@@ -7,7 +7,7 @@ import matplotlib
 # matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy as sp
+import scipy.stats
 import glob
 from read_ship import read_marmet
 from read_ARMdata import read_mwr
@@ -146,8 +146,8 @@ varmlongname[1]='Rainrate'
 #%% calculate the mean and standard error for each bin
 mean_lwp_o = np.array([np.nanmean(a) for a in lwp_o])
 mean_rain_o = np.array([np.nanmean(a) for a in rain_o])
-sem_lwp_o = np.array([sp.stats.sem(a,nan_policy='omit') for a in lwp_o])
-sem_rain_o = np.array([sp.stats.sem(a,nan_policy='omit') for a in rain_o])
+sem_lwp_o = np.array([scipy.stats.sem(a,nan_policy='omit') for a in lwp_o])
+sem_rain_o = np.array([scipy.stats.sem(a,nan_policy='omit') for a in rain_o])
 
 mean_lwp_m = list()
 mean_rain_m = list()
@@ -156,8 +156,8 @@ sem_rain_m = list()
 for mm in range(nmodels):
     mean_lwp_m.append(np.array([np.nanmean(a) for a in lwp_m[mm]]))
     mean_rain_m.append(np.array([np.nanmean(a) for a in rain_m[mm]]))
-    sem_lwp_m.append(np.array([sp.stats.sem(a,nan_policy='omit') for a in lwp_m[mm]]))
-    sem_rain_m.append(np.array([sp.stats.sem(a,nan_policy='omit') for a in rain_m[mm]]))
+    sem_lwp_m.append(np.array([scipy.stats.sem(a,nan_policy='omit') for a in lwp_m[mm]]))
+    sem_rain_m.append(np.array([scipy.stats.sem(a,nan_policy='omit') for a in rain_m[mm]]))
 
 #%% make plot
     

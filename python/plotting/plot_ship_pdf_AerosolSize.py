@@ -29,9 +29,9 @@ lst = glob.glob(E3SM_ship_path+'Ship_CNsize_'+campaign+'_'+Model_List[0]+'_shipl
 #%% read in model
 nmodels=len(Model_List)
 pdf_model = list()
-ntimes = list()
 for mm in range(nmodels):
     data2=list()
+    ntimes = list()
     for ll in range(len(lst)):
         if campaign=='MAGIC':
             legnum=lst[ll][-5:-3]
