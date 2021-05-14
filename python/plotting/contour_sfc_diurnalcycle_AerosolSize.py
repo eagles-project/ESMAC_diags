@@ -6,7 +6,7 @@ import sys
 sys.path.insert(1,'../subroutines/')
 
 import matplotlib
-# matplotlib.use('AGG') # plot without needing X-display setting
+matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob

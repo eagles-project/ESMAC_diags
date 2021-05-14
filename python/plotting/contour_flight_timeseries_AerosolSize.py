@@ -7,7 +7,7 @@ import sys
 sys.path.insert(1,'../subroutines/')
 
 import matplotlib
-# matplotlib.use('AGG') # plot without needing X-display setting
+matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
@@ -28,7 +28,7 @@ def avg_time(time0,data0,time):
 
 #%% settings
 
-from settings import campaign, merged_size_path, Model_List, \
+from settings import campaign, merged_size_path, Model_List, IOP, \
     E3SM_aircraft_path, figpath_aircraft_timeseries
 
 import os
@@ -39,6 +39,28 @@ if not os.path.exists(figpath_aircraft_timeseries):
 lst = glob.glob(merged_size_path+'merged_bin_*'+campaign+'*.nc')
 lst.sort()
 
+# choose files for specific IOP
+if campaign=='HISCALE':
+    if IOP=='IOP1':
+        lst=lst[0:17]
+    elif IOP=='IOP2':
+        lst=lst[17:]
+    elif IOP[0:4]=='2016':
+        a=lst[0].split('_'+campaign+'_')
+        lst = glob.glob(a[0]+'*'+IOP+'*')
+        lst.sort()
+elif campaign=='ACEENA':
+    if IOP=='IOP1':
+        lst=lst[0:20]
+    elif IOP=='IOP2':
+        lst=lst[20:]
+    elif IOP[0:4]=='2017' or IOP[0:4]=='2018':
+        a=lst[0].split('_'+campaign+'_')
+        lst = glob.glob(a[0]+'*'+IOP+'*')
+        lst.sort()
+else:
+    print('ERROR: campaign name is not recognized: '+campaign)
+    error
 
 if len(lst)==0:
     print('ERROR: cannot find any file at '+merged_size_path)

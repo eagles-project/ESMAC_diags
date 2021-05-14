@@ -6,7 +6,7 @@ import sys
 sys.path.insert(1,'../subroutines/')
 
 import matplotlib
-# matplotlib.use('AGG') # plot without needing X-display setting
+matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
@@ -150,4 +150,3 @@ ax2.set_xlabel('Calendar Day',fontsize=14)
 ax1.set_title('Aerosol Sulfate and Organic Concentration ($\mu$g/m$^3$) '+campaign+' '+IOP,fontsize=14)
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# plt.close()   

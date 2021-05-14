@@ -34,7 +34,7 @@ if len(lst)==0:
     error
 
 # choose files for specific IOP
-if campaign=='HiScale':
+if campaign=='HISCALE':
     if IOP=='IOP1':
         lst=lst[0:17]
     elif IOP=='IOP2':
@@ -92,7 +92,7 @@ for filename in lst:
     
     #%% read in CPC measurements
     
-    if campaign=='HiScale':
+    if campaign=='HISCALE':
         filename_c=glob.glob(cpcpath+'CPC_G1_'+date[0:8]+'*R2_HiScale001s.ict.txt')
     elif campaign=='ACEENA':
         filename_c=glob.glob(cpcpath+'CPC_G1_'+date[0:8]+'*R2_ACEENA001s.ict')    
@@ -102,7 +102,7 @@ for filename in lst:
         (cpc,cpclist)=read_cpc(filename_c[flightidx-1])
         if np.logical_and(campaign=='ACEENA', date=='20180216a'):
             cpc=np.insert(cpc,1404,(cpc[:,1403]+cpc[:,1404])/2,axis=1)
-        elif np.logical_and(campaign=='HiScale', date=='20160425a'):
+        elif np.logical_and(campaign=='HISCALE', date=='20160425a'):
             cpc=np.insert(cpc,0,cpc[:,0],axis=1)
             cpc[0,0]=cpc[0,0]-1
         time_cpc = cpc[0,:]
@@ -126,7 +126,7 @@ for filename in lst:
     
     #%% read in Models
     for mm in range(nmodels):
-        filename_m = E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[mm]+'_'+date+'.nc'
+        filename_m = E3SM_aircraft_path+'Aircraft_CNsize_'+campaign+'_'+Model_List[mm]+'_'+date+'.nc'
     
         (timem,heightm,cpc_m,timeunitm,ncn_unit,ncn_longname)=read_extractflight(filename_m,'NCN')
         (timem,heightm,cpcu_m,timeunitm,ncnu_unit,ncnu_longname)=read_extractflight(filename_m,'NUCN')

@@ -144,7 +144,7 @@ for filename in lst:
         dn2 = f.variables['dgnd_a02_'+E3SMdomain_range][:]
         dn3 = f.variables['dgnd_a03_'+E3SMdomain_range][:]
         dn4 = f.variables['dgnd_a04_'+E3SMdomain_range][:]
-        if model=='Nuc':  # with nucleation mode
+        if model[0:3]=='Nuc':  # with nucleation mode
             num_a5 = f.variables['num_a5_'+E3SMdomain_range][:]
             dn5 = f.variables['dgnd_a05_'+E3SMdomain_range][:]
         f.close()
@@ -171,7 +171,7 @@ for filename in lst:
             else:
                 numall = [num_a1[t_idx,z_idx,x_idx],num_a2[t_idx,z_idx,x_idx],num_a3[t_idx,z_idx,x_idx],num_a4[t_idx,z_idx,x_idx]]
                 dnall = [dn1[t_idx,z_idx,x_idx],dn2[t_idx,z_idx,x_idx],dn3[t_idx,z_idx,x_idx],dn4[t_idx,z_idx,x_idx]]
-                if model=='Nuc':  # with nucleation mode
+                if model[0:3]=='Nuc':  # with nucleation mode
                     numall.append(num_a5[t_idx,z_idx,x_idx])
                     dnall.append(dn5[t_idx,z_idx,x_idx])
                 NCNall[:,tt] = calc_CNsize_cutoff_0_3000nm(dnall,numall,T[t_idx,z_idx,x_idx],Pres[t_idx,z_idx,x_idx])

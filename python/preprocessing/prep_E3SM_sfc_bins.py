@@ -74,7 +74,7 @@ for mm in range(len(Model_List)):
         dn2 = f.variables['dgnd_a02_'+E3SMdomain_range][:]
         dn3 = f.variables['dgnd_a03_'+E3SMdomain_range][:]
         dn4 = f.variables['dgnd_a04_'+E3SMdomain_range][:]
-        if model=='Nuc':  # with nucleation mode
+        if model[0:3]=='Nuc':  # with nucleation mode
             num_a5 = f.variables['num_a5_'+E3SMdomain_range][:]
             dn5 = f.variables['dgnd_a05_'+E3SMdomain_range][:]
         f.close()
@@ -86,7 +86,7 @@ for mm in range(len(Model_List)):
     
         numall = [num_a1[:,-1,x_idx],num_a2[:,-1,x_idx],num_a3[:,-1,x_idx],num_a4[:,-1,x_idx]]
         dnall = [dn1[:,-1,x_idx],dn2[:,-1,x_idx],dn3[:,-1,x_idx],dn4[:,-1,x_idx]]
-        if model=='Nuc':  # with nucleation mode
+        if model[0:3]=='Nuc':  # with nucleation mode
             numall.append(num_a5[:,-1,x_idx])
             dnall.append(dn5[:,-1,x_idx])
            

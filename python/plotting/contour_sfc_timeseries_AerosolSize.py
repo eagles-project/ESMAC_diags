@@ -6,7 +6,7 @@ import sys
 sys.path.insert(1,'../subroutines/')
 
 import matplotlib
-# matplotlib.use('AGG') # plot without needing X-display setting
+matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
@@ -139,8 +139,9 @@ elif campaign=='HISCALE':
         cday=yyyymmdd2cday('2016-08-27')
         # average in time for quicker plot
         time2 = np.arange(time[0],time[-1],dt_res)
-        smps = avg_time(time,smps,time2)
-        t_smps=cday+time/86400
+        smps = avg_time(time,smps.T,time2)
+        smps = smps.T
+        t_smps=cday+time2/86400
         
     timeo = np.array(t_smps)
     size = np.array(size)

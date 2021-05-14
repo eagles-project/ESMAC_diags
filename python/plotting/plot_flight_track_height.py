@@ -18,7 +18,7 @@ from read_aircraft import read_iwg1, read_cvi_hiscale
 
 #%% settings
 
-from settings import campaign, site, iwgpath, cvipath, lat0, lon0, IOP, figpath_aircraft_timeseries
+from settings import campaign, iwgpath, cvipath, lat0, lon0, IOP, figpath_aircraft_timeseries
 
 import os
 if not os.path.exists(figpath_aircraft_timeseries):

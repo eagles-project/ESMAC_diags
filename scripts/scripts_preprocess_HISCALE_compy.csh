@@ -29,8 +29,8 @@
 set campaign = 'HISCALE'   # HISCALE, ACEENA,MAGIC,MARCUS,CSET,SOCRATES
  
 # set model names. 
-set Model_List = "['CTRL','nonucl','nonucl_pbl','NucSoaCond','NucSoaCond_noDpMin','NucSoaCond_DpMin5']"
-# set Model_List = "['E3SMv1']"
+# set Model_List = "['CTRL','nonucl','nonucl_pbl','NucSoaCond','NucSoaCond_noDpMin','NucSoaCond_DpMin5']"
+set Model_List = "['NucSoaCond','NucSoaCond_noDpMin','NucSoaCond_DpMin5']"
 
 # set plotting line colors for each model. corresponding to the Model_List
 # set color_model = ['b','r','g']

@@ -10,7 +10,7 @@ sys.path.insert(1,'../subroutines/')
 import numpy as np
 import scipy.stats
 import glob
-from time_format_change import yyyymmdd2cday
+from time_format_change import yyyymmdd2cday, cday2mmdd
 from read_ARMdata import read_cpc
 from read_netcdf import read_E3SM
 
@@ -29,20 +29,28 @@ def avg_time(time0,data0,time):
 #%% settings
 
 from settings import campaign, cpcsfcpath, cpcusfcpath, Model_List,  \
-    IOP, E3SM_sfc_path, figpath_sfc_statistics
+    IOP, start_date, end_date, E3SM_sfc_path, figpath_sfc_statistics
 
 # set time range you want to average
-# in calendar day
-if campaign=='ACEENA':
-    if IOP=='IOP1':
-        time_range = [172,212]
-    elif IOP=='IOP2':
-        time_range = [1,59]
-elif campaign=='HiScale':
-    if IOP=='IOP1':
-        time_range = [115,157]
-    elif IOP=='IOP2':
-        time_range = [238,268]
+# change start date into calendar day
+cday1 = yyyymmdd2cday(start_date,'noleap')
+cday2 = yyyymmdd2cday(end_date,'noleap')
+if start_date[0:4]!=end_date[0:4]:
+    print('ERROR: currently not support multiple years. please set start_date and end_date in the same year')
+    error
+year0 = start_date[0:4]
+
+# # in calendar day
+# if campaign=='ACEENA':
+#     if IOP=='IOP1':
+#         time_range = [172,212]
+#     elif IOP=='IOP2':
+#         time_range = [1,59]
+# elif campaign=='HiScale':
+#     if IOP=='IOP1':
+#         time_range = [115,157]
+#     elif IOP=='IOP2':
+#         time_range = [238,268]
         
         
 import os
@@ -57,7 +65,7 @@ missing_value = np.nan
 if campaign=='ACEENA':
     # cpc
     if IOP=='IOP1':
-        lst = glob.glob(cpcsfcpath+'enaaoscpcfC1.b1.201706*')+glob.glob(cpcsfcpath+'enaaoscpcfC1.b1.201707*')
+        lst = glob.glob(cpcsfcpath+'enaaoscpcfC1.b1.2017062*')+glob.glob(cpcsfcpath+'enaaoscpcfC1.b1.201707*')
     elif IOP=='IOP2':
         lst = glob.glob(cpcsfcpath+'enaaoscpcfC1.b1.201801*')+glob.glob(cpcsfcpath+'enaaoscpcfC1.b1.201802*')
     lst.sort()
@@ -73,12 +81,17 @@ if campaign=='ACEENA':
         data2 = avg_time(np.array(time),np.array(data),time2)
         t_cpc=np.hstack((t_cpc, cday+time2/86400))
         cpc=np.hstack((cpc, data2))
+    # fill missing days
+    t_cpc2=np.arange(cday1*24,cday2*24+0.01,1)/24.
+    cpc2=avg_time(t_cpc,cpc,t_cpc2)
+    cpc=cpc2
+    t_cpc=t_cpc2
     cpc[cpc<0]=np.nan
     # no cpcu
     t_cpcu = np.array(np.nan)
     cpcu = np.array(np.nan)
     
-elif campaign=='HiScale':  
+elif campaign=='HISCALE':  
     # cpc
     if IOP=='IOP1':
         lst = glob.glob(cpcsfcpath+'sgpaoscpcC1.b1.201604*')+glob.glob(cpcsfcpath+'sgpaoscpcC1.b1.201605*')+glob.glob(cpcsfcpath+'sgpaoscpcC1.b1.201606*')
@@ -98,13 +111,8 @@ elif campaign=='HiScale':
             cday=yyyymmdd2cday(date)
             t_cpc= np.hstack((t_cpc,cday+time/86400))
             cpc=np.hstack((cpc,data))
-            # # average in time for consistent comparison with model
-            # time2=np.arange(0,86400,3600)
-            # data2 = avg_time(np.array(time),np.array(data),time2)
-            # t_cpc=np.hstack((t_cpc, cday+time2/86400))
-            # cpc=np.hstack((cpc, data2))
         # average in time for consistent comparison with model
-        t_cpc2=np.arange(t_cpc[0]*24,t_cpc[-1]*24,1)/24.
+        t_cpc2=np.arange(cday1*24,cday2*24+0.01,1)/24.
         cpc2=avg_time(t_cpc,cpc,t_cpc2)
         cpc=cpc2
         t_cpc=t_cpc2
@@ -146,51 +154,20 @@ ncn_m = []
 nucn_m = []
 nmodels = len(Model_List)
 for mm in range(nmodels):
-    if campaign=='ACEENA':
-        if IOP=='IOP1':
-            (time6,NCN6,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2017-06.nc','NCN')
-            (time7,NCN7,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2017-07.nc','NCN')
-            (time6,NUCN6,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2017-06.nc','NUCN')
-            (time7,NUCN7,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2017-07.nc','NUCN')
-            timem = np.hstack((time6,time7))
-            tmp_ncn = np.hstack((NCN6,NCN7))
-            tmp_nucn = np.hstack((NUCN6,NUCN7))
-        elif IOP=='IOP2':
-            (time1,NCN1,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2018-01.nc','NCN')
-            (time2,NCN2,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2018-02.nc','NCN')
-            (time1,NUCN1,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2018-01.nc','NUCN')
-            (time2,NUCN2,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2018-02.nc','NUCN')
-            timem = np.hstack((time1,time2))
-            tmp_ncn = np.hstack((NCN1,NCN2))
-            tmp_nucn = np.hstack((NUCN1,NUCN2))
+    tmp_ncn=np.empty(0)
+    tmp_nucn=np.empty(0)
+    timem=np.empty(0)
+    for cday in range(cday1,cday2+1):
+        mmdd=cday2mmdd(cday)
+        date=year0+'-'+mmdd[0:2]+'-'+mmdd[2:4]
         
-    elif campaign=='HiScale':  
-        if IOP=='IOP1':
-            (time4,NCN4,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2016-04.nc','NCN')
-            (time5,NCN5,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2016-05.nc','NCN')
-            (time6,NCN6,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2016-06.nc','NCN')
-            (time4,NUCN4,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2016-04.nc','NUCN')
-            (time5,NUCN5,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2016-05.nc','NUCN')
-            (time6,NUCN6,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2016-06.nc','NUCN')
-            timem = np.hstack((time4,time5,time6))
-            tmp_ncn = np.hstack((NCN4,NCN5,NCN6))
-            tmp_nucn = np.hstack((NUCN4,NUCN5,NUCN6))
-        elif IOP=='IOP2':
-            (time8,NCN8,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2016-08.nc','NCN')
-            (time9,NCN9,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2016-09.nc','NCN')
-            (time8,NUCN8,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2016-08.nc','NUCN')
-            (time9,NUCN9,timemunit,dataunit,long_name)=read_E3SM(E3SM_sfc_path+'SFC_vars_'+campaign+'_'+Model_List[mm]+'_2016-09.nc','NUCN')
-            timem = np.hstack((time8,time9))
-            tmp_ncn = np.hstack((NCN8,NCN9))
-            tmp_nucn = np.hstack((NUCN8,NUCN9))
-            
-    else:
-        print('ERROR: does NOT recognize this campaign: '+campaign)
-        error 
+        filename_input = E3SM_sfc_path+'SFC_CNsize_'+campaign+'_'+Model_List[mm]+'_'+date+'.nc'
+        (time,ncn,timemunit,dataunit,long_name)=read_E3SM(filename_input,'NCN')
+        (time,nucn,timemunit,dataunit,long_name)=read_E3SM(filename_input,'NUCN')
         
-    # change some units
-    tmp_ncn=tmp_ncn*1e-6
-    tmp_nucn=tmp_nucn*1e-6
+        timem = np.hstack((timem,time))
+        tmp_ncn = np.hstack((tmp_ncn,ncn*1e-6))
+        tmp_nucn = np.hstack((tmp_nucn,nucn*1e-6))
     
     ncn_m.append(tmp_ncn)
     nucn_m.append(tmp_nucn)
@@ -198,13 +175,13 @@ for mm in range(nmodels):
 #%% calculate statistics
 
 # only choose the prescribed time range
-idx = np.logical_and(t_cpc>=time_range[0], t_cpc<=time_range[1])
+idx = np.logical_and(t_cpc>=cday1, t_cpc<=cday2)
 cpc=cpc[idx]
 t_cpc=t_cpc[idx]
-idx = np.logical_and(t_cpcu>=time_range[0], t_cpcu<=time_range[1])
+idx = np.logical_and(t_cpcu>=cday1, t_cpcu<=cday2)
 cpcu=cpcu[idx]
 t_cpcu=t_cpcu[idx]
-idx = np.logical_and(timem>=time_range[0], timem<=time_range[1])
+idx = np.logical_and(timem>=cday1, timem<=cday2)
 for mm in range(nmodels):
     ncn_m[mm]=ncn_m[mm][idx]
     nucn_m[mm]=nucn_m[mm][idx]

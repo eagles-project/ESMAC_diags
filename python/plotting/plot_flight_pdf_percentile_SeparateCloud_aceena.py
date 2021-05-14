@@ -6,7 +6,7 @@ import sys
 sys.path.insert(1,'../subroutines/')
 
 import matplotlib
-# matplotlib.use('AGG') # plot without needing X-display setting
+matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
@@ -417,6 +417,6 @@ ax3.plot([],c='k',label='Obs')
 for mm in range(nmodels):
     ax3.plot([],c=color_model[mm],label=Model_List[mm])
 ax3.legend(loc='lower left', shadow=False, fontsize='medium')
-# fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 # plt.close()
 

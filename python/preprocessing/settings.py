@@ -7,14 +7,14 @@ import numpy as np
 
 ############ these settings will be replaced by the settings in scripts_*.csh #############
 # set field campaign name. More settings on specific field campaigns are in next section
-campaign = 'MAGIC'
-# set model names. up to three
-Model_List = ['E3SMv1']
+campaign = 'HISCALE'
+# set model names.
+Model_List = ['NucSoaCond','NucSoaCond_noDpMin','NucSoaCond_DpMin5']
 # set line colors for each model. corresponding to the Model_List
 color_model = ['b','g']
 # set IOP that the statistics, pdf and percentiles are averaged for. Only available for HISCALE and ACEENA
 # IOP1/IOP2 
-IOP = 'IOP1'
+IOP = 'IOP2'
 ############ these settings will be replaced by the settings in scripts_*.csh #############
 
 

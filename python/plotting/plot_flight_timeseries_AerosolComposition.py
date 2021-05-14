@@ -204,6 +204,6 @@ for filename in lst:
 
     ax1.set_title('Aerosol Sulfate Concentration ($\mu$g/m$^3$)',fontsize=13)
     ax2.set_title('Aerosol Organic Concentration ($\mu$g/m$^3$)',fontsize=13)
-    error
+    
     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
     plt.close()   

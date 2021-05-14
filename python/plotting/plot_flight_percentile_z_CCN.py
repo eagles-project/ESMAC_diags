@@ -7,7 +7,7 @@ import sys
 sys.path.insert(1,'../subroutines/')
 
 import matplotlib
-# matplotlib.use('AGG') # plot without needing X-display setting
+matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
@@ -311,7 +311,7 @@ fig.text(0.4,0.06, 'CCN number (cm$^{-3}$)', fontsize=14)
 ax1.set_title('SS = '+SS3,fontsize=14)
 ax2.set_title('SS = '+SS5,fontsize=14)
 fig.text(0.48,0.92, IOP, fontsize=16)
-error
+
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 plt.close()
     
