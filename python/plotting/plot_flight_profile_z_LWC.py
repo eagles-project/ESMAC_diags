@@ -10,13 +10,21 @@ matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
-from read_aircraft import read_wcm
+from read_aircraft import read_wcm, read_RF_NCAR
 from read_netcdf import read_extractflight,read_merged_size
 
 #%% settings
 
-from settings import campaign, merged_size_path, wcmpath, Model_List, color_model, IOP,  \
+from settings import campaign, Model_List, color_model,  \
     height_bin, E3SM_aircraft_path, figpath_aircraft_statistics
+    
+if campaign=='HISCALE' or campaign=='ACEENA':
+    from settings import IOP,  wcmpath, merged_size_path
+elif campaign=='CSET' or campaign=='SOCRATES':
+    from settings import RFpath
+else:
+    print('ERROR: campaign name is not recognized: '+campaign)
+    error
     
 import os
 if not os.path.exists(figpath_aircraft_statistics):
@@ -33,13 +41,11 @@ zlen=len(z)
 
 #%% find files for flight information
 
-lst = glob.glob(merged_size_path+'merged_bin_*'+campaign+'*.nc')
+lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'*.nc')
 lst.sort()
-
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+merged_size_path)
+    print('ERROR: cannot find any file at '+E3SM_aircraft_path)
     error
-
 # choose files for specific IOP
 if campaign=='HISCALE':
     if IOP=='IOP1':
@@ -47,8 +53,8 @@ if campaign=='HISCALE':
     elif IOP=='IOP2':
         lst=lst[17:]
     elif IOP[0:4]=='2016':
-        a=lst[0].split('_'+campaign+'_')
-        lst = glob.glob(a[0]+'*'+IOP+'*')
+        a=lst[0].split('_'+Model_List[0]+'_')
+        lst = glob.glob(a[0]+'_'+Model_List[0]+'_'+IOP+'*')
         lst.sort()
 elif campaign=='ACEENA':
     if IOP=='IOP1':
@@ -56,64 +62,26 @@ elif campaign=='ACEENA':
     elif IOP=='IOP2':
         lst=lst[20:]
     elif IOP[0:4]=='2017' or IOP[0:4]=='2018':
-        a=lst[0].split('_'+campaign+'_')
-        lst = glob.glob(a[0]+'*'+IOP+'*')
+        a=lst[0].split('_'+Model_List[0]+'_')
+        lst = glob.glob(a[0]+'_'+Model_List[0]+'_'+IOP+'*')
         lst.sort()
-else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
-
-if len(lst)==0:
-    print('ERROR: cannot find any file for '+IOP)
-    error
+        
+alldates = [x.split('_')[-1].split('.')[0] for x in lst]
     
 #%% read all data
 
 heightall=[]
-lwc083all=[]
-lwc021all=[]
+lwcobsall=[]
 lwcmall=[]
 
 nmodels=len(Model_List)
 for mm in range(nmodels):
     lwcmall.append([])
     
-print('reading '+format(len(lst))+' files to calculate the statistics: ')
+print('reading '+format(len(alldates))+' files to calculate the statistics: ')
 
-for filename in lst:
-    
-    # get date info:        
-    date=filename[-12:-3]
-    if date[-1]=='a':
-        flightidx=1
-    else:
-        flightidx=2
+for date in alldates:
     print(date)
-    
-    #% read in flight information
-    (time,size,height,timeunit,cunit,long_name)=read_merged_size(filename,'height')
-    time=np.ma.compressed(time)
-    
-    
-     #%% read in WCM
-    filename_wcm = glob.glob(wcmpath+'WCM_G1_'+date[0:8]+'*')
-    if len(filename_wcm)==0:
-        print('skip this date: '+date)
-        continue
-    (wcm,wcmlist)=read_wcm(filename_wcm[flightidx-1])
-    time0=wcm[0,:]
-    flag=wcm[-1,:]
-    lwc083=wcm[2,:]
-    lwc021=wcm[3,:]
-    lwc083[lwc083<=0]=0.
-    lwc021[lwc021<=0]=0.
-    lwc083[flag!=0]=np.nan
-    lwc021[flag!=0]=np.nan
-    
-    lwc083all.append(lwc083)
-    lwc021all.append(lwc021)
-    heightall.append(height)
-    
     #%% read in models
     
     for mm in range(nmodels):
@@ -124,16 +92,42 @@ for filename in lst:
          # change E3SM unit from kg/m3 to g/m3 
         lwcmall[mm].append(lwc*1000)
         
+    #%% read in obs
+    if campaign=='HISCALE' or campaign=='ACEENA':
+        if date[-1]=='a':
+            flightidx=1
+        else:
+            flightidx=2
+        
+        filename_wcm = glob.glob(wcmpath+'WCM_G1_'+date[0:8]+'*')
+        filename_wcm.sort()
+        if len(filename_wcm)==0:
+            print('skip this date: '+date)
+            continue
+        (wcm,wcmlist)=read_wcm(filename_wcm[flightidx-1])
+        time0=wcm[0,:]
+        flag=wcm[-1,:]
+        lwcobs=wcm[2,:]
+        lwcobs[lwcobs<=0]=0.
+        lwcobs[flag!=0]=np.nan
+    
+    elif campaign=='CSET' or campaign=='SOCRATES':
+        filename = glob.glob(RFpath+'RF*'+date+'*.PNI.nc')
+        if len(filename)==1 or len(filename)==2:  # SOCRATES has two flights in 20180217, choose the later one
+            (time,lwcobs,timeunit,lwcunit,lwclongname,cellsize,cellunit)=read_RF_NCAR(filename[-1],'PLWCC')
+        lwcobs[lwcobs<=0]=0.
+        
+    lwcobsall.append(lwcobs)
+    heightall.append(heightm)
+    
 #%% calculate percentiles for each height bin
 
-lwc083_z = list()
-lwc021_z = list()
+lwcobs_z = list()
 lwcm_z = []
 for mm in range(nmodels):
     lwcm_z.append([])
 for zz in range(zlen):
-    lwc083_z.append(np.empty(0))
-    lwc021_z.append(np.empty(0))
+    lwcobs_z.append(np.empty(0))
     for mm in range(nmodels):
         lwcm_z[mm].append(np.empty(0))
     
@@ -141,12 +135,10 @@ ndays=len(heightall)
 # ndays=1;
 for dd in range(ndays):
     height = heightall[dd]
-    lwc083  = lwc083all[dd]
-    lwc021  = lwc021all[dd]
+    lwcobs  = lwcobsall[dd]
     for zz in range(zlen):
         idx = np.logical_and(height>=zmin[zz], height<zmax[zz])
-        lwc083_z[zz]=np.append(lwc083_z[zz],lwc083[idx])
-        lwc021_z[zz]=np.append(lwc021_z[zz],lwc021[idx])
+        lwcobs_z[zz]=np.append(lwcobs_z[zz],lwcobs[idx])
         
     for mm in range(nmodels):
         lwcm = lwcmall[mm][dd]
@@ -155,23 +147,18 @@ for dd in range(ndays):
             lwcm_z[mm][zz]=np.append(lwcm_z[mm][zz],lwcm[idx])
       
 #%% remove all NANs and calculate cloud frequency
-lwcmean_083 = np.full(zlen,np.nan)
-lwcmean_021 = np.full(zlen,np.nan)
-std_lwc_083 = np.full(zlen,np.nan)
+lwcmean_o = np.full(zlen,np.nan)
+std_lwc_o = np.full(zlen,np.nan)
 lwcmean_m = []
 for mm in range(nmodels):
     lwcmean_m.append(np.full(zlen,np.nan))
     
 for zz in range(zlen):
-    data = lwc083_z[zz]
+    data = lwcobs_z[zz]
     data = data[~np.isnan(data)]
     if len(data)>0:
-        lwcmean_083[zz] = np.mean(data)
-        std_lwc_083[zz] = np.std(data)/np.sqrt(len(data))
-    data = lwc021_z[zz]
-    data = data[~np.isnan(data)]
-    if len(data)>0:
-        lwcmean_021[zz] = np.mean(data)
+        lwcmean_o[zz] = np.mean(data)
+        std_lwc_o[zz] = np.std(data)/np.sqrt(len(data))
     for mm in range(nmodels):
         data = lwcm_z[mm][zz]
         data = data[~np.isnan(data)]
@@ -179,13 +166,16 @@ for zz in range(zlen):
             lwcmean_m[mm][zz] = np.mean(data)
             
 #%% plot frequency  
-figname = figpath_aircraft_statistics+'profile_height_LWC_'+campaign+'_'+IOP+'.png'
+if campaign=='HISCALE' or campaign=='ACEENA':
+    figname = figpath_aircraft_statistics+'profile_height_LWC_'+campaign+'_'+IOP+'.png'
+else:
+    figname = figpath_aircraft_statistics+'profile_height_LWC_'+campaign+'.png'
 print('plotting figures to '+figname)
 
 fig,ax = plt.subplots(figsize=(4,8))
 
-ax.plot(lwcmean_083,z,color='k',linewidth=1,linestyle='-',label='Obs')
-ax.fill_betweenx(z,lwcmean_083-std_lwc_083,lwcmean_083+std_lwc_083,facecolor='k',alpha=0.2)
+ax.plot(lwcmean_o,z,color='k',linewidth=1,linestyle='-',label='Obs')
+ax.fill_betweenx(z,lwcmean_o-std_lwc_o,lwcmean_o+std_lwc_o,facecolor='k',alpha=0.2)
 
 for mm in range(nmodels):
     ax.plot(lwcmean_m[mm],z,color=color_model[mm],linewidth=1,label=Model_List[mm])
@@ -197,7 +187,10 @@ ax.tick_params(color='k',labelsize=12)
 ax.set_ylabel('Height (m MSL)',fontsize=12)
 ax.legend(loc='upper right', fontsize='large')
 ax.set_xlabel('LWC (g/m3)',fontsize=12)
-ax.set_title(IOP,fontsize=15)
+if campaign=='HISCALE' or campaign=='ACEENA':
+    ax.set_title(IOP,fontsize=15)
+else:
+    ax.set_title(campaign,fontsize=15)
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             

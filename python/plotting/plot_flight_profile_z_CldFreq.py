@@ -10,12 +10,21 @@ matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
+from read_aircraft import  read_RF_NCAR
 from read_netcdf import read_extractflight,read_merged_size
 
 #%% settings
 
-from settings import campaign, merged_size_path, Model_List, color_model, IOP,  \
+from settings import campaign,  Model_List, color_model,   \
     height_bin, E3SM_aircraft_path, figpath_aircraft_statistics
+    
+if campaign=='HISCALE' or campaign=='ACEENA':
+    from settings import IOP, merged_size_path
+elif campaign=='CSET' or campaign=='SOCRATES':
+    from settings import RFpath
+else:
+    print('ERROR: campaign name is not recognized: '+campaign)
+    error
     
 import os
 if not os.path.exists(figpath_aircraft_statistics):
@@ -33,13 +42,11 @@ zlen=len(z)
 
 #%% find files for flight information
 
-lst = glob.glob(merged_size_path+'merged_bin_*'+campaign+'*.nc')
+lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'*.nc')
 lst.sort()
-
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+merged_size_path)
+    print('ERROR: cannot find any file at '+E3SM_aircraft_path)
     error
-
 # choose files for specific IOP
 if campaign=='HISCALE':
     if IOP=='IOP1':
@@ -47,8 +54,8 @@ if campaign=='HISCALE':
     elif IOP=='IOP2':
         lst=lst[17:]
     elif IOP[0:4]=='2016':
-        a=lst[0].split('_'+campaign+'_')
-        lst = glob.glob(a[0]+'*'+IOP+'*')
+        a=lst[0].split('_'+Model_List[0]+'_')
+        lst = glob.glob(a[0]+'_'+Model_List[0]+'_'+IOP+'*')
         lst.sort()
 elif campaign=='ACEENA':
     if IOP=='IOP1':
@@ -56,16 +63,11 @@ elif campaign=='ACEENA':
     elif IOP=='IOP2':
         lst=lst[20:]
     elif IOP[0:4]=='2017' or IOP[0:4]=='2018':
-        a=lst[0].split('_'+campaign+'_')
-        lst = glob.glob(a[0]+'*'+IOP+'*')
+        a=lst[0].split('_'+Model_List[0]+'_')
+        lst = glob.glob(a[0]+'_'+Model_List[0]+'_'+IOP+'*')
         lst.sort()
-else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
-
-if len(lst)==0:
-    print('ERROR: cannot find any file for '+IOP)
-    error
+        
+alldates = [x.split('_')[-1].split('.')[0] for x in lst]
     
 #%% read all data
 
@@ -77,25 +79,9 @@ nmodels=len(Model_List)
 for mm in range(nmodels):
     cldmall.append([])
     
-print('reading '+format(len(lst))+' files to calculate the statistics: ')
+print('reading '+format(len(alldates))+' files to calculate the statistics: ')
 
-for filename in lst:
-    
-    # get date info:        
-    date=filename[-12:-3]
-    if date[-1]=='a':
-        flightidx=1
-    else:
-        flightidx=2
-    print(date)
-    
-    #% read in flight information
-    (time,size,height,timeunit,cunit,long_name)=read_merged_size(filename,'height')
-    (time,size,cflag,timeunit,cunit,long_name)=read_merged_size(filename,'cld_flag')
-    time=np.ma.compressed(time)
-    
-    heightall.append(height)
-    cflagall.append(cflag)
+for date in alldates:
     
     #%% read in models
     
@@ -105,6 +91,33 @@ for filename in lst:
         (timem,heightm,cloud,timeunit,cldunit,cldname)=read_extractflight(filename_m,'CLOUD')
             
         cldmall[mm].append(cloud)
+        
+    #%% read in obs
+    if campaign=='HISCALE' or campaign=='ACEENA':
+        if date[-1]=='a':
+            flightidx=1
+        else:
+            flightidx=2
+        
+        #% read in flight information
+        if campaign=='HISCALE':
+            filename = merged_size_path+'merged_bin_fims_pcasp_'+campaign+'_'+date+'.nc'
+        elif campaign=='ACEENA':
+            filename = merged_size_path+'merged_bin_fims_pcasp_opc_'+campaign+'_'+date+'.nc'
+        (time,size,height,timeunit,cunit,long_name)=read_merged_size(filename,'height')
+        (time,size,cflag,timeunit,cunit,long_name)=read_merged_size(filename,'cld_flag')
+        time=np.ma.compressed(time)
+    
+    elif campaign=='CSET' or campaign=='SOCRATES':
+        filename = glob.glob(RFpath+'RF*'+date+'*.PNI.nc')
+        if len(filename)==1 or len(filename)==2:  # SOCRATES has two flights in 20180217, choose the later one
+            (time,lwc,timeunit,lwcunit,lwclongname,cellsize,cellunit)=read_RF_NCAR(filename[-1],'PLWCC')
+        cflag = 0*np.array(time)
+        cflag[lwc>0.02]=1
+        
+    heightall.append(heightm)
+    cflagall.append(cflag)
+    
 
 #%% calculate percentiles for each height bin
 
@@ -151,7 +164,10 @@ for zz in range(zlen):
             cldfreq_m[mm][zz] = np.mean(data)
   
 #%% plot frequency  
-figname = figpath_aircraft_statistics+'profile_height_CldFreq_'+campaign+'_'+IOP+'.png'
+if campaign=='HISCALE' or campaign=='ACEENA':
+    figname = figpath_aircraft_statistics+'profile_height_CldFreq_'+campaign+'_'+IOP+'.png'
+else:
+    figname = figpath_aircraft_statistics+'profile_height_CldFreq_'+campaign+'.png'
 print('plotting figures to '+figname)
 
 fig,ax = plt.subplots(figsize=(4,8))
@@ -167,6 +183,9 @@ ax.tick_params(color='k',labelsize=12)
 ax.set_ylabel('Height (m MSL)',fontsize=12)
 ax.legend(loc='upper right', fontsize='large')
 ax.set_xlabel('Cloud Frequency',fontsize=12)
-ax.set_title(IOP,fontsize=15)
+if campaign=='HISCALE' or campaign=='ACEENA':
+    ax.set_title(IOP,fontsize=15)
+else:
+    ax.set_title(campaign,fontsize=15)
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)

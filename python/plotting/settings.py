@@ -8,10 +8,10 @@ import numpy as np
 ############ these settings will be replaced by the settings in scripts_*.csh #############
 # set field campaign name. More settings on specific field campaigns are in next section
 campaign = 'HISCALE'
-# set model names.
-Model_List = ['NucSoaCond','NucSoaCond_noDpMin','NucSoaCond_DpMin5']
+# set model names. up to three
+Model_List = ['E3SMv1']
 # set line colors for each model. corresponding to the Model_List
-color_model = ['b','r','g']
+color_model = ['b','g']
 # set IOP that the statistics, pdf and percentiles are averaged for. Only available for HISCALE and ACEENA
 # IOP1/IOP2 
 IOP = 'IOP2'
@@ -179,11 +179,15 @@ elif campaign=='MARCUS':
     
 elif campaign=='CSET':
     # bin of flight heights to calculate percentiles
-    height_bin = np.arange(100,4300,300)
+    height_bin = np.arange(200,10000,400)
+    # lat/lon at the airport
+    lat0 = 38.5564
+    lon0 = 360-121.3120
     
     # observational data path. 
-    # ship measurements
+    # aircraft measurements
     RFpath=package_path+'data/'+campaign+'/obs/aircraft/aircraft_lowrate/'
+    ccnpath='N/A'
     
     # model path
     # pre-processed model path    
@@ -192,11 +196,16 @@ elif campaign=='CSET':
     
 elif campaign=='SOCRATES':
     # bin of flight heights to calculate percentiles
-    height_bin = np.arange(100,4300,300)
+    height_bin = np.arange(200,10000,400)
+    # height_bin = np.arange(200,7000,400)
+    # lat/lon at the airport
+    lat0 = -42.8371
+    lon0 = 147.5054
     
     # observational data path. 
-    # ship measurements
+    # aircraft measurements
     RFpath=package_path+'data/'+campaign+'/obs/aircraft/aircraft_lowrate/'
+    ccnpath=package_path+'data/'+campaign+'/obs/aircraft/CCN/'
     
     # model path
     # pre-processed model path    

@@ -17,22 +17,28 @@ from read_netcdf import read_merged_size,read_extractflight
 
 #%% settings
 
-from settings import campaign, amspath, iwgpath, merged_size_path, Model_List, color_model, \
-    IOP, E3SM_aircraft_path, figpath_aircraft_timeseries
+from settings import campaign, Model_List, color_model, \
+    E3SM_aircraft_path, figpath_aircraft_timeseries
 
+if campaign=='HISCALE' or campaign=='ACEENA':
+    from settings import IOP, merged_size_path, amspath, iwgpath
+elif campaign=='CSET' or campaign=='SOCRATES':
+    print('ERROR: CSET and SOCRATES do not have composition data ')
+    error
+else:
+    print('ERROR: campaign name is not recognized: '+campaign)
+    error
+    
 import os
 if not os.path.exists(figpath_aircraft_timeseries):
     os.makedirs(figpath_aircraft_timeseries)
     
 #%% find files for flight information
-lst = glob.glob(merged_size_path+'merged_bin_*'+campaign+'*.nc')
+lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'*.nc')
 lst.sort()
-
-
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+merged_size_path)
+    print('ERROR: cannot find any file at '+E3SM_aircraft_path)
     error
-
 # choose files for specific IOP
 if campaign=='HISCALE':
     if IOP=='IOP1':
@@ -40,8 +46,8 @@ if campaign=='HISCALE':
     elif IOP=='IOP2':
         lst=lst[17:]
     elif IOP[0:4]=='2016':
-        a=lst[0].split('_'+campaign+'_')
-        lst = glob.glob(a[0]+'*'+IOP+'*')
+        a=lst[0].split('_'+Model_List[0]+'_')
+        lst = glob.glob(a[0]+'_'+Model_List[0]+'_'+IOP+'*')
         lst.sort()
 elif campaign=='ACEENA':
     if IOP=='IOP1':
@@ -49,24 +55,25 @@ elif campaign=='ACEENA':
     elif IOP=='IOP2':
         lst=lst[20:]
     elif IOP[0:4]=='2017' or IOP[0:4]=='2018':
-        a=lst[0].split('_'+campaign+'_')
-        lst = glob.glob(a[0]+'*'+IOP+'*')
+        a=lst[0].split('_'+Model_List[0]+'_')
+        lst = glob.glob(a[0]+'_'+Model_List[0]+'_'+IOP+'*')
         lst.sort()
-else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+        
+alldates = [x.split('_')[-1].split('.')[0] for x in lst]
     
 # for each flight
-for filename in lst:
+for date in alldates:
     
-    # get date info:        
-    date=filename[-12:-3]
     if date[-1]=='a':
         flightidx=1
     else:
         flightidx=2
 
     #% read in flight information
+    if campaign=='HISCALE':
+        filename = merged_size_path+'merged_bin_fims_pcasp_'+campaign+'_'+date+'.nc'
+    elif campaign=='ACEENA':
+        filename = merged_size_path+'merged_bin_fims_pcasp_opc_'+campaign+'_'+date+'.nc'
     (time,size,cvi,timeunit,cunit,long_name)=read_merged_size(filename,'CVI_inlet')
     (time,size,cflag,timeunit,cunit,long_name)=read_merged_size(filename,'cld_flag')
     (time,size,height,timeunit,zunit,long_name)=read_merged_size(filename,'height')

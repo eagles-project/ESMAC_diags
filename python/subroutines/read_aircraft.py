@@ -11,7 +11,7 @@ def read_ams(filename):
     h='aaa'
     for ii in range(40):
         h=f.readline()
-    while(h[0:7]!='dat_ams'):
+    while(h[0:7]!='dat_ams' and h[0:7]!='dat_utc'):
         h=f.readline()
     h=h.strip()
     varlist=h.split(',')
@@ -103,6 +103,37 @@ def read_ccn_hiscale(filename):
     # data2[data2<-9990]=np.nan
     return(data2,varlist)
 
+#%%
+def read_ccn_socrates(filename):    
+    import numpy as np
+        
+    f=open(filename,'r')
+    
+    # read in data:
+    
+    h='aaa'
+    while h[0:14]!='Start_UTC, CCN':
+        h=f.readline()
+    h=h.strip()
+    varlist=h.split(',')
+    data=[]
+    if 'data2' in locals():
+        del(data2)
+    for line in f:
+        line=line.strip()  # remove \n
+        columns = line.split(',')
+        source = []
+        for i in range(0,len(columns)):
+            source.append(float(columns[i]))
+        data.append(source)
+        if 'data2' in locals():
+            data2=np.column_stack((data2,source))
+        else:
+            data2=np.asarray(source)
+    
+    f.close()
+    # data2[data2<-9990]=np.nan
+    return(data2,varlist)
 
 #%% read CVI
 # filename='../data/pekour-cvi/CVI_G1_20160518170015_R4_HISCALE_001s.ict.txt'

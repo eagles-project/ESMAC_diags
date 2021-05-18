@@ -11,6 +11,7 @@ matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
+from read_aircraft import read_RF_NCAR
 # from time_format_change import yyyymmdd2cday, hhmmss2sec
 from read_netcdf import read_merged_size,read_extractflight
 
@@ -28,17 +29,26 @@ def avg_time(time0,data0,time):
 
 #%% settings
 
-from settings import campaign, merged_size_path, Model_List, IOP, \
-    E3SM_aircraft_path, figpath_aircraft_timeseries
+from settings import campaign,  Model_List,  E3SM_aircraft_path, figpath_aircraft_timeseries
 
+if campaign=='HISCALE' or campaign=='ACEENA':
+    from settings import IOP, merged_size_path
+elif campaign=='CSET' or campaign=='SOCRATES':
+    from settings import RFpath
+else:
+    print('ERROR: campaign name is not recognized: '+campaign)
+    error
+    
 import os
 if not os.path.exists(figpath_aircraft_timeseries):
     os.makedirs(figpath_aircraft_timeseries)
     
 #%% find files for flight information
-lst = glob.glob(merged_size_path+'merged_bin_*'+campaign+'*.nc')
+lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'*.nc')
 lst.sort()
-
+if len(lst)==0:
+    print('ERROR: cannot find any file at '+E3SM_aircraft_path)
+    error
 # choose files for specific IOP
 if campaign=='HISCALE':
     if IOP=='IOP1':
@@ -46,8 +56,8 @@ if campaign=='HISCALE':
     elif IOP=='IOP2':
         lst=lst[17:]
     elif IOP[0:4]=='2016':
-        a=lst[0].split('_'+campaign+'_')
-        lst = glob.glob(a[0]+'*'+IOP+'*')
+        a=lst[0].split('_'+Model_List[0]+'_')
+        lst = glob.glob(a[0]+'_'+Model_List[0]+'_'+IOP+'*')
         lst.sort()
 elif campaign=='ACEENA':
     if IOP=='IOP1':
@@ -55,37 +65,76 @@ elif campaign=='ACEENA':
     elif IOP=='IOP2':
         lst=lst[20:]
     elif IOP[0:4]=='2017' or IOP[0:4]=='2018':
-        a=lst[0].split('_'+campaign+'_')
-        lst = glob.glob(a[0]+'*'+IOP+'*')
+        a=lst[0].split('_'+Model_List[0]+'_')
+        lst = glob.glob(a[0]+'_'+Model_List[0]+'_'+IOP+'*')
         lst.sort()
-else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+        
+alldates = [x.split('_')[-1].split('.')[0] for x in lst]
+    
+# dN/dlnDp for model
+dlnDp_m = np.empty((3000))
+for bb in range(3000):
+    dlnDp_m[bb]=np.log((bb+2)/(bb+1))
 
-if len(lst)==0:
-    print('ERROR: cannot find any file at '+merged_size_path)
-    error
+for date in alldates:
     
-# for each flight
-for filename in lst:
+    #%% read in Models
+    nmodels=len(Model_List)
+    data_m = []
+    for mm in range(nmodels):
+        filename_m = E3SM_aircraft_path+'Aircraft_CNsize_'+campaign+'_'+Model_List[mm]+'_'+date+'.nc'
+        (timem,heightm,datam,timeunitm,datamunit,datamlongname)=read_extractflight(filename_m,'NCNall')
+        datam=datam*1e-6    # #/m3 to #/cm3
+        # average in time for quicker plot
+        time2 = np.arange(timem[0],timem[-1],60)
+        data2 = avg_time(timem,datam.T,time2)
+        datam = data2.T
+        # change to dN/dlnDp
+        for tt in range(len(time2)):
+            datam[:,tt]=datam[:,tt]/dlnDp_m
+        data_m.append(datam) 
+        
+    # timem = (np.array(timem)-int(timem[0]))*24
+    timem = time2/3600.
     
-    # get date info:        
-    date=filename[-12:-3]
-    if date[-1]=='a':
-        flightidx=1
-    else:
-        flightidx=2
-
-    #% read in flight information
-    (time,size,cvi,timeunit,cunit,long_name)=read_merged_size(filename,'CVI_inlet')
-    (time,size,cflag,timeunit,cunit,long_name)=read_merged_size(filename,'cld_flag')
-    (time,size,height,timeunit,zunit,long_name)=read_merged_size(filename,'height')
-    (time,size,sizeh,timeunit,dataunit,long_name)=read_merged_size(filename,'size_high')
-    (time,size,sizel,timeunit,dataunit,long_name)=read_merged_size(filename,'size_low')
-    (time,size,merge,timeunit,dataunit,long_name)=read_merged_size(filename,'size_distribution_merged')
-    time=np.ma.compressed(time)
-    size=size*1000.
     
+    #%% read observation        
+    if campaign=='HISCALE' or campaign=='ACEENA':
+        if date[-1]=='a':
+            flightidx=1
+        else:
+            flightidx=2
+    
+        if campaign=='HISCALE':
+            filename = merged_size_path+'merged_bin_fims_pcasp_'+campaign+'_'+date+'.nc'
+        elif campaign=='ACEENA':
+            filename = merged_size_path+'merged_bin_fims_pcasp_opc_'+campaign+'_'+date+'.nc'
+        #% read in flight information
+        (time,size,cvi,timeunit,cunit,long_name)=read_merged_size(filename,'CVI_inlet')
+        (time,size,cflag,timeunit,cunit,long_name)=read_merged_size(filename,'cld_flag')
+        (time,size,height,timeunit,zunit,long_name)=read_merged_size(filename,'height')
+        (time,size,sizeh,timeunit,dataunit,long_name)=read_merged_size(filename,'size_high')
+        (time,size,sizel,timeunit,dataunit,long_name)=read_merged_size(filename,'size_low')
+        (time,size,merge,timeunit,dataunit,long_name)=read_merged_size(filename,'size_distribution_merged')
+        time=np.ma.compressed(time)
+        size=size*1000.
+    
+    elif campaign=='CSET' or campaign=='SOCRATES':
+        filename = glob.glob(RFpath+'RF*'+date+'*.PNI.nc')
+        # cloud flag
+        (time,lwc,timeunit,lwcunit,lwclongname,size,cellunit)=read_RF_NCAR(filename[-1],'PLWCC')
+        cflag = 0*np.array(time)
+        cflag[lwc>0.02]=1
+        if campaign=='CSET':
+            (time,uhsas,timeunit,dataunit,long_name,size,cellunit)=read_RF_NCAR(filename[-1],'CUHSAS_RWOOU')
+        elif campaign=='SOCRATES':
+            # there are two variables: CUHSAS_CVIU and CUHSAS_LWII
+            (time,uhsas,timeunit,dataunit,long_name,size,cellunit)=read_RF_NCAR(filename[-1],'CUHSAS_LWII')
+        merge = uhsas[:,0,:]
+        size=size*1000.
+        sizeh = size
+        sizel = np.hstack((2*size[0]-size[1],  size[0:-1]))
+        
     # merge=merge.T
     # time=time/3600.
     ## average in time for quicker plot
@@ -100,25 +149,6 @@ for filename in lst:
         merge[bb,:]=merge[bb,:]/dlnDp
         
         
-    #%% read in Models
-    nmodels=len(Model_List)
-    data_m = []
-    for mm in range(nmodels):
-        filename_m = E3SM_aircraft_path+'Aircraft_CNsize_'+campaign+'_'+Model_List[mm]+'_'+date+'.nc'
-        (timem,heightm,datam,timeunitm,datamunit,datamlongname)=read_extractflight(filename_m,'NCNall')
-        datam=datam*1e-6    # #/m3 to #/cm3
-        # average in time for quicker plot
-        time2 = np.arange(timem[0],timem[-1],60)
-        data2 = avg_time(timem,datam.T,time2)
-        datam = data2.T
-        # change to dN/dlnDp
-        for bb in range(3000):
-            dlnDp=np.log((bb+2)/(bb+1))
-            datam[bb,:]=datam[bb,:]/dlnDp
-        data_m.append(datam) 
-        
-    # timem = (np.array(timem)-int(timem[0]))*24
-    timem = time2/3600.
     
     #%% make plot
     

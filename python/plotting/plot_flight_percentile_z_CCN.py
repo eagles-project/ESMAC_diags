@@ -11,15 +11,23 @@ matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
-from read_aircraft import read_ccn_hiscale
+from read_aircraft import read_ccn_hiscale, read_ccn_socrates
 from read_ARMdata import read_ccn
 from read_netcdf import read_merged_size,read_extractflight
 
 #%% settings
 
-from settings import campaign, ccnpath,merged_size_path, Model_List, color_model, IOP, \
+from settings import campaign, Model_List, color_model, \
     height_bin, E3SM_aircraft_path, figpath_aircraft_statistics
 
+if campaign=='HISCALE' or campaign=='ACEENA':
+    from settings import IOP, ccnpath, merged_size_path
+elif campaign=='CSET' or campaign=='SOCRATES':
+    from settings import ccnpath
+else:
+    print('ERROR: campaign name is not recognized: '+campaign)
+    error
+    
 import os
 if not os.path.exists(figpath_aircraft_statistics):
     os.makedirs(figpath_aircraft_statistics)
@@ -36,13 +44,11 @@ zlen=len(z)
 
 #%% find files for flight information
 
-lst = glob.glob(merged_size_path+'merged_bin_*'+campaign+'*.nc')
+lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'*.nc')
 lst.sort()
-
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+merged_size_path)
+    print('ERROR: cannot find any file at '+E3SM_aircraft_path)
     error
-
 # choose files for specific IOP
 if campaign=='HISCALE':
     if IOP=='IOP1':
@@ -50,8 +56,8 @@ if campaign=='HISCALE':
     elif IOP=='IOP2':
         lst=lst[17:]
     elif IOP[0:4]=='2016':
-        a=lst[0].split('_'+campaign+'_')
-        lst = glob.glob(a[0]+'*'+IOP+'*')
+        a=lst[0].split('_'+Model_List[0]+'_')
+        lst = glob.glob(a[0]+'_'+Model_List[0]+'_'+IOP+'*')
         lst.sort()
 elif campaign=='ACEENA':
     if IOP=='IOP1':
@@ -59,16 +65,11 @@ elif campaign=='ACEENA':
     elif IOP=='IOP2':
         lst=lst[20:]
     elif IOP[0:4]=='2017' or IOP[0:4]=='2018':
-        a=lst[0].split('_'+campaign+'_')
-        lst = glob.glob(a[0]+'*'+IOP+'*')
+        a=lst[0].split('_'+Model_List[0]+'_')
+        lst = glob.glob(a[0]+'_'+Model_List[0]+'_'+IOP+'*')
         lst.sort()
-else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
-
-if len(lst)==0:
-    print('ERROR: cannot find any file for '+IOP)
-    error
+        
+alldates = [x.split('_')[-1].split('.')[0] for x in lst]
     
 #%% read all data
 
@@ -84,29 +85,31 @@ for mm in range(nmodels):
     ccn3_all.append([])
     ccn5_all.append([])
     
-print('reading '+format(len(lst))+' files to calculate the statistics: ')
+print('reading '+format(len(alldates))+' files to calculate the statistics: ')
 
-for filename in lst:
+for date in alldates:
     
-    # get date info:        
-    date=filename[-12:-3]
-    if date[-1]=='a':
-        flightidx=1
-    else:
-        flightidx=2
-    print(date)
+    #%% read in Models
     
-    #% read in flight information
-    (time,size,cvi,timeunit,cunit,long_name)=read_merged_size(filename,'CVI_inlet')
-    (time,size,cflag,timeunit,cunit,long_name)=read_merged_size(filename,'cld_flag')
-    (time,size,height,timeunit,zunit,long_name)=read_merged_size(filename,'height')
-    time=np.ma.compressed(time)
+    for mm in range(nmodels):
+        filename_m = E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[mm]+'_'+date+'.nc'
     
+        (timem,heightm,ccn3,timeunitm,ccn3_unit,ccn3_longname)=read_extractflight(filename_m,'CCN3')
+        (timem,heightm,ccn5,timeunitm,ccn5_unit,ccn5_longname)=read_extractflight(filename_m,'CCN5')
+        
+        
+    # get supersaturation
+    SS3 = ccn3_longname.split('=')[-1]
+    SS5 = ccn5_longname.split('=')[-1]
     
-    #%% read in ccn
+    #%% read in flight data (for HISCALE)
     if campaign=='HISCALE':
         filename_ccn=glob.glob(ccnpath+'CCN_G1_'+date[0:8]+'*R2_HiScale001s.*')
         filename_ccn.sort()
+        if date[-1]=='a':
+            flightidx=1
+        else:
+            flightidx=2
         # read in data
         if len(filename_ccn)==1 or len(filename_ccn)==2:
             (data0,ccnlist)=read_ccn_hiscale(filename_ccn[flightidx-1])
@@ -123,11 +126,11 @@ for filename in lst:
             SSa[SSa<0]=np.nan
             SSb[SSb<0]=np.nan
         elif len(filename_ccn)==0:
-            time_ccn=time
-            ccna=np.nan*np.empty([len(time)])
-            ccnb=np.nan*np.empty([len(time)])
-            SSa=0.24*np.full(len(time),1)
-            SSb=0.46*np.full(len(time),1)
+            time_ccn=timem
+            ccna=np.nan*np.empty([len(timem)])
+            ccnb=np.nan*np.empty([len(timem)])
+            SSa=0.24*np.full(len(timem),1)
+            SSb=0.46*np.full(len(timem),1)
         else:
             print('find too many files, check: ')
             print(filename_ccn)
@@ -145,9 +148,9 @@ for filename in lst:
             SSa[SSa<0]=np.nan
         elif len(filename_ccna)==0:
             # print('no CCN data found. set as NaN')
-            timea=time
-            SSa=np.nan*np.empty([len(time)])
-            ccna=np.nan*np.empty([len(time)])
+            timea=timem
+            SSa=np.nan*np.empty([len(timem)])
+            ccna=np.nan*np.empty([len(timem)])
         else:
             print('find too many files, check: ')
             print(filename_ccna)
@@ -158,52 +161,76 @@ for filename in lst:
             SSb[SSb<0]=np.nan
         elif len(filename_ccnb)==0:
             # print('no CCN data found. set as NaN')
-            timeb=time
-            SSb=np.nan*np.empty([len(time)])
-            ccnb=np.nan*np.empty([len(time)])
+            timeb=timem
+            SSb=np.nan*np.empty([len(timem)])
+            ccnb=np.nan*np.empty([len(timem)])
         else:
             print('find too many files, check: ')
             print(filename_ccnb)
             error
          
+    # CSET does not have observed CCN
+    elif campaign=='CSET':
+        timea=timem
+        SSa=np.nan*np.empty([len(timem)])
+        ccna=np.nan*np.empty([len(timem)])
+        timeb=timem
+        SSb=np.nan*np.empty([len(timem)])
+        ccnb=np.nan*np.empty([len(timem)])
+        
+    # SOCRATES
+    elif campaign=='SOCRATES':
+        filename_ccn=glob.glob(ccnpath+'CCNscanning_SOCRATES_GV_RF*'+date[0:8]+'_R0.ict')
+        if len(filename_ccn)==1:
+            (data0,ccnlist)=read_ccn_socrates(filename_ccn[0])
+            time_ccn = data0[0,:]
+            ccn = data0[1,:]
+            SS = data0[3,:]
+            ccn[ccn<-9000]=np.nan
+            timea=time_ccn
+            timeb=time_ccn
+            ccna=np.array(ccn)
+            ccnb=np.array(ccn)
+            idxa=np.logical_and(SS>0.05, SS<0.15)
+            ccna[idxa==False]=np.nan
+            SSa=np.full((len(timea)),0.1)
+            idxb=np.logical_and(SS>0.45, SS<0.55)
+            ccnb[idxb==False]=np.nan
+            SSb=np.full((len(timeb)),0.5)
+        elif len(filename_ccn)==0:
+            timea=timem
+            SSa=np.nan*np.empty([len(timem)])
+            ccna=np.nan*np.empty([len(timem)])
+            timeb=timem
+            SSb=np.nan*np.empty([len(timem)])
+            ccnb=np.nan*np.empty([len(timem)])
+        else:
+            print('find too many files, check: ')
+            print(filename_ccn)
+            error
+            
     if any(timea!=timeb):
         error   
         
     # exclude NaNs
-    idx = np.logical_and(~np.isnan(ccna), ~np.isnan(ccnb))
+    idx = np.logical_or(~np.isnan(ccna), ~np.isnan(ccnb))
     ccna_all.append(ccna[idx])
     ccnb_all.append(ccnb[idx])
     SSa_all=np.append(SSa_all,SSa[idx])
     SSb_all=np.append(SSb_all,SSb[idx])
     
-    height2=np.interp(timea,time,height)
+    height2=np.interp(timea,timem,heightm)
     height_all.append(height2[idx])
     
     # for interpolation of model results
     timea=timea[idx]
     timeb=timeb[idx]
     
-    #%% read in Models
-    
+    # interpolate model results into observational time
+    timem2 = (timem-int(timem[0]))*86400
     for mm in range(nmodels):
-        filename_m = E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[mm]+'_'+date+'.nc'
-    
-        (timem,heightm,ccn3,timeunitm,ccn3_unit,ccn3_longname)=read_extractflight(filename_m,'CCN3')
-        (timem,heightm,ccn5,timeunitm,ccn5_unit,ccn5_longname)=read_extractflight(filename_m,'CCN5')
-        if any(height!=heightm):
-            print('ERROR: model and obs have inconsistent heights. check!')
-            print(height[height!=heightm])
-            print(heightm[heightm!=height])
-            error
-        
-        # interpolate into observational time
-        timem2 = (timem-int(timem[0]))*86400
         ccn3_all[mm].append(np.interp(timea,timem2,ccn3)) 
         ccn5_all[mm].append(np.interp(timeb,timem2,ccn5)) 
-        
-    # get supersaturation
-    SS3 = ccn3_longname.split('=')[-1]
-    SS5 = ccn5_longname.split('=')[-1]
          
 #%% calculate percentiles for each height bin
 
@@ -243,8 +270,10 @@ for dd in range(ndays):
 p_shift = np.arange(nmodels+1)
 p_shift = (p_shift - p_shift.mean())*0.2
 
-    
-figname = figpath_aircraft_statistics+'percentile_height_CCN_'+campaign+'_'+IOP+'.png'
+if campaign=='HISCALE' or campaign=='ACEENA':
+    figname = figpath_aircraft_statistics+'percentile_height_CCN_'+campaign+'_'+IOP+'.png'
+else:
+    figname = figpath_aircraft_statistics+'percentile_height_CCN_'+campaign+'.png'
 print('plotting figures to '+figname)
 
 fig,(ax1,ax2) = plt.subplots(1,2,figsize=(8,8))   # figsize in inches
@@ -310,7 +339,8 @@ ax1.set_ylabel('Height (m MSL)',fontsize=14)
 fig.text(0.4,0.06, 'CCN number (cm$^{-3}$)', fontsize=14)
 ax1.set_title('SS = '+SS3,fontsize=14)
 ax2.set_title('SS = '+SS5,fontsize=14)
-fig.text(0.48,0.92, IOP, fontsize=16)
+if campaign=='HISCALE' or campaign=='ACEENA':
+    fig.text(0.48,0.92, IOP, fontsize=16)
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 plt.close()

@@ -17,9 +17,18 @@ from read_netcdf import read_merged_size,read_extractflight
 
 #%% settings
 
-from settings import campaign, amspath, iwgpath, merged_size_path, Model_List, color_model, \
-    IOP, height_bin, E3SM_aircraft_path, figpath_aircraft_statistics
+from settings import campaign, Model_List, color_model, \
+     height_bin, E3SM_aircraft_path, figpath_aircraft_statistics
 
+if campaign=='HISCALE' or campaign=='ACEENA':
+    from settings import IOP, merged_size_path, amspath, iwgpath
+elif campaign=='CSET' or campaign=='SOCRATES':
+    print('ERROR: CSET and SOCRATES do not have composition data ')
+    error
+else:
+    print('ERROR: campaign name is not recognized: '+campaign)
+    error
+    
 import os
 if not os.path.exists(figpath_aircraft_statistics):
     os.makedirs(figpath_aircraft_statistics)
