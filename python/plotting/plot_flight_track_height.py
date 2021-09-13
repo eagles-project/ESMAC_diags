@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import glob
 from read_ARMdata import read_cvi_aceena
+from specific_data_treatment import lwc2cflag
 from time_format_change import yyyymmdd2cday, hhmmss2sec
 from read_aircraft import read_iwg1, read_cvi_hiscale, read_RF_NCAR
 
@@ -156,8 +157,8 @@ for filename in lst:
         (time,lon,timeunit,lonunit,lonlongname,cellsize,cellunit)=read_RF_NCAR(filename,'LON')
         (time,lwc,timeunit,lwcunit,lwclongname,cellsize,cellunit)=read_RF_NCAR(filename,'PLWCC')
         # lon[lon<0]=lon[lon<0]+360
-        cldflag = 0*np.array(time)
-        cldflag[lwc>0.02]=1
+        # calculate cloud flag based on LWC
+        cldflag=lwc2cflag(lwc,lwcunit)
         if campaign=='SOCRATES':
             (time,cvi_inlet,timeunit,cviunit,cvilongname,cellsize,cellunit)=read_RF_NCAR(filename,'CVINLET')
         else:
@@ -176,7 +177,7 @@ for filename in lst:
     try:
         os.environ['PROJ_LIB'] = r'c:\Users\tang357\Anaconda3\pkgs\basemap-1.3.0-py38ha7665c8_0\Library\share'
         from mpl_toolkits.basemap import Basemap
-        figname = figpath_aircraft_timeseries + 'flighttrack_'+campaign+'_withmap_'+date+'.png'
+        figname = figpath_aircraft_timeseries + 'flighttrack_'+campaign+'_'+date+'.png'
         print('plot flight track to '+figname)
         fig,ax = plt.subplots(figsize=(8,5))   # figsize in inches
         plt.tight_layout(pad=0.1, w_pad=0.5, h_pad=1.5)   #pad=0.4, w_pad=0.5, h_pad=1.0
@@ -230,7 +231,7 @@ for filename in lst:
     plt.close()
         
     #%% plot flight height and flag/leg timeseries
-    figname = figpath_aircraft_timeseries + 'flightheight_timeseries_'+campaign+'_'+date+'.png'
+    figname = figpath_aircraft_timeseries + 'flightheight_'+campaign+'_'+date+'.png'
     print('plot flight height timeseries to '+figname)
     
     fig,ax1 = plt.subplots(figsize=(8,2))   # figsize in inches
@@ -242,7 +243,7 @@ for filename in lst:
             idx=legnum==ll
             ax1.plot(time[idx]/3600,height[idx]/1000,color='b',linewidth=2)
     h12=ax1.plot(time/3600,time*0+max(height)*0.00105,color='k',linewidth=.2)
-    cvi2=0*cvi_inlet
+    cvi2=0.0*cvi_inlet
     cvi2[cvi_inlet==1]=np.nan
     cvi2=cvi2+max(height)*0.00105
     h13=ax1.plot(time/3600,cvi2,color='k',linewidth=2)

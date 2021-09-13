@@ -38,7 +38,10 @@ def read_E3SM(filename,varname):
     if type(varname) is str:
         d_id = f.variables[varname]
         data = d_id[:]
-        dataunit = d_id.units
+        try:
+            dataunit = d_id.units
+        except:
+            dataunit='N/A'    
         long_name = d_id.long_name
     elif type(varname) is list:
         data=list()
@@ -47,7 +50,10 @@ def read_E3SM(filename,varname):
         for vv in range(len(varname)):
             d_id=f.variables[varname[vv]]
             data.append(d_id[:])
-            dataunit.append(d_id.units)
+            try:
+                dataunit.append(d_id.units)
+            except:
+                dataunit.append('N/A')    
             long_name.append(d_id.long_name)
     
     f.close()

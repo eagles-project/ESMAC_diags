@@ -31,7 +31,7 @@ def avg_time(time0,data0,time):
 
 from settings import campaign, Model_List, IOP, start_date, end_date, E3SM_sfc_path, figpath_sfc_timeseries
 if campaign=='ACEENA':
-    from settings import uhsaspath
+    from settings import uhsassfcpath
 elif campaign=='HISCALE':
     if IOP=='IOP1':
         from settings import smps_bnl_path, nanosmps_bnl_path
@@ -53,17 +53,17 @@ year0 = start_date[0:4]
 #%% read in obs data
 if campaign=='ACEENA':
     if IOP=='IOP1':
-        lst = glob.glob(uhsaspath+'enaaosuhsasC1.a1.2017062*')+glob.glob(uhsaspath+'enaaosuhsasC1.a1.201707*')
+        lst = glob.glob(uhsassfcpath+'enaaosuhsasC1.a1.2017062*')+glob.glob(uhsassfcpath+'enaaosuhsasC1.a1.201707*')
     elif IOP=='IOP2':
-        lst = glob.glob(uhsaspath+'enaaosuhsasC1.a1.201801*')+glob.glob(uhsaspath+'enaaosuhsasC1.a1.201802*')
+        lst = glob.glob(uhsassfcpath+'enaaosuhsasC1.a1.201801*')+glob.glob(uhsassfcpath+'enaaosuhsasC1.a1.201802*')
     lst.sort()
     t_uhsas=np.empty(0)
     uhsas=np.empty((0,99))
     for filename in lst:
-        (time,dmin,dmax,data,timeunit,dataunit,long_name) = read_uhsas(filename,'concentration')
+        (time,dmin,dmax,data,timeunit,dataunit,long_name) = read_uhsas(filename)
         timestr=timeunit.split(' ')
         date=timestr[2]
-        cday=yyyymmdd2cday(date)
+        cday=yyyymmdd2cday(date,'noleap')
         # average in time for quicker plot
         time2=np.arange(300,86400,600)
         data2 = avg_time(time,data,time2)
@@ -77,7 +77,7 @@ if campaign=='ACEENA':
         dlnDp_u[bb]=np.log10(dmax[bb]/dmin[bb])
         uhsas[:,bb]=uhsas[:,bb]/dlnDp_u[bb]
     
-    time = np.array(t_uhsas)
+    time0 = np.array(t_uhsas)
     size = np.array(size_u)
     obs = np.array(uhsas.T)
     
@@ -95,7 +95,7 @@ elif campaign=='HISCALE':
             data[flag!=0,:]=np.nan
             timestr=timeunit.split(' ')
             date=timestr[2]
-            cday=yyyymmdd2cday(date)
+            cday=yyyymmdd2cday(date,'noleap')
             t_smps=np.hstack((t_smps, cday+time/86400))
             smps=np.vstack((smps, data))
         smps=smps.T
@@ -111,7 +111,7 @@ elif campaign=='HISCALE':
             datan[flagn!=0,:]=np.nan
             timestr=timenunit.split(' ')
             date=timestr[2]
-            cday=yyyymmdd2cday(date)
+            cday=yyyymmdd2cday(date,'noleap')
             t_nano=np.hstack((t_nano, cday+timen/86400))
             nanosmps=np.vstack((nanosmps, datan))
         nanosmps=nanosmps.T
@@ -125,11 +125,11 @@ elif campaign=='HISCALE':
         time=data[0,:]
         smps=data[1:-1,:]
         flag=data[-1,:]
-        cday=yyyymmdd2cday('2016-08-27')
+        cday=yyyymmdd2cday('2016-08-27','noleap')
         t_smps=cday+time/86400
         smps[:,flag!=0]=np.nan
         
-    time = np.array(t_smps)
+    time0 = np.array(t_smps)
     size = np.array(size)
     obs = np.array(smps)  
     
@@ -138,7 +138,12 @@ elif campaign=='HISCALE':
 else:
     print('ERROR: does NOT recognize this campaign: '+campaign)
     error
-    
+
+# only choose the time period between start_date and end_date
+obs=obs[:,np.logical_and(time0>=cday1, time0<cday2+1)]
+time0=time0[np.logical_and(time0>=cday1, time0<cday2+1)]
+
+
 #%% read in models
 model = []
 nmodels = len(Model_List)
@@ -175,8 +180,8 @@ for dd in range(len(days)):
     nn=0
     for tt in range(len(time_dc)):
         time_tmp = days[dd]+time_dc[tt]/1440.
-        idx = np.abs(time-time_tmp).argmin()
-        if (time[idx]-time_tmp)*1440 <= 30:    
+        idx = np.abs(time0-time_tmp).argmin()
+        if (time0[idx]-time_tmp)*1440 <= 30:    
             obs_dc[:,tt,dd] = obs[:,idx]
 obs_dc = np.nanmean(obs_dc,2)
 

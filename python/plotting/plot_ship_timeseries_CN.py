@@ -4,7 +4,7 @@ import sys
 sys.path.insert(1,'../subroutines/')
 
 import matplotlib
-# matplotlib.use('AGG') # plot without needing X-display setting
+matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
@@ -23,6 +23,7 @@ if not os.path.exists(figpath_ship_timeseries):
     os.makedirs(figpath_ship_timeseries)
 
 lst = glob.glob(E3SM_ship_path+'Ship_CNsize_'+campaign+'_'+Model_List[0]+'_shipleg*.nc')
+lst.sort()
 
 for ll in range(len(lst)):
     

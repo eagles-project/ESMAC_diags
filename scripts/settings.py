@@ -7,14 +7,14 @@ import numpy as np
 
 ############ these settings will be replaced by the settings in scripts_*.csh #############
 # set field campaign name. More settings on specific field campaigns are in next section
-campaign = 'HISCALE'
+campaign = 'SOCRATES'
 # set model names. up to three
 Model_List = ['E3SMv1']
 # set line colors for each model. corresponding to the Model_List
-color_model = ['b','g']
+color_model = ['r','b','g']
 # set IOP that the statistics, pdf and percentiles are averaged for. Only available for HISCALE and ACEENA
 # IOP1/IOP2 
-IOP = 'IOP2'
+IOP = 'IOP1'
 ############ these settings will be replaced by the settings in scripts_*.csh #############
 
 
@@ -25,10 +25,14 @@ package_path = '../../'
 E3SM_h3_path=[]
 E3SM_h3_filehead=[]     # filename before .cam.h3.yyyy-mm-dd.00000.nc
 for mm in Model_List:
-    # E3SM_h3_path.append('/global/cscratch1/sd/sqtang/EAGLES/E3SM_output/'+mm+'_h3/')
-    # E3SM_h3_filehead.append('cori-knl_F20TRC5-CMIP6_ne30_E3SMv1_othertestbeds')
-    E3SM_h3_path.append('/qfs/projects/eagles/zhan524/simulations/compy_F20TRC5-CMIP6_ne30_EG1_R2_'+mm+'/h3/')
-    E3SM_h3_filehead.append('compy_F20TRC5-CMIP6_ne30_EG1_R2_'+mm)
+    E3SM_h3_path.append('/global/cscratch1/sd/sqtang/EAGLES/E3SM_output/E3SMv1_h3/')
+    if campaign=='MAGIC':
+        E3SM_h3_filehead.append(mm+'_2012-2013')
+    else:
+#        E3SM_h3_filehead.append(mm+'_2014-2018')
+        E3SM_h3_filehead.append(mm)
+    #E3SM_h3_path.append('/qfs/projects/eagles/zhan524/simulations/compy_F20TRC5-CMIP6_ne30_EG1_R2_'+mm+'/h3/')
+    #E3SM_h3_filehead.append('compy_F20TRC5-CMIP6_ne30_EG1_R2_'+mm)
 
 # path of output figures
 figpath_aircraft_timeseries = package_path+'figures/'+campaign+'/aircraft/timeseries/'
@@ -55,7 +59,7 @@ if campaign=='HISCALE':
     
     # time periods for IOPs. needed in preprocessing of surface data
     if IOP=='IOP1':
-        start_date='2016-04-20'
+        start_date='2016-04-25'
         end_date='2016-05-29'
     elif IOP=='IOP2':
         start_date='2016-08-27'
@@ -76,6 +80,7 @@ if campaign=='HISCALE':
     smps_pnnl_path = package_path+'data/'+campaign+'/obs/surface/pnnl-smps/'
     smps_bnl_path = package_path+'data/'+campaign+'/obs/surface/bnl-smps/'
     nanosmps_bnl_path = package_path+'data/'+campaign+'/obs/surface/bnl-nanosmps/'
+    uhsassfcpath = package_path+'data/'+campaign+'/obs/surface/arm-uhsas/'
     cpcsfcpath = package_path+'data/'+campaign+'/obs/surface/arm-cpc/'
     cpcusfcpath = package_path+'data/'+campaign+'/obs/surface/arm-cpcu/'
     ccnsfcpath = package_path+'data/'+campaign+'/obs/surface/arm-ccn/'
@@ -124,7 +129,7 @@ elif campaign=='ACEENA':
     amspath = package_path+'data/'+campaign+'/obs/aircraft/shilling-hrfams/'
     wcmpath = package_path+'data/'+campaign+'/obs/aircraft/wcm_ACEENA/'
     # surface measurements
-    uhsaspath = package_path+'data/'+campaign+'/obs/surface/arm_uhsas/'
+    uhsassfcpath = package_path+'data/'+campaign+'/obs/surface/arm_uhsas/'
     cpcsfcpath = package_path+'data/'+campaign+'/obs/surface/arm_cpcf/'
     cpcusfcpath = 'N/A'
     ccnsfcpath = package_path+'data/'+campaign+'/obs/surface/arm_aosccn1/'
@@ -143,7 +148,11 @@ elif campaign=='MAGIC':
     site='MAG'
     
     # bin of latitude to calculate ship track composite
-    latbin = np.arange(21.25,34,0.5)
+    latbin = np.arange(21.5,34,1)
+    
+    # reference lat/lon
+    lat0=30.
+    lon0=230.
     
     # observational data path. 
     # ship measurements
@@ -162,7 +171,12 @@ elif campaign=='MARCUS':
     site='MAR'
     
     # bin of latitude to calculate ship track composite
-    latbin = np.arange(42.5,68,1)
+    latbin = np.arange(-68.5,-42,1)
+    
+    # reference lat/lon
+    lat0=-40.
+    lon0=120.
+    
     
     # observational data path. 
     # ship measurements
@@ -179,7 +193,10 @@ elif campaign=='MARCUS':
     
 elif campaign=='CSET':
     # bin of flight heights to calculate percentiles
-    height_bin = np.arange(200,10000,400)
+    height_bin = np.arange(200,8000,400)
+    # bin of latitude to calculate composite percentiles, same as MAGIC
+    latbin = np.arange(22.5,39,1)
+    
     # lat/lon at the airport
     lat0 = 38.5564
     lon0 = 360-121.3120
@@ -196,7 +213,9 @@ elif campaign=='CSET':
     
 elif campaign=='SOCRATES':
     # bin of flight heights to calculate percentiles
-    height_bin = np.arange(200,10000,400)
+    height_bin = np.arange(200,8000,400)
+    # bin of latitude to calculate composite percentiles
+    latbin = np.arange(-63.5,-42,1)
     # height_bin = np.arange(200,7000,400)
     # lat/lon at the airport
     lat0 = -42.8371

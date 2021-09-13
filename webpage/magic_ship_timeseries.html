@@ -1,0 +1,110 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<title>ESMAC Diags quickplots</title>
+
+<script>
+function update_images()
+{
+    var listVars= document.getElementById('variables');
+    var listDay = document.getElementById('days');
+    var listPlottype = document.getElementById('plottype');
+    var outputImgContainer = document.getElementById('output_img_container');
+    
+    // remove all images
+    while (outputImgContainer.hasChildNodes())
+    {
+        var removedNode = outputImgContainer.removeChild(outputImgContainer.firstChild);
+        delete removedNode;
+    }
+
+  var newH3 = document.createElement('h3');
+  newH3.appendChild(document.createTextNode('quick plots:'));
+  outputImgContainer.appendChild(newH3);
+    
+    // select variables and days
+    for (var v = 0; v < listVars.options.length; v++)
+    {
+         if (listVars.options[v].selected)
+         {
+             var curVar = listVars.options[v].value; 
+             for (var m = 0; m < listDay.options.length; m++)
+             {
+                   if (listDay.options[m].selected)
+                   {              
+  				   var curDay = listDay.options[m].value;
+                                     var imgURL = '../figures/MAGIC/ship/timeseries/timeseries_' + curVar + '_MAGIC_'+curDay + '.png'; 
+                                     var newDiv = document.createElement('div');
+                                     newDiv.appendChild(document.createTextNode( 'file =' + imgURL ));
+                                     var newBr = document.createElement('br');
+                                     newDiv.appendChild(newBr);
+                                     var newImg = document.createElement('img');
+                                     newImg.src = imgURL;
+                                     newImg.style.width = "800px";
+                                     newDiv.appendChild(newImg );
+                                     var newHr = document.createElement('hr');
+                                     newDiv.appendChild(newHr);
+                                     outputImgContainer.appendChild(newDiv);
+                     } 
+               } // for listDay
+          }
+    } // for listVars
+} // end of function
+
+
+</script>
+
+</head>
+
+<body>
+  
+
+<h2>MAGIC Quick Plots </h2>
+<p><medium> Select a variable and then press &lt;GO&gt; button to see a plot. You can select one or all variables. To select multiple choices, press and hold CTRL key and click left mouse button. To deselect a choice, press and hold CTRL key and click on the selected item. You can also select multiple consequtive items by selecting first item, and then selecting the last item while holding the SHIFT key. You can also browse all figures in <a href="../figures/MAGIC/ship/timeseries">here</a>. </medium></p>
+<h2><small> Platform: ship; Plot type: timeseries </small></h2>
+
+    
+<table border="0" cellpadding="2" cellspacing="10">
+         
+<tbody>
+<tr>
+<td><label for="variables"> <medium> variables</medium> </label></td>
+<td colspan="1"><select id="variables" multiple="multiple" size="8">
+<option selected="selected" value="met">meteorological fields</option>
+<option value="CN">aerosol number concentration (CN)</option>
+<option value="CCN">CCN number concentration</option>
+<option value="AerosolSize">aerosol number size distribution</option>
+</select></td>
+<td><label for="days"> <medium> ship trips </medium></label></td>
+<td colspan="3"><select id="days" multiple="multiple" size="8">
+<option selected="selected" value="ship02">ship #02</option>
+<option value="ship03">ship #03</option>
+<option value="ship04">ship #04</option>
+<option value="ship05">ship #05</option>
+<option value="ship06">ship #06</option>
+<option value="ship07">ship #07</option>
+<option value="ship08">ship #08</option>
+<option value="ship09">ship #09</option>
+<option value="ship10">ship #10</option>
+<option value="ship11">ship #11</option>
+<option value="ship12">ship #12</option>
+<option value="ship13">ship #13</option>
+<option value="ship14">ship #14</option>
+<option value="ship15">ship #15</option>
+<option value="ship16">ship #16</option>
+<option value="ship17">ship #17</option>
+<option value="ship18">ship #18</option>
+<option value="ship19">ship #19</option>
+</select></td>
+</tr>    
+        <tr>
+            <td colspan="4" align="center"><input value="  Go  " onclick="update_images();" type="submit"></td>
+        </tr>
+    </tbody></table>
+    
+    <hr>
+    
+    <div id="output_img_container"></div>
+
+
+
+</body></html>

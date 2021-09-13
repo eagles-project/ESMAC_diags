@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import glob
 from read_aircraft import read_RF_NCAR
+from specific_data_treatment import lwc2cflag
 # from time_format_change import yyyymmdd2cday, hhmmss2sec
 from read_netcdf import read_merged_size,read_extractflight
 
@@ -44,7 +45,7 @@ if not os.path.exists(figpath_aircraft_timeseries):
     os.makedirs(figpath_aircraft_timeseries)
     
 #%% find files for flight information
-lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'*.nc')
+lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
     print('ERROR: cannot find any file at '+E3SM_aircraft_path)
@@ -123,8 +124,8 @@ for date in alldates:
         filename = glob.glob(RFpath+'RF*'+date+'*.PNI.nc')
         # cloud flag
         (time,lwc,timeunit,lwcunit,lwclongname,size,cellunit)=read_RF_NCAR(filename[-1],'PLWCC')
-        cflag = 0*np.array(time)
-        cflag[lwc>0.02]=1
+        # calculate cloud flag based on LWC
+        cflag=lwc2cflag(lwc,lwcunit)
         if campaign=='CSET':
             (time,uhsas,timeunit,dataunit,long_name,size,cellunit)=read_RF_NCAR(filename[-1],'CUHSAS_RWOOU')
         elif campaign=='SOCRATES':
@@ -152,7 +153,7 @@ for date in alldates:
     
     #%% make plot
     
-    figname = figpath_aircraft_timeseries+'timeseries_AerosolSize_'+campaign+'_'+date+'.png'
+    figname = figpath_aircraft_timeseries+'AerosolSize_'+campaign+'_'+date+'.png'
     print('plotting figures to '+figname)
     
     #fig = plt.figure()

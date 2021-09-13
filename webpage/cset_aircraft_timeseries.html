@@ -1,0 +1,109 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<title>ESMAC Diags quickplots</title>
+
+<script>
+function update_images()
+{
+    var listVars= document.getElementById('variables');
+    var listDay = document.getElementById('days');
+    var listPlottype = document.getElementById('plottype');
+    var outputImgContainer = document.getElementById('output_img_container');
+    
+    // remove all images
+    while (outputImgContainer.hasChildNodes())
+    {
+        var removedNode = outputImgContainer.removeChild(outputImgContainer.firstChild);
+        delete removedNode;
+    }
+
+  var newH3 = document.createElement('h3');
+  newH3.appendChild(document.createTextNode('quick plots:'));
+  outputImgContainer.appendChild(newH3);
+    
+    // select variables and days
+    for (var v = 0; v < listVars.options.length; v++)
+    {
+         if (listVars.options[v].selected)
+         {
+             var curVar = listVars.options[v].value; 
+             for (var m = 0; m < listDay.options.length; m++)
+             {
+                   if (listDay.options[m].selected)
+                   {              
+  				   var curDay = listDay.options[m].value;
+                                     var imgURL = '../figures/CSET/aircraft/timeseries/' + curVar + '_CSET_'+curDay + '.png'; 
+                                     var newDiv = document.createElement('div');
+                                     newDiv.appendChild(document.createTextNode( 'file =' + imgURL ));
+                                     var newBr = document.createElement('br');
+                                     newDiv.appendChild(newBr);
+                                     var newImg = document.createElement('img');
+                                     newImg.src = imgURL;
+                                     newImg.style.width = "800px";
+                                     newDiv.appendChild(newImg );
+                                     var newHr = document.createElement('hr');
+                                     newDiv.appendChild(newHr);
+                                     outputImgContainer.appendChild(newDiv);
+                     } 
+               } // for listDay
+          }
+    } // for listVars
+} // end of function
+
+
+</script>
+
+</head>
+
+<body>
+  
+
+<h2>CSET Quick Plots </h2>
+<p><medium> Select a variable and then press &lt;GO&gt; button to see a plot. You can select one or all variables. To select multiple choices, press and hold CTRL key and click left mouse button. To deselect a choice, press and hold CTRL key and click on the selected item. You can also select multiple consequtive items by selecting first item, and then selecting the last item while holding the SHIFT key. You can also browse all figures in <a href="../figures/CSET/aircraft/timeseries">here</a>. </medium></p>
+<h2><small> Platform: aircraft; Plot type: timeseries </small></h2>
+
+    
+<table border="0" cellpadding="2" cellspacing="10">
+         
+<tbody>
+<tr>
+<td><label for="variables"> <medium> variables</medium> </label></td>
+<td colspan="1"><select id="variables" multiple="multiple" size="8">
+<option selected="selected" value="flightheight">flight heights </option>
+<option value="flighttrack">flight location</option>
+<option value="CN">aerosol number concentration (CN)</option>
+<option value="CCN">CCN number concentration</option>
+<option value="AerosolSize">aerosol number size distribution</option>
+</select></td>
+<td><label for="days"> <medium> days </medium></label></td>
+<td colspan="3"><select id="days" multiple="multiple" size="9">
+<option selected="selected" value="20150701">20150701</option>
+<option value="20150707">20150707</option>
+<option value="20150709">20150709</option>
+<option value="20150712">20150712</option>
+<option value="20150714">20150714</option>
+<option value="20150717">20150717</option>
+<option value="20150719">20150719</option>
+<option value="20150722">20150722</option>
+<option value="20150724">20150724</option>
+<option value="20150727">20150727</option>
+<option value="20150729">20150729</option>
+<option value="20150801">20150801</option>
+<option value="20150803">20150803</option>
+<option value="20150807">20150807</option>
+<option value="20150809">20150809</option>
+<option value="20150812">20150812</option>
+</select></td>
+</tr>    
+        <tr>
+            <td colspan="4" align="center"><input value="  Go  " onclick="update_images();" type="submit"></td>
+        </tr>
+    </tbody></table>
+    
+    <hr>
+    
+    <div id="output_img_container"></div>
+
+
+
+</body></html>

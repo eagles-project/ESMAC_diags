@@ -1,5 +1,23 @@
 # function of some specific data treatment
 
+#%% estimate cloud flag based on LWC
+def lwc2cflag(lwc,lwcunit):
+    if lwcunit=='kg/m3':
+        lwc=lwc*0.001
+        lwcunit='g/m3'
+    elif lwcunit=='g m-3':
+        lwcunit='g/m3'
+    if lwcunit!='g/m3' and lwcunit!='gram/m3':
+        print('unit of LWC should be gram/m3. check: '+lwcunit)
+        error
+        
+    import numpy as np
+    cldflag = 0*np.array(lwc)
+    
+    # set threshold of LWC to identify cloud
+    cldflag[lwc>0.02]=1
+    return(cldflag)
+
 #%% set model masks if the difference of Ps is too large
 def mask_model_ps(timem,psm,legnum,campaign,shipmetpath):
     

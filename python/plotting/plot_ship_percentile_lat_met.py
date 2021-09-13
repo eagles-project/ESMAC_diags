@@ -4,7 +4,7 @@ import sys
 sys.path.insert(1,'../subroutines/')
 
 import matplotlib
-# matplotlib.use('AGG') # plot without needing X-display setting
+matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sp
@@ -203,10 +203,10 @@ for mm in range(nmodels):
             boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
             medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
             vert=True, patch_artist=True)    # need patch_artist to fill color in box
-ax1.tick_params(color='k',labelsize=12)
+ax1.tick_params(color='k',labelsize=15)
 # ax1.set_yscale('log')
 ax1.set_xlim(-1,latlen)
-ax1.set_xticks(np.arange(-0.5*dlat,latlen,2))
+ax1.set_xticks(np.arange(-0.5*dlat,latlen-1,2))
 # plot temporal lines for label
 ax1.plot([],c='k',label='OBS')
 for mm in range(nmodels):
@@ -224,10 +224,10 @@ for mm in range(nmodels):
             boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
             medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
             vert=True, patch_artist=True)    # need patch_artist to fill color in box
-ax2.tick_params(color='k',labelsize=12)
+ax2.tick_params(color='k',labelsize=15)
 # ax2.set_yscale('log')
 ax2.set_xlim(-1,latlen)
-ax2.set_xticks(np.arange(-0.5*dlat,latlen,2))
+ax2.set_xticks(np.arange(-0.5*dlat,latlen-1,2))
 # plot temporal lines for label
 ax2.plot([],c='k',label='OBS')
 for mm in range(nmodels):
@@ -245,10 +245,10 @@ for mm in range(nmodels):
             boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
             medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
             vert=True, patch_artist=True)    # need patch_artist to fill color in box
-ax3.tick_params(color='k',labelsize=12)
+ax3.tick_params(color='k',labelsize=15)
 # ax3.set_yscale('log')
 ax3.set_xlim(-1,latlen)
-ax3.set_xticks(np.arange(-0.5*dlat,latlen,2))
+ax3.set_xticks(np.arange(-0.5*dlat,latlen-1,2))
 # plot temporal lines for label
 ax3.plot([],c='k',label='OBS')
 for mm in range(nmodels):
@@ -276,17 +276,17 @@ for mm in range(nmodels):
 #     ax4.plot([],c=color_model[mm],label=Model_List[mm])
     
 
-ax3.set_xlabel('Latitude',fontsize=14)
+ax3.set_xlabel('Latitude',fontsize=16)
 
 ax1.set_xticklabels([])
 ax2.set_xticklabels([])
 ax3.set_xticklabels([])
 ax3.set_xticklabels([int(np.floor(a)) for a in latbin[0::2]])
-ax1.set_title(varmlongname[0]+' ('+varmunit[0]+')',fontsize=15)
-ax2.set_title(varmlongname[1]+' ('+varmunit[1]+')',fontsize=15)
-ax3.set_title(varmlongname[2]+' ('+varmunit[2]+')',fontsize=15)
+ax1.set_title(varmlongname[0]+' ('+varmunit[0]+')',fontsize=17)
+ax2.set_title(varmlongname[1]+' ('+varmunit[1]+')',fontsize=17)
+ax3.set_title(varmlongname[2]+' ('+varmunit[2]+')',fontsize=17)
 # ax4.set_title(varmlongname[3]+' ('+varmunit[3]+')',fontsize=15)
 
-ax1.legend(loc='upper right', shadow=False, fontsize='large')
+ax1.legend(loc='upper right', shadow=False, fontsize='x-large')
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)

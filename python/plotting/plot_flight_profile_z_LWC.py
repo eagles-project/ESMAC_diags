@@ -41,7 +41,7 @@ zlen=len(z)
 
 #%% find files for flight information
 
-lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'*.nc')
+lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
     print('ERROR: cannot find any file at '+E3SM_aircraft_path)
@@ -82,15 +82,6 @@ print('reading '+format(len(alldates))+' files to calculate the statistics: ')
 
 for date in alldates:
     print(date)
-    #%% read in models
-    
-    for mm in range(nmodels):
-        filename_m = E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[mm]+'_'+date+'.nc'
-        
-        (timem,heightm,lwc,timeunit,cldunit,cldname)=read_extractflight(filename_m,'LWC')
-            
-         # change E3SM unit from kg/m3 to g/m3 
-        lwcmall[mm].append(lwc*1000)
         
     #%% read in obs
     if campaign=='HISCALE' or campaign=='ACEENA':
@@ -118,6 +109,17 @@ for date in alldates:
         lwcobs[lwcobs<=0]=0.
         
     lwcobsall.append(lwcobs)
+    
+    #%% read in models
+    
+    for mm in range(nmodels):
+        filename_m = E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[mm]+'_'+date+'.nc'
+        
+        (timem,heightm,lwc,timeunit,cldunit,cldname)=read_extractflight(filename_m,'LWC')
+            
+         # change E3SM unit from kg/m3 to g/m3 
+        lwcmall[mm].append(lwc*1000)
+        
     heightall.append(heightm)
     
 #%% calculate percentiles for each height bin
@@ -172,7 +174,7 @@ else:
     figname = figpath_aircraft_statistics+'profile_height_LWC_'+campaign+'.png'
 print('plotting figures to '+figname)
 
-fig,ax = plt.subplots(figsize=(4,8))
+fig,ax = plt.subplots(figsize=(3,8))
 
 ax.plot(lwcmean_o,z,color='k',linewidth=1,linestyle='-',label='Obs')
 ax.fill_betweenx(z,lwcmean_o-std_lwc_o,lwcmean_o+std_lwc_o,facecolor='k',alpha=0.2)
@@ -180,17 +182,19 @@ ax.fill_betweenx(z,lwcmean_o-std_lwc_o,lwcmean_o+std_lwc_o,facecolor='k',alpha=0
 for mm in range(nmodels):
     ax.plot(lwcmean_m[mm],z,color=color_model[mm],linewidth=1,label=Model_List[mm])
 
-ax.tick_params(color='k',labelsize=12)
+ax.tick_params(color='k',labelsize=16)
 # ax.set_ylim(-1,zlen)
 # ax.set_yticks(range(zlen))
-# ax.set_yticks(z[0:-1:2])
-ax.set_ylabel('Height (m MSL)',fontsize=12)
+if campaign=='HISCALE':
+    ax.set_ylim(0,4500)
+ax.set_yticks(z)
+ax.set_ylabel('Height (m MSL)',fontsize=16)
 ax.legend(loc='upper right', fontsize='large')
-ax.set_xlabel('LWC (g/m3)',fontsize=12)
+ax.set_xlabel('LWC (g/m3)',fontsize=16)
 if campaign=='HISCALE' or campaign=='ACEENA':
-    ax.set_title(IOP,fontsize=15)
+    ax.set_title(IOP,fontsize=18)
 else:
-    ax.set_title(campaign,fontsize=15)
+    ax.set_title(campaign,fontsize=18)
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             

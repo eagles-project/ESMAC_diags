@@ -47,7 +47,7 @@ if campaign=='ACEENA':
         (time,timeunit,data,dataunit,SS0)=read_ccn(filename)
         timestr=timeunit.split(' ')
         date=timestr[2]
-        cday=yyyymmdd2cday(date)
+        cday=yyyymmdd2cday(date,'noleap')
         t_ccn=np.hstack((t_ccn, cday+time/86400))
         ccn=np.hstack((ccn, data))
         SS=np.hstack((SS, SS0))

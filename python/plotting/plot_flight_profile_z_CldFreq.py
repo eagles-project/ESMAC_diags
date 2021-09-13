@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import glob
 from read_aircraft import  read_RF_NCAR
+from specific_data_treatment import lwc2cflag
 from read_netcdf import read_extractflight,read_merged_size
 
 #%% settings
@@ -42,7 +43,7 @@ zlen=len(z)
 
 #%% find files for flight information
 
-lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'*.nc')
+lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
     print('ERROR: cannot find any file at '+E3SM_aircraft_path)
@@ -112,8 +113,8 @@ for date in alldates:
         filename = glob.glob(RFpath+'RF*'+date+'*.PNI.nc')
         if len(filename)==1 or len(filename)==2:  # SOCRATES has two flights in 20180217, choose the later one
             (time,lwc,timeunit,lwcunit,lwclongname,cellsize,cellunit)=read_RF_NCAR(filename[-1],'PLWCC')
-        cflag = 0*np.array(time)
-        cflag[lwc>0.02]=1
+        # calculate cloud flag based on LWC
+        cflag=lwc2cflag(lwc,lwcunit)
         
     heightall.append(heightm)
     cflagall.append(cflag)

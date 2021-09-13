@@ -57,7 +57,7 @@ if campaign=='ACEENA':
         (time,data,timeunit,cpcunit)=read_cpc(filename)
         timestr=timeunit.split(' ')
         date=timestr[2]
-        cday=yyyymmdd2cday(date)
+        cday=yyyymmdd2cday(date,'noleap')
         # average in time for quicker and clearer plot
         time2=np.arange(1800,86400,3600)
         data2 = avg_time(np.array(time),np.array(data),time2)
@@ -85,7 +85,7 @@ elif campaign=='HISCALE':
             (time,data,timeunit,cpcunit)=read_cpc(filename)
             timestr=timeunit.split(' ')
             date=timestr[2]
-            cday=yyyymmdd2cday(date)
+            cday=yyyymmdd2cday(date,'noleap')
             t_cpc=np.hstack((t_cpc, cday+time/86400))
             cpc=np.hstack((cpc, data))
         cpc[cpc<0]=np.nan
@@ -106,7 +106,7 @@ elif campaign=='HISCALE':
             (time,data,timeunit,cpcuunit)=read_cpc(filename)
             timestr=timeunit.split(' ')
             date=timestr[2]
-            cday=yyyymmdd2cday(date)
+            cday=yyyymmdd2cday(date,'noleap')
             t_cpcu=np.hstack((t_cpcu, cday+time/86400))
             cpcu=np.hstack((cpcu, data))
         cpcu[cpcu<0]=np.nan

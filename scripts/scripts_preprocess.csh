@@ -10,25 +10,26 @@
 # #    campaign name also needs to be set here               #
 # ############################################################
 #
-# # load modules. Tested version is Python 3.6.7
+# # load modules. Tested version is Python 3.6.7 (Constance) and Python 3.8.5 (NERSC)
  module load python
  
 # # this should be consistent with settings.py
 # set field campaign name. More settings on specific field campaigns are in next section
-set campaign = 'HISCALE'   # HiScale, ACEENA
+set campaign = 'HISCALE'   # HISCALE, ACEENA, CSET, SOCRATES, MAGIC, MARCUS
  
 # set model names. up to three
-# set Model_List = ['CTRL','Nuc','NucSoaCond']
-set Model_List = "['E3SMv1']"
+# set Model_List = "['CTRL','Nuc','NucSoaCond']"
+set Model_List = "['EAMv1_CONUS_RRM']"
 
 # set plotting line colors for each model. corresponding to the Model_List
-# set color_model = ['b','r','g']
+# set color_model = "['b','r','g']"
 set color_model = "['b','g']"
 
 # set IOP (or flight date) that the statistics, pdf and percentiles are averaged for.
 # options: IOP1, IOP2, ALL, 20160830b
-#set IOP = 'IOP2'
+# set IOP = 'IOP1'
 foreach IOP ('IOP1' 'IOP2')
+
 
 # ############################################################
 # # Step 2: update settings.py with the above settings       #
@@ -63,23 +64,38 @@ cd ../python/preprocessing/
 #endif
     
 # for models
+if (($campaign == 'HISCALE') || ($campaign == 'ACEENA')) then
+echo '**********************************************'
 echo '**** extract aerosol size distribution at Surface ****'
 python prep_E3SM_sfc_bins.py
+echo '**********************************************'
 echo '**** extract all other variables at Surface ****'
 python prep_E3SM_sfc_allvars.py
+echo '**********************************************'
 echo '**** extract vertical profiles at ARM site ****'
 python prep_E3SM_profile_allvars.py
+endif
+
+if (($campaign == 'HISCALE') || ($campaign == 'ACEENA') || ($campaign == 'CSET') ||($campaign == 'SOCRATES')) then
+echo '**********************************************'
 echo '**** extract aerosol size distribution for aircraft tracks ****'
 python prep_E3SM_flighttrack_bins.py
+echo '**********************************************'
 echo '**** extract all other variables for aircraft tracks ****'
 python prep_E3SM_flighttrack_allvars.py
+endif
         
-#echo '**** extract all other variables along ship tracks ****'
-#python prep_E3SM_shiptrack_allvars.py
-#echo '**** extract aerosol size distribution along ship tracks ****'
-#python prep_E3SM_shiptrack_bins.py
-#echo '**** extract vertical profiles along ship tracks ****'
-#python prep_E3SM_shiptrack_profiles.py
+if (($campaign == 'MAGIC') ||($campaign == 'MARCUS')) then
+echo '**********************************************'
+echo '**** extract all other variables along ship tracks ****'
+python prep_E3SM_shiptrack_allvars.py
+echo '**********************************************'
+echo '**** extract aerosol size distribution along ship tracks ****'
+python prep_E3SM_shiptrack_bins.py
+echo '**********************************************'
+echo '**** extract vertical profiles along ship tracks ****'
+python prep_E3SM_shiptrack_profiles.py
+endif
 
 # ############################################################
 # # Step 4: end of preprocessing                             #

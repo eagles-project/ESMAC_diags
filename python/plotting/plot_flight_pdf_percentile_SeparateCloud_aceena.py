@@ -157,7 +157,7 @@ for filename in lst:
     datam2 = []
     for mm in range(nmodels):
         filename_m = E3SM_aircraft_path+'Aircraft_CNsize_'+campaign+'_'+Model_List[mm]+'_'+date+'.nc'
-        (timem,heightm,datam,timeunitm,datamunit,datamlongname)=read_extractflight(filename_m,'NCN')
+        (timem,heightm,datam,timeunitm,datamunit,datamlongname)=read_extractflight(filename_m,'NCNall')
         datam2.append(datam*1e-6)    # #/m3 to #/cm3
     
     timem = (timem - int(timem[0]))*24
@@ -288,7 +288,7 @@ for bb in range(len(size)):
 
 
 #%% plot entire pdf below and above PBL
-figname = figpath_aircraft_statistics+'SeparateCloud_pdf_'+IOP+'.png'
+figname = figpath_aircraft_statistics+'SeparateCloud_pdf_AerosolSize_ACEENA_'+IOP+'.png'
 print('plotting PDF figures to '+figname)
 
 fig,(ax1,ax2,ax3) = plt.subplots(3,1,figsize=(6,8))
@@ -335,7 +335,7 @@ fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 #%% plot percentile on sizes
 
-figname = figpath_aircraft_statistics+'SeparateCloud_percentile_'+IOP+'.png'
+figname = figpath_aircraft_statistics+'SeparateCloud_percentile_AerosolSize_ACEENA_'+IOP+'.png'
 print('plotting percentile figures to '+figname)
 
 # set position shift so that models and obs are not overlapped
