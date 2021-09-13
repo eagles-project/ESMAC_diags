@@ -95,7 +95,7 @@ def read_cpc(filename):
     # long_name = d_id.long_name
     try:
         flag = f.variables['qc_concentration'][:]
-        data[flag!=0]=np.nan
+        data[np.logical_and(flag>0, flag<20)]=np.nan
     except:
         data[data<0]=np.nan
     f.close()
@@ -156,7 +156,10 @@ def read_mwr(filename,varname):
     data = d_id[:]
     dataunit = d_id.units
     # long_name = d_id.long_name
-    flag = f.variables['qc_'+varname][:]
+    try:
+        flag = f.variables['qc_'+varname][:]
+    except:
+        flag = data*0
     f.close()
     return(time,data,timeunit,dataunit,flag)
 

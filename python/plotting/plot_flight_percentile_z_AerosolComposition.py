@@ -135,6 +135,9 @@ for filename in lst:
         print('Problem finding IWG data, check: ')
         print(filename_i)
         error
+    # remove cloud flag
+    T_iwg[cflag!=0]=np.nan
+    P_iwg[cflag!=0]=np.nan
     
     #%% read aerosol composition in AMS
     
@@ -256,7 +259,7 @@ p_shift = np.arange(nmodels+1)
 p_shift = (p_shift - p_shift.mean())*0.2
 
     
-figname = figpath_aircraft_statistics+'percentile_height_SO4_ORG_'+campaign+'_'+IOP+'.png'
+figname = figpath_aircraft_statistics+'percentile_height_AerosolComposition_'+campaign+'_'+IOP+'.png'
 print('plotting figures to '+figname)
 
 fig,(ax1,ax2) = plt.subplots(1,2,figsize=(8,8))   # figsize in inches
@@ -274,7 +277,7 @@ for mm in range(nmodels):
             boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
             medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
             vert=False, patch_artist=True)    # need patch_artist to fill color in box
-ax1.tick_params(color='k',labelsize=12)
+ax1.tick_params(color='k',labelsize=16)
 # ax1.set_xscale('log')
 ax1.set_ylim(-1,zlen)
 ax1.set_yticks(range(zlen))
@@ -285,7 +288,7 @@ ax1.set_yticklabels(z)
 ax1.plot([],c='k',label='Obs')
 for mm in range(nmodels):
     ax1.plot([],c=color_model[mm],label=Model_List[mm])
-ax1.legend(loc='upper right', fontsize='large')
+ax1.legend(loc='upper right', fontsize='x-large')
     
 ax2.boxplot(org_o_z,whis=(5,95),showmeans=False,showfliers=False,
             positions=np.array(range(zlen))+p_shift[-1],widths=0.15,
@@ -299,7 +302,7 @@ for mm in range(nmodels):
             boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
             medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
             vert=False, patch_artist=True)    # need patch_artist to fill color in box
-ax2.tick_params(color='k',labelsize=12)
+ax2.tick_params(color='k',labelsize=16)
 # ax2.set_xscale('log')
 ax2.set_ylim(-1,zlen)
 ax2.set_yticks(range(zlen))
@@ -310,7 +313,7 @@ ax2.set_yticklabels([])
 ax2.plot([],c='k',label='Obs')
 for mm in range(nmodels):
     ax2.plot([],c=color_model[mm],label=Model_List[mm])
-ax2.legend(loc='upper right', fontsize='large')
+ax2.legend(loc='upper right', fontsize='x-large')
     
 # set xlimit consistent in subplots
 # xlim1 = ax1.get_xlim()
@@ -318,11 +321,11 @@ ax2.legend(loc='upper right', fontsize='large')
 # ax1.set_xlim([min(xlim1[0],xlim2[0]), max(xlim1[1],xlim2[1])])
 # ax2.set_xlim([min(xlim1[0],xlim2[0]), max(xlim1[1],xlim2[1])])
 
-ax1.set_ylabel('Height (m MSL)',fontsize=14)
-fig.text(0.46,0.06, '$\mu$g/m$^3$', fontsize=14)
-ax1.set_title('Sulfate',fontsize=14)
-ax2.set_title('Organic',fontsize=14)
-fig.text(0.48,0.92, IOP, fontsize=16)
+ax1.set_ylabel('Height (m MSL)',fontsize=16)
+fig.text(0.46,0.06, '$\mu$g/m$^3$', fontsize=16)
+ax1.set_title('Sulfate',fontsize=16)
+ax2.set_title('Organic',fontsize=16)
+fig.text(0.48,0.92, IOP, fontsize=18)
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 # plt.close()

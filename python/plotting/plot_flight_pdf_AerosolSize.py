@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import glob
 from read_aircraft import read_RF_NCAR
+from specific_data_treatment import lwc2cflag
 # from time_format_change import yyyymmdd2cday, hhmmss2sec
 from read_netcdf import read_merged_size,read_extractflight
 
@@ -47,7 +48,7 @@ if not os.path.exists(figpath_aircraft_statistics):
     
 #%% find files for flight information
 
-lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'*.nc')
+lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
     print('ERROR: cannot find any file at '+E3SM_aircraft_path)
@@ -77,6 +78,7 @@ alldates = [x.split('_')[-1].split('.')[0] for x in lst]
 print('reading '+format(len(alldates))+' files to calculate mean aerosol pdf: ')
 
 nmodels=len(Model_List)
+pdfall_m = [np.empty((3000,0)) for mm in range(nmodels)]
 size_m = np.zeros(3000)
 pdf_model = [size_m for mm in range(nmodels)]
 if 'pdf_obs' in locals():
@@ -101,11 +103,21 @@ for date in alldates:
         (timem,heightm,datam,timeunitm,datamunit,datamlongname)=read_extractflight(filename_m,'NCNall')
         datam=datam*1e-6    # #/m3 to #/cm3
         
+        # average in time for quicker plot
+        time2=np.arange(300,86400,600)
+        data2 = avg_time(timem,datam.T,time2)
+        datam=data2.T
+        timem=time2
+        
+        for tt in range(len(timem)):
+            datam[:,tt]=datam[:,tt]/dlnDp_m
+            
+        pdfall_m[mm] = np.column_stack((pdfall_m[mm],datam))
         for tt in range(len(timem)):
             if ~np.isnan(datam[0,tt]):
-                pdf_model[mm] = pdf_model[mm]+datam[:,tt]/dlnDp_m
+                pdf_model[mm] = pdf_model[mm]+datam[:,tt]
                 n_m[mm]=n_m[mm]+1
-                
+        
     #%% read observation        
     if campaign=='HISCALE' or campaign=='ACEENA':
         if date[-1]=='a':
@@ -126,21 +138,37 @@ for date in alldates:
         (time,size,merge,timeunit,dataunit,long_name)=read_merged_size(filename,'size_distribution_merged')
         time=np.ma.compressed(time)
         size=size*1000.
-        merge=np.array(merge.T)
-        time=time/3600.
+        merge[cflag==1,:]=np.nan
+        
+        
+        
+        # average in time for quicker plot
+        time2=np.arange(300,86400,600)
+        data2 = avg_time(time,merge,time2)
+        merge = data2.T
+        time=time2/3600.
+        
 
     elif campaign=='CSET' or campaign=='SOCRATES':
         filename = glob.glob(RFpath+'RF*'+date+'*.PNI.nc')
         # cloud flag
         (time,lwc,timeunit,lwcunit,lwclongname,size,cellunit)=read_RF_NCAR(filename[-1],'PLWCC')
-        cflag = 0*np.array(time)
-        cflag[lwc>0.02]=1
         if campaign=='CSET':
             (time,uhsas,timeunit,dataunit,long_name,size,cellunit)=read_RF_NCAR(filename[-1],'CUHSAS_RWOOU')
         elif campaign=='SOCRATES':
             # there are two variables: CUHSAS_CVIU and CUHSAS_LWII
             (time,uhsas,timeunit,dataunit,long_name,size,cellunit)=read_RF_NCAR(filename[-1],'CUHSAS_LWII')
-        merge = uhsas[:,0,:].T
+        # calculate cloud flag based on LWC
+        cflag=lwc2cflag(lwc,lwcunit)
+        uhsas[cflag==1,:,:]=np.nan
+        
+        # average in time for quicker plot
+        time2=np.arange(300,86400,600)
+        data2 = avg_time(time,uhsas[:,0,:],time2)
+        merge = data2.T
+        time=time2/3600.
+        
+        
         size=size*1000.
         sizeh = size
         sizel = np.hstack((2*size[0]-size[1],  size[0:-1]))
@@ -151,12 +179,17 @@ for date in alldates:
         merge[bb,:]=merge[bb,:]/dlnDp
     
     merge[merge<0]=np.nan
-    merge[:,cflag==1]=np.nan
+    
+    # exclude 30min after takeoff and before landing
+    idx=np.logical_or(time2<(time2[0]+1800), time2>(time2[-1]-1800))
+    merge[:,idx]=np.nan
     
     if ('pdf_obs' in locals()) == False:
         pdf_obs = np.zeros(len(size)) 
+        pdfall_o = np.empty((len(size),0))
     idx_valid = ~np.isnan(np.mean(merge,0))
     pdf_obs = pdf_obs + np.sum(merge[:,idx_valid],1)
+    pdfall_o = np.hstack((pdfall_o,np.array(merge[:,idx_valid])))
     n_o = n_o + np.sum(idx_valid)
     
 
@@ -166,6 +199,16 @@ pdf_obs[pdf_obs<1e-3]=np.nan
 pdf_obs=pdf_obs/n_o
 for mm in range(nmodels):
     pdf_model[mm]=pdf_model[mm]/n_m[mm]
+
+#%%
+pdfall_o[pdfall_o<0]=np.nan
+pct1_o = [np.nanpercentile(pdfall_o[i,:],10) for i in range(len(size))]
+pct2_o = [np.nanpercentile(pdfall_o[i,:],90) for i in range(len(size))]
+pct1_m = [[] for mm in range(nmodels)]
+pct2_m = [[] for mm in range(nmodels)]
+for mm in range(nmodels):
+    pct1_m[mm] = [np.nanpercentile(pdfall_m[mm][i,:],10) for i in range(3000)]
+    pct2_m[mm] = [np.nanpercentile(pdfall_m[mm][i,:],90) for i in range(3000)]
 
 #%% make plot
 
@@ -177,22 +220,30 @@ else:
 print('plotting figures to '+figname)
 
 #fig = plt.figure()
-fig,ax = plt.subplots(figsize=(6,3))   # figsize in inches
+fig,ax = plt.subplots(figsize=(4,2.5))   # figsize in inches
 
 ax.plot(size,pdf_obs,color='k',label='Obs')
 for mm in range(nmodels):
     ax.plot(np.arange(1,3001),pdf_model[mm],color=color_model[mm],linewidth=1, label=Model_List[mm])
 
+ax.fill_between(size,pct1_o,pct2_o, alpha=0.5, facecolor='gray')
+for mm in range(nmodels):
+    ax.fill_between(np.arange(1,3001),pct1_m[mm],pct2_m[mm], alpha=0.2, facecolor=color_model[mm])
+
 ax.legend(loc='upper right', shadow=False, fontsize='medium')
 ax.tick_params(color='k',labelsize=12)
 ax.set_xscale('log')
 ax.set_yscale('log')
-ax.set_ylim(0.01,100000)
-ax.set_xlabel('Diameter (nm)',fontsize=12)
+ax.set_ylim(0.01,1e4)
+ax.set_xlim(0.67,4500)
+ax.set_xlabel('Diameter (nm)',fontsize=13)
+ax.set_ylabel('#/dlnDp (cm$^{-3}$)',fontsize=13)
+
 if campaign=='HISCALE' or campaign=='ACEENA':
-    ax.set_title('Aerosol Size Distribution (#/dlnDp, cm$^{-3}$) '+IOP,fontsize=13)
+    ax.set_title(campaign+' '+IOP,fontsize=14)
 else:
-    ax.set_title('Aerosol Size Distribution (#/dlnDp, cm$^{-3}$) '+campaign,fontsize=13)
+    ax.set_title(campaign,fontsize=14)
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# plt.close()
+plt.close()
+

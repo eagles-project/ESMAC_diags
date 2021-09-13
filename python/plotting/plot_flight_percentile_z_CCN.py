@@ -13,7 +13,7 @@ import numpy as np
 import glob
 from read_aircraft import read_ccn_hiscale, read_ccn_socrates
 from read_ARMdata import read_ccn
-from read_netcdf import read_merged_size,read_extractflight
+from read_netcdf import read_extractflight
 
 #%% settings
 
@@ -44,7 +44,7 @@ zlen=len(z)
 
 #%% find files for flight information
 
-lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'*.nc')
+lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
     print('ERROR: cannot find any file at '+E3SM_aircraft_path)
@@ -88,14 +88,19 @@ for mm in range(nmodels):
 print('reading '+format(len(alldates))+' files to calculate the statistics: ')
 
 for date in alldates:
+    print(date)
     
     #%% read in Models
     
+    ccn3=[]
+    ccn5=[]
     for mm in range(nmodels):
         filename_m = E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[mm]+'_'+date+'.nc'
     
-        (timem,heightm,ccn3,timeunitm,ccn3_unit,ccn3_longname)=read_extractflight(filename_m,'CCN3')
-        (timem,heightm,ccn5,timeunitm,ccn5_unit,ccn5_longname)=read_extractflight(filename_m,'CCN5')
+        (timem,heightm,ccn3_tmp,timeunitm,ccn3_unit,ccn3_longname)=read_extractflight(filename_m,'CCN3')
+        (timem,heightm,ccn5_tmp,timeunitm,ccn5_unit,ccn5_longname)=read_extractflight(filename_m,'CCN5')
+        ccn3.append(ccn3_tmp)
+        ccn5.append(ccn5_tmp)
         
         
     # get supersaturation
@@ -137,6 +142,11 @@ for date in alldates:
             error
         timea=time_ccn
         timeb=time_ccn
+        # cloud flag
+        filename = merged_size_path+'merged_bin_fims_pcasp_'+campaign+'_'+date+'.nc'
+        (time,size,cflag,timeunit,cunit,long_name)=read_merged_size(filename,'cld_flag')
+        ccna[cflag!=0]=np.nan
+        ccnb[cflag!=0]=np.nan
         
     elif campaign=='ACEENA':
         filename_ccna=glob.glob(ccnpath+'enaaafccn2colaF1.b1.'+date[0:8]+'*.nc')
@@ -168,6 +178,29 @@ for date in alldates:
             print('find too many files, check: ')
             print(filename_ccnb)
             error
+        # cloud flag
+        filename = merged_size_path+'merged_bin_fims_pcasp_opc_'+campaign+'_'+date+'.nc'
+        (time,size,cflag,timeunit,cunit,long_name)=read_merged_size(filename,'cld_flag')
+        if date=='20170707a':
+            time=np.delete(time,5247)
+            cflag=np.delete(cflag,5247)
+        elif date=='20180201a':
+            time=np.delete(time,3635)
+            cflag=np.delete(cflag,3635)
+        if time[0]<timea[0]:
+            cflag = cflag[np.where(time==timea[0])[0][0]:]
+            time = time[np.where(time==timea[0])[0][0]:]
+        elif time[0]>timea[0]:
+            cflag = np.insert(cflag,np.full(int(time[0]-timea[0]),0), -9999)
+            time = np.insert(time,np.full(int(time[0]-timea[0]),0), -9999)
+        if time[-1]<timea[-1]:
+            cflag = np.append(cflag,np.full(int(timea[-1]-time[-1]), -9999))
+            time = np.append(time,np.full(int(timea[-1]-time[-1]), -9999))
+        elif time[-1]>timea[-1]:
+            cflag = cflag[0:np.where(time==timea[-1])[0][0]+1]
+            time = time[0:np.where(time==timea[-1])[0][0]+1]
+        ccna[cflag!=0]=np.nan
+        ccnb[cflag!=0]=np.nan
          
     # CSET does not have observed CCN
     elif campaign=='CSET':
@@ -227,10 +260,9 @@ for date in alldates:
     timeb=timeb[idx]
     
     # interpolate model results into observational time
-    timem2 = (timem-int(timem[0]))*86400
     for mm in range(nmodels):
-        ccn3_all[mm].append(np.interp(timea,timem2,ccn3)) 
-        ccn5_all[mm].append(np.interp(timeb,timem2,ccn5)) 
+        ccn3_all[mm].append(np.interp(timea,timem,ccn3[mm])) 
+        ccn5_all[mm].append(np.interp(timeb,timem,ccn5[mm])) 
          
 #%% calculate percentiles for each height bin
 
@@ -291,8 +323,8 @@ for mm in range(nmodels):
             boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
             medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
             vert=False, patch_artist=True)    # need patch_artist to fill color in box
-ax1.tick_params(color='k',labelsize=12)
-ax1.set_xscale('log')
+ax1.tick_params(color='k',labelsize=16)
+#ax1.set_xscale('log')
 ax1.set_ylim(-1,zlen)
 ax1.set_yticks(range(zlen))
 ax1.set_yticklabels(z)
@@ -302,7 +334,7 @@ ax1.set_yticklabels(z)
 ax1.plot([],c='k',label='Obs ('+format(np.nanmean(SSa_all),'.2f')+'%)')
 for mm in range(nmodels):
     ax1.plot([],c=color_model[mm],label=Model_List[mm])
-ax1.legend(loc='upper right', fontsize='large')
+ax1.legend(loc='upper right', fontsize='x-large')
     
 ax2.boxplot(ccnb_z,whis=(5,95),showmeans=False,showfliers=False,
             positions=np.array(range(zlen))+p_shift[-1],widths=0.15,
@@ -316,8 +348,8 @@ for mm in range(nmodels):
             boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
             medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
             vert=False, patch_artist=True)    # need patch_artist to fill color in box
-ax2.tick_params(color='k',labelsize=12)
-ax2.set_xscale('log')
+ax2.tick_params(color='k',labelsize=16)
+#ax2.set_xscale('log')
 ax2.set_ylim(-1,zlen)
 ax2.set_yticks(range(zlen))
 ax2.set_yticklabels([])
@@ -327,21 +359,21 @@ ax2.set_yticklabels([])
 ax2.plot([],c='k',label='Obs ('+format(np.nanmean(SSb_all),'.2f')+'%)')
 for mm in range(nmodels):
     ax2.plot([],c=color_model[mm],label=Model_List[mm])
-ax2.legend(loc='upper right', fontsize='large')
+ax2.legend(loc='upper right', fontsize='x-large')
     
 # set xlimit consistent in subplots
-xlim1 = ax1.get_xlim()
-xlim2 = ax2.get_xlim()
-ax1.set_xlim([min(xlim1[0],xlim2[0]), max(xlim1[1],xlim2[1])])
-ax2.set_xlim([min(xlim1[0],xlim2[0]), max(xlim1[1],xlim2[1])])
+# xlim1 = ax1.get_xlim()
+# xlim2 = ax2.get_xlim()
+# ax1.set_xlim([min(xlim1[0],xlim2[0]), max(xlim1[1],xlim2[1])])
+# ax2.set_xlim([min(xlim1[0],xlim2[0]), max(xlim1[1],xlim2[1])])
 
-ax1.set_ylabel('Height (m MSL)',fontsize=14)
-fig.text(0.4,0.06, 'CCN number (cm$^{-3}$)', fontsize=14)
-ax1.set_title('SS = '+SS3,fontsize=14)
-ax2.set_title('SS = '+SS5,fontsize=14)
+ax1.set_ylabel('Height (m MSL)',fontsize=16)
+fig.text(0.4,0.06, 'CCN number (cm$^{-3}$)', fontsize=16)
+ax1.set_title('SS = '+SS3,fontsize=16)
+ax2.set_title('SS = '+SS5,fontsize=16)
 if campaign=='HISCALE' or campaign=='ACEENA':
-    fig.text(0.48,0.92, IOP, fontsize=16)
+    fig.text(0.48,0.92, IOP, fontsize=18)
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-plt.close()
+# plt.close()
     

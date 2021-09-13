@@ -58,7 +58,7 @@ if campaign=='ACEENA':
         (time,data,timeunit,cpcunit)=read_cpc(filename)
         timestr=timeunit.split(' ')
         date=timestr[2]
-        cday=yyyymmdd2cday(date)
+        cday=yyyymmdd2cday(date,'noleap')
         # average in time for better comparison with obs
         time2=np.arange(0,86400,3600)
         data2 = avg_time(np.array(time),np.array(data),time2)
@@ -86,7 +86,7 @@ elif campaign=='HISCALE':
             (time,data,timeunit,cpcunit)=read_cpc(filename)
             timestr=timeunit.split(' ')
             date=timestr[2]
-            cday=yyyymmdd2cday(date)
+            cday=yyyymmdd2cday(date,'noleap')
             # average in time for better comparison with obs
             time2=np.arange(0,86400,3600)
             data2 = avg_time(np.array(time),np.array(data),time2)
@@ -110,7 +110,7 @@ elif campaign=='HISCALE':
             (time,data,timeunit,cpcuunit)=read_cpc(filename)
             timestr=timeunit.split(' ')
             date=timestr[2]
-            cday=yyyymmdd2cday(date)
+            cday=yyyymmdd2cday(date,'noleap')
             # average in time for better comparison with obs
             time2=np.arange(0,86400,3600)
             data2 = avg_time(np.array(time),np.array(data),time2)

@@ -33,7 +33,7 @@ from settings import campaign, Model_List, color_model, IOP, start_date, end_dat
             E3SM_sfc_path, figpath_sfc_statistics
             
 if campaign=='ACEENA':
-    from settings import uhsaspath
+    from settings import uhsassfcpath
 elif campaign=='HISCALE':
     if IOP=='IOP1':
         from settings import smps_bnl_path, nanosmps_bnl_path
@@ -55,19 +55,19 @@ if not os.path.exists(figpath_sfc_statistics):
 #%% read in obs data
 if campaign=='ACEENA':
     if IOP=='IOP1':
-        lst = glob.glob(uhsaspath+'enaaosuhsasC1.a1.2017062*')+glob.glob(uhsaspath+'enaaosuhsasC1.a1.201707*')
+        lst = glob.glob(uhsassfcpath+'enaaosuhsasC1.a1.2017062*')+glob.glob(uhsassfcpath+'enaaosuhsasC1.a1.201707*')
     elif IOP=='IOP2':
-        lst = glob.glob(uhsaspath+'enaaosuhsasC1.a1.201801*')+glob.glob(uhsaspath+'enaaosuhsasC1.a1.201802*')
+        lst = glob.glob(uhsassfcpath+'enaaosuhsasC1.a1.201801*')+glob.glob(uhsassfcpath+'enaaosuhsasC1.a1.201802*')
     lst.sort()
     t_uhsas=np.empty(0)
     uhsas=np.empty((0,99))
     for filename in lst:
-        (time,dmin,dmax,data,timeunit,dataunit,long_name) = read_uhsas(filename,'concentration')
+        (time,dmin,dmax,data,timeunit,dataunit,long_name) = read_uhsas(filename)
         timestr=timeunit.split(' ')
         date=timestr[2]
-        cday=yyyymmdd2cday(date)
+        cday=yyyymmdd2cday(date,'noleap')
         # average in time for quicker plot
-        time2=np.arange(300,86400,600)
+        time2=np.arange(1800,86400,3600)
         data2 = avg_time(time,data,time2)
         t_uhsas=np.hstack((t_uhsas, cday+time2/86400))
         uhsas=np.vstack((uhsas, data2))
@@ -97,9 +97,12 @@ elif campaign=='HISCALE':
             data[flag!=0,:]=np.nan
             timestr=timeunit.split(' ')
             date=timestr[2]
-            cday=yyyymmdd2cday(date)
-            t_smps=np.hstack((t_smps, cday+time/86400))
-            smps=np.vstack((smps, data))
+            cday=yyyymmdd2cday(date,'noleap')
+            # average in time for quicker plot
+            time2=np.arange(1800,86400,3600)
+            data2 = avg_time(time,data,time2)
+            t_smps=np.hstack((t_smps, cday+time2/86400))
+            smps=np.vstack((smps, data2))
         smps=smps.T
         # combine with nanoSMPS
         lst2 = glob.glob(nanosmps_bnl_path+'*.nc')
@@ -113,9 +116,12 @@ elif campaign=='HISCALE':
             datan[flagn!=0,:]=np.nan
             timestr=timenunit.split(' ')
             date=timestr[2]
-            cday=yyyymmdd2cday(date)
-            t_nano=np.hstack((t_nano, cday+timen/86400))
-            nanosmps=np.vstack((nanosmps, datan))
+            cday=yyyymmdd2cday(date,'noleap')
+            # average in time for quicker plot
+            time2=np.arange(1800,86400,3600)
+            data2 = avg_time(timen,datan,time2)
+            t_nano=np.hstack((t_nano, cday+time2/86400))
+            nanosmps=np.vstack((nanosmps, data2))
         nanosmps=nanosmps.T
         for tt in range(smps.shape[1]):
             if any(t_nano==t_smps[tt]):
@@ -127,9 +133,13 @@ elif campaign=='HISCALE':
         time=data[0,:]
         smps=data[1:-1,:]
         flag=data[-1,:]
-        cday=yyyymmdd2cday('2016-08-27')
-        t_smps=cday+time/86400
         smps[:,flag!=0]=np.nan
+        cday=yyyymmdd2cday('2016-08-27')
+        # average in time for quicker plot
+        time2=np.arange(time[0],time[-1]+1800,3600)
+        data2 = avg_time(time,smps.T,time2)
+        t_smps=cday+time2/86400
+        smps=data2.T
         
     time = np.array(t_smps)
     size = np.array(size)
@@ -170,6 +180,21 @@ pdf_model=[None]*nmodels
 for mm in range(nmodels):
     pdf_model[mm]=np.nanmean(model[mm],1)
 
+#%%
+pct1_o = [np.nanpercentile(obs[i,:],10) for i in range(len(size))]
+pct2_o = [np.nanpercentile(obs[i,:],90) for i in range(len(size))]
+pct1_m = [[] for mm in range(nmodels)]
+pct2_m = [[] for mm in range(nmodels)]
+for mm in range(nmodels):
+    pct1_m[mm] = [np.nanpercentile(model[mm][i,:],10) for i in range(3000)]
+    pct2_m[mm] = [np.nanpercentile(model[mm][i,:],90) for i in range(3000)]
+
+# import scipy.stats as stats
+# sem_o = np.ma.filled(stats.sem(obs,1,nan_policy='omit'),np.nan)
+# sem_m = [[] for mm in range(nmodels)]
+# for mm in range(nmodels):
+#     sem_m[mm] = np.ma.filled(stats.sem(model[mm],1,nan_policy='omit'),np.nan)
+
 #%% make plot
 # not plotting data if the mean value is 0
 pdf_obs[pdf_obs==0] = np.nan
@@ -178,20 +203,25 @@ figname = figpath_sfc_statistics+'pdf_AerosolSize_'+campaign+'_'+IOP+'.png'
 
 print('plotting figures to '+figname)
 
-#fig = plt.figure()
-fig,ax = plt.subplots(figsize=(6,3))   # figsize in inches
+fig,ax = plt.subplots(figsize=(4,2.5))   # figsize in inches
 
 ax.plot(size,pdf_obs,color='k',label='Obs')
 for mm in range(nmodels):
     ax.plot(np.arange(1,3001),pdf_model[mm],color=color_model[mm],linewidth=1, label=Model_List[mm])
 
+ax.fill_between(size,pct1_o,pct2_o, alpha=0.5, facecolor='gray')
+for mm in range(nmodels):
+    ax.fill_between(np.arange(1,3001),pct1_m[mm],pct2_m[mm], alpha=0.2, facecolor=color_model[mm])
+
 ax.legend(loc='upper right', shadow=False, fontsize='medium')
 ax.tick_params(color='k',labelsize=12)
 ax.set_xscale('log')
 ax.set_yscale('log')
-ax.set_ylim(0.01,100000)
-ax.set_xlabel('Diameter (nm)',fontsize=12)
-ax.set_title('Aerosol Size Distribution (#/dlnDp, cm$^{-3}$) '+IOP,fontsize=13)
+ax.set_ylim(0.01,1e4)
+ax.set_xlim(0.67,4500)
+ax.set_xlabel('Diameter (nm)',fontsize=13)
+ax.set_ylabel('#/dlnDp (cm$^{-3}$)',fontsize=13)
+ax.set_title(campaign+' '+IOP,fontsize=14)
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 # plt.close()

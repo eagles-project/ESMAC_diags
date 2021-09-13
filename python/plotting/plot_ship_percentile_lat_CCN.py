@@ -4,7 +4,7 @@ import sys
 sys.path.insert(1,'../subroutines/')
 
 import matplotlib
-# matplotlib.use('AGG') # plot without needing X-display setting
+matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
@@ -155,7 +155,7 @@ p_shift = np.arange(nmodels+1)
 p_shift = (p_shift - p_shift.mean())*0.2
 
     
-figname = figpath_ship_statistics+'percentile_lat_CcN_'+campaign+'.png'
+figname = figpath_ship_statistics+'percentile_lat_CCN_'+campaign+'.png'
 print('plotting figures to '+figname)
 
 fig,(ax1,ax2) = plt.subplots(2,1,figsize=(8,4))   # figsize in inches
@@ -173,10 +173,10 @@ for mm in range(nmodels):
             boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
             medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
             vert=True, patch_artist=True)    # need patch_artist to fill color in box
-ax1.tick_params(color='k',labelsize=12)
-ax1.set_yscale('log')
+ax1.tick_params(color='k',labelsize=15)
+#ax1.set_yscale('log')
 ax1.set_xlim(-1,latlen)
-ax1.set_xticks(np.arange(-0.5*dlat,latlen,2))
+ax1.set_xticks(np.arange(-0.5*dlat,latlen-1,2))
 ax1.set_xticklabels([])
 # plot temporal lines for label
 ax1.plot([],c='k',label='OBS')
@@ -195,10 +195,10 @@ for mm in range(nmodels):
             boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
             medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
             vert=True, patch_artist=True)    # need patch_artist to fill color in box
-ax2.tick_params(color='k',labelsize=12)
-ax2.set_yscale('log')
+ax2.tick_params(color='k',labelsize=15)
+#ax2.set_yscale('log')
 ax2.set_xlim(-1,latlen)
-ax2.set_xticks(np.arange(-0.5*dlat,latlen,2))
+ax2.set_xticks(np.arange(-0.5*dlat,latlen-1,2))
 ax2.set_xticklabels([int(np.floor(a)) for a in latbin[0::2]])
 # plot temporal lines for label
 ax2.plot([],c='k',label='OBS')
@@ -206,14 +206,14 @@ for mm in range(nmodels):
     ax2.plot([],c=color_model[mm],label=Model_List[mm])
     
 # ax1.legend(loc='upper right', fontsize='large')
-ax2.legend(loc='upper right', fontsize='large')
+ax2.legend(loc='upper right', fontsize='x-large')
 
 # supersaturation
 fig.text(0.08,0.98,'SS='+str(SS1)+'%')
 fig.text(0.08,0.47,'SS='+str(SS5)+'%')
     
-ax2.set_xlabel('Latitude',fontsize=14)
-ax1.set_title('CCN Number Concentration (cm$^{-3}$)',fontsize=15)
+ax2.set_xlabel('Latitude',fontsize=16)
+ax1.set_title('CCN Number Concentration (cm$^{-3}$)',fontsize=17)
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 

@@ -34,7 +34,7 @@ if not os.path.exists(figpath_aircraft_timeseries):
     os.makedirs(figpath_aircraft_timeseries)
     
 #%% find files for flight information
-lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'*.nc')
+lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
     print('ERROR: cannot find any file at '+E3SM_aircraft_path)
@@ -184,7 +184,7 @@ for date in alldates:
        
     #%% make plot
         
-    figname = figpath_aircraft_timeseries+'timeseries_AerosolComposition_'+campaign+'_'+date+'.png'
+    figname = figpath_aircraft_timeseries+'AerosolComposition_'+campaign+'_'+date+'.png'
     print('plotting figures to '+figname)
     
     fig,(ax1,ax2) = plt.subplots(2,1,figsize=(8,4))   # figsize in inches

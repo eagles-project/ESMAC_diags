@@ -43,7 +43,7 @@ zlen=len(z)
 
 #%% find files for flight information
 
-lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'*.nc')
+lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
     print('ERROR: cannot find any file at '+E3SM_aircraft_path)
@@ -88,6 +88,7 @@ for mm in range(nmodels):
 print('reading '+format(len(alldates))+' files to calculate the statistics: ')
 
 for date in alldates:
+    print(date)
     
     #%% read in Models
     for mm in range(nmodels):
@@ -133,6 +134,15 @@ for date in alldates:
             print('find too many files, check: ')
             print(filename_c)
             error
+        
+        # cloud flag
+        if campaign=='HISCALE':
+            filename = merged_size_path+'merged_bin_fims_pcasp_'+campaign+'_'+date+'.nc'
+        elif campaign=='ACEENA':
+            filename = merged_size_path+'merged_bin_fims_pcasp_opc_'+campaign+'_'+date+'.nc'
+        (time,size,cflag,timeunit,cunit,long_name)=read_merged_size(filename,'cld_flag')
+        cpc3[cflag!=0]=np.nan
+        cpc10[cflag!=0]=np.nan
         
         # some quality checks
         cpc3[cpc3<20]=np.nan
@@ -236,8 +246,8 @@ for mm in range(nmodels):
             boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
             medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
             vert=False, patch_artist=True)    # need patch_artist to fill color in box
-ax1.tick_params(color='k',labelsize=12)
-ax1.set_xscale('log')
+ax1.tick_params(color='k',labelsize=16)
+#ax1.set_xscale('log')
 ax1.set_ylim(-1,zlen)
 ax1.set_yticks(range(zlen))
 ax1.set_yticklabels(z)
@@ -247,7 +257,7 @@ ax1.set_yticklabels(z)
 ax1.plot([],c='k',label='CPC(>10nm)')
 for mm in range(nmodels):
     ax1.plot([],c=color_model[mm],label=Model_List[mm])
-ax1.legend(loc='upper right', fontsize='large')
+ax1.legend(loc='upper right', fontsize='x-large')
     
 if campaign=='HISCALE' or campaign=='ACEENA':
     ax2.boxplot(cpc3_o_z,whis=(5,95),showmeans=False,showfliers=False,
@@ -278,8 +288,7 @@ elif campaign=='CSET' or campaign=='SOCRATES':
                 vert=False, patch_artist=True)    # need patch_artist to fill color in box
     ax2.plot([],c='k',label='UHSAS(>100nm)')
     
-ax2.tick_params(color='k',labelsize=12)
-ax2.set_xscale('log')
+ax2.tick_params(color='k',labelsize=16)
 ax2.set_ylim(-1,zlen)
 ax2.set_yticks(range(zlen))
 ax2.set_yticklabels([])
@@ -288,18 +297,51 @@ ax2.set_yticklabels([])
 # plot temporal lines for label
 for mm in range(nmodels):
     ax2.plot([],c=color_model[mm],label=Model_List[mm])
-ax2.legend(loc='upper right', fontsize='large')
+ax2.legend(loc='upper right', fontsize='x-large')
     
 # set xlimit consistent in subplots
-xlim1 = ax1.get_xlim()
-xlim2 = ax2.get_xlim()
-ax1.set_xlim([min(xlim1[0],xlim2[0]), max(xlim1[1],xlim2[1])])
-ax2.set_xlim([min(xlim1[0],xlim2[0]), max(xlim1[1],xlim2[1])])
+# xlim1 = ax1.get_xlim()
+# xlim2 = ax2.get_xlim()
+# ax1.set_xlim([min(xlim1[0],xlim2[0]), max(xlim1[1],xlim2[1])])
+# ax2.set_xlim([min(xlim1[0],xlim2[0]), max(xlim1[1],xlim2[1])])
+if campaign=='HISCALE':
+    ax1.set_xlim(-200,15000)
+    ax2.set_xlim(-200,15000)
+elif campaign=='ACEENA':
+    ax1.set_xlim(0,3000)
+    ax2.set_xlim(0,3000)
+elif campaign=='CSET':
+    ax1.set_xscale('log')
+    ax2.set_xscale('log')
+    ax1.set_xlim(1,1e4)
+    ax2.set_xlim(1,1e4)
+elif campaign=='SOCRATES':
+    ax1.set_xscale('log')
+    ax2.set_xscale('log')
+    ax1.set_xlim(1,1e4)
+    ax2.set_xlim(1,1e4)
 
-ax1.set_ylabel('Height (m MSL)',fontsize=14)
-fig.text(0.4,0.06, 'Aerosol number (cm$^{-3}$)', fontsize=14)
+ax1.set_ylabel('Height (m MSL)',fontsize=16)
+fig.text(0.4,0.06, 'Aerosol number (cm$^{-3}$)', fontsize=16)
 if campaign=='HISCALE' or campaign=='ACEENA':
-    fig.text(0.48,0.9, IOP, fontsize=16)
+    fig.text(0.48,0.9, IOP, fontsize=18)
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 # plt.close()
+
+#%% plot sample numbers
+num_sample = [len(a) for a in cpc10_o_z]
+fig,ax = plt.subplots(figsize=(2,8))
+ax.plot(num_sample,z,color='k',linewidth=1,linestyle='-')
+ax.set_xscale('log')
+ax.set_xlabel('Sample Number (#)',fontsize=16)
+ax.set_ylabel('Height (m MSL)',fontsize=16)
+ax.set_xticks([10,1e3,1e5])
+ax.set_yticks(z)
+ax.tick_params(color='k',labelsize=16)
+
+if campaign=='HISCALE' or campaign=='ACEENA':
+    figname = figpath_aircraft_statistics+'samplenumber_'+campaign+'_'+IOP+'.png'
+else:
+    figname = figpath_aircraft_statistics+'samplenumber_'+campaign+'.png'
+fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)

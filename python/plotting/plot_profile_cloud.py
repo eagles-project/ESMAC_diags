@@ -63,7 +63,7 @@ for mm in range(nmodels):
         mmdd=cday2mmdd(cday)
         date=year0+'-'+mmdd[0:2]+'-'+mmdd[2:4]
         
-        filename_input = E3SM_profile_path+'Profile_vars_'+campaign+'_'+Model_List[mm]+'_'+date+'.nc'
+        filename_input = E3SM_profile_path+'Profile_vars_'+campaign+'_'+Model_List[mm]+'.'+date+'.nc'
         (time,height,data,timemunit,dataunit,long_name)=read_E3SM_z(filename_input,'CLOUD')
         
         timem = np.hstack((timem,time))

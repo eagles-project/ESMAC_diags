@@ -4,7 +4,7 @@ import sys
 sys.path.insert(1,'../subroutines/')
 
 import matplotlib
-# matplotlib.use('AGG') # plot without needing X-display setting
+matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
@@ -197,16 +197,16 @@ for mm in range(nmodels):
             boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
             medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
             vert=True, patch_artist=True)    # need patch_artist to fill color in box
-ax1.tick_params(color='k',labelsize=12)
+ax1.tick_params(color='k',labelsize=15)
 ax1.set_yscale('log')
 ax1.set_xlim(-1,latlen)
-ax1.set_xticks(np.arange(-0.5*dlat,latlen,2))
+ax1.set_xticks(np.arange(-0.5*dlat,latlen-1,2))
 ax1.set_xticklabels([])
 # plot temporal lines for label
 ax1.plot([],c='k',label='CPC')
 for mm in range(nmodels):
     ax1.plot([],c=color_model[mm],label=Model_List[mm])
-ax1.legend(loc='upper left', fontsize='large')
+ax1.legend(loc='upper left', fontsize='x-large')
     
 ax2.boxplot(uhsas_o,whis=(5,95),showmeans=False,showfliers=False,
             positions=np.array(range(latlen))+p_shift[-1],widths=0.15,
@@ -220,24 +220,26 @@ for mm in range(nmodels):
             boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
             medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
             vert=True, patch_artist=True)    # need patch_artist to fill color in box
-ax2.tick_params(color='k',labelsize=12)
+ax2.tick_params(color='k',labelsize=15)
 ax2.set_yscale('log')
+ax2.set_ylim(10,3000)
+ax2.set_yticks([10,100,1000])
 ax2.set_xlim(-1,latlen)
-ax2.set_xticks(np.arange(-0.5*dlat,latlen,2))
+ax2.set_xticks(np.arange(-0.5*dlat,latlen-1,2))
 ax2.set_xticklabels([int(np.floor(a)) for a in latbin[0::2]])
 # plot temporal lines for label
 ax2.plot([],c='k',label='UHSAS')
 for mm in range(nmodels):
     ax2.plot([],c=color_model[mm],label=Model_List[mm])
-ax2.legend(loc='upper left', fontsize='large')
+ax2.legend(loc='upper left', fontsize='x-large')
     
-# set xlimit consistent in subplots
-ylim1 = ax1.get_ylim()
-ylim2 = ax2.get_ylim()
-ax1.set_ylim([min(ylim1[0],ylim2[0]), max(ylim1[1],ylim2[1])])
-ax2.set_ylim([min(ylim1[0],ylim2[0]), max(ylim1[1],ylim2[1])])
+# # set xlimit consistent in subplots
+# ylim1 = ax1.get_ylim()
+# ylim2 = ax2.get_ylim()
+# ax1.set_ylim([min(ylim1[0],ylim2[0]), max(ylim1[1],ylim2[1])])
+# ax2.set_ylim([min(ylim1[0],ylim2[0]), max(ylim1[1],ylim2[1])])
 
-ax2.set_xlabel('Latitude',fontsize=14)
-ax1.set_title('Aerosol Number Concentration (cm$^{-3}$)',fontsize=15)
+ax2.set_xlabel('Latitude',fontsize=16)
+ax1.set_title('Aerosol Number Concentration (cm$^{-3}$)',fontsize=17)
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)

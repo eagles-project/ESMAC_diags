@@ -140,7 +140,7 @@ for filename in lst:
     
     #%% make plot
         
-    figname = figpath_aircraft_timeseries+'timeseries_CN_'+campaign+'_'+date+'.png'
+    figname = figpath_aircraft_timeseries+'CN_'+campaign+'_'+date+'.png'
     print('plotting figures to '+figname)
     
     fig,(ax1,ax2) = plt.subplots(2,1,figsize=(8,4))   # figsize in inches

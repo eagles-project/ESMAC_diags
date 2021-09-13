@@ -284,7 +284,7 @@ for nn in range(n_above):
     
      
 #%% plot entire pdf below and above PBL
-figname = figpath_aircraft_statistics+'SeparatePBLH_pdf_hdiff'+str(heightdiff)+'_'+IOP+'.png'
+figname = figpath_aircraft_statistics+'SeparatePBLH_pdf_AerosolSize_HISCALE_'+IOP+'.png'
 print('plotting PDF figures to '+figname)
 
 fig,(ax0,ax1) = plt.subplots(2,1,figsize=(8,6))
@@ -323,7 +323,7 @@ fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 #%% plot percentile on sizes
 
-figname = figpath_aircraft_statistics+'SeparatePBLH_percentile_hdiff'+str(heightdiff)+'_'+IOP+'.png'
+figname = figpath_aircraft_statistics+'SeparatePBLH_percentile_AerosolSize_HISCALE_'+IOP+'.png'
 print('plotting percentile figures to '+figname)
 
 # set position shift so that models and obs are not overlapped

@@ -1,0 +1,133 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<title>ESMAC Diags quickplots</title>
+
+<script>
+function update_images()
+{
+    var listVars= document.getElementById('variables');
+    var listDay = document.getElementById('days');
+    var listPlottype = document.getElementById('plottype');
+    var outputImgContainer = document.getElementById('output_img_container');
+    
+    // remove all images
+    while (outputImgContainer.hasChildNodes())
+    {
+        var removedNode = outputImgContainer.removeChild(outputImgContainer.firstChild);
+        delete removedNode;
+    }
+
+  var newH3 = document.createElement('h3');
+  newH3.appendChild(document.createTextNode('quick plots:'));
+  outputImgContainer.appendChild(newH3);
+    
+    // select variables and days
+    for (var v = 0; v < listVars.options.length; v++)
+    {
+         if (listVars.options[v].selected)
+         {
+             var curVar = listVars.options[v].value; 
+             for (var m = 0; m < listDay.options.length; m++)
+             {
+                   if (listDay.options[m].selected)
+                   {              
+  				   var curDay = listDay.options[m].value;
+                                     var imgURL = '../figures/ACEENA/aircraft/timeseries/' + curVar + '_ACEENA_'+curDay + '.png'; 
+                                     var newDiv = document.createElement('div');
+                                     newDiv.appendChild(document.createTextNode( 'file =' + imgURL ));
+                                     var newBr = document.createElement('br');
+                                     newDiv.appendChild(newBr);
+                                     var newImg = document.createElement('img');
+                                     newImg.src = imgURL;
+                                     newImg.style.width = "800px";
+                                     newDiv.appendChild(newImg );
+                                     var newHr = document.createElement('hr');
+                                     newDiv.appendChild(newHr);
+                                     outputImgContainer.appendChild(newDiv);
+                     } 
+               } // for listDay
+          }
+    } // for listVars
+} // end of function
+
+
+</script>
+
+</head>
+
+<body>
+  
+
+<h2>ACEENAQuick Plots </h2>
+<p><medium> Select a variable and then press &lt;GO&gt; button to see a plot. You can select one or all variables. To select multiple choices, press and hold CTRL key and click left mouse button. To deselect a choice, press and hold CTRL key and click on the selected item. You can also select multiple consequtive items by selecting first item, and then selecting the last item while holding the SHIFT key. You can also browse all figures in <a href="../figures/ACEENA/aircraft/timeseries">here</a>. </medium></p>
+<h2><small> Platform: aircraft; Plot type: timeseries </small></h2>
+
+    
+<table border="0" cellpadding="2" cellspacing="10">
+         
+<tbody>
+<tr>
+<td><label for="variables"> <medium> variables</medium> </label></td>
+<td colspan="1"><select id="variables" multiple="multiple" size="8">
+<option selected="selected" value="flightheight">flight heights </option>
+<option value="flighttrack">flight location</option>
+<option value="CN">aerosol number concentration (CN)</option>
+<option value="CCN">CCN number concentration</option>
+<option value="AerosolComposition">aerosol composition mass concentration</option>
+<option value="AerosolSize">aerosol number size distribution</option>
+</select></td>
+<td><label for="days"> <medium> days </medium></label></td>
+<td colspan="3"><select id="days" multiple="multiple" size="9">
+<option selected="selected" value="20170621a">20170621</option>
+<option value="20170623a">20170623</option>
+<option value="20170625a">20170625</option>
+<option value="20170626a">20170626</option>
+<option value="20170628a">20170628</option>
+<option value="20170629a">20170629</option>
+<option value="20170630a">20170630</option>
+<option value="20170703a">20170703</option>
+<option value="20170704a">20170704</option>
+<option value="20170706a">20170706</option>
+<option value="20170707a">20170707</option>
+<option value="20170708a">20170708</option>
+<option value="20170711a">20170711</option>
+<option value="20170712a">20170712</option>
+<option value="20170713a">20170713</option>
+<option value="20170715a">20170715</option>
+<option value="20170717a">20170717</option>
+<option value="20170718a">20170718</option>
+<option value="20170719a">20170719</option>
+<option value="20170720a">20170720</option>
+<option value="20180119a">20180119</option>
+<option value="20180121a">20180121</option>
+<option value="20180124a">20180124</option>
+<option value="20180125a">20180125</option>
+<option value="20180126a">20180126</option>
+<option value="20180128a">20180128</option>
+<option value="20180129a">20180129</option>
+<option value="20180130a">20180130</option>
+<option value="20180201a">20180201</option>
+<option value="20180207a">20180207</option>
+<option value="20180208a">20180208</option>
+<option value="20180209a">20180209</option>
+<option value="20180210a">20180210</option>
+<option value="20180211a">20180211</option>
+<option value="20180212a">20180212</option>
+<option value="20180215a">20180215</option>
+<option value="20180216a">20180216</option>
+<option value="20180218a">20180218</option>
+<option value="20180219a">20180219</option>
+</select></td>
+</tr>    
+        <tr>
+            <td colspan="4" align="center"><input value="  Go  " onclick="update_images();" type="submit"></td>
+        </tr>
+    </tbody></table>
+    
+    <hr>
+    
+    <div id="output_img_container"></div>
+
+
+
+</body></html>

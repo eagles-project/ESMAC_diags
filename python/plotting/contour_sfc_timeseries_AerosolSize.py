@@ -31,7 +31,7 @@ def avg_time(time0,data0,time):
 
 from settings import campaign, Model_List, IOP, start_date, end_date, E3SM_sfc_path, figpath_sfc_timeseries
 if campaign=='ACEENA':
-    from settings import uhsaspath
+    from settings import uhsassfcpath
 elif campaign=='HISCALE':
     if IOP=='IOP1':
         from settings import smps_bnl_path, nanosmps_bnl_path
@@ -57,17 +57,17 @@ dt_res = 3600  # in sec
 #%% read in obs data
 if campaign=='ACEENA':
     if IOP=='IOP1':
-        lst = glob.glob(uhsaspath+'enaaosuhsasC1.a1.2017062*')+glob.glob(uhsaspath+'enaaosuhsasC1.a1.201707*')
+        lst = glob.glob(uhsassfcpath+'enaaosuhsasC1.a1.2017062*')+glob.glob(uhsassfcpath+'enaaosuhsasC1.a1.201707*')
     elif IOP=='IOP2':
-        lst = glob.glob(uhsaspath+'enaaosuhsasC1.a1.201801*')+glob.glob(uhsaspath+'enaaosuhsasC1.a1.201802*')
+        lst = glob.glob(uhsassfcpath+'enaaosuhsasC1.a1.201801*')+glob.glob(uhsassfcpath+'enaaosuhsasC1.a1.201802*')
     lst.sort()
     t_uhsas=np.empty(0)
     uhsas=np.empty((0,99))
     for filename in lst:
-        (time,dmin,dmax,data,timeunit,dataunit,long_name) = read_uhsas(filename,'concentration')
+        (time,dmin,dmax,data,timeunit,dataunit,long_name) = read_uhsas(filename)
         timestr=timeunit.split(' ')
         date=timestr[2]
-        cday=yyyymmdd2cday(date)
+        cday=yyyymmdd2cday(date,'noleap')
         # average in time for quicker plot
         time2=np.arange(0,86400,dt_res)
         data2 = avg_time(time,data,time2)
@@ -99,7 +99,7 @@ elif campaign=='HISCALE':
             data[flag!=0,:]=np.nan
             timestr=timeunit.split(' ')
             date=timestr[2]
-            cday=yyyymmdd2cday(date)
+            cday=yyyymmdd2cday(date,'noleap')
             # average in time for quicker plot
             time2=np.arange(0,86400,dt_res)
             data2 = avg_time(time,data,time2)
@@ -118,7 +118,7 @@ elif campaign=='HISCALE':
             datan[flagn!=0,:]=np.nan
             timestr=timenunit.split(' ')
             date=timestr[2]
-            cday=yyyymmdd2cday(date)
+            cday=yyyymmdd2cday(date,'noleap')
             # average in time for quicker plot
             time2=np.arange(0,86400,dt_res)
             data2 = avg_time(timen,datan,time2)
@@ -136,7 +136,7 @@ elif campaign=='HISCALE':
         smps=data[1:-1,:]
         flag=data[-1,:]
         smps[:,flag!=0]=np.nan
-        cday=yyyymmdd2cday('2016-08-27')
+        cday=yyyymmdd2cday('2016-08-27','noleap')
         # average in time for quicker plot
         time2 = np.arange(time[0],time[-1],dt_res)
         smps = avg_time(time,smps.T,time2)
@@ -218,9 +218,9 @@ for ii in range(nmodels+1):
         ax[ii].text(0.01, 0.94, 'OBS', fontsize=14,transform=ax[ii].transAxes, verticalalignment='top')
     else:
         ax[ii].text(0.01, 0.94, Model_List[ii-1], fontsize=14,transform=ax[ii].transAxes, verticalalignment='top')
+    ax[ii].set_ylabel('Diameter (nm)',fontsize=14)
     
-ax[1].set_ylabel('Diameter (nm)',fontsize=14)
-ax[0].set_title('Size Distribution (#/dlogDp, cm-3) '+campaign+' '+IOP,fontsize=15)
+ax[0].set_title('Size Distribution (#/dlogDp, cm$^{-3}$) '+campaign+' '+IOP,fontsize=15)
 ax[nmodels].set_xlabel('Calendar Day',fontsize=14)
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)

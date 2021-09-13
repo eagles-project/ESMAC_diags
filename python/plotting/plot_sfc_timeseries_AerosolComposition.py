@@ -64,7 +64,7 @@ for filename in lst:
     (times_obs,orgsfc,timeunit,orgsfcunit)=read_acsm(filename,'total_organics')
     timestr=timeunit.split(' ')
     date=timestr[2]
-    cday=yyyymmdd2cday(date)
+    cday=yyyymmdd2cday(date,'noleap')
     # average in time for quicker plot
     time2=np.arange(1800,86400,3600)
     so42 = avg_time(np.array(times_obs),np.array(so4sfc),time2)
