@@ -7,7 +7,7 @@ import numpy as np
 
 ############ these settings will be replaced by the settings in scripts_*.csh #############
 # set field campaign name. More settings on specific field campaigns are in next section
-campaign = 'SOCRATES'
+campaign = 'MARCUS'
 # set model names. up to three
 Model_List = ['E3SMv1']
 # set line colors for each model. corresponding to the Model_List

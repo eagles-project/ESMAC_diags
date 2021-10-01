@@ -62,7 +62,7 @@ for mm in range(len(Model_List)):
         variables = list()
         var_units = list()
         var_longnames = list()
-        
+         
         filename_input = E3SM_h3_path[mm]+E3SM_h3_filehead[mm]+'.cam.h3.'+date+'-00000.nc'
     
         (timem,lonm,timeunitm,lonmunit,lonmname)=read_E3SM(filename_input,'lon_'+E3SMdomain_range)
@@ -84,14 +84,13 @@ for mm in range(len(Model_List)):
                 # interpolate height above sea level to height above ground
                 var2[tt,:] = np.interp(z_f,np.flip(zm[tt,:]-zm[tt,-1]),np.flip(var[tt,:]))
             variables.append(var2) 
-            var_units.append(var2dunit)
-            var_longnames.append(var2dlongname)      
+            var_units.append(var2dunit[vv])
+            var_longnames.append(var2dlongname[vv])      
     
         cdaym = timeunit2cday(timeunitm,'noleap')
         yearm = timeunitm.split(' ')[2][0:4]
         time = timem.data - 365*(int(year0)-int(yearm)) + cdaym
         
-    
     
         # %% output extacted file
         outputname = 'Profile_vars_'+campaign+'_'+model+'.'+date+'.nc'

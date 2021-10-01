@@ -408,6 +408,7 @@ def read_RF_NCAR(filename,varname):
         cellunit = d_id.CellSizeUnits
     except:
         cellunit = 'N/A'
+
     
     f.close()
     

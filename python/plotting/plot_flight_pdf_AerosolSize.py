@@ -94,7 +94,7 @@ dlnDp_m = np.empty((3000))
 for bb in range(3000):
     dlnDp_m[bb]=np.log((bb+2)/(bb+1))
 
-for date in alldates:
+for date in alldates[:]:
     print(date)
     
     #%% read in Models
@@ -161,13 +161,14 @@ for date in alldates:
         # calculate cloud flag based on LWC
         cflag=lwc2cflag(lwc,lwcunit)
         uhsas[cflag==1,:,:]=np.nan
+        uhsas[uhsas>500]=np.nan
         
         # average in time for quicker plot
         time2=np.arange(300,86400,600)
         data2 = avg_time(time,uhsas[:,0,:],time2)
         merge = data2.T
+        time0 = np.array(time)
         time=time2/3600.
-        
         
         size=size*1000.
         sizeh = size
@@ -183,6 +184,11 @@ for date in alldates:
     # exclude 30min after takeoff and before landing
     idx=np.logical_or(time2<(time2[0]+1800), time2>(time2[-1]-1800))
     merge[:,idx]=np.nan
+    
+    # fig,ax=plt.subplots()
+    # ax.plot(merge[9,:])
+    # ax.set_title(date)
+    # error
     
     if ('pdf_obs' in locals()) == False:
         pdf_obs = np.zeros(len(size)) 

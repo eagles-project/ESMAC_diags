@@ -136,12 +136,21 @@ for date in alldates:
         cpc3[cpc3<20]=np.nan
         cpc10[cpc10<10]=np.nan
         
-        cpc10_o=np.hstack((cpc10_o, cpc10))
-        cpc3_o=np.hstack((cpc3_o, cpc3))
-
         # read in PCASP
         (time_merge,size,pcasp,timeunit,pcaspunit,pcasplongname)=read_merged_size(filename_merge,'totalnum_pcasp')
         pcasp[pcasp<0]=np.nan
+        if len(time_merge)!=len(time_cpc):
+            print('check time consistency of merge and cpc')
+            error
+        
+        # exclude 30min after takeoff and before landing
+        idx=np.logical_or(time_cpc<(time_cpc[0]+1800), time_cpc>(time_cpc[-1]-1800))
+        cpc3[idx]=np.nan
+        cpc10[idx]=np.nan
+        pcasp[idx]=np.nan
+        
+        cpc10_o=np.hstack((cpc10_o, cpc10))
+        cpc3_o=np.hstack((cpc3_o, cpc3))
         uhsas100_o=np.hstack((uhsas100_o, pcasp))
     
     #%% read in flight data (for CSET and SOCRATES)
@@ -161,7 +170,12 @@ for date in alldates:
         
         # some quality checks
         uhsas100[uhsas100<0]=np.nan
-        cpc10[np.logical_or(cpc10<0,cpc10>2e5)]=np.nan
+        # cpc10[np.logical_or(cpc10<0,cpc10>2e5)]=np.nan
+        
+        # exclude 30min after takeoff and before landing
+        idx=np.logical_or(time_cpc<(time_cpc[0]+1800), time_cpc>(time_cpc[-1]-1800))
+        cpc10[idx]=np.nan
+        uhsas100[idx]=np.nan
         
         cpc10_o=np.hstack((cpc10_o, cpc10))
         uhsas100_o=np.hstack((uhsas100_o, uhsas100))
@@ -189,15 +203,35 @@ corr3 = [None]*(nmodels)
 rmse100 = [None]*(nmodels)
 rmse10 = [None]*(nmodels)
 rmse3 = [None]*(nmodels)
+p10_100 = [None]*(nmodels+1)
+p10_10 = [None]*(nmodels+1)
+p10_3 = [None]*(nmodels+1)
+p25_100 = [None]*(nmodels+1)
+p25_10 = [None]*(nmodels+1)
+p25_3 = [None]*(nmodels+1)
+p75_100 = [None]*(nmodels+1)
+p75_10 = [None]*(nmodels+1)
+p75_3 = [None]*(nmodels+1)
+p90_100 = [None]*(nmodels+1)
+p90_10 = [None]*(nmodels+1)
+p90_3 = [None]*(nmodels+1)
     
 if sum(idx10)/len(idx10)<0.1:   # two few observation available
     # for obs
     mean10[nmodels] = missing_value
     std10[nmodels] = missing_value
+    p10_10[nmodels] = missing_value
+    p25_10[nmodels] = missing_value
+    p75_10[nmodels] = missing_value
+    p90_10[nmodels] = missing_value
     # for models
     for mm in range(nmodels):
         mean10[mm] = np.nanmean(ncn10_m[mm][idx10])
         std10[mm] = np.nanstd(ncn10_m[mm][idx10])
+        p10_10[mm] = np.nanpercentile(ncn10_m[mm][idx10],10)
+        p25_10[mm] = np.nanpercentile(ncn10_m[mm][idx10],25)
+        p75_10[mm] = np.nanpercentile(ncn10_m[mm][idx10],75)
+        p90_10[mm] = np.nanpercentile(ncn10_m[mm][idx10],90)
         bias10[mm] =  missing_value
         corr10[mm] = [missing_value, missing_value]
         rmse10[mm] = missing_value
@@ -205,10 +239,18 @@ else:
     # for obs
     mean10[nmodels] = np.nanmean(cpc10_o[idx10])
     std10[nmodels] = np.nanstd(cpc10_o[idx10])
+    p10_10[nmodels] = np.nanpercentile(cpc10_o[idx10],10)
+    p25_10[nmodels] = np.nanpercentile(cpc10_o[idx10],25)
+    p75_10[nmodels] = np.nanpercentile(cpc10_o[idx10],75)
+    p90_10[nmodels] = np.nanpercentile(cpc10_o[idx10],90)
     # for models
     for mm in range(nmodels):
         mean10[mm] = np.nanmean(ncn10_m[mm][idx10])
         std10[mm] = np.nanstd(ncn10_m[mm][idx10])
+        p10_10[mm] = np.nanpercentile(ncn10_m[mm][idx10],10)
+        p25_10[mm] = np.nanpercentile(ncn10_m[mm][idx10],25)
+        p75_10[mm] = np.nanpercentile(ncn10_m[mm][idx10],75)
+        p90_10[mm] = np.nanpercentile(ncn10_m[mm][idx10],90)
         bias10[mm] = mean10[mm] - mean10[nmodels]
         c10 = scipy.stats.pearsonr(ncn10_m[mm][idx10],cpc10_o[idx10])
         corr10[mm] = [c10[0],c10[1]]
@@ -218,10 +260,18 @@ if sum(idx100)/len(idx100)<0.1:   # two few observation available
     # for obs
     mean100[nmodels] = missing_value
     std100[nmodels] = missing_value
+    p10_100[nmodels] = missing_value
+    p25_100[nmodels] = missing_value
+    p75_100[nmodels] = missing_value
+    p90_100[nmodels] = missing_value
     # for models
     for mm in range(nmodels):
         mean100[mm] = np.nanmean(ncn100_m[mm][idx100])
         std100[mm] = np.nanstd(ncn100_m[mm][idx100])
+        p10_100[mm] = np.nanpercentile(ncn100_m[mm][idx100],10)
+        p25_100[mm] = np.nanpercentile(ncn100_m[mm][idx100],25)
+        p75_100[mm] = np.nanpercentile(ncn100_m[mm][idx100],75)
+        p90_100[mm] = np.nanpercentile(ncn100_m[mm][idx100],90)
         bias100[mm] =  missing_value
         corr100[mm] = [missing_value, missing_value]
         rmse100[mm] = missing_value
@@ -229,10 +279,18 @@ else:
     # for obs
     mean100[nmodels] = np.nanmean(uhsas100_o[idx100])
     std100[nmodels] = np.nanstd(uhsas100_o[idx100])
+    p10_100[nmodels] = np.nanpercentile(uhsas100_o[idx100],10)
+    p25_100[nmodels] = np.nanpercentile(uhsas100_o[idx100],25)
+    p75_100[nmodels] = np.nanpercentile(uhsas100_o[idx100],75)
+    p90_100[nmodels] = np.nanpercentile(uhsas100_o[idx100],90)
     # for models
     for mm in range(nmodels):
         mean100[mm] = np.nanmean(ncn100_m[mm][idx100])
         std100[mm] = np.nanstd(ncn100_m[mm][idx100])
+        p10_100[mm] = np.nanpercentile(ncn100_m[mm][idx100],10)
+        p25_100[mm] = np.nanpercentile(ncn100_m[mm][idx100],25)
+        p75_100[mm] = np.nanpercentile(ncn100_m[mm][idx100],75)
+        p90_100[mm] = np.nanpercentile(ncn100_m[mm][idx100],90)
         bias100[mm] = mean100[mm] - mean100[nmodels]
         c100 = scipy.stats.pearsonr(ncn100_m[mm][idx100],uhsas100_o[idx100])
         corr100[mm] = [c100[0],c100[1]]
@@ -242,10 +300,18 @@ if len(idx3)==0 or sum(idx3)/len(idx3)<0.1:   # two few observation available
     # for obs
     mean3[nmodels] = missing_value
     std3[nmodels] = missing_value
+    p10_3[nmodels] = missing_value
+    p25_3[nmodels] = missing_value
+    p75_3[nmodels] = missing_value
+    p90_3[nmodels] = missing_value
     # for models
     for mm in range(nmodels):
         mean3[mm] = np.nanmean(ncn3_m[mm][idx3])
         std3[mm] = np.nanstd(ncn3_m[mm][idx3])
+        p10_3[mm] = np.nanpercentile(ncn3_m[mm][idx3],10)
+        p25_3[mm] = np.nanpercentile(ncn3_m[mm][idx3],25)
+        p75_3[mm] = np.nanpercentile(ncn3_m[mm][idx3],75)
+        p90_3[mm] = np.nanpercentile(ncn3_m[mm][idx3],90)
         bias3[mm] =  missing_value
         corr3[mm] = [missing_value, missing_value]
         rmse3[mm] = missing_value
@@ -253,10 +319,18 @@ else:
     # for obs
     mean3[nmodels] = np.nanmean(cpc3_o[idx3])
     std3[nmodels] = np.nanstd(cpc3_o[idx3])
+    p10_3[nmodels] = np.nanpercentile(cpc3_o[idx3],10)
+    p25_3[nmodels] = np.nanpercentile(cpc3_o[idx3],25)
+    p75_3[nmodels] = np.nanpercentile(cpc3_o[idx3],75)
+    p90_3[nmodels] = np.nanpercentile(cpc3_o[idx3],90)
     # for models
     for mm in range(nmodels):
         mean3[mm] = np.nanmean(ncn3_m[mm][idx3])
         std3[mm] = np.nanstd(ncn3_m[mm][idx3])
+        p10_3[mm] = np.nanpercentile(ncn3_m[mm][idx3],10)
+        p25_3[mm] = np.nanpercentile(ncn3_m[mm][idx3],25)
+        p75_3[mm] = np.nanpercentile(ncn3_m[mm][idx3],75)
+        p90_3[mm] = np.nanpercentile(ncn3_m[mm][idx3],90)
         bias3[mm] = mean3[mm] - mean3[nmodels]
         c3 = scipy.stats.pearsonr(ncn3_m[mm][idx3],cpc3_o[idx3])
         corr3[mm] = [c3[0],c3[1]]
@@ -287,6 +361,19 @@ with open(outfile, 'w') as f:
     f.write('\n std. dev.,')
     for ii in range(len(std10)):
         f.write(format(std10[ii],'10.2f')+', ')
+    # write percentiles
+    f.write('\n 10% percentile: ')
+    for ii in range(len(p10_10)):
+        f.write(format(p10_10[ii],'10.2f')+', ')
+    f.write('\n 25% percentile: ')
+    for ii in range(len(p25_10)):
+        f.write(format(p25_10[ii],'10.2f')+', ')
+    f.write('\n 75% percentile: ')
+    for ii in range(len(p75_10)):
+        f.write(format(p75_10[ii],'10.2f')+', ')
+    f.write('\n 90% percentile: ')
+    for ii in range(len(p90_10)):
+        f.write(format(p90_10[ii],'10.2f')+', ')
     # write bias
     f.write('\n bias,\t')
     for ii in range(len(bias10)):
@@ -323,6 +410,19 @@ if campaign=='HISCALE' or campaign=='ACEENA':
         f.write('\n std. dev.,')
         for ii in range(len(std3)):
             f.write(format(std3[ii],'10.2f')+', ')
+        # write percentiles
+        f.write('\n 10% percentile: ')
+        for ii in range(len(p10_3)):
+            f.write(format(p10_3[ii],'10.2f')+', ')
+        f.write('\n 25% percentile: ')
+        for ii in range(len(p25_3)):
+            f.write(format(p25_3[ii],'10.2f')+', ')
+        f.write('\n 75% percentile: ')
+        for ii in range(len(p75_3)):
+            f.write(format(p75_3[ii],'10.2f')+', ')
+        f.write('\n 90% percentile: ')
+        for ii in range(len(p90_3)):
+            f.write(format(p90_3[ii],'10.2f')+', ')
         # write bias
         f.write('\n bias,\t')
         for ii in range(len(bias3)):
@@ -367,6 +467,19 @@ with open(outfile, 'w') as f:
     f.write('\n std. dev.,')
     for ii in range(len(std100)):
         f.write(format(std100[ii],'10.2f')+', ')
+    # write percentiles
+    f.write('\n 10% percentile: ')
+    for ii in range(len(p10_100)):
+        f.write(format(p10_100[ii],'10.2f')+', ')
+    f.write('\n 25% percentile: ')
+    for ii in range(len(p25_100)):
+        f.write(format(p25_100[ii],'10.2f')+', ')
+    f.write('\n 75% percentile: ')
+    for ii in range(len(p75_100)):
+        f.write(format(p75_100[ii],'10.2f')+', ')
+    f.write('\n 90% percentile: ')
+    for ii in range(len(p90_100)):
+        f.write(format(p90_100[ii],'10.2f')+', ')
     # write bias
     f.write('\n bias,\t')
     for ii in range(len(bias100)):

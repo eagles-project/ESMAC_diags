@@ -95,7 +95,7 @@ def read_cpc(filename):
     # long_name = d_id.long_name
     try:
         flag = f.variables['qc_concentration'][:]
-        data[np.logical_and(flag>0, flag<20)]=np.nan
+        data[np.logical_and(flag>0, flag<=20)]=np.nan
     except:
         data[data<0]=np.nan
     f.close()
