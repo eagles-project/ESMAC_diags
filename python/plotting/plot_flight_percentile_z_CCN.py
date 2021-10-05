@@ -13,7 +13,7 @@ import numpy as np
 import glob
 from read_aircraft import read_ccn_hiscale, read_ccn_socrates
 from read_ARMdata import read_ccn
-from read_netcdf import read_extractflight
+from read_netcdf import read_extractflight,read_merged_size
 
 #%% settings
 

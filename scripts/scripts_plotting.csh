@@ -14,12 +14,12 @@
  
 # # this should be consistent with settings.py
 # set field campaign name. More settings on specific field campaigns are in next section
-#set campaign = 'ACEENA'   # HISCALE, ACEENA, CSET, SOCRATES, MAGIC, MARCUS
-foreach campaign ('MAGIC' 'MARCUS' 'CSET' 'SOCRATES')
+set campaign = 'HISCALE'   # HISCALE, ACEENA, CSET, SOCRATES, MAGIC, MARCUS
+#foreach campaign ('MAGIC' 'MARCUS' 'CSET' 'SOCRATES')
  
 # set model names. up to three
 # set Model_List = "['CTRL','Nuc','NucSoaCond']"
-set Model_List = "['E3SMv1']"
+set Model_List = "['E3SMv1','EAMv1_CONUS_RRM']"
 
 # set plotting line colors for each model. corresponding to the Model_List
 # set color_model = "['b','r','g']"
@@ -27,8 +27,8 @@ set color_model = "['r','b','g']"
 
 # set IOP (or flight date) that the statistics, pdf and percentiles are averaged for.
 # options: IOP1, IOP2, ALL, 20160830b
-set IOP = 'IOP1'
-#foreach IOP ('IOP1' 'IOP2')
+#set IOP = 'IOP1'
+foreach IOP ('IOP1' 'IOP2')
 
 # ############################################################
 # # Step 2: update settings.py with the above settings       #
@@ -95,6 +95,9 @@ if (($campaign == 'CSET') ||($campaign == 'SOCRATES')) then
     echo '**********************************************'
     echo 'plotting flight CN percentile in latitude bins'
     python plot_flight_percentile_lat_CN.py
+    echo '**********************************************'
+    echo 'plotting flight CCN percentile in latitude bins'
+    python plot_flight_percentile_lat_CCN.py
 endif
 if (($campaign == 'HISCALE') ||($campaign == 'ACEENA')) then
     echo '**********************************************'
@@ -185,8 +188,8 @@ echo '**********************************************'
 echo 'plotting CCN number percentiles in latitude for ship measurements'
 python plot_ship_percentile_lat_CCN.py
 echo '**********************************************'
-echo 'plotting rainfall and LWP composition in latitude for ship measurements'
-python plot_ship_latitude_rainLWP.py
+echo 'plotting LWP composition in latitude for ship measurements'
+python plot_ship_percentile_lat_LWP.py
 echo '**********************************************'
 echo 'plotting mean aerosol size distribution for ship measurements'
 python plot_ship_pdf_AerosolSize.py
