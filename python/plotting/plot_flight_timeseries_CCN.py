@@ -1,35 +1,33 @@
+"""
 # plot aircraft track data
 # timeseries of CCN number concentration 
 # compare models and aircraft measurements
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from read_aircraft import read_ccn_hiscale,read_ccn_socrates
 from read_ARMdata import read_ccn
-from read_netcdf import read_merged_size,read_extractflight
+from read_netcdf import read_extractflight
 from quality_control import qc_mask_qcflag,qc_remove_neg
 
 #%% settings
 
-from settings import campaign, ccnpath,Model_List, color_model, \
+from settings import campaign, Model_List, color_model, \
     E3SM_aircraft_path, figpath_aircraft_timeseries
 
-if campaign=='HISCALE' or campaign=='ACEENA':
-    from settings import IOP, merged_size_path
-elif campaign=='CSET' or campaign=='SOCRATES':
+if campaign in ['HISCALE', 'ACEENA']:
+    from settings import ccnpath, IOP
+elif campaign in ['CSET', 'SOCRATES']:
     from settings import ccnpath
 else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+    raise ValueError('campaign name is not recognized: '+campaign)
     
-import os
 if not os.path.exists(figpath_aircraft_timeseries):
     os.makedirs(figpath_aircraft_timeseries)
     
@@ -38,8 +36,7 @@ if not os.path.exists(figpath_aircraft_timeseries):
 lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+E3SM_aircraft_path)
-    error
+    raise ValueError('cannot find any file')
 # choose files for specific IOP
 if campaign=='HISCALE':
     if IOP=='IOP1':
@@ -110,9 +107,7 @@ for date in alldates:
             SSa=0.24
             SSb=0.46
         else:
-            print('find too many files, check: ')
-            print(filename_ccn)
-            error
+            raise ValueError('find too many files')
         timea=time_ccn
         timeb=time_ccn
         
@@ -131,9 +126,7 @@ for date in alldates:
             SSa=np.nan*np.empty([len(timem)])
             ccna=np.nan*np.empty([len(timem)])
         else:
-            print('find too many files, check: ')
-            print(filename_ccna)
-            error
+            raise ValueError('find too many files')
         if len(filename_ccnb)==1:
             (timeb,timeunitb,ccnb,qcflag,ccnunit,SSb)=read_ccn(filename_ccnb[0])
             ccnb=qc_mask_qcflag(ccnb,qcflag)
@@ -145,9 +138,7 @@ for date in alldates:
             SSb=np.nan*np.empty([len(timem)])
             ccnb=np.nan*np.empty([len(timem)])
         else:
-            print('find too many files, check: ')
-            print(filename_ccnb)
-            error
+            raise ValueError('find too many files')
         
     # CSET does not have observed CCN
     elif campaign=='CSET':
@@ -185,9 +176,7 @@ for date in alldates:
             SSb=np.nan*np.empty([len(timem)])
             ccnb=np.nan*np.empty([len(timem)])
         else:
-            print('find too many files, check: ')
-            print(filename_ccn)
-            error
+            raise ValueError('find too many files')
             
             
     

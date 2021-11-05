@@ -1,14 +1,13 @@
+"""
 # plot ship-track meteorological variables binned by different latitudes
-
+"""
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy as sp
-import glob
 from read_ship import read_marmet
 from read_ARMdata import read_met
 from read_netcdf import read_E3SM
@@ -25,7 +24,6 @@ latmin = latbin-dlat/2
 latmax = latbin+dlat/2
 latlen = len(latbin)
 
-import os
 if not os.path.exists(figpath_ship_statistics):
     os.makedirs(figpath_ship_statistics)
 

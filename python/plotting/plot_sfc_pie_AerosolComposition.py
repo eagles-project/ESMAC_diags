@@ -1,15 +1,14 @@
+"""
 # plot surface aerosol composition in a pie plot
 # plot models and surface measurements separately
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from time_format_change import yyyymmdd2cday,cday2mmdd
 from read_ARMdata import read_acsm
 from read_netcdf import read_E3SM
@@ -17,15 +16,14 @@ from quality_control import qc_remove_neg,qc_acsm_org_max
 
 #%% settings
 
-from settings import campaign, acsmpath, Model_List, color_model, \
+from settings import campaign, acsmpath, Model_List, \
     IOP, start_date, end_date, E3SM_sfc_path, figpath_sfc_statistics
 
 # change start date into calendar day
 cday1 = yyyymmdd2cday(start_date,'noleap')
 cday2 = yyyymmdd2cday(end_date,'noleap')
 if start_date[0:4]!=end_date[0:4]:
-    print('ERROR: currently not support multiple years. please set start_date and end_date in the same year')
-    error
+    raise ValueError('currently not support multiple years. please set start_date and end_date in the same year')
 year0 = start_date[0:4]
     
 import os
@@ -47,8 +45,7 @@ elif campaign=='HISCALE':
         lst = glob.glob(acsmpath+'sgpaosacsmC1.b1.201608*.cdf') + glob.glob(acsmpath+'sgpaosacsmC1.b1.201609*.cdf')
     lst.sort()
 else:
-    print('Error: surface aerosol composition is only available in HISCALE or ACEENA. check the field campaign: '+campaign)
-    error
+    raise ValueError('surface aerosol composition is only available in HISCALE or ACEENA. check: '+campaign)
     
 t_obs=np.empty(0)
 so4_obs=np.empty(0)
@@ -147,12 +144,13 @@ figname = figpath_sfc_statistics+'Pieplot_AerosolComposition_'+campaign+'_'+IOP+
 print('plotting figures to '+figname)
 
 fig,ax = plt.subplots(1,nmodels+1,figsize=((nmodels+1)*3.5,3.5))   # figsize in inches
-# colors = ['yellowgreen', 'gold', 'lightskyblue', 'lightcoral', 'lightcoral' ]
-colors = ['limegreen', 'red', 'b', 'y', 'orange' ]
+# colors = ['limegreen', 'red', 'b', 'y', 'orange' ]
 
+colors_o = ['limegreen', 'red', 'orange', 'lightblue', 'yellow']
 labels_o = ['ORG', 'SO4', 'NO3', 'NH4', 'CHL']
 sizeo = [np.nanmean(org_obs),np.nanmean(so4_obs),np.nanmean(no3_obs),np.nanmean(nh4_obs),np.nanmean(chl_obs)]
 
+colors_m = ['limegreen', 'red', 'k', 'silver','gray']
 labels_m = ['ORG', 'SO4', 'BC', 'DST', 'NCL']
 sizem = []
 for mm in range(nmodels):
@@ -161,12 +159,12 @@ for mm in range(nmodels):
 def absolute_value(val):
     a=np.round(val*sum(sizeo))/100
     return a
-ax[0].pie(sizeo/sum(sizeo),labels=labels_o,colors=colors, autopct=absolute_value)  # autopct='%1.1f%%'
+ax[0].pie(sizeo/sum(sizeo),labels=labels_o,colors=colors_o, autopct=absolute_value)  # autopct='%1.1f%%'
 for mm in range(nmodels):
     def absolute_valuemm(val):
         a=np.round(val*sum(sizem[mm]))/100
         return a
-    ax[mm+1].pie(sizem[mm]/sum(sizem[mm]),labels=labels_m, colors=colors, autopct=absolute_valuemm)
+    ax[mm+1].pie(sizem[mm]/sum(sizem[mm]),labels=labels_m, colors=colors_m, autopct=absolute_valuemm)
     
 ax[0].set_title('Obs',fontsize=14)
 for mm in range(nmodels):

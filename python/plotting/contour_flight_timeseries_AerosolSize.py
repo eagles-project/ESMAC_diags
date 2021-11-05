@@ -1,16 +1,16 @@
+"""
 # plot aircraft track data
 # timeseries of aerosol size distribution
 # compare models and aircraft measurements
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from read_aircraft import read_RF_NCAR
 from specific_data_treatment import lwc2cflag, avg_time_2d
 # from time_format_change import yyyymmdd2cday, hhmmss2sec
@@ -21,15 +21,13 @@ from read_netcdf import read_merged_size,read_extractflight
 
 from settings import campaign,  Model_List,  E3SM_aircraft_path, figpath_aircraft_timeseries
 
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     from settings import IOP, merged_size_path
-elif campaign=='CSET' or campaign=='SOCRATES':
+elif campaign in ['CSET', 'SOCRATES']:
     from settings import RFpath
 else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+    raise ValueError('please check campaign name: '+campaign)
     
-import os
 if not os.path.exists(figpath_aircraft_timeseries):
     os.makedirs(figpath_aircraft_timeseries)
     
@@ -37,8 +35,7 @@ if not os.path.exists(figpath_aircraft_timeseries):
 lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+E3SM_aircraft_path)
-    error
+    raise ValueError('cannot find any file')
 # choose files for specific IOP
 if campaign=='HISCALE':
     if IOP=='IOP1':
@@ -89,7 +86,7 @@ for date in alldates:
     
     
     #%% read observation        
-    if campaign=='HISCALE' or campaign=='ACEENA':
+    if campaign in ['HISCALE', 'ACEENA']:
         if date[-1]=='a':
             flightidx=1
         else:
@@ -109,7 +106,7 @@ for date in alldates:
         time=np.ma.compressed(time)
         size=size*1000.
     
-    elif campaign=='CSET' or campaign=='SOCRATES':
+    elif campaign in ['CSET', 'SOCRATES']:
         filename = glob.glob(RFpath+'RF*'+date+'*.PNI.nc')
         # cloud flag
         (time,lwc,timeunit,lwcunit,lwclongname,size,cellunit)=read_RF_NCAR(filename[-1],'PLWCC')

@@ -1,16 +1,16 @@
+"""
 # plot mean aerosol size ditribution for aircraft track data
 # average for each IOP
 # compare models and aircraft measurements
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-# matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from read_aircraft import read_RF_NCAR
 from specific_data_treatment import lwc2cflag
 # from time_format_change import yyyymmdd2cday, hhmmss2sec
@@ -24,15 +24,13 @@ from quality_control import qc_mask_cloudflag, qc_uhsas_RF_NCAR,qc_remove_neg,qc
 from settings import campaign,  Model_List, color_model,  \
     E3SM_aircraft_path, figpath_aircraft_statistics
 
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     from settings import IOP, merged_size_path
-elif campaign=='CSET' or campaign=='SOCRATES':
+elif campaign in ['CSET', 'SOCRATES']:
     from settings import RFpath
 else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+    raise ValueError('campaign name is not recognized: '+campaign)
     
-import os
 if not os.path.exists(figpath_aircraft_statistics):
     os.makedirs(figpath_aircraft_statistics)
     
@@ -42,8 +40,7 @@ if not os.path.exists(figpath_aircraft_statistics):
 lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+E3SM_aircraft_path)
-    error
+    raise ValueError('cannot find any file')
 # choose files for specific IOP
 if campaign=='HISCALE':
     if IOP=='IOP1':
@@ -110,7 +107,7 @@ for date in alldates[:]:
                 n_m[mm]=n_m[mm]+1
         
     #%% read observation        
-    if campaign=='HISCALE' or campaign=='ACEENA':
+    if campaign in ['HISCALE', 'ACEENA']:
         if date[-1]=='a':
             flightidx=1
         else:
@@ -138,7 +135,7 @@ for date in alldates[:]:
         time=time2/3600.
         
 
-    elif campaign=='CSET' or campaign=='SOCRATES':
+    elif campaign in ['CSET', 'SOCRATES']:
         filename = glob.glob(RFpath+'RF*'+date+'*.PNI.nc')
         # cloud flag
         (time,lwc,timeunit,lwcunit,lwclongname,size,cellunit)=read_RF_NCAR(filename[-1],'PLWCC')
@@ -207,7 +204,7 @@ for mm in range(nmodels):
 
 #%% make plot
 
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     figname = figpath_aircraft_statistics+'pdf_AerosolSize_'+campaign+'_'+IOP+'.png'
 else:
     figname = figpath_aircraft_statistics+'pdf_AerosolSize_'+campaign+'.png'
@@ -234,11 +231,11 @@ ax.set_xlim(0.67,4500)
 ax.set_xlabel('Diameter (nm)',fontsize=13)
 ax.set_ylabel('#/dlnDp (cm$^{-3}$)',fontsize=13)
 
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     ax.set_title(campaign+' '+IOP,fontsize=14)
 else:
     ax.set_title(campaign,fontsize=14)
 
-# fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 # plt.close()
 

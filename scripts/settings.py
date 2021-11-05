@@ -7,7 +7,7 @@ import numpy as np
 
 ############ these settings will be replaced by the settings in scripts_*.csh #############
 # set field campaign name. More settings on specific field campaigns are in next section
-campaign = 'ACEENA'
+campaign = 'MAGIC'
 # set model names. up to three
 Model_List = ['E3SMv1']
 # set line colors for each model. corresponding to the Model_List
@@ -232,7 +232,4 @@ elif campaign=='SOCRATES':
     E3SM_profile_path = package_path+'data/'+campaign+'/model/profile/'
     
 else:
-    print('ERROR: does not recognize campaign '+campaign)
-    error
-    
-    
+    raise ValueError("does not recognize this campaign: "+campaign)

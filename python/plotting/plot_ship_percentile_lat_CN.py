@@ -1,13 +1,13 @@
+"""
 # plot ship-track aerosol number concentration binned by different latitudes
-
+"""
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from read_ARMdata import read_cpc, read_uhsas
 from read_netcdf import read_E3SM
 from time_format_change import  cday2mmdd
@@ -15,7 +15,7 @@ from quality_control import qc_mask_qcflag,qc_remove_neg,qc_cn_max
 
 #%% settings
 
-from settings import campaign, site, latbin, Model_List, color_model, \
+from settings import campaign, latbin, Model_List, color_model, \
             shipcpcpath, shipuhsaspath, E3SM_ship_path, figpath_ship_statistics
 
 dlat = latbin[1]-latbin[0]
@@ -23,7 +23,6 @@ latmin = latbin-dlat/2
 latmax = latbin+dlat/2
 latlen = len(latbin)
 
-import os
 if not os.path.exists(figpath_ship_statistics):
     os.makedirs(figpath_ship_statistics)
 
@@ -150,8 +149,8 @@ for ll in range(len(lst)):
         if len(filenameo)==0:
             continue  # some days may be missing
         if len(filenameo)>1:
-            print('ERROR: should not find multiple files. check')
-            error
+            raise ValueError('find too many files')
+            
         (time,dmin,dmax,obs,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
         obs=np.ma.filled(obs)
         obs=qc_remove_neg(obs)

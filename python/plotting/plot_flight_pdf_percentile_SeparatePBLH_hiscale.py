@@ -1,15 +1,15 @@
+"""
 # plot pdf and percentiles in several aerosol size bins for aircraft data
 # separated by observed PBLH 
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from time_format_change import  hhmmss2sec,yyyymmdd2cday
 from read_ARMdata import read_pblhtmpl1
 from read_surface import read_dl_pblh
@@ -22,7 +22,6 @@ from quality_control import qc_remove_neg
 from settings import campaign, cpcpath,merged_size_path, pblhpath, dlpath, \
     Model_List, color_model, IOP, E3SM_aircraft_path, figpath_aircraft_statistics
 
-import os
 if not os.path.exists(figpath_aircraft_statistics):
     os.makedirs(figpath_aircraft_statistics)
    
@@ -54,8 +53,7 @@ lst = glob.glob(merged_size_path+'merged_bin_*'+campaign+'*.nc')
 lst.sort()
 
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+merged_size_path)
-    error
+    raise ValueError('cannot find any file')
 
 # choose files for specific IOP
 if campaign=='HISCALE':
@@ -68,12 +66,10 @@ if campaign=='HISCALE':
         lst = glob.glob(a[0]+'*'+IOP+'*')
         lst.sort()
 else:
-    print('ERROR: this code is only for HISCALE, check the campaign settings: '+campaign)
-    error
+    raise ValueError('this code is only for HISCALE, check the campaign settings')
 
 if len(lst)==0:
-    print('ERROR: cannot find any file for '+IOP)
-    error
+    raise ValueError('cannot find any file')
     
 #%% read all data
 
@@ -129,7 +125,7 @@ for filename in lst:
     if campaign=='HISCALE':
         filename_c=glob.glob(cpcpath+'CPC_G1_'+date[0:8]+'*R2_HiScale001s.ict.txt')
     else:
-        error
+        raise ValueError('this code is only for HISCALE, check the campaign settings')
     filename_c.sort()
     # read in data
     if len(filename_c)==1 or len(filename_c)==2: # some days have two flights
@@ -147,9 +143,7 @@ for filename in lst:
         cpc10=np.nan*np.empty([len(time)])
         cpc3=np.nan*np.empty([len(time)])
     else:
-        print('find too many files, check: ')
-        print(filename_c)
-        error
+        raise ValueError('find too many files')
     
     cpcdiff = cpc3-cpc10
     cpcdiff=qc_remove_neg(cpcdiff)
@@ -164,9 +158,7 @@ for filename in lst:
         print('no pblh file in this day. skip...')
         continue
     else:
-        print('check file ')
-        print(filename_mpl)
-        error
+        raise ValueError('find too many files: ' + filename_mpl)
     time_pblh=time_pblh/3600
     
     #%% choose the same time of DL. get pblh
@@ -185,9 +177,7 @@ for filename in lst:
     timem = timem/3600
     
     if len(timem)!=len(time) or len(time)!=len(time_cpc):
-        print('ERROR: time dimension for obs and/or model are not consistent: ')
-        print(len(time),len(timem),len(time_cpc))
-        error
+        raise ValueError('time dimension for obs and/or model are not consistent')
     
     #%% get pdf for legs below and above PBLH
     

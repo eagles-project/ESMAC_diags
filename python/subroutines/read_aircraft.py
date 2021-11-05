@@ -1,16 +1,31 @@
-
-#%% READ AMS composition data
+"""
+functions of reading aircraft data, mostly ascii format
+"""
+import numpy as np
+from netCDF4 import Dataset
+#%% 
 # filename='../../data/HiScale/obs/aircraft/shilling-ams\\HiScaleAMS_G1_20160425_R0.ict'
 def read_ams(filename):    
-    import numpy as np
+    """
+    READ AMS composition data
+
+    Parameters
+    ----------
+    filename : input filename
+
+    Returns
+    -------
+    data2: ams measured variables
+    varlist: list of variable names
+    """
         
-    f=open(filename,'r')
+    f = open(filename, 'r')
     
     # read in data:
     
-    h='aaa'
+    h = 'aaa'
     for ii in range(40):
-        h=f.readline()
+        h = f.readline()
     while(h[0:7]!='dat_ams' and h[0:7]!='dat_utc'):
         h=f.readline()
     h=h.strip()
@@ -22,26 +37,36 @@ def read_ams(filename):
         line=line.strip()  # remove \n
         columns = line.split(',')
         source = []
-        for i in range(0,len(columns)):
+        for i in range(0, len(columns)):
             source.append(float(columns[i]))
         data.append(source)
-        if 'data2' in locals():
-            data2=np.column_stack((data2,source))
-        else:
+        if not('data2' in locals()):
             data2=np.asarray(source)
+        else:
+            data2=np.column_stack((data2, source))
     
     f.close()
     # data2[data2<-9990]=np.nan
-    return(data2,varlist)
+    return(data2, varlist)
 
 
-#%% read in CPC data (mei-cpc)
-
+#%% 
 # filename='../data/mei-cpc/CPC_G1_20160830143515_R2_HiScale001s.ict.txt'
-def read_cpc(filename):    
-    import numpy as np
+def read_cpc(filename): 
+    """
+    READ CPC data (from mei-cpc)
+
+    Parameters
+    ----------
+    filename : input filename
+
+    Returns
+    -------
+    data2: all measured variables
+    varlist: list of variable names
+    """    
         
-    f=open(filename,'r')
+    f=open(filename, 'r')
     
     # read in data:
     
@@ -57,25 +82,35 @@ def read_cpc(filename):
         line=line.strip()  # remove \n
         columns = line.split(',')
         source = []
-        for i in range(0,len(columns)):
+        for i in range(0, len(columns)):
             source.append(float(columns[i]))
         data.append(source)
-        if 'data2' in locals():
-            data2=np.column_stack((data2,source))
-        else:
+        if not('data2' in locals()):
             data2=np.asarray(source)
+        else:
+            data2=np.column_stack((data2, source))
     
     f.close()
     data2[data2<-9990]=np.nan
-    return(data2,varlist)
+    return(data2, varlist)
 
-#%% read in CCN data (mei-ccn)
-
+#%%
 # filename='../data/mei-ccn/CCN_G1_20160518170015_R2_HiScale001s.ict'
-def read_ccn_hiscale(filename):    
-    import numpy as np
+def read_ccn_hiscale(filename):
+    """
+    READ CCN data (from mei-ccn)
+
+    Parameters
+    ----------
+    filename : input filename
+
+    Returns
+    -------
+    data2: all measured variables
+    varlist: list of variable names
+    """    
         
-    f=open(filename,'r')
+    f=open(filename, 'r')
     
     # read in data:
     
@@ -91,23 +126,34 @@ def read_ccn_hiscale(filename):
         line=line.strip()  # remove \n
         columns = line.split(',')
         source = []
-        for i in range(0,len(columns)):
+        for i in range(0, len(columns)):
             source.append(float(columns[i]))
         data.append(source)
-        if 'data2' in locals():
-            data2=np.column_stack((data2,source))
-        else:
+        if not('data2' in locals()):
             data2=np.asarray(source)
+        else:
+            data2=np.column_stack((data2, source))
     
     f.close()
     # data2[data2<-9990]=np.nan
-    return(data2,varlist)
+    return(data2, varlist)
 
 #%%
-def read_ccn_socrates(filename):    
-    import numpy as np
+def read_ccn_socrates(filename):
+    """
+    READ CPC data for SOCRATES
+
+    Parameters
+    ----------
+    filename : input filename
+
+    Returns
+    -------
+    data2: all measured variables
+    varlist: list of variable names
+    """    
         
-    f=open(filename,'r')
+    f=open(filename, 'r')
     
     # read in data:
     
@@ -123,23 +169,34 @@ def read_ccn_socrates(filename):
         line=line.strip()  # remove \n
         columns = line.split(',')
         source = []
-        for i in range(0,len(columns)):
+        for i in range(0, len(columns)):
             source.append(float(columns[i]))
         data.append(source)
-        if 'data2' in locals():
-            data2=np.column_stack((data2,source))
-        else:
+        if not('data2' in locals()):
             data2=np.asarray(source)
+        else:
+            data2=np.column_stack((data2, source))
     
     f.close()
     # data2[data2<-9990]=np.nan
-    return(data2,varlist)
+    return(data2, varlist)
 
-#%% read CVI
+#%%
 # filename='../data/pekour-cvi/CVI_G1_20160518170015_R4_HISCALE_001s.ict.txt'
-def read_cvi_hiscale(filename):    
-    import numpy as np
-    f=open(filename,'r')
+def read_cvi_hiscale(filename):  
+    """
+    READ in CVI data
+
+    Parameters
+    ----------
+    filename : input filename
+
+    Returns
+    -------
+    data2: all measured variables
+    varlist: list of variable names
+    """      
+    f=open(filename, 'r')
     h='aaa'
     while h[0:3]!='R0:':
         h=f.readline()
@@ -152,23 +209,33 @@ def read_cvi_hiscale(filename):
         line=line.strip()  # remove \n
         columns = line.split(',')
         source = []
-        for i in range(0,len(columns)):
+        for i in range(0, len(columns)):
             source.append(float(columns[i]))
         # data.append(source)
-        if 'data2' in locals():
-            data2=np.column_stack((data2,source))
-        else:
+        if not('data2' in locals()):
             data2=np.asarray(source)
+        else:
+            data2=np.column_stack((data2, source))
     f.close()
     # data2[data2<-9990]=np.nan
-    return(data2,varlist)
+    return(data2, varlist)
 
-#%% read in FIMS data (wang-fims)
+#%%
 def read_fims(filename):
+    """
+    READ in wang-fims data
+
+    Parameters
+    ----------
+    filename : input filename
+
+    Returns
+    -------
+    data2: all measured variables
+    varlist: list of variable names
+    """
     
-    import numpy as np
-    
-    f=open(filename,'r')
+    f=open(filename, 'r')
     
     # read in data:
     
@@ -184,28 +251,40 @@ def read_fims(filename):
         line=line.strip()  # remove \n
         columns = line.split(',')
         source = []
-        for i in range(0,len(columns)):
+        for i in range(0, len(columns)):
             source.append(float(columns[i]))
         data.append(source)
-        if 'data2' in locals():
-            data2=np.column_stack((data2,source))
-        else:
+        if not('data2' in locals()):
             data2=np.asarray(source)
+        else:
+            data2=np.column_stack((data2, source))
     
     f.close()
     
     # data2[data2<-9990]=np.nan
     
     # multiply dlnDp since FIMS data are dN/dlnDp 
-    # data2[1:31,:]=data2[1:31,:]*0.1272
-    return(data2,varlist)
+    # data2[1:31, :]=data2[1:31, :]*0.1272
+    return(data2, varlist)
 
 
-#%% read FIMS bins information (wang-fims)
+#%%
 # filename='../data/wang-fims/HISCALE_FIMS_bins_R1.dat'
 def read_fims_bin(filename):
-    import numpy as np
-    f=open(filename,'r')
+    """
+    READ in bin information of wang-fims data
+
+    Parameters
+    ----------
+    filename : input filename
+
+    Returns
+    -------
+    dmean: mean aerosol diameter for each bin
+    dmin: lower bound of diameter
+    dmax: upper bound of diameter
+    """
+    f=open(filename, 'r')
     h=f.readline()
     h=h.strip()
     dmean=[]
@@ -215,57 +294,79 @@ def read_fims_bin(filename):
         line=line.strip()  # remove \n
         columns = line.split(',')
         source = []
-        for i in range(0,len(columns)):
+        for i in range(0, len(columns)):
             source.append(float(columns[i]))
         dmin.append(source[0])
         dmean.append(source[1])
         dmax.append(source[2])
     f.close()
 
-    return(dmean,dmin,dmax)
+    return(dmean, dmin, dmax)
 
-#%% read in IWG1 data (mei-iwg1)
-
+#%%
 # filename='../data/mei-iwg1/aaf.iwg1001s.g1.hiscale.20160511a.a2.txt'
-# try:
 def read_iwg1(filename):
+    """
+    READ in mei-iwg data
+
+    Parameters
+    ----------
+    filename : input filename
+
+    Returns
+    -------
+    data: all measured variables
+    a: list of variable names and units
+    """
     
-    import numpy as np
     
-    f=open(filename,'r')
+    f=open(filename, 'r')
     varname=f.readline()
     varunit=f.readline()
     varname=varname.strip()
     varname=varname.split(',')
     varunit=varunit.strip()
     varunit=varunit.split(',')
-    a = np.column_stack((np.asarray(varname),np.asarray(varunit)))
+    a = np.column_stack((np.asarray(varname), np.asarray(varunit)))
     data=[]
     for line in f:
         line=line.strip()  # remove \n
         columns = line.split(',')
         source = []
-        for i in range(0,len(columns)):
+        for i in range(0, len(columns)):
             source.append(columns[i])
         data.append(source)
     
     f.close()
     # data[data<-9990]=np.nan
-    return(data,a)
+    return(data, a)
     
 # except:
 #     print('error')
 
-#%% read kappa
+#%%
 # filename='../data/Kappa/FIMS_kappa_IOP2_part2/20160830aAir_data_table_FIMS_kappa_col_A.dat'
 def read_kappa(filename):    
-    import numpy as np
-    f=open(filename,'r')
+    """
+    READ in kappa data. 
+    this data is calculated from FIMS and CCN measurements.
+    currently it is not used in the ESMAC Diags
+
+    Parameters
+    ----------
+    filename : input filename
+
+    Returns
+    -------
+    data2: all measured variables
+    varname: list of variable names
+    """
+    f=open(filename, 'r')
     varname=f.readline()
     # varunit=f.readline()
     varname=varname.strip()
     varname=varname.split()
-    data=[]
+    # data=[]
     if 'data2' in locals():
         del(data2)
     for line in f:
@@ -274,22 +375,36 @@ def read_kappa(filename):
         if columns==[]:
             continue
         source = []
-        for i in range(0,len(columns)):
+        for i in range(0, len(columns)):
             source.append(float(columns[i]))
         # data.append(source)
-        if 'data2' in locals():
-            data2=np.column_stack((data2,source))
-        else:
+        if not('data2' in locals()):
             data2=np.asarray(source)
+        else:
+            data2=np.column_stack((data2, source))
     
     f.close()
-    return(data2,varname)
+    return(data2, varname)
 
 #%% read OPC
 # filename='../data/opciso/OPCISO_G1_20170707103233_R3_ACEENA_001s.ict'
-def read_opc(filename):    
-    import numpy as np
-    f=open(filename,'r')
+def read_opc(filename):   
+    """
+    READ in OPC data
+
+    Parameters
+    ----------
+    filename : input filename
+
+    Returns
+    -------
+    data2: measured aerosol number concentration in each size bin
+    d_min: lower bound of aerosol size bins
+    d_max: upper bound of aerosol size bins
+    d_center: center diameter for each size bin
+    varlist: list of variable names in data2
+    """ 
+    f=open(filename, 'r')
     h='aaa'
     while h[0:26]!='UPPER_BIN_SIZE_micrometer:':
         h=f.readline()
@@ -315,23 +430,34 @@ def read_opc(filename):
         line=line.strip()  # remove \n
         columns = line.split(',')
         source = []
-        for i in range(0,len(columns)):
+        for i in range(0, len(columns)):
             source.append(float(columns[i]))
         # data.append(source)
-        if 'data2' in locals():
-            data2=np.column_stack((data2,source))
-        else:
+        if not('data2' in locals()):
             data2=np.asarray(source)
+        else:
+            data2=np.column_stack((data2, source))
     f.close()
     # data2[data2<-9990]=np.nan
-    return(data2,np.array(d_min),np.array(d_max),np.array(d_center),varlist)
+    return(data2, np.array(d_min), np.array(d_max), np.array(d_center), varlist)
 
 
-#%% read PCASP
+#%%
 # filename='../data/tomlinson-pcasp/pcasp_g1_20160511163038_R2_L1_hiscale001s.ict.txt'
 def read_pcasp(filename):    
-    import numpy as np
-    f=open(filename,'r')
+    """
+    READ in PCASP aerosol size distribution data
+
+    Parameters
+    ----------
+    filename : input filename
+
+    Returns
+    -------
+    data2: all measured variables
+    varlist: list of variable names
+    """
+    f=open(filename, 'r')
     h='aaa'
     while h[0:3]!='R0:':
         h=f.readline()
@@ -344,23 +470,40 @@ def read_pcasp(filename):
         line=line.strip()  # remove \n
         columns = line.split(',')
         source = []
-        for i in range(0,len(columns)):
+        for i in range(0, len(columns)):
             source.append(float(columns[i]))
         # data.append(source)
-        if 'data2' in locals():
-            data2=np.column_stack((data2,source))
-        else:
+        if not('data2' in locals()):
             data2=np.asarray(source)
+        else:
+            data2=np.column_stack((data2, source))
     f.close()
     data2[data2<-9990]=np.nan
-    return(data2,varlist)
+    return(data2, varlist)
     
 #%% read research flight data from NCAR
-def read_RF_NCAR(filename,varname):
+def read_RF_NCAR(filename, varname):
+    """
+    READ in NCAR research flight data
+
+    Parameters
+    ----------
+    filename : input filename
+    varname : choose variables to read
+
+    Returns
+    -------
+    time: time of measurements
+    data: measured variables
+    timeunit: description of time
+    dataunit: unit of data
+    long_name: long_name or description of the data
+    cellsize: if read in size distribution, return size information of each cell
+    cellunit: unit of cell size
     
-    from netCDF4 import Dataset
-    
-    f = Dataset(filename,'r')
+    cellsize and cellunit are 'N/A' if variable is not size distribution
+    """
+    f = Dataset(filename, 'r')
     
     # read in variables
     t_id = f.variables['Time']
@@ -372,23 +515,34 @@ def read_RF_NCAR(filename,varname):
     long_name = d_id.long_name
     try:
         cellsize = d_id.CellSizes
-    except:
+    except: # pylint: disable=bare-except
         cellsize = 'N/A'
     try:
         cellunit = d_id.CellSizeUnits
-    except:
+    except: # pylint: disable=bare-except
         cellunit = 'N/A'
 
     
     f.close()
     
-    return(time,data,timeunit,dataunit,long_name,cellsize,cellunit)
+    return(time, data, timeunit, dataunit, long_name, cellsize, cellunit)
 
-#%% SO2
+#%%
 # filename='../data/springston-tracegases/SO2/SO2_G1_20160510_R2.ict'
 def read_so2(filename):
-    import numpy as np
-    f=open(filename,'r')
+    """
+    READ in SO2 data
+
+    Parameters
+    ----------
+    filename : input filename
+
+    Returns
+    -------
+    data2: all measured variables
+    varlist: list of variable names
+    """
+    f=open(filename, 'r')
     h='aaa'
     while h[0:3]!='R0:':
         h=f.readline()
@@ -401,22 +555,33 @@ def read_so2(filename):
         line=line.strip()  # remove \n
         columns = line.split(',')
         source = []
-        for i in range(0,len(columns)):
+        for i in range(0, len(columns)):
             source.append(float(columns[i]))
         # data.append(source)
-        if 'data2' in locals():
-            data2=np.column_stack((data2,source))
-        else:
+        if not('data2' in locals()):
             data2=np.asarray(source)
+        else:
+            data2=np.column_stack((data2, source))
     f.close()
     data2[data2<-9990]=np.nan
-    return(data2,varlist)
+    return(data2, varlist)
     
-#%% read UHSAS
+#%%
 # filename='../data/tomlinson-uhsas/uhsasa_g1_20160425155810_R1_L1_hiscale001s.ict.txt'
-def read_uhsas(filename):    
-    import numpy as np
-    f=open(filename,'r')
+def read_uhsas(filename):  
+    """
+    READ in UHSAS data
+
+    Parameters
+    ----------
+    filename : input filename
+
+    Returns
+    -------
+    data2: all measured variables
+    varlist: list of variable names
+    """  
+    f=open(filename, 'r')
     h='aaa'
     while h[0:3]!='R0:':
         h=f.readline()
@@ -429,22 +594,33 @@ def read_uhsas(filename):
         line=line.strip()  # remove \n
         columns = line.split(',')
         source = []
-        for i in range(0,len(columns)):
+        for i in range(0, len(columns)):
             source.append(float(columns[i]))
         # data.append(source)
-        if 'data2' in locals():
-            data2=np.column_stack((data2,source))
-        else:
+        if not('data2' in locals()):
             data2=np.asarray(source)
+        else:
+            data2=np.column_stack((data2, source))
     f.close()
     data2[data2<-9990]=np.nan
-    return(data2,varlist)
+    return(data2, varlist)
 
 #%% read LWC from WCM
 # filename='../data/matthews-wcm/WCM_G1_20160909150045_R2_HISCALE001s.ict.txt'
-def read_wcm(filename):    
-    import numpy as np
-    f=open(filename,'r')
+def read_wcm(filename):
+    """
+    READ in LWC data from WCM measurements
+
+    Parameters
+    ----------
+    filename : input filename
+
+    Returns
+    -------
+    data2: all measured variables
+    varlist: list of variable names
+    """
+    f=open(filename, 'r')
     h='aaa'
     while h[0:3]!='R0:':
         h=f.readline()
@@ -457,22 +633,22 @@ def read_wcm(filename):
         line=line.strip()  # remove \n
         columns = line.split(',')
         source = []
-        for i in range(0,len(columns)):
+        for i in range(0, len(columns)):
             source.append(float(columns[i]))
         # data.append(source)
-        if 'data2' in locals():
-            data2=np.column_stack((data2,source))
-        else:
+        if not('data2' in locals()):
             data2=np.asarray(source)
+        else:
+            data2=np.column_stack((data2, source))
     f.close()
     data2[data2<-9990]=np.nan
-    return(data2,varlist)
+    return(data2, varlist)
 
 
 # In[test read in data]
 # filename = '../data/wang-fims/FIMS_G1_20160830_R1_L1_HISCALE_001s.ict'
 
-# (x,y)=read_fims(filename)
+# (x, y)=read_fims(filename)
 
 # filename='../data/mei-iwg1/aaf.iwg1001s.g1.hiscale.20160511a.a2.txt'
-# (x,y)=read_iwg1(filename)
+# (x, y)=read_iwg1(filename)

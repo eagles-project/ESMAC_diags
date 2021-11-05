@@ -1,13 +1,13 @@
+"""
 # plot vertical profile of cloud fraction
 # for each day of selected IOP
 # compare models and surface measurements
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 from time_format_change import timeunit2cday,yyyymmdd2cday,cday2mmdd
@@ -23,11 +23,9 @@ from settings import campaign, armbepath, Model_List, IOP, start_date, end_date,
 cday1 = yyyymmdd2cday(start_date,'noleap')
 cday2 = yyyymmdd2cday(end_date,'noleap')
 if start_date[0:4]!=end_date[0:4]:
-    print('ERROR: currently not support multiple years. please set start_date and end_date in the same year')
-    error
+    raise ValueError('currently not support multiple years. please set start_date and end_date in the same year')
 year0 = start_date[0:4]
     
-import os
 if not os.path.exists(figpath_profile_timeseries):
     os.makedirs(figpath_profile_timeseries)
 

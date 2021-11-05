@@ -1,10 +1,25 @@
-# -*- coding: utf-8 -*-
+"""
+functions of calculating time or changing time format
+"""
 
-# timestr='16:30:40'
-
-# datestr='2016-05-11'
 #%%
 def yyyymmdd2cday(datestr,calendar='leap'):
+    """
+    change from date string to calendar day
+
+    Parameters
+    ----------
+    datestr : string
+        yyyymmdd format or yyyy-mm-dd format
+        e.g., '20190312', '2019-03-12'
+    calendar : string, optional
+        option if use leap year or nonleap year. The default is 'leap'.
+
+    Returns
+    -------
+    cday : calendar day in this year
+
+    """
     # must be yyyy-mm-dd format or yyyymmdd format
     if len(datestr)==10:
         dstr=datestr.split('-')
@@ -16,11 +31,10 @@ def yyyymmdd2cday(datestr,calendar='leap'):
         mon=int(datestr[4:6])
         day=int(datestr[6:8])
     else:
-        print('Error: input date format must be yyyymmdd or yyyy-mm-dd')
-        return()
+        raise ValueError("input date format must be yyyymmdd or yyyy-mm-dd")
         
     
-    if calendar=='leap' and yr%4==0:
+    if calendar=='leap' and yr%4 == 0:
         mmm=[31,29,31,30,31,30,31,31,30,31,30,31]
     else:
         mmm=[31,28,31,30,31,30,31,31,30,31,30,31]
@@ -36,6 +50,20 @@ def yyyymmdd2cday(datestr,calendar='leap'):
 
 #%%
 def hhmmss2sec(timestr):
+    """
+    change time from hhmmss format to seconds of the day
+
+    Parameters
+    ----------
+    timestr : string
+        time, in hh:mm:ss format.
+        e.g., 12:23:11
+
+    Returns
+    -------
+    tsec : time in seconds of the day
+
+    """
     #must be hh:mm:ss format
     tstr=timestr.split(':')
     hh=int(tstr[0])
@@ -49,6 +77,19 @@ def hhmmss2sec(timestr):
 
 #%%
 def cday2hhmmss(cday):
+    """
+    find the time from calendar day in hour-minute-second format
+
+    Parameters
+    ----------
+    cday : float
+        calendar day
+
+    Returns
+    -------
+    hhmmss : string of time of the day
+
+    """
     
     time=86400*(cday-int(cday))
     hh=int(time/3600)
@@ -61,6 +102,21 @@ def cday2hhmmss(cday):
 
 #%% 
 def cday2mmdd(cday,calendar='noleap'):
+    """
+    find the date from calendar day in month and day format
+
+    Parameters
+    ----------
+    cday : float
+        calendar day
+    calendar : string, optional
+        option if use leap year or noleap year. The default is 'noleap'.
+
+    Returns
+    -------
+    mmdd : string of day of the year
+
+    """
     
     if calendar=='leap':
         mmm=[31,29,31,30,31,30,31,31,30,31,30,31]
@@ -78,34 +134,25 @@ def cday2mmdd(cday,calendar='noleap'):
 #%%
 
 def timeunit2cday(timeunit,calendar='leap'):
+    """
+    find the calendar day of the initial time in timeunit
+
+    Parameters
+    ----------
+    timeunit : string
+        timeunit, in format of "*** since yyyy-mm-dd hh:mm:ss"
+        *** may be days, hours, minutes or seconds
+    calendar : string, optional
+        option if use leap year or noleap year. The default is 'leap'.
+
+    Returns
+    -------
+    cday0 : calendar day of yyyy-mm-dd hh:mm:ss in float format
+
+    """
     tstr=timeunit.split(' ')
     cday0 = yyyymmdd2cday(tstr[2],calendar) + hhmmss2sec(tstr[3])/86400
     return(cday0)
 
 # print(yyyymmdd2cday(datestr))
 # print(hhmmss2sec(timestr))
-
-#%% change the model time along the aircraft track to aircraft measurement time
-def get_obs_time(time_model):
-    
-    import numpy as np
-    time_obs=np.array([time_model[x]-int(time_model[x]) for x in range(len(time_model))])*86400
-    t_unique = np.unique(time_model)
-    
-    for tt in range(len(t_unique)):
-        idx = time_model==t_unique[tt]
-        time_part = time_obs[idx]
-        t_num = len(time_part)
-        if tt==0:
-            for ii in range(t_num):
-                time_part[ii] = time_part[ii] + 60*(ii+30-t_num-15)
-        else:
-            if round((t_unique[tt]-t_unique[tt-1])*86400)==1800:
-                for ii in range(t_num):
-                    time_part[ii] = time_part[ii] + 60*(ii-15)
-            else:
-                for ii in range(t_num):
-                    time_part[ii] = time_part[ii] + 60*(ii+30-t_num-15)
-        time_obs[idx]=time_part
-        
-    return(time_obs)

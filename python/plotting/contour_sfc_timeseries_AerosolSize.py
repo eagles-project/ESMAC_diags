@@ -1,16 +1,16 @@
+"""
 # plot surface timeseries of aerosol size distribution
 # compare models and surface measurements
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
-from time_format_change import yyyymmdd2cday, hhmmss2sec,cday2mmdd
+from time_format_change import yyyymmdd2cday, cday2mmdd
 from read_surface import read_smpsb_pnnl,read_smps_bin
 from read_ARMdata import read_uhsas, read_smps_bnl
 from read_netcdf import read_E3SM
@@ -28,7 +28,6 @@ elif campaign=='HISCALE':
     elif IOP=='IOP2':
         from settings import smps_pnnl_path
 
-import os
 if not os.path.exists(figpath_sfc_timeseries):
     os.makedirs(figpath_sfc_timeseries)
     
@@ -36,8 +35,7 @@ if not os.path.exists(figpath_sfc_timeseries):
 cday1 = yyyymmdd2cday(start_date,'noleap')
 cday2 = yyyymmdd2cday(end_date,'noleap')
 if start_date[0:4]!=end_date[0:4]:
-    print('ERROR: currently not support multiple years. please set start_date and end_date in the same year')
-    error
+    raise ValueError('currently not support multiple years. please set start_date and end_date in the same year')
 year0 = start_date[0:4]
 
 # set time resolution for plotting. longer time needs coarser resolution to prevent memory error
@@ -140,8 +138,7 @@ elif campaign=='HISCALE':
     # SMPS is already divided by log10
     
 else:
-    print('ERROR: does NOT recognize this campaign: '+campaign)
-    error
+    raise ValueError('please check campaign name: '+campaign)
     
 #%% read in models
 model = []

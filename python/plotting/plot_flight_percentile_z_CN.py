@@ -1,16 +1,16 @@
+"""
 # plot percentile of aerosol number concentration (CN) with height
 # for flight data in IOPs
 # compare models and CPC measurements
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import glob
+import os
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from read_aircraft import read_cpc, read_RF_NCAR
 from read_netcdf import read_merged_size,read_extractflight
 from quality_control import qc_mask_cloudflag,qc_remove_neg,qc_cpc_air
@@ -20,15 +20,13 @@ from quality_control import qc_mask_cloudflag,qc_remove_neg,qc_cpc_air
 from settings import campaign, Model_List, color_model,  \
     height_bin, E3SM_aircraft_path, figpath_aircraft_statistics
 
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     from settings import IOP, cpcpath,merged_size_path
-elif campaign=='CSET' or campaign=='SOCRATES':
+elif campaign in ['CSET', 'SOCRATES']:
     from settings import RFpath
 else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+    raise ValueError('campaign name is not recognized: '+campaign)
     
-import os
 if not os.path.exists(figpath_aircraft_statistics):
     os.makedirs(figpath_aircraft_statistics)
    
@@ -47,8 +45,7 @@ zlen=len(z)
 lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+E3SM_aircraft_path)
-    error
+    raise ValueError('cannot find any file')
 # choose files for specific IOP
 if campaign=='HISCALE':
     if IOP=='IOP1':
@@ -106,7 +103,7 @@ for date in alldates:
     height_all.append(heightm)
     
     #%% read in CPC measurements
-    if campaign=='HISCALE' or campaign=='ACEENA':
+    if campaign in ['HISCALE', 'ACEENA']:
         if date[-1]=='a':
             flightidx=1
         else:
@@ -132,9 +129,7 @@ for date in alldates:
             cpc10=np.nan*np.empty([len(timem)])
             cpc3=np.nan*np.empty([len(timem)])
         else:
-            print('find too many files, check: ')
-            print(filename_c)
-            error
+            raise ValueError('find too many files: '+filename_c)
         
         # cloud flag
         if campaign=='HISCALE':
@@ -152,7 +147,7 @@ for date in alldates:
         cpc3_o.append(cpc3)
     
     #%% read in flight data (for CSET and SOCRATES)
-    elif campaign=='CSET' or campaign=='SOCRATES':
+    elif campaign in ['CSET', 'SOCRATES']:
         filename = glob.glob(RFpath+'RF*'+date+'*.PNI.nc')
         if len(filename)==1 or len(filename)==2:  # SOCRATES has two flights in 20180217, choose the later one
             (time_cpc,cpc10,timeunit,cpc10unit,cpc10longname,cellsize,cellunit)=read_RF_NCAR(filename[-1],'CONCN')
@@ -162,9 +157,7 @@ for date in alldates:
                 # there are two variables: CONCU100_CVIU and CONCU100_LWII
                 (time_cpc,uhsas100,timeunit,uhsas100unit,uhsas100longname,cellsize,cellunit)=read_RF_NCAR(filename[-1],'CONCU100_LWII')
         else:
-            print  ('find no file or too many files, check: ')
-            print(filename)
-            error  
+            raise ValueError('cannot find any file or find too many files: '+filename)
         
         # some quality checks
         uhsas100=qc_remove_neg(uhsas100)
@@ -199,9 +192,9 @@ ndays=len(height_all)
 for dd in range(ndays):
     height = height_all[dd]
     cpc10 = cpc10_o[dd]
-    if campaign=='HISCALE' or campaign=='ACEENA':
+    if campaign in ['HISCALE', 'ACEENA']:
         cpc3 = cpc3_o[dd]
-    elif campaign=='CSET' or campaign=='SOCRATES':
+    elif campaign in ['CSET', 'SOCRATES']:
         uhsas100 = uhsas100_o[dd]
     for zz in range(zlen):
         idx = np.logical_and(height>=zmin[zz], height<zmax[zz])
@@ -209,12 +202,12 @@ for dd in range(ndays):
         for mm in range(nmodels):
             model10 = cpc10_m[mm][dd]
             cpc10_m_z[mm][zz]=np.append(cpc10_m_z[mm][zz],model10[idx])
-        if campaign=='HISCALE' or campaign=='ACEENA':
+        if campaign in ['HISCALE', 'ACEENA']:
             cpc3_o_z[zz]=np.append(cpc3_o_z[zz],cpc3[np.logical_and(idx,~np.isnan(cpc3))])
             for mm in range(nmodels):
                 model3 = cpc3_m[mm][dd]
                 cpc3_m_z[mm][zz]=np.append(cpc3_m_z[mm][zz],model3[idx])
-        elif campaign=='CSET' or campaign=='SOCRATES':
+        elif campaign in ['CSET', 'SOCRATES']:
             uhsas100_o_z[zz]=np.append(uhsas100_o_z[zz],uhsas100[np.logical_and(idx,~np.isnan(uhsas100))])
             for mm in range(nmodels):
                 model100 = cpc100_m[mm][dd]
@@ -225,7 +218,7 @@ for dd in range(ndays):
 p_shift = np.arange(nmodels+1)
 p_shift = (p_shift - p_shift.mean())*0.2
 
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     figname = figpath_aircraft_statistics+'percentile_height_CN_'+campaign+'_'+IOP+'.png'
 else:
     figname = figpath_aircraft_statistics+'percentile_height_CN_'+campaign+'.png'
@@ -259,7 +252,7 @@ for mm in range(nmodels):
     ax1.plot([],c=color_model[mm],label=Model_List[mm])
 ax1.legend(loc='upper right', fontsize='x-large')
     
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     ax2.boxplot(cpc3_o_z,whis=(5,95),showmeans=False,showfliers=False,
                 positions=np.array(range(zlen))+p_shift[-1],widths=0.15,
                 boxprops=dict(facecolor='k', color='k'),whiskerprops=dict(color='k'),
@@ -273,7 +266,7 @@ if campaign=='HISCALE' or campaign=='ACEENA':
                 medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
                 vert=False, patch_artist=True)    # need patch_artist to fill color in box
     ax2.plot([],c='k',label='CPC(>3nm)')
-elif campaign=='CSET' or campaign=='SOCRATES':
+elif campaign in ['CSET', 'SOCRATES']:
     ax2.boxplot(uhsas100_o_z,whis=(5,95),showmeans=False,showfliers=False,
                 positions=np.array(range(zlen))+p_shift[-1],widths=0.15,
                 boxprops=dict(facecolor='k', color='k'),whiskerprops=dict(color='k'),
@@ -323,7 +316,7 @@ elif campaign=='SOCRATES':
 
 ax1.set_ylabel('Height (m MSL)',fontsize=16)
 fig.text(0.4,0.06, 'Aerosol number (cm$^{-3}$)', fontsize=16)
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     fig.text(0.48,0.9, IOP, fontsize=18)
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
@@ -340,7 +333,7 @@ fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 # ax.set_yticks(z)
 # ax.tick_params(color='k',labelsize=16)
 
-# if campaign=='HISCALE' or campaign=='ACEENA':
+# if campaign in ['HISCALE', 'ACEENA']:
 #     figname = figpath_aircraft_statistics+'samplenumber_'+campaign+'_'+IOP+'.png'
 # else:
 #     figname = figpath_aircraft_statistics+'samplenumber_'+campaign+'.png'

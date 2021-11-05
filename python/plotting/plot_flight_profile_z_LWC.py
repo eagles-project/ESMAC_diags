@@ -1,17 +1,17 @@
+"""
 # plot vertical profile of cloud fraction for all flights in each IOP
 # compare models and aircraft measurements
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from read_aircraft import read_wcm, read_RF_NCAR
-from read_netcdf import read_extractflight,read_merged_size
+from read_netcdf import read_extractflight
 from quality_control import qc_mask_qcflag,qc_remove_neg
 
 #%% settings
@@ -19,15 +19,13 @@ from quality_control import qc_mask_qcflag,qc_remove_neg
 from settings import campaign, Model_List, color_model,  \
     height_bin, E3SM_aircraft_path, figpath_aircraft_statistics
     
-if campaign=='HISCALE' or campaign=='ACEENA':
-    from settings import IOP,  wcmpath, merged_size_path
-elif campaign=='CSET' or campaign=='SOCRATES':
+if campaign in ['HISCALE', 'ACEENA']:
+    from settings import IOP,  wcmpath
+elif campaign in ['CSET', 'SOCRATES']:
     from settings import RFpath
 else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+    raise ValueError('campaign name is not recognized: '+campaign)
     
-import os
 if not os.path.exists(figpath_aircraft_statistics):
     os.makedirs(figpath_aircraft_statistics)
     
@@ -45,8 +43,7 @@ zlen=len(z)
 lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+E3SM_aircraft_path)
-    error
+    raise ValueError('cannot find any file')
 # choose files for specific IOP
 if campaign=='HISCALE':
     if IOP=='IOP1':
@@ -85,7 +82,7 @@ for date in alldates:
     print(date)
         
     #%% read in obs
-    if campaign=='HISCALE' or campaign=='ACEENA':
+    if campaign in ['HISCALE', 'ACEENA']:
         if date[-1]=='a':
             flightidx=1
         else:
@@ -103,7 +100,7 @@ for date in alldates:
         lwcobs=qc_remove_neg(lwcobs)
         lwcobs=qc_mask_qcflag(lwcobs,flag)
     
-    elif campaign=='CSET' or campaign=='SOCRATES':
+    elif campaign in ['CSET', 'SOCRATES']:
         filename = glob.glob(RFpath+'RF*'+date+'*.PNI.nc')
         if len(filename)==1 or len(filename)==2:  # SOCRATES has two flights in 20180217, choose the later one
             (time,lwcobs,timeunit,lwcunit,lwclongname,cellsize,cellunit)=read_RF_NCAR(filename[-1],'PLWCC')
@@ -169,7 +166,7 @@ for zz in range(zlen):
             lwcmean_m[mm][zz] = np.mean(data)
             
 #%% plot frequency  
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     figname = figpath_aircraft_statistics+'profile_height_LWC_'+campaign+'_'+IOP+'.png'
 else:
     figname = figpath_aircraft_statistics+'profile_height_LWC_'+campaign+'.png'
@@ -192,7 +189,7 @@ ax.set_yticks(z)
 ax.set_ylabel('Height (m MSL)',fontsize=16)
 ax.legend(loc='upper right', fontsize='large')
 ax.set_xlabel('LWC (g/m3)',fontsize=16)
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     ax.set_title(IOP,fontsize=18)
 else:
     ax.set_title(campaign,fontsize=18)

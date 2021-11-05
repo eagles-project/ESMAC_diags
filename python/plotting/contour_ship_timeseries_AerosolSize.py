@@ -3,22 +3,20 @@
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-# matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from read_ARMdata import read_uhsas
 from read_netcdf import read_E3SM
 from time_format_change import cday2mmdd
 from specific_data_treatment import  avg_time_2d
-from quality_control import qc_mask_qcflag, qc_remove_neg
+from quality_control import qc_remove_neg
 
 #%% settings
 
-from settings import campaign, site, Model_List, shipuhsaspath, E3SM_ship_path, figpath_ship_timeseries
+from settings import campaign, Model_List, shipuhsaspath, E3SM_ship_path, figpath_ship_timeseries
 
-import os
 if not os.path.exists(figpath_ship_timeseries):
     os.makedirs(figpath_ship_timeseries)
 
@@ -87,8 +85,7 @@ for ll in range(len(lst)):
         if len(filenameo)==0:
             continue  # some days may be missing
         if len(filenameo)>1:
-            print('ERROR: should not find multiple files. check')
-            error
+            raise ValueError('find too many files: ' + filenameo)
         
         
         (time,dmin,dmax,uhsas,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
@@ -169,5 +166,5 @@ for ll in range(len(lst)):
     
     fig.text(.08, .97,'ship leg '+legnum, fontsize=12)
     
-    # fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
     

@@ -1,13 +1,13 @@
+"""
 # plot timeseries of basic meteorological variables along ship track
-
+"""
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-# matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from read_ship import read_marmet
 from read_ARMdata import read_met
 from read_netcdf import read_E3SM
@@ -19,7 +19,6 @@ from specific_data_treatment import  avg_time_1d
 
 from settings import campaign, Model_List, color_model, shipmetpath, E3SM_ship_path, figpath_ship_timeseries
 
-import os
 if not os.path.exists(figpath_ship_timeseries):
     os.makedirs(figpath_ship_timeseries)
 
@@ -150,8 +149,7 @@ for ll in range(len(lst)):
     varmlongname[3]='Rainrate'
         
     if len(time)!=len(timem):
-        print('ERROR: the model shiptrack data should have the same time as in obs. check!')
-        error
+        raise ValueError('model and observation have inconsistent time dimension')
     
     #%% make plot
         
@@ -200,5 +198,5 @@ for ll in range(len(lst)):
     
     fig.text(.1, .999,'trip # '+legnum, fontsize=15)
     
-    # fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
     

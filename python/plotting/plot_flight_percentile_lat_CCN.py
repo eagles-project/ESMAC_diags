@@ -1,21 +1,18 @@
+"""
 # plot percentile of aerosol number concentration binned by different latitudes
 # separated by below-cloud, near-cloud and above-cloud
 # for aircraft measurements in CSET or SOCRATES
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import glob
+import os
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy as sp
-import glob
-from read_aircraft import read_ccn_hiscale, read_ccn_socrates, read_RF_NCAR
-from read_ARMdata import read_ccn
+from read_aircraft import read_ccn_socrates, read_RF_NCAR
 from read_netcdf import read_extractflight
-from time_format_change import yyyymmdd2cday,  cday2mmdd
 from quality_control import qc_remove_neg
 
 #%% settings
@@ -25,13 +22,11 @@ plot_method = 'all'  # 'height': separate by height. 'all': all heights below 5k
 from settings import campaign, Model_List, color_model, \
     latbin, E3SM_aircraft_path, figpath_aircraft_statistics
 
-if campaign=='CSET' or campaign=='SOCRATES':
+if campaign in ['CSET', 'SOCRATES']:
     from settings import ccnpath, RFpath
 else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+    raise ValueError('This code is only for CSET or SOCRATES. check campaign setting: '+campaign)
     
-import os
 if not os.path.exists(figpath_aircraft_statistics):
     os.makedirs(figpath_aircraft_statistics)
    
@@ -47,8 +42,7 @@ nmodels=len(Model_List)
 lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+E3SM_aircraft_path)
-    error
+    raise ValueError('cannot find any file')
 alldates = [x.split('_')[-1].split('.')[0] for x in lst]
 
 #%% define variables by latitude bins below, near and above clouds
@@ -139,12 +133,10 @@ for date in alldates:
             SSb=np.nan*np.empty([len(timem)])
             ccnb=np.nan*np.empty([len(timem)])
         else:
-            print('find too many files, check: ')
-            print(filename_ccn)
-            error
+            raise ValueError('find too many files: ' + filename_ccn)
             
     if any(timea!=timeb):
-        error   
+        raise ValueError('inconsitent time dimension')
         
     
     # need latitude from RF file
@@ -152,9 +144,7 @@ for date in alldates:
     if len(lst)==1 or len(lst)==2:  # SOCRATES has two flights in 20180217, choose the later one
         filename=lst[-1]
     else:
-        print  ('find no file or too many files, check: ')
-        print(lst)
-        error  
+        raise ValueError('find no file or too many files: ' + lst)
     (time,lat,timeunit,latunit,latlongname,cellsize,cellunit)=read_RF_NCAR(filename,'LAT')
     
     # exclude NaNs
@@ -438,7 +428,6 @@ elif plot_method == 'all':
     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 #%%
 else:
-    print('Error: does not recognize plot_method: '+plot_method)
-    error
+    raise ValueError('does not recognize plot_method: '+plot_method)
     
    

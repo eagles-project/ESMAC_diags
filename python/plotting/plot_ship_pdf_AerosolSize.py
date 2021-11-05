@@ -1,15 +1,15 @@
+"""
 # plot mean aerosol size ditribution for ship track data
 # average for all data
 # compare models and aircraft measurements
-
+"""
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from read_ARMdata import read_uhsas
 from read_netcdf import read_E3SM
 from time_format_change import cday2mmdd,yyyymmdd2cday
@@ -19,7 +19,6 @@ from specific_data_treatment import  avg_time_2d
 
 from settings import campaign, Model_List, color_model, shipuhsaspath, E3SM_ship_path, figpath_ship_statistics
 
-import os
 if not os.path.exists(figpath_ship_statistics):
     os.makedirs(figpath_ship_statistics)
 
@@ -92,9 +91,7 @@ for cc in range(cday1,cday2+1):
     if len(filenameo)==0:
         continue  
     elif len(filenameo)>1:
-        print('ERROR: should only find one file. check: ')
-        print(filenameo)
-        error
+        raise ValueError('find too many files')
     
     print(yyyymmdd)
     

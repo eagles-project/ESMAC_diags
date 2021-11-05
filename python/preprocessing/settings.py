@@ -232,7 +232,5 @@ elif campaign=='SOCRATES':
     E3SM_profile_path = package_path+'data/'+campaign+'/model/profile/'
     
 else:
-    print('ERROR: does not recognize campaign '+campaign)
-    error
-    
-    
+    raise ValueError("does not recognize this campaign: "+campaign)
+

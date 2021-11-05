@@ -1,17 +1,20 @@
+"""
 # prepare E3SM aerosol size distribution for flight tracks
 # input data is IWG measurements from aircraft and E3SM regional output
 # output is  aerosol size distribution for each flight
-
+"""
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import numpy as np
 import glob
-from time_format_change import yyyymmdd2cday, hhmmss2sec, timeunit2cday, get_obs_time
+import os
+import numpy as np
+from time_format_change import hhmmss2sec, timeunit2cday
 from read_aircraft import read_iwg1, read_RF_NCAR
 from read_netcdf import read_E3SM
 from CN_mode_to_size import calc_CNsize_cutoff_0_3000nm
 from netCDF4 import Dataset
+
 
 def find_nearest(xall,yall,x,y):
     distance = np.square(xall-x) + np.square(yall-y)
@@ -23,15 +26,13 @@ def find_nearest(xall,yall,x,y):
 
 from settings import campaign, E3SM_h3_path, E3SM_h3_filehead, E3SM_aircraft_path, Model_List
 
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     from settings import IOP, iwgpath
-elif campaign=='CSET' or campaign=='SOCRATES':
+elif campaign in ['CSET', 'SOCRATES']:
     from settings import RFpath
 else:
-    print('ERROR: this aircraft campaign is not recognized: '+campaign)
-    error
+    raise ValueError('this aircraft campaign is not recognized: '+campaign)
     
-import os
 if not os.path.exists(E3SM_aircraft_path):
     os.makedirs(E3SM_aircraft_path)
 
@@ -45,8 +46,7 @@ elif campaign=='CSET':
 elif campaign=='SOCRATES':
     E3SMdomain_range='133e_to_164e_42s_to_63s'  
 else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+    raise ValueError('this aircraft campaign is not recognized: '+campaign)
 
 #%% find all flight data
 if campaign=='HISCALE':
@@ -71,19 +71,19 @@ elif campaign=='ACEENA':
         a=lst[0].split('_'+campaign+'_')
         lst = glob.glob(a[0]+'*'+IOP+'*')
         lst.sort()
-elif campaign=='CSET' or campaign=='SOCRATES':
+elif campaign in ['CSET', 'SOCRATES']:
     lst = glob.glob(RFpath+'RF*.PNI.nc')
     lst.sort()
 else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+    raise ValueError('this aircraft campaign is not recognized: '+campaign)
+    
 print('total number of files:'+str(len(lst)))
 
 for filename in lst:
     
     fname=filename.split('.')
     #%% read in flight data
-    if campaign=='HISCALE' or campaign=='ACEENA':
+    if campaign in ['HISCALE', 'ACEENA']:
         date=fname[-3]
         print('input data for '+date)
         year=date[0:4]
@@ -109,7 +109,7 @@ for filename in lst:
             timestr=flight[t][1].split(' ')
             time[t]=hhmmss2sec(timestr[1])
     
-    elif campaign=='CSET' or campaign=='SOCRATES':
+    elif campaign in ['CSET', 'SOCRATES']:
         date=fname[-4]
         print('input data for '+date)
         year=date[0:4]
@@ -228,7 +228,7 @@ for filename in lst:
         import time as ttt
         f.description = model+" extact for aircraft track for "+campaign
         f.aircraftfile = filename.split('\\')[-1]
-        f.history = "Created by Shuaiqi at " + ttt.ctime(ttt.time())
+        f.create_time = ttt.ctime(ttt.time())
         
         f.close()
 

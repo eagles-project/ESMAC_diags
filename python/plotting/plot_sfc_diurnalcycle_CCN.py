@@ -1,15 +1,15 @@
+"""
 # plot surface diurnal cycle of aerosol size distribution
 # compare models and surface measurements
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from time_format_change import yyyymmdd2cday,cday2mmdd
 from read_ARMdata import read_ccn
 from read_surface import read_CCN_hiscale_IOP1, read_CCN_hiscale_IOP2
@@ -25,11 +25,9 @@ from settings import campaign, ccnsfcpath,  Model_List, color_model, \
 cday1 = yyyymmdd2cday(start_date,'noleap')
 cday2 = yyyymmdd2cday(end_date,'noleap')
 if start_date[0:4]!=end_date[0:4]:
-    print('ERROR: currently not support multiple years. please set start_date and end_date in the same year')
-    error
+    raise ValueError('currently not support multiple years. please set start_date and end_date in the same year')
 year0 = start_date[0:4]
     
-import os
 if not os.path.exists(figpath_sfc_timeseries):
     os.makedirs(figpath_sfc_timeseries)
     

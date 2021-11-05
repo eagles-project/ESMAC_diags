@@ -1,20 +1,17 @@
-# plot percentile of meteorological variables binned by different latitudes
+"""# plot percentile of meteorological variables binned by different latitudes
 # for aircraft measurements in CSET or SOCRATES
 # only select a certain height ranges for warm clouds (the height range needs to be further tuned)
-
+"""
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy as sp
-import glob
 from read_aircraft import read_RF_NCAR
 from read_netcdf import read_extractflight
 from specific_data_treatment import lwc2cflag
-from time_format_change import yyyymmdd2cday,  cday2mmdd
 from quality_control import qc_mask_takeoff_landing
 
 #%% settings
@@ -22,13 +19,11 @@ from quality_control import qc_mask_takeoff_landing
 from settings import campaign, Model_List, color_model,  \
     latbin, E3SM_aircraft_path, figpath_aircraft_statistics
 
-if campaign=='CSET' or campaign=='SOCRATES':
+if campaign in ['CSET', 'SOCRATES']:
     from settings import RFpath
 else:
-    print('ERROR: percentile by latitude for aircraft is only applied to CSET and SOCRATES. check campaign: '+campaign)
-    error
+    raise ValueError('This code is only for CSET or SOCRATES. check campaign setting: '+campaign)
     
-import os
 if not os.path.exists(figpath_aircraft_statistics):
     os.makedirs(figpath_aircraft_statistics)
     
@@ -44,8 +39,7 @@ nmodels=len(Model_List)
 lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+E3SM_aircraft_path)
-    error
+    raise ValueError('cannot fine any file')
 alldates = [x.split('_')[-1].split('.')[0] for x in lst]
 
 
@@ -85,9 +79,7 @@ for date in alldates:
     if len(lst)==1 or len(lst)==2:  # SOCRATES has two flights in 20180217, choose the later one
         filename=lst[-1]
     else:
-        print  ('find no file or too many files, check: ')
-        print(lst)
-        error  
+        raise ValueError('find no file or too many files: '+lst)
     (time,height,timeunit,hunit,hlongname,cellsize,cellunit)=read_RF_NCAR(filename,'ALT')
     (time,lat,timeunit,latunit,latlongname,cellsize,cellunit)=read_RF_NCAR(filename,'LAT')
     (time,lon,timeunit,lonunit,lonlongname,cellsize,cellunit)=read_RF_NCAR(filename,'LON')

@@ -1,13 +1,13 @@
+"""
 # plot timeseries of surface CCN number concentration along each ship leg
-
+"""
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-# matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from read_ARMdata import read_ccn_magic, read_ccn
 from read_netcdf import read_E3SM
 from time_format_change import cday2mmdd
@@ -20,7 +20,6 @@ from quality_control import qc_mask_qcflag,qc_ccn_max
 from settings import campaign, Model_List, color_model, \
             shipccnpath, shipmetpath, E3SM_ship_path, figpath_ship_timeseries
 
-import os
 if not os.path.exists(figpath_ship_timeseries):
     os.makedirs(figpath_ship_timeseries)
 
@@ -156,4 +155,4 @@ for ll in range(len(lst)):
     ax1.vlines(timem[datamask],ylim1[0],ylim1[1],color='lightgray')
     ax2.vlines(timem[datamask],ylim2[0],ylim2[1],color='lightgray')
     
-    # fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)

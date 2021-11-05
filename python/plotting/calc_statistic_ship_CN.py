@@ -1,13 +1,15 @@
+"""
 # calculate statistics (mean, bias, correlation, RMSE) of Aerosol number concentration
 # for ship measurements
 # compare models and CPC/UHSAS measurements
-
+"""
 import sys
 sys.path.insert(1,'../subroutines/')
 
+import os
+import glob
 import numpy as np
 import scipy.stats
-import glob
 from read_ARMdata import read_cpc, read_uhsas
 from read_netcdf import read_E3SM
 from time_format_change import  cday2mmdd
@@ -19,7 +21,6 @@ from quality_control import qc_mask_qcflag, qc_remove_neg
 
 from settings import campaign, Model_List, shipcpcpath, shipmetpath, shipuhsaspath, E3SM_ship_path, figpath_ship_statistics
 
-import os
 if not os.path.exists(figpath_ship_statistics):
     os.makedirs(figpath_ship_statistics)
 missing_value = np.nan
@@ -43,8 +44,7 @@ for ll in range(len(lst)):
     elif campaign=='MARCUS':
         legnum=lst[ll][-4]
     else: 
-        print('Error: not recongnize the campaign name: '+campaign)
-        error
+        raise ValueError('please check campaign name: '+campaign)
     print('legnum '+format(legnum))
     
     #%% read in model
@@ -135,8 +135,7 @@ for ll in range(len(lst)):
         if len(filenameo)==0:
             continue  # some days may be missing
         if len(filenameo)>1:
-            print('ERROR: should not find multiple files. check')
-            error
+            raise ValueError('find too many files: '+filenameo)
             
         (time,dmin,dmax,obs,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
         obs=np.ma.filled(obs)
@@ -181,8 +180,7 @@ for ll in range(len(lst)):
 #%% calculate statistics
 
 if ncn10all[0].shape != cpcall.shape or ncn100all[0].shape != uhsasall.shape:
-    print('Error: obs and model are in different shape. Check!')
-    error
+    raise ValueError('observation and model dimensions are inconsitent ')
 
 # select only valid data in obs and the corresponding data in models (all data are not NAN)
 idx10 = sum(np.vstack((~np.isnan(ncn10all),~np.isnan(cpcall))))==nmodels+1

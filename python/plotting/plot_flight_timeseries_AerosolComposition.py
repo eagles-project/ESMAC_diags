@@ -1,17 +1,17 @@
+"""
 # plot aircraft track data
 # timeseries of aerosol composition (SO4 and total organic) concentration 
 # compare models and aircraft measurements
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
-from time_format_change import yyyymmdd2cday, hhmmss2sec
+from time_format_change import hhmmss2sec
 from read_aircraft import read_ams,read_iwg1
 from read_netcdf import read_merged_size,read_extractflight
 from quality_control import qc_mask_qcflag,qc_remove_neg
@@ -21,16 +21,13 @@ from quality_control import qc_mask_qcflag,qc_remove_neg
 from settings import campaign, Model_List, color_model, \
     E3SM_aircraft_path, figpath_aircraft_timeseries
 
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     from settings import IOP, merged_size_path, amspath, iwgpath
-elif campaign=='CSET' or campaign=='SOCRATES':
-    print('ERROR: CSET and SOCRATES do not have composition data ')
-    error
+elif campaign in ['CSET', 'SOCRATES']:
+    raise ValueError('CSET and SOCRATES do not have composition data')
 else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+    raise ValueError('campaign name is not recognized: '+campaign)
     
-import os
 if not os.path.exists(figpath_aircraft_timeseries):
     os.makedirs(figpath_aircraft_timeseries)
     
@@ -38,8 +35,7 @@ if not os.path.exists(figpath_aircraft_timeseries):
 lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+E3SM_aircraft_path)
-    error
+    raise ValueError('cannot find any file')
 # choose files for specific IOP
 if campaign=='HISCALE':
     if IOP=='IOP1':
@@ -103,9 +99,7 @@ for date in alldates:
             timestr=iwg[t][1].split(' ')
             time_iwg[t]=hhmmss2sec(timestr[1])
     else:
-        print('Problem finding IWG data, check: ')
-        print(filename_i)
-        error
+        raise ValueError('find no file or multiple files: ' + filename_i)
     
     #%% read aerosol composition in AMS
     
@@ -126,9 +120,7 @@ for date in alldates:
         orgaaf = np.full(len(time_ams),np.nan)
         so4aaf = np.full(len(time_ams),np.nan)
     else:
-        print('found too many AMS files, check: ')
-        print(filename_ams)
-        error
+        raise ValueError('find too many files')
     
     # change values from standardize condition to ambient condition
     T_ams = np.interp(time_ams,time,T_iwg)

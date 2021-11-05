@@ -1,13 +1,13 @@
+"""
 # plot ship-track CCN number concentration binned by different latitudes
-
+"""
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from read_ARMdata import read_ccn_magic, read_ccn
 from read_netcdf import read_E3SM
 from time_format_change import  cday2mmdd
@@ -23,7 +23,6 @@ latmin = latbin-dlat/2
 latmax = latbin+dlat/2
 latlen = len(latbin)
 
-import os
 if not os.path.exists(figpath_ship_statistics):
     os.makedirs(figpath_ship_statistics)
 

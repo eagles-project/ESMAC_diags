@@ -1,19 +1,19 @@
+"""
 # plot aircraft information
 # plot 1: plot flight track location (lat/lon) with height in color
 # plot 2: plot timeseries of flight height with cloud and CVI flags
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from read_ARMdata import read_cvi_aceena
 from specific_data_treatment import lwc2cflag
-from time_format_change import yyyymmdd2cday, hhmmss2sec
+from time_format_change import hhmmss2sec
 from read_aircraft import read_iwg1, read_cvi_hiscale, read_RF_NCAR
 
 
@@ -21,15 +21,13 @@ from read_aircraft import read_iwg1, read_cvi_hiscale, read_RF_NCAR
 
 from settings import campaign, lat0, lon0, figpath_aircraft_timeseries
 
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     from settings import IOP, iwgpath, cvipath
-elif campaign=='CSET' or campaign=='SOCRATES':
+elif campaign in ['CSET', 'SOCRATES']:
     from settings import RFpath
 else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+    raise ValueError('campaign name is not recognized: '+campaign)
     
-import os
 if not os.path.exists(figpath_aircraft_timeseries):
     os.makedirs(figpath_aircraft_timeseries)
     
@@ -56,11 +54,10 @@ elif campaign=='ACEENA':
     elif IOP[0:4]=='2017' or IOP[0:4]=='2018':
         a=lst[0].split('_'+campaign+'_')
         lst = glob.glob(a[0]+'*'+IOP+'*')
-elif campaign=='CSET' or campaign=='SOCRATES':
+elif campaign in ['CSET', 'SOCRATES']:
     lst = glob.glob(RFpath+'RF*.PNI.nc')
 else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+    raise ValueError('campaign name is not recognized: '+campaign)
 lst.sort()
 
 #%% read in data and make plot
@@ -70,7 +67,7 @@ for filename in lst:
     fname=filename.split('.')
     
     #%% read in flight data (for HISCALE and ACEENA)
-    if campaign=='HISCALE' or campaign=='ACEENA':
+    if campaign in ['HISCALE', 'ACEENA']:
         date=fname[-3]
         if date[-1]=='a':
             flightidx=1
@@ -113,15 +110,12 @@ for filename in lst:
                 time_cvi = cvi[0,:]
                 cvi_inlet=cvi[-1,:]
                 if all(time_cvi==time)==False:
-                    print('time is not consistent for CVI')
-                    error
+                    raise ValueError('time dimension is incosistent')
             elif len(filename_c)==0:
                 time_cvi=time
                 cvi_inlet=np.nan*np.empty([len(time)])
             else:
-                print('find too many files, check: ')
-                print(filename_c)
-                error
+                raise ValueError('find too many files: '+filename_c)
                 
         elif campaign=='ACEENA':
             filename_c=glob.glob(cvipath+'enaaafinletcviF1.c1.'+date[0:8]+'*.nc')
@@ -133,23 +127,19 @@ for filename in lst:
                     time_c=np.insert(time_c,1403,(time_c[1402]+time_c[1403])/2)
                     cvi_inlet=np.insert(cvi_inlet,1403,cvi_inlet[1403])
                 if all(time_c==time)==False:
-                    print('time is not consistent for CVI')
-                    error
+                    raise ValueError('time dimension is incosistent')
             elif len(filename_c)==0:
                 time_cvi=time
                 cvi_inlet=np.nan*np.empty([len(time)])
             else:
-                print('find too many files, check: ')
-                print(filename_c)
-                error
+                raise ValueError('find too many files: '+filename_c)
             # cvi_inlet[cvi_inlet==-9]=1  # if cvi_inlet is unfunctional, use fims as good data
         
         else:
-            print('ERROR: not recognize this campaign: '+campaign)
-            error
+            raise ValueError('do not recognize this campaign: '+campaign)
     
     #%% read in flight data (for CSET and SOCRATES)
-    elif campaign=='CSET' or campaign=='SOCRATES':
+    elif campaign in ['CSET', 'SOCRATES']:
         date=fname[-4]
         print('input data for '+date)
         (time,height,timeunit,hunit,hlongname,cellsize,cellunit)=read_RF_NCAR(filename,'ALT')
@@ -175,42 +165,42 @@ for filename in lst:
         lon0=lon0-360
         
     try:
-        os.environ['PROJ_LIB'] = r'c:\Users\tang357\Anaconda3\pkgs\basemap-1.3.0-py38ha7665c8_0\Library\share'
-        from mpl_toolkits.basemap import Basemap
-        figname = figpath_aircraft_timeseries + 'flighttrack_'+campaign+'_'+date+'.png'
-        print('plot flight track to '+figname)
-        fig,ax = plt.subplots(figsize=(8,5))   # figsize in inches
-        plt.tight_layout(pad=0.1, w_pad=0.5, h_pad=1.5)   #pad=0.4, w_pad=0.5, h_pad=1.0
-        if campaign=='CSET' or campaign=='SOCRATES':
-            m = Basemap(llcrnrlon=min(np.floor(min(lon)),np.floor(lon0))-2,llcrnrlat=min(np.floor(min(lat)),np.floor(lat0))-2,\
-                urcrnrlon=max(np.ceil(max(lon)),np.ceil(lon0))+2,urcrnrlat=max(np.ceil(max(lat)),np.ceil(lat0))+2,\
-                resolution='l',rsphere=(6378137.00,6356752.3142),projection='lcc',lat_0=np.min(lat),lon_0=np.min(lon)) #,lat_ts=5.)
-            m.drawparallels(np.arange(-90,90,5),labels=[1,0,0,0])
-            m.drawmeridians(np.arange(-180,180,5),labels=[0,0,0,1])
-            m.drawcoastlines()
-            m.fillcontinents()
-        elif campaign=='HISCALE':
-            m = Basemap(llcrnrlon=-99,llcrnrlat=35,urcrnrlon=-95,urcrnrlat=38,\
-                resolution='l',rsphere=(6378137.00,6356752.3142),projection='lcc',lat_0=lat0,lon_0=lon0) #,lat_ts=5.)
-            m.drawparallels(np.arange(30,40,1),labels=[1,0,0,0])
-            m.drawmeridians(np.arange(-110,-90,1),labels=[0,0,0,1])
-            m.drawstates()
-            x2,y2=m(lon0,lat0)
-            m.scatter(x2,y2,s=100,marker='*',color='k')
-        elif campaign=='ACEENA':
-            m = Basemap(llcrnrlon=-30,llcrnrlat=37,urcrnrlon=-25,urcrnrlat=41,\
-                resolution='l',rsphere=(6378137.00,6356752.3142),projection='lcc',lat_0=lat0,lon_0=lon0) #,lat_ts=5.)
-            m.drawparallels(np.arange(30,42,1),labels=[1,0,0,0])
-            m.drawmeridians(np.arange(-30,-20,1),labels=[0,0,0,1])
-            m.drawcoastlines()
-            m.fillcontinents()
-            x2,y2=m(lon0,lat0)
-            m.scatter(x2,y2,s=100,marker='*',color='k')
-        x, y = m(lon,lat)
-        h=m.scatter(x,y,s=1,c=height,cmap='jet')
-        ax.set_title('Flight track '+date,fontsize=15)
-        cbar=fig.colorbar(h)
-    except:
+    #     os.environ['PROJ_LIB'] = r'c:\Users\tang357\Anaconda3\pkgs\basemap-1.3.0-py38ha7665c8_0\Library\share'
+    #     from mpl_toolkits.basemap import Basemap
+    #     figname = figpath_aircraft_timeseries + 'flighttrack_'+campaign+'_'+date+'.png'
+    #     print('plot flight track to '+figname)
+    #     fig,ax = plt.subplots(figsize=(8,5))   # figsize in inches
+    #     plt.tight_layout(pad=0.1, w_pad=0.5, h_pad=1.5)   #pad=0.4, w_pad=0.5, h_pad=1.0
+    #     if campaign in ['CSET', 'SOCRATES']:
+    #         m = Basemap(llcrnrlon=min(np.floor(min(lon)),np.floor(lon0))-2,llcrnrlat=min(np.floor(min(lat)),np.floor(lat0))-2,\
+    #             urcrnrlon=max(np.ceil(max(lon)),np.ceil(lon0))+2,urcrnrlat=max(np.ceil(max(lat)),np.ceil(lat0))+2,\
+    #             resolution='l',rsphere=(6378137.00,6356752.3142),projection='lcc',lat_0=np.min(lat),lon_0=np.min(lon)) #,lat_ts=5.)
+    #         m.drawparallels(np.arange(-90,90,5),labels=[1,0,0,0])
+    #         m.drawmeridians(np.arange(-180,180,5),labels=[0,0,0,1])
+    #         m.drawcoastlines()
+    #         m.fillcontinents()
+    #     elif campaign=='HISCALE':
+    #         m = Basemap(llcrnrlon=-99,llcrnrlat=35,urcrnrlon=-95,urcrnrlat=38,\
+    #             resolution='l',rsphere=(6378137.00,6356752.3142),projection='lcc',lat_0=lat0,lon_0=lon0) #,lat_ts=5.)
+    #         m.drawparallels(np.arange(30,40,1),labels=[1,0,0,0])
+    #         m.drawmeridians(np.arange(-110,-90,1),labels=[0,0,0,1])
+    #         m.drawstates()
+    #         x2,y2=m(lon0,lat0)
+    #         m.scatter(x2,y2,s=100,marker='*',color='k')
+    #     elif campaign=='ACEENA':
+    #         m = Basemap(llcrnrlon=-30,llcrnrlat=37,urcrnrlon=-25,urcrnrlat=41,\
+    #             resolution='l',rsphere=(6378137.00,6356752.3142),projection='lcc',lat_0=lat0,lon_0=lon0) #,lat_ts=5.)
+    #         m.drawparallels(np.arange(30,42,1),labels=[1,0,0,0])
+    #         m.drawmeridians(np.arange(-30,-20,1),labels=[0,0,0,1])
+    #         m.drawcoastlines()
+    #         m.fillcontinents()
+    #         x2,y2=m(lon0,lat0)
+    #         m.scatter(x2,y2,s=100,marker='*',color='k')
+    #     x, y = m(lon,lat)
+    #     h=m.scatter(x,y,s=1,c=height,cmap='jet')
+    #     ax.set_title('Flight track '+date,fontsize=15)
+    #     cbar=fig.colorbar(h)
+    # except:
         figname = figpath_aircraft_timeseries + 'flighttrack_'+campaign+'_'+date+'.png'
         print('plot flight track to '+figname)
         fig,ax = plt.subplots(figsize=(8,5))   # figsize in inches
@@ -227,6 +217,8 @@ for filename in lst:
         ax.set_title('Flight track '+date,fontsize=15)
         cbar=fig.colorbar(h)
         fig.text(0.81,0.91, 'm MSL')
+    except:
+        raise ValueError("cannot make flight track plot")
     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
     plt.close()
         
@@ -238,7 +230,7 @@ for filename in lst:
     plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.5)   #pad=0.4, w_pad=0.5, h_pad=1.0
     
     h11=ax1.plot(time/3600,height/1000,color='k',linewidth=1)
-    if campaign=='HISCALE' or campaign=='ACEENA':
+    if campaign in ['HISCALE', 'ACEENA']:
         for ll in range(1,max(legnum)+1):
             idx=legnum==ll
             ax1.plot(time[idx]/3600,height[idx]/1000,color='b',linewidth=2)

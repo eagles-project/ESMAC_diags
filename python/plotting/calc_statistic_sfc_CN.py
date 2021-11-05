@@ -1,15 +1,17 @@
+"""
 # calculate statistics (mean, bias, correlation, RMSE) of Aerosol number concentration
 # for surface measurements
 # compare models and CPC measurements
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
 # import matplotlib.pyplot as plt
+import os
+import glob
 import numpy as np
 import scipy.stats
-import glob
 from time_format_change import yyyymmdd2cday, cday2mmdd, timeunit2cday
 from read_ARMdata import read_cpc,read_uhsas
 from read_netcdf import read_E3SM
@@ -27,8 +29,7 @@ from settings import campaign, cpcsfcpath, cpcusfcpath, uhsassfcpath, Model_List
 cday1 = yyyymmdd2cday(start_date,'noleap')
 cday2 = yyyymmdd2cday(end_date,'noleap')
 if start_date[0:4]!=end_date[0:4]:
-    print('ERROR: currently not support multiple years. please set start_date and end_date in the same year')
-    error
+    raise ValueError('currently not support multiple years. please set start_date and end_date in the same year')
 year0 = start_date[0:4]
 
 # # in calendar day
@@ -44,7 +45,6 @@ year0 = start_date[0:4]
 #         time_range = [238,268]
         
         
-import os
 if not os.path.exists(figpath_sfc_statistics):
     os.makedirs(figpath_sfc_statistics)
    

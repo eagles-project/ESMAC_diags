@@ -1,16 +1,16 @@
+"""
 # plot aircraft track data
 # timeseries of aerosol number concentration (CN)
 # compare models and CPC measurements
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from read_aircraft import read_cpc, read_RF_NCAR
 from read_netcdf import read_merged_size,read_extractflight
 from quality_control import qc_cpc_air
@@ -20,32 +20,28 @@ from quality_control import qc_cpc_air
 from settings import campaign,  Model_List, color_model, \
     E3SM_aircraft_path, figpath_aircraft_timeseries
 
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     from settings import IOP, cpcpath,merged_size_path
-elif campaign=='CSET' or campaign=='SOCRATES':
+elif campaign in ['CSET', 'SOCRATES']:
     from settings import RFpath
 else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+    raise ValueError('campaign name is not recognized: '+campaign)
     
-import os
 if not os.path.exists(figpath_aircraft_timeseries):
     os.makedirs(figpath_aircraft_timeseries)
    
 
 #%% find files for flight information
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     lst = glob.glob(merged_size_path+'merged_bin_*'+campaign+'*.nc')
-elif campaign=='CSET' or campaign=='SOCRATES':
+elif campaign in ['CSET', 'SOCRATES']:
     lst = glob.glob(RFpath+'RF*.PNI.nc')
 else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+    raise ValueError('campaign name is not recognized: '+campaign)
 lst.sort()
 
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+merged_size_path)
-    error
+    raise ValueError('cannot find any file')
   
 # choose files for specific IOP
 if campaign=='HISCALE':
@@ -71,7 +67,7 @@ elif campaign=='ACEENA':
 for filename in lst:
     
     #%% read in flight data (for HISCALE and ACEENA)
-    if campaign=='HISCALE' or campaign=='ACEENA':
+    if campaign in ['HISCALE', 'ACEENA']:
         # get date info:        
         date=filename[-12:-3]
         if date[-1]=='a':
@@ -100,14 +96,12 @@ for filename in lst:
             cpc10=np.nan*np.empty([len(time)])
             cpc3=np.nan*np.empty([len(time)])
         else:
-            print('find too many files, check: ')
-            print(filename_c)
-            error
+            raise ValueError('find too many files')
         # some quality checks
         (cpc3,cpc10) = qc_cpc_air(cpc3,cpc10)
         
     #%% read in flight data (for CSET and SOCRATES)
-    elif campaign=='CSET' or campaign=='SOCRATES':
+    elif campaign in ['CSET', 'SOCRATES']:
         fname=filename.split('.')
         date=fname[-4]
         (time_cpc,cpc10,timeunit,cpc10unit,cpc10longname,cellsize,cellunit)=read_RF_NCAR(filename,'CONCN')
@@ -153,11 +147,11 @@ for filename in lst:
     ax1.tick_params(color='k',labelsize=12)
     ylim1 = ax1.get_ylim()
     
-    if campaign=='HISCALE' or campaign=='ACEENA':
+    if campaign in ['HISCALE', 'ACEENA']:
         ax2.plot(time_cpc/3600,cpc3,color='k',linewidth=1,label='CPC(>3nm)')
         for mm in range(nmodels):
             ax2.plot(timem2, cpc3_m[mm],color=color_model[mm],linewidth=1, label=Model_List[mm])
-    elif campaign=='CSET' or campaign=='SOCRATES':
+    elif campaign in ['CSET', 'SOCRATES']:
         ax2.plot(time_cpc/3600,uhsas100,color='k',linewidth=1,label='UHSAS(>100nm)')
         for mm in range(nmodels):
             ax2.plot(timem2, cpc100_m[mm],color=color_model[mm],linewidth=1, label=Model_List[mm])

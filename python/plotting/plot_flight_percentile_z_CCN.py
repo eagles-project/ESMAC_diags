@@ -1,16 +1,16 @@
+"""
 # plot percentile of CCN number concentration with height
 # for flight data in IOPs
 # compare models and CCN measurements
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
-import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+import os
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 from read_aircraft import read_ccn_hiscale, read_ccn_socrates
 from read_ARMdata import read_ccn
 from read_netcdf import read_extractflight,read_merged_size
@@ -21,15 +21,13 @@ from quality_control import qc_mask_qcflag,qc_mask_cloudflag,qc_remove_neg
 from settings import campaign, Model_List, color_model, \
     height_bin, E3SM_aircraft_path, figpath_aircraft_statistics
 
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     from settings import IOP, ccnpath, merged_size_path
-elif campaign=='CSET' or campaign=='SOCRATES':
+elif campaign in ['CSET', 'SOCRATES']:
     from settings import ccnpath
 else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+    raise ValueError('campaign name is not recognized: '+campaign)
     
-import os
 if not os.path.exists(figpath_aircraft_statistics):
     os.makedirs(figpath_aircraft_statistics)
    
@@ -48,8 +46,7 @@ zlen=len(z)
 lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+E3SM_aircraft_path)
-    error
+    raise ValueError('cannot find any file')
 # choose files for specific IOP
 if campaign=='HISCALE':
     if IOP=='IOP1':
@@ -137,9 +134,7 @@ for date in alldates:
             SSa=0.24*np.full(len(timem),1)
             SSb=0.46*np.full(len(timem),1)
         else:
-            print('find too many files, check: ')
-            print(filename_ccn)
-            error
+            raise ValueError('find too many files: '+filename_ccn)
         timea=time_ccn
         timeb=time_ccn
         # cloud flag
@@ -163,9 +158,7 @@ for date in alldates:
             SSa=np.nan*np.empty([len(timem)])
             ccna=np.nan*np.empty([len(timem)])
         else:
-            print('find too many files, check: ')
-            print(filename_ccna)
-            error
+            raise ValueError('find too many files: '+filename_ccna)
         if len(filename_ccnb)==1:
             (timeb,timeunitb,ccnb,qcflag,ccnunit,SSb)=read_ccn(filename_ccnb[0])
             ccnb=qc_mask_qcflag(ccnb,qcflag)
@@ -177,9 +170,7 @@ for date in alldates:
             SSb=np.nan*np.empty([len(timem)])
             ccnb=np.nan*np.empty([len(timem)])
         else:
-            print('find too many files, check: ')
-            print(filename_ccnb)
-            error
+            raise ValueError('find too many files: '+filename_ccnb)
         # cloud flag
         filename = merged_size_path+'merged_bin_fims_pcasp_opc_'+campaign+'_'+date+'.nc'
         (time,size,cflag,timeunit,cunit,long_name)=read_merged_size(filename,'cld_flag')
@@ -240,12 +231,10 @@ for date in alldates:
             SSb=np.nan*np.empty([len(timem)])
             ccnb=np.nan*np.empty([len(timem)])
         else:
-            print('find too many files, check: ')
-            print(filename_ccn)
-            error
+            raise ValueError('find too many files: '+filename_ccn)
             
     if any(timea!=timeb):
-        error   
+        raise ValueError('time dimension is inconsistent')
         
     # exclude NaNs
     idx = np.logical_or(~np.isnan(ccna), ~np.isnan(ccnb))
@@ -304,7 +293,7 @@ for dd in range(ndays):
 p_shift = np.arange(nmodels+1)
 p_shift = (p_shift - p_shift.mean())*0.2
 
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     figname = figpath_aircraft_statistics+'percentile_height_CCN_'+campaign+'_'+IOP+'.png'
 else:
     figname = figpath_aircraft_statistics+'percentile_height_CCN_'+campaign+'.png'
@@ -373,7 +362,7 @@ ax1.set_ylabel('Height (m MSL)',fontsize=16)
 fig.text(0.4,0.06, 'CCN number (cm$^{-3}$)', fontsize=16)
 ax1.set_title('SS = '+SS3,fontsize=16)
 ax2.set_title('SS = '+SS5,fontsize=16)
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     fig.text(0.48,0.92, IOP, fontsize=18)
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)

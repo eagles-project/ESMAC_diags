@@ -1,15 +1,17 @@
+"""
 # calculate statistics (mean, bias, correlation, RMSE) of Aerosol number concentration
 # for aircraft measurements
 # compare models and CPC measurements
-
+"""
 
 import sys
 sys.path.insert(1,'../subroutines/')
 
 # import matplotlib.pyplot as plt
+import os
+import glob
 import numpy as np
 import scipy.stats
-import glob
 from read_aircraft import read_cpc, read_RF_NCAR
 from read_netcdf import read_merged_size,read_extractflight
 from quality_control import qc_cpc_air, qc_remove_neg, qc_mask_takeoff_landing
@@ -18,15 +20,13 @@ from quality_control import qc_cpc_air, qc_remove_neg, qc_mask_takeoff_landing
 
 from settings import campaign, Model_List, E3SM_aircraft_path, figpath_aircraft_statistics
 
-if campaign=='HISCALE' or campaign=='ACEENA':
+if campaign in ['HISCALE', 'ACEENA']:
     from settings import IOP, cpcpath,merged_size_path
-elif campaign=='CSET' or campaign=='SOCRATES':
+elif campaign in ['CSET', 'SOCRATES']:
     from settings import RFpath
 else:
-    print('ERROR: campaign name is not recognized: '+campaign)
-    error
+    raise ValueError('please check campaign name: '+campaign)
     
-import os
 if not os.path.exists(figpath_aircraft_statistics):
     os.makedirs(figpath_aircraft_statistics)
    
@@ -37,8 +37,7 @@ missing_value = -999999.
 lst = glob.glob(E3SM_aircraft_path+'Aircraft_vars_'+campaign+'_'+Model_List[0]+'_*.nc')
 lst.sort()
 if len(lst)==0:
-    print('ERROR: cannot find any file at '+E3SM_aircraft_path)
-    error
+    raise ValueError('cannot find any file')
 # choose files for specific IOP
 if campaign=='HISCALE':
     if IOP=='IOP1':
@@ -100,7 +99,7 @@ for date in alldates:
         
         
     #%% read in flight measurements (CPC and PCASP) for HISCALE and ACEENA
-    if campaign=='HISCALE' or campaign=='ACEENA':
+    if campaign in ['HISCALE', 'ACEENA']:
         if date[-1]=='a':
             flightidx=1
         else:
@@ -130,9 +129,7 @@ for date in alldates:
             cpc10=np.nan*np.empty([len(timem)])
             cpc3=np.nan*np.empty([len(timem)])
         else:
-            print('find too many files, check: ')
-            print(filename_c)
-            error
+            raise ValueError('find too many files: '+filename_c)
         
         # some quality checks
         (cpc3,cpc10) = qc_cpc_air(cpc3, cpc10)
@@ -141,8 +138,7 @@ for date in alldates:
         (time_merge,size,pcasp,timeunit,pcaspunit,pcasplongname)=read_merged_size(filename_merge,'totalnum_pcasp')
         pcasp=qc_remove_neg(pcasp)
         if len(time_merge)!=len(time_cpc):
-            print('check time consistency of merge and cpc')
-            error
+            raise ValueError('time dimension is inconsistent ')
         
         # exclude 30min after takeoff and before landing
         cpc3 = qc_mask_takeoff_landing(time_cpc,cpc3)
@@ -154,7 +150,7 @@ for date in alldates:
         uhsas100_o=np.hstack((uhsas100_o, pcasp))
     
     #%% read in flight data (for CSET and SOCRATES)
-    elif campaign=='CSET' or campaign=='SOCRATES':
+    elif campaign in ['CSET', 'SOCRATES']:
         filename = glob.glob(RFpath+'RF*'+date+'*.PNI.nc')
         if len(filename)==1 or len(filename)==2:  # SOCRATES has two flights in 20180217, choose the later one
             (time_cpc,cpc10,timeunit,cpc10unit,cpc10longname,cellsize,cellunit)=read_RF_NCAR(filename[-1],'CONCN')
@@ -164,9 +160,7 @@ for date in alldates:
                 # there are two variables: CONCU100_CVIU and CONCU100_LWII
                 (time_cpc,uhsas100,timeunit,uhsas100unit,uhsas100longname,cellsize,cellunit)=read_RF_NCAR(filename[-1],'CONCU100_LWII')
         else:
-            print  ('find no file or too many files, check: ')
-            print(filename)
-            error  
+            raise ValueError('find too many files: '+filename)
         
         # some quality checks
         uhsas100=qc_remove_neg(uhsas100)
@@ -337,9 +331,9 @@ else:
 
 #%% write out files
 
-if campaign=='HISCALE' or campaign=='ACEENA':   
+if campaign in ['HISCALE', 'ACEENA']:   
     outfile = figpath_aircraft_statistics+'statistics_CN10nm_'+campaign+'_'+IOP+'.txt'
-elif campaign=='CSET' or campaign=='SOCRATES':
+elif campaign in ['CSET', 'SOCRATES']:
     outfile = figpath_aircraft_statistics+'statistics_CN10nm_'+campaign+'.txt'
 
 print('write statistics to file '+outfile)
@@ -390,7 +384,7 @@ with open(outfile, 'w') as f:
         f.write(format(corr10[ii][1],'10.2f')+', ')
         
 
-if campaign=='HISCALE' or campaign=='ACEENA':   
+if campaign in ['HISCALE', 'ACEENA']:   
     outfile = figpath_aircraft_statistics+'statistics_CN3nm_'+campaign+'_'+IOP+'.txt'
     print('write statistics to file '+outfile)
     with open(outfile, 'w') as f:
@@ -439,14 +433,14 @@ if campaign=='HISCALE' or campaign=='ACEENA':
             f.write(format(corr3[ii][1],'10.2f')+', ')
         
         
-if campaign=='HISCALE' or campaign=='ACEENA':   
+if campaign in ['HISCALE', 'ACEENA']:   
     outfile = figpath_aircraft_statistics+'statistics_CN100nm_'+campaign+'_'+IOP+'.txt'
-elif campaign=='CSET' or campaign=='SOCRATES':
+elif campaign in ['CSET', 'SOCRATES']:
     outfile = figpath_aircraft_statistics+'statistics_CN100nm_'+campaign+'.txt'
 print('write statistics to file '+outfile)
 
 with open(outfile, 'w') as f:
-    if campaign=='CSET' or campaign=='SOCRATES':
+    if campaign in ['CSET', 'SOCRATES']:
         f.write('statistics of Aerosol Number Concentration comparing with UHSAS(>100nm). sample size '+format(sum(idx100))+'\n')
     elif campaign=='ACEENA':
         f.write('statistics of Aerosol Number Concentration comparing with PCASP(>100nm). sample size '+format(sum(idx100))+'\n')
