@@ -16,6 +16,7 @@ from read_aircraft import read_RF_NCAR
 from read_netcdf import read_extractflight
 from specific_data_treatment import lwc2cflag
 from time_format_change import yyyymmdd2cday,  cday2mmdd
+from quality_control import qc_mask_takeoff_landing,qc_remove_neg,qc_mask_cloudflag
 
 #%% settings
 
@@ -120,23 +121,23 @@ for date in alldates:
         # (time,uhsas500,timeunit,uhsas100unit,uhsas100longname,cellsize,cellunit)=read_RF_NCAR(filename,'CONCU500_LWII')
     
     # exclude 30min after takeoff and before landing
-    idx=np.logical_and(time>(time[0]+1.800), time<(time[-1]-1.800))
-    time=time[idx]
-    height=height[idx]
-    lat=lat[idx]
-    lwc=lwc[idx]
-    cpc10=cpc10[idx]
-    uhsas100=uhsas100[idx]
-    timem=timem[idx]
+    height=qc_mask_takeoff_landing(time,height)
+    lat=qc_mask_takeoff_landing(time,lat)
+    lwc=qc_mask_takeoff_landing(time,lwc)
+    cpc10=qc_mask_takeoff_landing(time,cpc10)
+    uhsas100=qc_mask_takeoff_landing(time,uhsas100)
+    timem=qc_mask_takeoff_landing(time,timem)
     for mm in range(nmodels):
-        cpc10_m[mm]=cpc10_m[mm][idx]
-        cpc100_m[mm]=cpc100_m[mm][idx]
+        cpc10_m[mm]=qc_mask_takeoff_landing(time,cpc10_m[mm])
+        cpc100_m[mm]=qc_mask_takeoff_landing(time,cpc100_m[mm])
     
     # calculate cloud flag based on LWC
     cldflag=lwc2cflag(lwc,lwcunit)
     
-    uhsas100[np.logical_or(uhsas100<0,cldflag==1)]=np.nan
-    cpc10[np.logical_or(cpc10<0,cldflag==1)]=np.nan
+    cpc10 = qc_mask_cloudflag(cpc10,cldflag)
+    cpc10 = qc_remove_neg(cpc10)
+    uhsas100 = qc_mask_cloudflag(uhsas100,cldflag)
+    uhsas100 = qc_remove_neg(uhsas100)
     
     # if min(lat)<28:
     #     print(np.nanmax(uhsas100[np.logical_and(lat>25,lat<28)]))
@@ -471,7 +472,7 @@ elif plot_method == 'height':
     
     ax1.legend(loc='upper right', shadow=False, fontsize='x-large')
     
-    # fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
     
     #%% plot for UHSAS (>100nm)
     figname = figpath_aircraft_statistics+'percentile_lat_CN100nm_byheight_'+campaign+'.png'
@@ -533,7 +534,7 @@ elif plot_method == 'height':
     
     ax1.legend(loc='upper right', shadow=False, fontsize='x-large')
     
-    # fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 #%%    
 
 elif plot_method == 'all':

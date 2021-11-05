@@ -178,7 +178,6 @@ for bb in range(latlen):
     ps_o[bb] = ps_o[bb][~np.isnan(ps_o[bb])]
     # rain_o[bb] = rain_o[bb][~np.isnan(rain_o[bb])]
     
-    
 #%% make plot
 # set position shift so that models and obs are not overlapped
 p_shift = np.arange(nmodels+1)

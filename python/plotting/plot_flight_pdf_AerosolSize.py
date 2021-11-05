@@ -7,7 +7,7 @@ import sys
 sys.path.insert(1,'../subroutines/')
 
 import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+# matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
@@ -16,17 +16,8 @@ from specific_data_treatment import lwc2cflag
 # from time_format_change import yyyymmdd2cday, hhmmss2sec
 from read_netcdf import read_merged_size,read_extractflight
 
-# define function of averaging in time for faster plotting
-def avg_time(time0,data0,time):
-    data0[data0<0]=np.nan
-    if data0.shape[0]!=len(time0):
-        error
-    data = np.full((len(time),data0.shape[1]),np.nan)
-    dt=(time[1]-time[0])/2
-    for tt in range(len(time)):
-        idx = np.logical_and(time0>=time[tt]-dt,time0<=time[tt]+dt)
-        data[tt,:]=np.nanmean(data0[idx,:],axis=0)
-    return(data)
+from specific_data_treatment import  avg_time_2d
+from quality_control import qc_mask_cloudflag, qc_uhsas_RF_NCAR,qc_remove_neg,qc_mask_takeoff_landing
 
 #%% settings
 
@@ -105,7 +96,7 @@ for date in alldates[:]:
         
         # average in time for quicker plot
         time2=np.arange(300,86400,600)
-        data2 = avg_time(timem,datam.T,time2)
+        data2 = avg_time_2d(timem,datam.T,time2)
         datam=data2.T
         timem=time2
         
@@ -138,13 +129,11 @@ for date in alldates[:]:
         (time,size,merge,timeunit,dataunit,long_name)=read_merged_size(filename,'size_distribution_merged')
         time=np.ma.compressed(time)
         size=size*1000.
-        merge[cflag==1,:]=np.nan
-        
-        
+        merge = qc_mask_cloudflag(merge,cflag)
         
         # average in time for quicker plot
         time2=np.arange(300,86400,600)
-        data2 = avg_time(time,merge,time2)
+        data2 = avg_time_2d(time,merge,time2)
         merge = data2.T
         time=time2/3600.
         
@@ -158,14 +147,15 @@ for date in alldates[:]:
         elif campaign=='SOCRATES':
             # there are two variables: CUHSAS_CVIU and CUHSAS_LWII
             (time,uhsas,timeunit,dataunit,long_name,size,cellunit)=read_RF_NCAR(filename[-1],'CUHSAS_LWII')
+        uhsas=uhsas[:,0,:]
         # calculate cloud flag based on LWC
         cflag=lwc2cflag(lwc,lwcunit)
-        uhsas[cflag==1,:,:]=np.nan
-        uhsas[uhsas>500]=np.nan
+        uhsas = qc_mask_cloudflag(uhsas,cflag)
+        uhsas= qc_uhsas_RF_NCAR(uhsas)
         
         # average in time for quicker plot
         time2=np.arange(300,86400,600)
-        data2 = avg_time(time,uhsas[:,0,:],time2)
+        data2 = avg_time_2d(time,uhsas,time2)
         merge = data2.T
         time0 = np.array(time)
         time=time2/3600.
@@ -179,11 +169,10 @@ for date in alldates[:]:
         dlnDp=np.log(sizeh[bb]/sizel[bb])
         merge[bb,:]=merge[bb,:]/dlnDp
     
-    merge[merge<0]=np.nan
+    merge=qc_remove_neg(merge)
     
     # exclude 30min after takeoff and before landing
-    idx=np.logical_or(time2<(time2[0]+1800), time2>(time2[-1]-1800))
-    merge[:,idx]=np.nan
+    merge = qc_mask_takeoff_landing(time2,merge)
     
     # fig,ax=plt.subplots()
     # ax.plot(merge[9,:])
@@ -250,6 +239,6 @@ if campaign=='HISCALE' or campaign=='ACEENA':
 else:
     ax.set_title(campaign,fontsize=14)
 
-fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-plt.close()
+# fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# plt.close()
 

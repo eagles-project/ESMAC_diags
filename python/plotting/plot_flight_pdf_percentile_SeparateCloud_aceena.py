@@ -13,6 +13,7 @@ import glob
 from time_format_change import  hhmmss2sec,yyyymmdd2cday
 from read_aircraft import read_cpc
 from read_netcdf import read_merged_size,read_extractflight
+from quality_control import qc_remove_neg
 
 #%% settings
 
@@ -119,7 +120,7 @@ for filename in lst:
     size=np.ma.compressed(size)*1000  # um to nm
     sizel=sizel*1000
     sizeh=sizeh*1000
-    merge[merge<0]=np.nan
+    merge=qc_remove_neg(merge)
     
     
 
@@ -151,7 +152,7 @@ for filename in lst:
         error
     
     cpcdiff = cpc3-cpc10
-    cpcdiff[cpcdiff<0.]=np.nan
+    cpcdiff=qc_remove_neg(cpcdiff)
     
     #%% read in Models
     datam2 = []

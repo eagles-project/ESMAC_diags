@@ -13,18 +13,7 @@ import glob
 from read_ARMdata import read_uhsas
 from read_netcdf import read_E3SM
 from time_format_change import cday2mmdd,yyyymmdd2cday
-
-# define function of averaging in time for faster plotting
-def avg_time(time0,data0,time):
-    data0[data0<0]=np.nan
-    if data0.shape[0]!=len(time0):
-        error
-    data = np.full((len(time),data0.shape[1]),np.nan)
-    dt=(time[1]-time[0])/2
-    for tt in range(len(time)):
-        idx = np.logical_and(time0>=time[tt]-dt,time0<=time[tt]+dt)
-        data[tt,:]=np.nanmean(data0[idx,:],axis=0)
-    return(data)
+from specific_data_treatment import  avg_time_2d
 
 #%% settings
 
@@ -57,12 +46,11 @@ for mm in range(nmodels):
         
         # average for each file to reduce computational time
         ntimes.append(sum(data[0,:]>0))  # number of valid values
-        data[data<0]=np.nan
         data=data*1e-6   # change unit from 1/m3 to 1/cm3
         
         # average in time for quicker plot
         time0=np.arange(timem[0],timem[-1]+0.04,1./24)
-        data0 = avg_time(timem,data.T,time0)
+        data0 = avg_time_2d(timem,data.T,time0)
         pdfall_m[mm] = np.column_stack((pdfall_m[mm],data0.T))
         
         meandata=np.nanmean(data,1)
@@ -113,10 +101,9 @@ for cc in range(cday1,cday2+1):
     (time,dmin,dmax,uhsas,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
     
     uhsas=np.ma.filled(uhsas)
-    uhsas[uhsas<0]=np.nan
     # average in time for quicker plot
     time0=np.arange(1800,86400,3600)
-    data0 = avg_time(time,uhsas,time0)
+    data0 = avg_time_2d(time,uhsas,time0)
     pdfall_o = np.column_stack((pdfall_o,data0.T))
     
     # average for each file to reduce computational time

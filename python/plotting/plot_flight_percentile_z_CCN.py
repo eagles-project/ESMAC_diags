@@ -14,6 +14,7 @@ import glob
 from read_aircraft import read_ccn_hiscale, read_ccn_socrates
 from read_ARMdata import read_ccn
 from read_netcdf import read_extractflight,read_merged_size
+from quality_control import qc_mask_qcflag,qc_mask_cloudflag,qc_remove_neg
 
 #%% settings
 
@@ -125,11 +126,10 @@ for date in alldates:
             ccnb = data0[11,:]
             SSa = data0[2,:]
             SSb = data0[5,:]
-            idx = flag==0.0
-            ccna[flag!=0]=np.nan
-            ccnb[flag!=0]=np.nan
-            SSa[SSa<0]=np.nan
-            SSb[SSb<0]=np.nan
+            ccna = qc_mask_qcflag(ccna,flag)
+            ccnb = qc_mask_qcflag(ccnb,flag)
+            SSa=qc_remove_neg(SSa)
+            SSb=qc_remove_neg(SSb)
         elif len(filename_ccn)==0:
             time_ccn=timem
             ccna=np.nan*np.empty([len(timem)])
@@ -145,17 +145,18 @@ for date in alldates:
         # cloud flag
         filename = merged_size_path+'merged_bin_fims_pcasp_'+campaign+'_'+date+'.nc'
         (time,size,cflag,timeunit,cunit,long_name)=read_merged_size(filename,'cld_flag')
-        ccna[cflag!=0]=np.nan
-        ccnb[cflag!=0]=np.nan
+        ccna = qc_mask_cloudflag(ccna,cflag)
+        ccnb = qc_mask_cloudflag(ccnb,cflag)
         
     elif campaign=='ACEENA':
         filename_ccna=glob.glob(ccnpath+'enaaafccn2colaF1.b1.'+date[0:8]+'*.nc')
         filename_ccnb=glob.glob(ccnpath+'enaaafccn2colbF1.b1.'+date[0:8]+'*.nc')
         # read in data
         if len(filename_ccna)==1:
-            (timea,timeunita,ccna,ccnunit,SSa)=read_ccn(filename_ccna[0])
-            ccna[ccna<0]=np.nan
-            SSa[SSa<0]=np.nan
+            (timea,timeunita,ccna,qcflag,ccnunit,SSa)=read_ccn(filename_ccna[0])
+            ccna=qc_mask_qcflag(ccna,qcflag)
+            ccna=qc_remove_neg(ccna)
+            SSa=qc_remove_neg(SSa)
         elif len(filename_ccna)==0:
             # print('no CCN data found. set as NaN')
             timea=timem
@@ -166,9 +167,10 @@ for date in alldates:
             print(filename_ccna)
             error
         if len(filename_ccnb)==1:
-            (timeb,timeunitb,ccnb,ccnunit,SSb)=read_ccn(filename_ccnb[0])
-            ccnb[ccnb<0]=np.nan
-            SSb[SSb<0]=np.nan
+            (timeb,timeunitb,ccnb,qcflag,ccnunit,SSb)=read_ccn(filename_ccnb[0])
+            ccnb=qc_mask_qcflag(ccnb,qcflag)
+            ccnb=qc_remove_neg(ccnb)
+            SSb=qc_remove_neg(SSb)
         elif len(filename_ccnb)==0:
             # print('no CCN data found. set as NaN')
             timeb=timem
@@ -199,9 +201,9 @@ for date in alldates:
         elif time[-1]>timea[-1]:
             cflag = cflag[0:np.where(time==timea[-1])[0][0]+1]
             time = time[0:np.where(time==timea[-1])[0][0]+1]
-        ccna[cflag!=0]=np.nan
-        ccnb[cflag!=0]=np.nan
-         
+        ccna = qc_mask_cloudflag(ccna,cflag)
+        ccnb = qc_mask_cloudflag(ccnb,cflag)
+        
     # CSET does not have observed CCN
     elif campaign=='CSET':
         timea=timem
@@ -219,7 +221,7 @@ for date in alldates:
             time_ccn = data0[0,:]
             ccn = data0[1,:]
             SS = data0[3,:]
-            ccn[ccn<-9000]=np.nan
+            ccn=qc_remove_neg(ccn)
             timea=time_ccn
             timeb=time_ccn
             ccna=np.array(ccn)

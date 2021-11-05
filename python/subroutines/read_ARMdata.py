@@ -60,8 +60,8 @@ def read_ccn(filename):
     ccn = d_id[:]
     dataunit = d_id.units
     f.close()
-    ccn[qc_ccn!=0] = -9999.
-    return(time,timeunit,ccn,dataunit,SS)
+    # ccn[qc_ccn!=0] = -9999.
+    return(time,timeunit,ccn,qc_ccn, dataunit,SS)
 
 # MAGIC
 def read_ccn_magic(filename):    
@@ -94,12 +94,11 @@ def read_cpc(filename):
     dataunit = d_id.units
     # long_name = d_id.long_name
     try:
-        flag = f.variables['qc_concentration'][:]
-        data[np.logical_and(flag>0, flag<=20)]=np.nan
+        qc_flag = f.variables['qc_concentration'][:]
     except:
-        data[data<0]=np.nan
+        qc_flag = np.full(len(data),0.0)
     f.close()
-    return(time,data,timeunit,dataunit)
+    return(time,data,qc_flag, timeunit,dataunit)
 
 #%%  CVI
 # filename='../data/inletcvi/enaaafinletcviF1.c1.20170718.083145.nc'
@@ -207,9 +206,9 @@ def read_pblhtmpl1(filename):
     d_id = f.variables['annealing_pbl_height_sawyer_li']
     qc = f.variables['qc_annealing_pbl_height_sawyer_li'][:]
     pblh = d_id[:]
-    pblh[qc!=0] = np.nan
+    # pblh[qc!=0] = np.nan
     f.close()
-    return(time,timeunit,pblh)
+    return(time,timeunit,pblh,qc)
 
 #%%  BNL SMPS data
 # filename='../data/bnl-smps/sgpaossmpsS01.a1.20160513.000000.nc'

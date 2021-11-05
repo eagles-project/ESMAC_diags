@@ -1,5 +1,33 @@
 # function of some specific data treatment
 
+import numpy as np
+
+#%% average data into coarser time resolution
+def avg_time_1d(time0,data0,time):
+    from quality_control import qc_remove_neg
+    data0 = qc_remove_neg(data0)
+    if data0.shape[0]!=len(time0):
+        error
+    data = np.full((len(time)),np.nan)
+    dt=(time[1]-time[0])/2
+    for tt in range(len(time)):
+        idx = np.logical_and(time0>=time[tt]-dt,time0<=time[tt]+dt)
+        data[tt]=np.nanmean(data0[idx],axis=0)
+    return(data)
+
+# 
+def avg_time_2d(time0,data0,time):
+    from quality_control import qc_remove_neg
+    data0 = qc_remove_neg(data0)
+    if data0.shape[0]!=len(time0):
+        error
+    data = np.full((len(time),data0.shape[1]),np.nan)
+    dt=(time[1]-time[0])/2
+    for tt in range(len(time)):
+        idx = np.logical_and(time0>=time[tt]-dt,time0<=time[tt]+dt)
+        data[tt,:]=np.nanmean(data0[idx,:],axis=0)
+    return(data)
+
 #%% estimate cloud flag based on LWC
 def lwc2cflag(lwc,lwcunit):
     if lwcunit=='kg/m3':

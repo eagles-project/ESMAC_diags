@@ -13,18 +13,8 @@ import glob
 from time_format_change import yyyymmdd2cday,cday2mmdd
 from read_ARMdata import read_cpc
 from read_netcdf import read_E3SM
-
-# define function used in the code
-def avg_time(time0,data0,time):
-    data0[data0<0]=np.nan
-    if data0.shape[0]!=len(time0):
-        error
-    data = np.full((len(time)),np.nan)
-    dt=(time[1]-time[0])/2
-    for tt in range(len(time)):
-        idx = np.logical_and(time0>=time[tt]-dt,time0<=time[tt]+dt)
-        data[tt]=np.nanmean(data0[idx],axis=0)
-    return(data)
+from specific_data_treatment import  avg_time_1d
+from quality_control import qc_remove_neg,qc_mask_qcflag_cpc
 
 #%% settings
 
@@ -54,16 +44,16 @@ if campaign=='ACEENA':
     t_cpc=np.empty(0)
     cpc=np.empty(0)
     for filename in lst:
-        (time,data,timeunit,cpcunit)=read_cpc(filename)
+        (time,data,qc,timeunit,cpcunit)=read_cpc(filename)
+        data=qc_mask_qcflag_cpc(data,qc)
         timestr=timeunit.split(' ')
         date=timestr[2]
         cday=yyyymmdd2cday(date,'noleap')
         # average in time for quicker and clearer plot
         time2=np.arange(1800,86400,3600)
-        data2 = avg_time(np.array(time),np.array(data),time2)
+        data2 = avg_time_1d(np.array(time),np.array(data),time2)
         t_cpc=np.hstack((t_cpc, cday+time2/86400))
         cpc=np.hstack((cpc, data2))
-    cpc[cpc<0]=np.nan
     # no cpcu
     t_cpcu = np.array(np.nan)
     cpcu = np.array(np.nan)
@@ -82,13 +72,14 @@ elif campaign=='HISCALE':
         cpc = np.array(np.nan)
     else:
         for filename in lst:
-            (time,data,timeunit,cpcunit)=read_cpc(filename)
+            (time,data,qc,timeunit,cpcunit)=read_cpc(filename)
+            data=qc_mask_qcflag_cpc(data,qc)
             timestr=timeunit.split(' ')
             date=timestr[2]
             cday=yyyymmdd2cday(date,'noleap')
             t_cpc=np.hstack((t_cpc, cday+time/86400))
             cpc=np.hstack((cpc, data))
-        cpc[cpc<0]=np.nan
+        cpc=qc_remove_neg(cpc)
   
     # cpcu
     if IOP=='IOP1':
@@ -103,13 +94,14 @@ elif campaign=='HISCALE':
         cpcu = np.array(np.nan)
     else:
         for filename in lst:
-            (time,data,timeunit,cpcuunit)=read_cpc(filename)
+            (time,data,qc,timeunit,cpcuunit)=read_cpc(filename)
+            data=qc_mask_qcflag_cpc(data,qc)
             timestr=timeunit.split(' ')
             date=timestr[2]
             cday=yyyymmdd2cday(date,'noleap')
             t_cpcu=np.hstack((t_cpcu, cday+time/86400))
             cpcu=np.hstack((cpcu, data))
-        cpcu[cpcu<0]=np.nan
+        cpcu=qc_remove_neg(cpcu)
     
 #%% read in models
 ncn_m = []
@@ -175,5 +167,3 @@ ax1.set_title('Aerosol Number Concentration (cm$^{-3}$) '+campaign+' '+IOP,fonts
 
 fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-    
-    

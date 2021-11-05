@@ -14,6 +14,7 @@ from time_format_change import yyyymmdd2cday,cday2mmdd
 from read_ARMdata import read_ccn
 from read_surface import read_CCN_hiscale_IOP1, read_CCN_hiscale_IOP2
 from read_netcdf import read_E3SM
+from quality_control import qc_remove_neg,qc_mask_qcflag,qc_ccn_max
 
 #%% settings
 
@@ -44,14 +45,16 @@ if campaign=='ACEENA':
     ccn=np.empty(0)
     SS=np.empty(0)
     for filename in lst:
-        (time,timeunit,data,dataunit,SS0)=read_ccn(filename)
+        (time,timeunit,data,qc,dataunit,SS0)=read_ccn(filename)
+        data=qc_mask_qcflag(data,qc)
         timestr=timeunit.split(' ')
         date=timestr[2]
         cday=yyyymmdd2cday(date,'noleap')
         t_ccn=np.hstack((t_ccn, cday+time/86400))
         ccn=np.hstack((ccn, data))
         SS=np.hstack((SS, SS0))
-    ccn[np.logical_or(ccn<0,ccn>1500)]=np.nan
+    ccn=qc_remove_neg(ccn)
+    ccn=qc_ccn_max(ccn,SS)
     # SS=0.1%
     idx = np.logical_and(SS>0.05, SS<0.15)
     t_ccna = t_ccn[idx]

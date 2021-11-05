@@ -326,36 +326,6 @@ def read_opc(filename):
     # data2[data2<-9990]=np.nan
     return(data2,np.array(d_min),np.array(d_max),np.array(d_center),varlist)
 
-#%% check with processed data
-def read_processed(filename):
-    # filename='../data/merged-bin/avesize_0830a_leg03.dat'
-    import numpy as np
-    f=open(filename)
-    h=f.readline()
-    ii=0
-    for line in f:
-        line=line.strip()
-        columns = line.split()
-        source=[]
-        for i in range(0,len(columns)):
-            source.append(float(columns[i]))
-        if ii==0:
-            fims=np.asarray(source)
-        elif ii<30:
-            fims=np.column_stack((fims,source))
-        elif ii==30:
-            pcasp=np.asarray(source)
-        elif ii>30 and ii<60:
-            pcasp=np.column_stack((pcasp,source))
-        elif ii==60:
-            merge=np.asarray(source)
-        elif ii>60:
-            merge=np.column_stack((merge,source))
-        ii=ii+1
-    f.close()
-    return (merge,fims,pcasp)
-
-
 
 #%% read PCASP
 # filename='../data/tomlinson-pcasp/pcasp_g1_20160511163038_R2_L1_hiscale001s.ict.txt'

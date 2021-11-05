@@ -13,6 +13,7 @@ import glob
 from time_format_change import yyyymmdd2cday,cday2mmdd
 from read_ARMdata import read_acsm
 from read_netcdf import read_E3SM
+from quality_control import qc_remove_neg,qc_acsm_org_max
 
 #%% settings
 
@@ -69,12 +70,13 @@ for filename in lst:
     nh4_obs=np.hstack((nh4_obs, nh4sfc))
     no3_obs=np.hstack((no3_obs, no3sfc))
     chl_obs=np.hstack((chl_obs, chlsfc))
-so4_obs[so4_obs<0]=np.nan
-nh4_obs[nh4_obs<0]=np.nan
-no3_obs[no3_obs<0]=np.nan
-chl_obs[chl_obs<0]=np.nan
-org_obs[np.logical_or(org_obs<0, org_obs>10)]=np.nan
-    
+so4_obs=qc_remove_neg(so4_obs)
+nh4_obs=qc_remove_neg(nh4_obs)
+no3_obs=qc_remove_neg(no3_obs)
+chl_obs=qc_remove_neg(chl_obs)
+org_obs=qc_remove_neg(org_obs)
+org_obs=qc_acsm_org_max(org_obs)
+
 #%% read in models
 nmodels = len(Model_List)
 model_org = list()

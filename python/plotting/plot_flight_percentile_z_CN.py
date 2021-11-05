@@ -13,6 +13,7 @@ import numpy as np
 import glob
 from read_aircraft import read_cpc, read_RF_NCAR
 from read_netcdf import read_merged_size,read_extractflight
+from quality_control import qc_mask_cloudflag,qc_remove_neg,qc_cpc_air
 
 #%% settings
 
@@ -141,12 +142,11 @@ for date in alldates:
         elif campaign=='ACEENA':
             filename = merged_size_path+'merged_bin_fims_pcasp_opc_'+campaign+'_'+date+'.nc'
         (time,size,cflag,timeunit,cunit,long_name)=read_merged_size(filename,'cld_flag')
-        cpc3[cflag!=0]=np.nan
-        cpc10[cflag!=0]=np.nan
+        cpc3=qc_mask_cloudflag(cpc3,cflag)
+        cpc10=qc_mask_cloudflag(cpc10,cflag)
         
         # some quality checks
-        cpc3[cpc3<20]=np.nan
-        cpc10[cpc10<10]=np.nan
+        (cpc3,cpc10) = qc_cpc_air(cpc3,cpc10)
         
         cpc10_o.append(cpc10)
         cpc3_o.append(cpc3)
@@ -167,8 +167,8 @@ for date in alldates:
             error  
         
         # some quality checks
-        uhsas100[uhsas100<0]=np.nan
-        cpc10[cpc10<0]=np.nan
+        uhsas100=qc_remove_neg(uhsas100)
+        cpc10=qc_remove_neg(cpc10)
         
         cpc10_o.append(cpc10)
         uhsas100_o.append(uhsas100)
@@ -330,18 +330,18 @@ fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 # plt.close()
 
 #%% plot sample numbers
-num_sample = [len(a) for a in cpc10_o_z]
-fig,ax = plt.subplots(figsize=(2,8))
-ax.plot(num_sample,z,color='k',linewidth=1,linestyle='-')
-ax.set_xscale('log')
-ax.set_xlabel('Sample Number (#)',fontsize=16)
-ax.set_ylabel('Height (m MSL)',fontsize=16)
-ax.set_xticks([10,1e3,1e5])
-ax.set_yticks(z)
-ax.tick_params(color='k',labelsize=16)
+# num_sample = [len(a) for a in cpc10_o_z]
+# fig,ax = plt.subplots(figsize=(2,8))
+# ax.plot(num_sample,z,color='k',linewidth=1,linestyle='-')
+# ax.set_xscale('log')
+# ax.set_xlabel('Sample Number (#)',fontsize=16)
+# ax.set_ylabel('Height (m MSL)',fontsize=16)
+# ax.set_xticks([10,1e3,1e5])
+# ax.set_yticks(z)
+# ax.tick_params(color='k',labelsize=16)
 
-if campaign=='HISCALE' or campaign=='ACEENA':
-    figname = figpath_aircraft_statistics+'samplenumber_'+campaign+'_'+IOP+'.png'
-else:
-    figname = figpath_aircraft_statistics+'samplenumber_'+campaign+'.png'
-fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# if campaign=='HISCALE' or campaign=='ACEENA':
+#     figname = figpath_aircraft_statistics+'samplenumber_'+campaign+'_'+IOP+'.png'
+# else:
+#     figname = figpath_aircraft_statistics+'samplenumber_'+campaign+'.png'
+# fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)

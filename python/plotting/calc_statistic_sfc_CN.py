@@ -13,18 +13,9 @@ import glob
 from time_format_change import yyyymmdd2cday, cday2mmdd, timeunit2cday
 from read_ARMdata import read_cpc,read_uhsas
 from read_netcdf import read_E3SM
+from quality_control import  qc_remove_neg, qc_mask_qcflag_cpc,qc_mask_qcflag
+from specific_data_treatment import avg_time_1d
 
-# define function used in the code
-def avg_time(time0,data0,time):
-    data0[data0<0]=np.nan
-    if data0.shape[0]!=len(time0):
-        error
-    data = np.full((len(time)),np.nan)
-    dt=(time[1]-time[0])/2
-    for tt in range(len(time)):
-        idx = np.logical_and(time0>=time[tt]-dt,time0<=time[tt]+dt)
-        data[tt]=np.nanmean(data0[idx],axis=0)
-    return(data)
 
 #%% settings
 
@@ -72,21 +63,22 @@ if campaign=='ACEENA':
     t_cpc=np.empty(0)
     cpc=np.empty(0)
     for filename in lst:
-        (time,data,timeunit,cpcunit)=read_cpc(filename)
+        (time,data,qc,timeunit,cpcunit)=read_cpc(filename)
+        data = qc_mask_qcflag(data,qc)
         timestr=timeunit.split(' ')
         date=timestr[2]
         cday=yyyymmdd2cday(date,'noleap')
         # average in time for consistent comparison with model
         time2=np.arange(0,86400,3600)
-        data2 = avg_time(np.array(time),np.array(data),time2)
+        data2 = avg_time_1d(np.array(time),np.array(data),time2)
         t_cpc=np.hstack((t_cpc, cday+time2/86400))
         cpc=np.hstack((cpc, data2))
     # fill missing days
     t_cpc2=np.arange(cday1*24,cday2*24+0.01,1)/24.
-    cpc2=avg_time(t_cpc,cpc,t_cpc2)
+    cpc2=avg_time_1d(t_cpc,cpc,t_cpc2)
     cpc=cpc2
     t_cpc=t_cpc2
-    cpc[cpc<0]=np.nan
+    cpc = qc_remove_neg(cpc)
     # no cpcu
     t_cpcu = np.array(np.nan)
     cpcu = np.array(np.nan)
@@ -107,12 +99,12 @@ if campaign=='ACEENA':
         data1=np.nansum(data[:,idx100],1)
         # average in time for consistent comparison with model
         time2=np.arange(0,86400,3600)
-        data2 = avg_time(np.array(time),np.array(data1),time2)
+        data2 = avg_time_1d(np.array(time),np.array(data1),time2)
         t_uhsas=np.hstack((t_uhsas, timeunit2cday(timeunit)+time2/86400))
         uhsas=np.hstack((uhsas, data2))
     # fill missing days
     t_uhsas2=np.arange(cday1*24,cday2*24+0.01,1)/24.
-    uhsas2=avg_time(t_uhsas,uhsas,t_uhsas2)
+    uhsas2=avg_time_1d(t_uhsas,uhsas,t_uhsas2)
     uhsas=uhsas2
     t_uhsas=t_uhsas2
     
@@ -131,7 +123,8 @@ elif campaign=='HISCALE':
         cpc = np.array(np.nan)
     else:
         for filename in lst:
-            (time,data,timeunit,cpcunit)=read_cpc(filename)
+            (time,data,qc,timeunit,cpcunit)=read_cpc(filename)
+            data = qc_mask_qcflag_cpc(data,qc)
             timestr=timeunit.split(' ')
             date=timestr[2]
             cday=yyyymmdd2cday(date,'noleap')
@@ -139,10 +132,10 @@ elif campaign=='HISCALE':
             cpc=np.hstack((cpc,data))
         # average in time for consistent comparison with model
         t_cpc2=np.arange(cday1*24,cday2*24+0.01,1)/24.
-        cpc2=avg_time(t_cpc,cpc,t_cpc2)
+        cpc2=avg_time_1d(t_cpc,cpc,t_cpc2)
         cpc=cpc2
         t_cpc=t_cpc2
-        cpc[cpc<0]=np.nan
+        cpc = qc_remove_neg(cpc)
   
     # cpcu
     if IOP=='IOP1':
@@ -157,7 +150,8 @@ elif campaign=='HISCALE':
         cpcu = np.array(np.nan)
     else:
         for filename in lst:
-            (time,data,timeunit,cpcuunit)=read_cpc(filename)
+            (time,data,qc,timeunit,cpcuunit)=read_cpc(filename)
+            data = qc_mask_qcflag_cpc(data,qc)
             timestr=timeunit.split(' ')
             date=timestr[2]
             cday=yyyymmdd2cday(date,'noleap')
@@ -165,13 +159,13 @@ elif campaign=='HISCALE':
             # cpcu=np.hstack((cpcu,data))
             # average in time for consistent comparison with model
             time2=np.arange(0,86400,3600)
-            data2 = avg_time(np.array(time),np.array(data),time2)
+            data2 = avg_time_1d(np.array(time),np.array(data),time2)
             t_cpcu=np.hstack((t_cpcu, cday+time2/86400))
             cpcu=np.hstack((cpcu, data2))
-        cpcu[cpcu<0]=np.nan
+        cpcu = qc_remove_neg(cpcu)
         # # average in time for consistent comparison with model
         # t_cpcu2=np.arange(t_cpcu[0]*24,t_cpcu[-1]*24,1)/24.
-        # cpcu2=avg_time(t_cpcu,cpcu,t_cpcu2)
+        # cpcu2=avg_time_1d(t_cpcu,cpcu,t_cpcu2)
         # cpcu=cpcu2
         # t_cpcu=t_cpcu2
         
@@ -191,12 +185,12 @@ elif campaign=='HISCALE':
         data1=np.nansum(data[:,idx100],1)
         # average in time for consistent comparison with model
         time2=np.arange(0,86400,3600)
-        data2 = avg_time(np.array(time),np.array(data1),time2)
+        data2 = avg_time_1d(np.array(time),np.array(data1),time2)
         t_uhsas=np.hstack((t_uhsas, timeunit2cday(timeunit)+time2/86400))
         uhsas=np.hstack((uhsas, data2))
     # fill missing days
     t_uhsas2=np.arange(cday1*24,cday2*24+0.01,1)/24.
-    uhsas2=avg_time(t_uhsas,uhsas,t_uhsas2)
+    uhsas2=avg_time_1d(t_uhsas,uhsas,t_uhsas2)
     uhsas=uhsas2
     t_uhsas=t_uhsas2
     

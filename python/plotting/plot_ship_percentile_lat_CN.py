@@ -11,6 +11,7 @@ import glob
 from read_ARMdata import read_cpc, read_uhsas
 from read_netcdf import read_E3SM
 from time_format_change import  cday2mmdd
+from quality_control import qc_mask_qcflag,qc_remove_neg,qc_cn_max
 
 #%% settings
 
@@ -109,9 +110,12 @@ for ll in range(len(lst)):
             if len(filenameo)==0:
                 continue  # some days may be missing
              
-        (time,obs,timeunit,dataunit)=read_cpc(filenameo[0])
+        (time,obs,qc,timeunit,dataunit)=read_cpc(filenameo[0])
+        obs=qc_mask_qcflag(obs,qc)
         t_cpc=np.hstack((t_cpc, dd+time/86400))
         cpc=np.hstack((cpc, obs))
+    cpc=qc_remove_neg(cpc)
+    cpc=qc_cn_max(cpc,10)
     # if time expands two years, add 365 days to the second year
     if t_cpc[0]>t_cpc[-1]:
         t_cpc[t_cpc<=t_cpc[-1]]=t_cpc[t_cpc<=t_cpc[-1]]+365
@@ -150,9 +154,11 @@ for ll in range(len(lst)):
             error
         (time,dmin,dmax,obs,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
         obs=np.ma.filled(obs)
-        obs[obs<0]=np.nan
+        obs=qc_remove_neg(obs)
         uhsas=np.hstack((uhsas, np.nansum(obs,1)))
         t_uh = np.hstack((t_uh,time/86400+dd))
+        
+    uhsas=qc_cn_max(uhsas,100)
     # if no obs available, fill one data with NaN
     if len(t_uh)==0:
         t_uh=[timem[0],timem[1]]

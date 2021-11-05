@@ -15,6 +15,7 @@ from read_ARMdata import read_pblhtmpl1
 from read_surface import read_dl_pblh
 from read_aircraft import read_cpc
 from read_netcdf import read_merged_size,read_extractflight
+from quality_control import qc_remove_neg
 
 #%% settings
 
@@ -44,7 +45,7 @@ for tt in range(len(time_dl)):
     hhmmss=format(int(dl[3,tt]),'02d')+':'+format(int(dl[4,tt]),'02d')+':'+format(int(dl[5,tt]),'02d')
     day_dl[tt]=yyyymmdd2cday(yyyymmdd)
     time_dl[tt]=hhmmss2sec(hhmmss)
-mlh_dl[mlh_dl<0]=np.nan
+mlh_dl=qc_remove_neg(mlh_dl)
 
 
 #%% find files for flight information
@@ -120,7 +121,7 @@ for filename in lst:
     size=np.ma.compressed(size)*1000  # um to nm
     sizel=sizel*1000
     sizeh=sizeh*1000
-    merge[merge<0]=np.nan
+    merge=qc_remove_neg(merge)
     merge=merge.T
     
     #%% read in CPC measurements
@@ -151,7 +152,7 @@ for filename in lst:
         error
     
     cpcdiff = cpc3-cpc10
-    cpcdiff[cpcdiff<0.]=np.nan
+    cpcdiff=qc_remove_neg(cpcdiff)
     
     
     #%% read in PBLH data from MPL

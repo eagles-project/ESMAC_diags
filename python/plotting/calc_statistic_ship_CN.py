@@ -11,19 +11,9 @@ import glob
 from read_ARMdata import read_cpc, read_uhsas
 from read_netcdf import read_E3SM
 from time_format_change import  cday2mmdd
-from specific_data_treatment import mask_model_ps
+from specific_data_treatment import mask_model_ps, avg_time_1d
+from quality_control import qc_mask_qcflag, qc_remove_neg
 
-# define function used in the code
-def avg_time(time0,data0,time):
-    data0[data0<0]=np.nan
-    if data0.shape[0]!=len(time0):
-        error
-    data = np.full((len(time)),np.nan)
-    dt=(time[1]-time[0])/2
-    for tt in range(len(time)):
-        idx = np.logical_and(time0>=time[tt]-dt,time0<=time[tt]+dt)
-        data[tt]=np.nanmean(data0[idx],axis=0)
-    return(data)
 
 #%% settings
 
@@ -111,7 +101,8 @@ for ll in range(len(lst)):
                 continue  # some days may be missing
                 
                 
-        (time,obs,timeunit,dataunit)=read_cpc(filenameo[0])
+        (time,obs,qc,timeunit,dataunit)=read_cpc(filenameo[0])
+        obs = qc_mask_qcflag(obs,qc)
         t_cpc=np.hstack((t_cpc, dd+time/86400))
         cpc=np.hstack((cpc, obs))
         
@@ -149,7 +140,7 @@ for ll in range(len(lst)):
             
         (time,dmin,dmax,obs,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
         obs=np.ma.filled(obs)
-        obs[obs<0]=np.nan
+        obs=qc_remove_neg(obs)
         uhsas=np.hstack((uhsas, np.nansum(obs,1)))
         t_uh = np.hstack((t_uh,time/86400+dd))
         
@@ -173,11 +164,11 @@ for ll in range(len(lst)):
     
     #%% average into 1hr resolution
     time0 = np.arange(timem[0],timem[-1],1./24)
-    cpc = avg_time(t_cpc,cpc,time0)
-    uhsas = avg_time(t_uh,uhsas,time0)
+    cpc = avg_time_1d(t_cpc,cpc,time0)
+    uhsas = avg_time_1d(t_uh,uhsas,time0)
     for mm in range(nmodels):
-        datam[mm] = avg_time(timem,datam[mm],time0)
-        datam2[mm] = avg_time(timem,datam2[mm],time0)
+        datam[mm] = avg_time_1d(timem,datam[mm],time0)
+        datam2[mm] = avg_time_1d(timem,datam2[mm],time0)
         
     #%% 
     cpcall = np.hstack((cpcall,cpc))

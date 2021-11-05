@@ -12,6 +12,7 @@ import scipy.stats
 import glob
 from read_aircraft import read_cpc, read_RF_NCAR
 from read_netcdf import read_merged_size,read_extractflight
+from quality_control import qc_cpc_air, qc_remove_neg, qc_mask_takeoff_landing
 
 #%% settings
 
@@ -115,8 +116,9 @@ for date in alldates:
         # read in CPC
         if len(filename_c)==1 or len(filename_c)==2: # some days have two flights
             (cpc,cpclist)=read_cpc(filename_c[flightidx-1])
+            # fill missing timestep
             if np.logical_and(campaign=='ACEENA', date=='20180216a'):
-                cpc=np.insert(cpc,1404,(cpc[:,1403]+cpc[:,1404])/2,axis=1)
+                cpc=np.insert(cpc,1404,(cpc[:,1403]+cpc[:,1404])/2,axis=1) 
             elif np.logical_and(campaign=='HISCALE', date=='20160425a'):
                 cpc=np.insert(cpc,0,cpc[:,0],axis=1)
                 cpc[0,0]=cpc[0,0]-1
@@ -133,21 +135,19 @@ for date in alldates:
             error
         
         # some quality checks
-        cpc3[cpc3<20]=np.nan
-        cpc10[cpc10<10]=np.nan
+        (cpc3,cpc10) = qc_cpc_air(cpc3, cpc10)
         
         # read in PCASP
         (time_merge,size,pcasp,timeunit,pcaspunit,pcasplongname)=read_merged_size(filename_merge,'totalnum_pcasp')
-        pcasp[pcasp<0]=np.nan
+        pcasp=qc_remove_neg(pcasp)
         if len(time_merge)!=len(time_cpc):
             print('check time consistency of merge and cpc')
             error
         
         # exclude 30min after takeoff and before landing
-        idx=np.logical_or(time_cpc<(time_cpc[0]+1800), time_cpc>(time_cpc[-1]-1800))
-        cpc3[idx]=np.nan
-        cpc10[idx]=np.nan
-        pcasp[idx]=np.nan
+        cpc3 = qc_mask_takeoff_landing(time_cpc,cpc3)
+        cpc10 = qc_mask_takeoff_landing(time_cpc,cpc10)
+        pcasp = qc_mask_takeoff_landing(time_cpc,pcasp)
         
         cpc10_o=np.hstack((cpc10_o, cpc10))
         cpc3_o=np.hstack((cpc3_o, cpc3))
@@ -169,13 +169,11 @@ for date in alldates:
             error  
         
         # some quality checks
-        uhsas100[uhsas100<0]=np.nan
-        # cpc10[np.logical_or(cpc10<0,cpc10>2e5)]=np.nan
+        uhsas100=qc_remove_neg(uhsas100)
         
         # exclude 30min after takeoff and before landing
-        idx=np.logical_or(time_cpc<(time_cpc[0]+1800), time_cpc>(time_cpc[-1]-1800))
-        cpc10[idx]=np.nan
-        uhsas100[idx]=np.nan
+        cpc10 = qc_mask_takeoff_landing(time_cpc,cpc10)
+        uhsas100 = qc_mask_takeoff_landing(time_cpc,uhsas100)
         
         cpc10_o=np.hstack((cpc10_o, cpc10))
         uhsas100_o=np.hstack((uhsas100_o, uhsas100))

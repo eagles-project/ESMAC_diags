@@ -22,7 +22,7 @@
 # # this should be consistent with settings.py
 # set field campaign name. More settings on specific field campaigns are in next section
 #set campaign = 'ACEENA'   # HISCALE, ACEENA, CSET, SOCRATES, MAGIC, MARCUS
-foreach campaign ('MAGIC')# 'MARCUS' 'CSET' 'SOCRATES')
+foreach campaign ('MAGIC' 'MARCUS' 'CSET' 'SOCRATES' 'HISCALE' 'ACEENA')
  
 # set model names. up to three
 # set Model_List = "['CTRL','Nuc','NucSoaCond']"

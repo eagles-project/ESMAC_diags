@@ -12,21 +12,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import glob
 from read_aircraft import read_RF_NCAR
-from specific_data_treatment import lwc2cflag
+from specific_data_treatment import lwc2cflag, avg_time_2d
 # from time_format_change import yyyymmdd2cday, hhmmss2sec
 from read_netcdf import read_merged_size,read_extractflight
 
-# define function of averaging in time for faster plotting
-def avg_time(time0,data0,time):
-    data0[data0<0]=np.nan
-    if data0.shape[0]!=len(time0):
-        error
-    data = np.full((len(time),data0.shape[1]),np.nan)
-    dt=(time[1]-time[0])/2
-    for tt in range(len(time)):
-        idx = np.logical_and(time0>=time[tt]-dt,time0<=time[tt]+dt)
-        data[tt,:]=np.nanmean(data0[idx,:],axis=0)
-    return(data)
 
 #%% settings
 
@@ -88,7 +77,7 @@ for date in alldates:
         datam=datam*1e-6    # #/m3 to #/cm3
         # average in time for quicker plot
         time2 = np.arange(timem[0],timem[-1],60)
-        data2 = avg_time(timem,datam.T,time2)
+        data2 = avg_time_2d(timem,datam.T,time2)
         datam = data2.T
         # change to dN/dlnDp
         for tt in range(len(time2)):
@@ -140,7 +129,7 @@ for date in alldates:
     # time=time/3600.
     ## average in time for quicker plot
     time2=np.arange(time[0],time[-1],60)
-    data2 = avg_time(time,merge,time2)
+    data2 = avg_time_2d(time,merge,time2)
     merge = data2.T
     time=time2/3600.
 

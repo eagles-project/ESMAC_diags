@@ -13,17 +13,8 @@ import glob
 from time_format_change import yyyymmdd2cday,cday2mmdd
 from read_ARMdata import read_acsm
 from read_netcdf import read_E3SM
-
-def avg_time(time0,data0,time):
-    data0[data0<0]=np.nan
-    if data0.shape[0]!=len(time0):
-        error
-    data = np.full((len(time)),np.nan)
-    dt=(time[1]-time[0])/2
-    for tt in range(len(time)):
-        idx = np.logical_and(time0>=time[tt]-dt,time0<=time[tt]+dt)
-        data[tt]=np.nanmean(data0[idx],axis=0)
-    return(data)
+from specific_data_treatment import  avg_time_1d
+from quality_control import qc_remove_neg,qc_acsm_org_max
 
 #%% settings
 
@@ -67,13 +58,14 @@ for filename in lst:
     cday=yyyymmdd2cday(date,'noleap')
     # average in time for quicker plot
     time2=np.arange(1800,86400,3600)
-    so42 = avg_time(np.array(times_obs),np.array(so4sfc),time2)
-    org2 = avg_time(np.array(times_obs),np.array(orgsfc),time2)
+    so42 = avg_time_1d(np.array(times_obs),np.array(so4sfc),time2)
+    org2 = avg_time_1d(np.array(times_obs),np.array(orgsfc),time2)
     t_obs=np.hstack((t_obs, cday+time2/86400))
     so4_obs=np.hstack((so4_obs, so42))
     org_obs=np.hstack((org_obs, org2))
-so4_obs[so4_obs<0]=np.nan
-org_obs[np.logical_or(org_obs<0, org_obs>10)]=np.nan
+so4_obs=qc_remove_neg(so4_obs)
+org_obs=qc_remove_neg(org_obs)
+org_obs=qc_acsm_org_max(org_obs)
     
 
 #%% read in models

@@ -15,6 +15,7 @@ from read_aircraft import read_RF_NCAR
 from read_netcdf import read_extractflight
 from specific_data_treatment import lwc2cflag
 from time_format_change import yyyymmdd2cday,  cday2mmdd
+from quality_control import qc_mask_takeoff_landing
 
 #%% settings
 
@@ -93,15 +94,13 @@ for date in alldates:
     (time,lwc,timeunit,lwcunit,lwclongname,cellsize,cellunit)=read_RF_NCAR(filename,'PLWCC')
     
     # exclude 30min after takeoff and before landing
-    idx=np.logical_and(time>(time[0]+1800), time<(time[-1]-1800))
-    time=time[idx]
-    height=height[idx]
-    lat=lat[idx]
-    lon=lon[idx]
-    lwc=lwc[idx]
-    timem=timem[idx]
+    height=qc_mask_takeoff_landing(time,height)
+    lat=qc_mask_takeoff_landing(time,lat)
+    lon=qc_mask_takeoff_landing(time,lon)
+    lwc=qc_mask_takeoff_landing(time,lwc)
+    timem=qc_mask_takeoff_landing(time,timem)
     for mm in range(nmodels):
-        cloudm[mm]=cloudm[mm][idx]
+        cloudm[mm]=qc_mask_takeoff_landing(time,cloudm[mm])
     
     # calculate cloud flag based on LWC
     cldflag=lwc2cflag(lwc,lwcunit)

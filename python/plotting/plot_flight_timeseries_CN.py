@@ -13,6 +13,7 @@ import numpy as np
 import glob
 from read_aircraft import read_cpc, read_RF_NCAR
 from read_netcdf import read_merged_size,read_extractflight
+from quality_control import qc_cpc_air
 
 #%% settings
 
@@ -103,8 +104,7 @@ for filename in lst:
             print(filename_c)
             error
         # some quality checks
-        cpc3[cpc3<20]=np.nan
-        cpc10[cpc10<10]=np.nan
+        (cpc3,cpc10) = qc_cpc_air(cpc3,cpc10)
         
     #%% read in flight data (for CSET and SOCRATES)
     elif campaign=='CSET' or campaign=='SOCRATES':

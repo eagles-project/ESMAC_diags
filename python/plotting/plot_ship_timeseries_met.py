@@ -4,7 +4,7 @@ import sys
 sys.path.insert(1,'../subroutines/')
 
 import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+# matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
@@ -12,18 +12,8 @@ from read_ship import read_marmet
 from read_ARMdata import read_met
 from read_netcdf import read_E3SM
 from time_format_change import yyyymmdd2cday,  cday2mmdd
+from specific_data_treatment import  avg_time_1d
 
-# define function of averaging in time for faster plotting
-def avg_time(time0,data0,time):
-    data0[data0<-900]=np.nan
-    if len(data0)!=len(time0):
-        error
-    data = np.full((len(time)),np.nan)
-    dt=(time[1]-time[0])/2
-    for tt in range(len(time)):
-        idx = np.logical_and(time0>=time[tt]-dt,time0<=time[tt]+dt)
-        data[tt]=np.nanmean(data0[idx],axis=0)
-    return(data)
 
 #%% settings
 
@@ -73,7 +63,7 @@ for ll in range(len(lst)):
         
         # rain needs to be averaged into 1-hr timewindow for comparison with model
         time1hr = np.arange(int(time[0]*24),int(time[-1]*24)+1)/24.
-        rain2=avg_time(time,rain,time1hr)
+        rain2=avg_time_1d(time,rain,time1hr)
         
         # rain rate in leg 19 are unrealistic. mask all data
         if legnum=='19':
@@ -210,5 +200,5 @@ for ll in range(len(lst)):
     
     fig.text(.1, .999,'trip # '+legnum, fontsize=15)
     
-    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    # fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
     

@@ -16,6 +16,7 @@ from read_aircraft import read_ccn_hiscale, read_ccn_socrates, read_RF_NCAR
 from read_ARMdata import read_ccn
 from read_netcdf import read_extractflight
 from time_format_change import yyyymmdd2cday,  cday2mmdd
+from quality_control import qc_remove_neg
 
 #%% settings
 
@@ -119,7 +120,7 @@ for date in alldates:
             time_ccn = data0[0,:]
             ccn = data0[1,:]
             SS = data0[3,:]
-            ccn[ccn<-9000]=np.nan
+            ccn=qc_remove_neg(ccn)
             timea=time_ccn
             timeb=time_ccn
             ccna=np.array(ccn)

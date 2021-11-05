@@ -14,6 +14,7 @@ import glob
 from time_format_change import yyyymmdd2cday, hhmmss2sec
 from read_aircraft import read_ams,read_iwg1
 from read_netcdf import read_merged_size,read_extractflight
+from quality_control import qc_mask_qcflag,qc_mask_cloudflag,qc_remove_neg
 
 #%% settings
 
@@ -136,8 +137,8 @@ for filename in lst:
         print(filename_i)
         error
     # remove cloud flag
-    T_iwg[cflag!=0]=np.nan
-    P_iwg[cflag!=0]=np.nan
+    T_iwg=qc_mask_cloudflag(T_iwg,cflag)
+    P_iwg=qc_mask_cloudflag(P_iwg,cflag)
     
     #%% read aerosol composition in AMS
     
@@ -150,8 +151,8 @@ for filename in lst:
         flag=ams[-1,:]
         orgaaf=ams[1,:]
         so4aaf=ams[5,:]
-        orgaaf[flag!=0]=np.nan
-        so4aaf[flag!=0]=np.nan
+        orgaaf=qc_mask_qcflag(orgaaf,flag)
+        so4aaf=qc_mask_qcflag(so4aaf,flag)
     elif len(filename_ams)==0:
         time_ams = time_iwg
         orgaaf = np.full(len(time_ams),np.nan)
@@ -167,9 +168,8 @@ for filename in lst:
     so4aaf = so4aaf * (296.15/T_ams) * (P_ams/101325.)
     orgaaf = orgaaf * (296.15/T_ams) * (P_ams/101325.)
     
-    # some quality check:
-    so4aaf[np.logical_or(so4aaf<0, so4aaf>15)]=np.nan
-    orgaaf[np.logical_or(orgaaf<0, orgaaf>15)]=np.nan
+    so4aaf = qc_remove_neg(so4aaf)
+    orgaaf = qc_remove_neg(orgaaf)
 
     # exclude NaNs
     idx = np.logical_and(~np.isnan(so4aaf), ~np.isnan(orgaaf))

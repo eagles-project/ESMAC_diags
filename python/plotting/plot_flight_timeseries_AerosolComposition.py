@@ -14,6 +14,7 @@ import glob
 from time_format_change import yyyymmdd2cday, hhmmss2sec
 from read_aircraft import read_ams,read_iwg1
 from read_netcdf import read_merged_size,read_extractflight
+from quality_control import qc_mask_qcflag,qc_remove_neg
 
 #%% settings
 
@@ -117,8 +118,9 @@ for date in alldates:
         flag=ams[-1,:]
         orgaaf=ams[1,:]
         so4aaf=ams[5,:]
-        orgaaf[flag>1]=np.nan
-        so4aaf[flag>1]=np.nan
+        # flag=1 is also good data but behind CVI inlet. currently only use good data behind isokinetic inlet (flag=0)
+        orgaaf=qc_mask_qcflag(orgaaf,flag)
+        so4aaf=qc_mask_qcflag(so4aaf,flag)
     elif len(filename_ams)==0:
         time_ams = time_iwg
         orgaaf = np.full(len(time_ams),np.nan)
@@ -135,8 +137,8 @@ for date in alldates:
     orgaaf = orgaaf * (296.15/T_ams) * (P_ams/101325.)
     
     # some quality check:
-    so4aaf[np.logical_or(so4aaf<0, so4aaf>15)]=np.nan
-    orgaaf[np.logical_or(orgaaf<0, orgaaf>15)]=np.nan
+    orgaaf=qc_remove_neg(orgaaf)
+    so4aaf=qc_remove_neg(so4aaf)
     
     
     #%% read in Models

@@ -4,7 +4,7 @@ import sys
 sys.path.insert(1,'../subroutines/')
 
 import matplotlib
-matplotlib.use('AGG') # plot without needing X-display setting
+# matplotlib.use('AGG') # plot without needing X-display setting
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
@@ -12,6 +12,7 @@ from read_ARMdata import read_ccn_magic, read_ccn
 from read_netcdf import read_E3SM
 from time_format_change import cday2mmdd
 from specific_data_treatment import mask_model_ps
+from quality_control import qc_mask_qcflag,qc_ccn_max
 
 
 #%% settings
@@ -88,11 +89,13 @@ for ll in range(len(lst)):
                 filenameo = glob.glob(shipccnpath+'maraosccn1colavgM1.b1.2018'+cday2mmdd(dd,calendar='noleap')+'.*')
             if len(filenameo)==0:
                 continue  # some days may be missing
-            (time,timeunit,obs,dataunit,SS0)=read_ccn(filenameo[0])            
+            (time,timeunit,obs,qc,dataunit,SS0)=read_ccn(filenameo[0])            
+            obs=qc_mask_qcflag(obs,qc)
             
         t_ccn=np.hstack((t_ccn, dd+time/86400))
         ccn=np.hstack((ccn, obs))
         SS=np.hstack((SS, SS0))
+        ccn=qc_ccn_max(ccn,SS)
         
     # if time expands two years, add 365 days to the second year
     if t_ccn[0]>t_ccn[-1]:
@@ -153,4 +156,4 @@ for ll in range(len(lst)):
     ax1.vlines(timem[datamask],ylim1[0],ylim1[1],color='lightgray')
     ax2.vlines(timem[datamask],ylim2[0],ylim2[1],color='lightgray')
     
-    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    # fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)

@@ -12,6 +12,7 @@ import numpy as np
 import glob
 from read_aircraft import read_wcm, read_RF_NCAR
 from read_netcdf import read_extractflight,read_merged_size
+from quality_control import qc_mask_qcflag,qc_remove_neg
 
 #%% settings
 
@@ -99,14 +100,14 @@ for date in alldates:
         time0=wcm[0,:]
         flag=wcm[-1,:]
         lwcobs=wcm[2,:]
-        lwcobs[lwcobs<=0]=0.
-        lwcobs[flag!=0]=np.nan
+        lwcobs=qc_remove_neg(lwcobs)
+        lwcobs=qc_mask_qcflag(lwcobs,flag)
     
     elif campaign=='CSET' or campaign=='SOCRATES':
         filename = glob.glob(RFpath+'RF*'+date+'*.PNI.nc')
         if len(filename)==1 or len(filename)==2:  # SOCRATES has two flights in 20180217, choose the later one
             (time,lwcobs,timeunit,lwcunit,lwclongname,cellsize,cellunit)=read_RF_NCAR(filename[-1],'PLWCC')
-        lwcobs[lwcobs<=0]=0.
+        lwcobs=qc_remove_neg(lwcobs)
         
     lwcobsall.append(lwcobs)
     

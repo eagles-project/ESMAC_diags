@@ -11,6 +11,7 @@ import glob
 from read_ARMdata import read_ccn_magic, read_ccn
 from read_netcdf import read_E3SM
 from time_format_change import  cday2mmdd
+from quality_control import qc_mask_qcflag,qc_ccn_max
 
 #%% settings
 
@@ -113,11 +114,14 @@ for ll in range(len(lst)):
                 filenameo = glob.glob(shipccnpath+'maraosccn1colavgM1.b1.2018'+cday2mmdd(dd,calendar='noleap')+'.*')
             if len(filenameo)==0:
                 continue  # some days may be missing
-            (time,timeunit,obs,dataunit,SS0)=read_ccn(filenameo[0])     
+            (time,timeunit,obs,qc,dataunit,SS0)=read_ccn(filenameo[0])     
+            obs=qc_mask_qcflag(obs,qc)
         t_ccn=np.hstack((t_ccn, dd+time/86400))
         ccn=np.hstack((ccn, obs))
         SS=np.hstack((SS, SS0))
         
+    ccn=qc_ccn_max(ccn,SS)
+    
     # if time expands two years, add 365 days to the second year
     if t_ccn[0]>t_ccn[-1]:
         t_ccn[t_ccn<=t_ccn[-1]]=t_ccn[t_ccn<=t_ccn[-1]]+365
