@@ -4,17 +4,16 @@
 """
 
 import sys
-sys.path.insert(1,'../subroutines/')
 
 import os
 import glob
 import matplotlib.pyplot as plt
 import numpy as np
-from time_format_change import yyyymmdd2cday,cday2mmdd
-from read_ARMdata import read_ccn
-from read_surface import read_CCN_hiscale_IOP1, read_CCN_hiscale_IOP2
-from read_netcdf import read_E3SM
-from quality_control import qc_remove_neg,qc_mask_qcflag,qc_ccn_max
+from ..subroutines.time_format_change import yyyymmdd2cday,cday2mmdd
+from ..subroutines.read_ARMdata import read_ccn
+from ..subroutines.read_surface import read_CCN_hiscale_IOP1, read_CCN_hiscale_IOP2
+from ..subroutines.read_netcdf import read_E3SM
+from ..subroutines.quality_control import qc_remove_neg,qc_mask_qcflag,qc_ccn_max
 
 #%% settings
 

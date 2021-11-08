@@ -1,10 +1,9 @@
 
 import sys
-sys.path.insert(1,'../subroutines/')
 
 import numpy as np
 from time_format_change import  yyyymmdd2cday, cday2mmdd
-from read_netcdf import read_E3SM
+from ..subroutines.read_netcdf import read_E3SM
 from netCDF4 import Dataset
 
 

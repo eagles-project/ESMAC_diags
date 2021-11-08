@@ -4,14 +4,13 @@
 # output is aerosol variables for each flight
 """
 import sys
-sys.path.insert(1, '../subroutines/')
 
 import glob
 import os
 import numpy as np
-from time_format_change import hhmmss2sec, timeunit2cday
-from read_aircraft import read_iwg1, read_RF_NCAR
-from read_netcdf import read_E3SM
+from ..subroutines.time_format_change import hhmmss2sec, timeunit2cday
+from ..subroutines.read_aircraft import read_iwg1, read_RF_NCAR
+from ..subroutines.read_netcdf import read_E3SM
 from netCDF4 import Dataset
 
 def find_nearest(xall, yall, x, y):

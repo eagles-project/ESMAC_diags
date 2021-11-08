@@ -2,16 +2,15 @@
 # plot ship-track meteorological variables binned by different latitudes
 """
 import sys
-sys.path.insert(1,'../subroutines/')
 
 import os
 import glob
 import matplotlib.pyplot as plt
 import numpy as np
-from read_ship import read_marmet
-from read_ARMdata import read_met
-from read_netcdf import read_E3SM
-from time_format_change import yyyymmdd2cday,  cday2mmdd
+from ..subroutines.read_ship import read_marmet
+from ..subroutines.read_ARMdata import read_met
+from ..subroutines.read_netcdf import read_E3SM
+from ..subroutines.time_format_change import yyyymmdd2cday,  cday2mmdd
 
 
 #%% settings

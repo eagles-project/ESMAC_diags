@@ -5,18 +5,17 @@
 """
 
 import sys
-sys.path.insert(1,'../subroutines/')
 
 # import matplotlib.pyplot as plt
 import os
 import glob
 import numpy as np
 import scipy.stats
-from time_format_change import yyyymmdd2cday, cday2mmdd, timeunit2cday
-from read_ARMdata import read_cpc,read_uhsas
-from read_netcdf import read_E3SM
-from quality_control import  qc_remove_neg, qc_mask_qcflag_cpc,qc_mask_qcflag
-from specific_data_treatment import avg_time_1d
+from ..subroutines.time_format_change import yyyymmdd2cday, cday2mmdd, timeunit2cday
+from ..subroutines.read_ARMdata import read_cpc,read_uhsas
+from ..subroutines.read_netcdf import read_E3SM
+from ..subroutines.quality_control import  qc_remove_neg, qc_mask_qcflag_cpc,qc_mask_qcflag
+from ..subroutines.specific_data_treatment import avg_time_1d
 
 
 #%% settings

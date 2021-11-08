@@ -4,17 +4,16 @@
 # compare models and CPC/UHSAS measurements
 """
 import sys
-sys.path.insert(1,'../subroutines/')
 
 import os
 import glob
 import numpy as np
 import scipy.stats
-from read_ARMdata import read_cpc, read_uhsas
-from read_netcdf import read_E3SM
-from time_format_change import  cday2mmdd
-from specific_data_treatment import mask_model_ps, avg_time_1d
-from quality_control import qc_mask_qcflag, qc_remove_neg
+from ..subroutines.read_ARMdata import read_cpc, read_uhsas
+from ..subroutines.read_netcdf import read_E3SM
+from ..subroutines.time_format_change import  cday2mmdd
+from ..subroutines.specific_data_treatment import mask_model_ps, avg_time_1d
+from ..subroutines.quality_control import qc_mask_qcflag, qc_remove_neg
 
 
 #%% settings

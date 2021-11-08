@@ -4,18 +4,17 @@
 """
 
 import sys
-sys.path.insert(1,'../subroutines/')
 
 import os
 import glob
 import matplotlib.pyplot as plt
 import numpy as np
-from time_format_change import  hhmmss2sec,yyyymmdd2cday
-from read_ARMdata import read_pblhtmpl1
-from read_surface import read_dl_pblh
-from read_aircraft import read_cpc
-from read_netcdf import read_merged_size,read_extractflight
-from quality_control import qc_remove_neg
+from ..subroutines.time_format_change import  hhmmss2sec,yyyymmdd2cday
+from ..subroutines.read_ARMdata import read_pblhtmpl1
+from ..subroutines.read_surface import read_dl_pblh
+from ..subroutines.read_aircraft import read_cpc
+from ..subroutines.read_netcdf import read_merged_size,read_extractflight
+from ..subroutines.quality_control import qc_remove_neg
 
 #%% settings
 

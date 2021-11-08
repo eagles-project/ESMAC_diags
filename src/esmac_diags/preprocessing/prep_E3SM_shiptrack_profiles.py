@@ -4,15 +4,14 @@
 # output is vertical profiles at the nearest grid of the ship track
 """
 import sys
-sys.path.insert(1, '../subroutines/')
 
 import os
 import glob
 import numpy as np
-from time_format_change import timeunit2cday, yyyymmdd2cday, cday2mmdd
-from read_netcdf import read_E3SM
-from read_ship import read_marmet
-from read_ARMdata import read_met
+from ..subroutines.time_format_change import timeunit2cday, yyyymmdd2cday, cday2mmdd
+from ..subroutines.read_netcdf import read_E3SM
+from ..subroutines.read_ship import read_marmet
+from ..subroutines.read_ARMdata import read_met
 from netCDF4 import Dataset
 
 def find_nearest(xall, yall, x, y):

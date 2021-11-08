@@ -5,15 +5,14 @@
 # 2020.10.1
 """
 import sys
-sys.path.insert(1, '../subroutines/')
 
 import os
 import glob
 import re
 import numpy as np
-from read_aircraft import read_fims, read_fims_bin, read_iwg1, read_pcasp, read_opc
-from read_ARMdata import read_cvi_aceena as read_cvi
-from time_format_change import hhmmss2sec
+from ..subroutines.read_aircraft import read_fims, read_fims_bin, read_iwg1, read_pcasp, read_opc
+from ..subroutines.read_ARMdata import read_cvi_aceena as read_cvi
+from ..subroutines.time_format_change import hhmmss2sec
 from netCDF4 import Dataset
 
 #%% set data paths

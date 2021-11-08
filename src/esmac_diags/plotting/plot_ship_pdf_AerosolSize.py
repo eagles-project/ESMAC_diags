@@ -4,16 +4,15 @@
 # compare models and aircraft measurements
 """
 import sys
-sys.path.insert(1,'../subroutines/')
 
 import os
 import glob
 import matplotlib.pyplot as plt
 import numpy as np
-from read_ARMdata import read_uhsas
-from read_netcdf import read_E3SM
-from time_format_change import cday2mmdd,yyyymmdd2cday
-from specific_data_treatment import  avg_time_2d
+from ..subroutines.read_ARMdata import read_uhsas
+from ..subroutines.read_netcdf import read_E3SM
+from ..subroutines.time_format_change import cday2mmdd,yyyymmdd2cday
+from ..subroutines.specific_data_treatment import  avg_time_2d
 
 #%% settings
 

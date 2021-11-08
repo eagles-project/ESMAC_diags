@@ -5,14 +5,13 @@
 """
 
 import sys
-sys.path.insert(1,'../subroutines/')
 
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-from time_format_change import timeunit2cday,yyyymmdd2cday,cday2mmdd
-from read_ARMdata import read_armbe
-from read_netcdf import read_E3SM_z
+from ..subroutines.time_format_change import timeunit2cday,yyyymmdd2cday,cday2mmdd
+from ..subroutines.read_ARMdata import read_armbe
+from ..subroutines.read_netcdf import read_E3SM_z
 
 #%% settings
 

@@ -2,16 +2,15 @@
 # plot ship-track aerosol number concentration binned by different latitudes
 """
 import sys
-sys.path.insert(1,'../subroutines/')
 
 import os
 import glob
 import matplotlib.pyplot as plt
 import numpy as np
-from read_ARMdata import read_cpc, read_uhsas
-from read_netcdf import read_E3SM
-from time_format_change import  cday2mmdd
-from quality_control import qc_mask_qcflag,qc_remove_neg,qc_cn_max
+from ..subroutines.read_ARMdata import read_cpc, read_uhsas
+from ..subroutines.read_netcdf import read_E3SM
+from ..subroutines.time_format_change import  cday2mmdd
+from ..subroutines.quality_control import qc_mask_qcflag,qc_remove_neg,qc_cn_max
 
 #%% settings
 

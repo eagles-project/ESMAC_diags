@@ -5,16 +5,15 @@
 """
 
 import sys
-sys.path.insert(1,'../subroutines/')
 
 import os
 import glob
 import matplotlib.pyplot as plt
 import numpy as np
-from read_aircraft import read_RF_NCAR
-from specific_data_treatment import lwc2cflag, avg_time_2d
+from ..subroutines.read_aircraft import read_RF_NCAR
+from ..subroutines.specific_data_treatment import lwc2cflag, avg_time_2d
 # from time_format_change import yyyymmdd2cday, hhmmss2sec
-from read_netcdf import read_merged_size,read_extractflight
+from ..subroutines.read_netcdf import read_merged_size,read_extractflight
 
 
 #%% settings

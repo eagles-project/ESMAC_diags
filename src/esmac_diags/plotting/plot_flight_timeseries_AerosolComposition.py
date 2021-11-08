@@ -5,16 +5,15 @@
 """
 
 import sys
-sys.path.insert(1,'../subroutines/')
 
 import os
 import glob
 import matplotlib.pyplot as plt
 import numpy as np
-from time_format_change import hhmmss2sec
-from read_aircraft import read_ams,read_iwg1
-from read_netcdf import read_merged_size,read_extractflight
-from quality_control import qc_mask_qcflag,qc_remove_neg
+from ..subroutines.time_format_change import hhmmss2sec
+from ..subroutines.read_aircraft import read_ams,read_iwg1
+from ..subroutines.read_netcdf import read_merged_size,read_extractflight
+from ..subroutines.quality_control import qc_mask_qcflag,qc_remove_neg
 
 #%% settings
 

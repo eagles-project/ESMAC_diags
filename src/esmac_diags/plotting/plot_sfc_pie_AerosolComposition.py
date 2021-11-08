@@ -4,15 +4,14 @@
 """
 
 import sys
-sys.path.insert(1,'../subroutines/')
 
 import glob
 import matplotlib.pyplot as plt
 import numpy as np
-from time_format_change import yyyymmdd2cday,cday2mmdd
-from read_ARMdata import read_acsm
-from read_netcdf import read_E3SM
-from quality_control import qc_remove_neg,qc_acsm_org_max
+from ..subroutines.time_format_change import yyyymmdd2cday,cday2mmdd
+from ..subroutines.read_ARMdata import read_acsm
+from ..subroutines.read_netcdf import read_E3SM
+from ..subroutines.quality_control import qc_remove_neg,qc_acsm_org_max
 
 #%% settings
 

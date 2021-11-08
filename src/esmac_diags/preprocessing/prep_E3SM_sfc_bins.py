@@ -4,13 +4,12 @@
 # output is surface aerosol distribution at the nearest grid
 """
 import sys
-sys.path.insert(1, '../subroutines/')
 
 import os
 import numpy as np
-from time_format_change import timeunit2cday, yyyymmdd2cday, cday2mmdd
-from read_netcdf import read_E3SM
-from CN_mode_to_size import calc_CNsize_cutoff_0_3000nm
+from ..subroutines.time_format_change import timeunit2cday, yyyymmdd2cday, cday2mmdd
+from ..subroutines.read_netcdf import read_E3SM
+from ..subroutines.CN_mode_to_size import calc_CNsize_cutoff_0_3000nm
 from netCDF4 import Dataset
 
 def find_nearest(xall, yall, x, y):

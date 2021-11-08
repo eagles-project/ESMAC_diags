@@ -4,15 +4,14 @@
 # output is  aerosol size distribution for each flight
 """
 import sys
-sys.path.insert(1,'../subroutines/')
 
 import glob
 import os
 import numpy as np
-from time_format_change import hhmmss2sec, timeunit2cday
-from read_aircraft import read_iwg1, read_RF_NCAR
-from read_netcdf import read_E3SM
-from CN_mode_to_size import calc_CNsize_cutoff_0_3000nm
+from ..subroutines.time_format_change import hhmmss2sec, timeunit2cday
+from ..subroutines.read_aircraft import read_iwg1, read_RF_NCAR
+from ..subroutines.read_netcdf import read_E3SM
+from ..subroutines.CN_mode_to_size import calc_CNsize_cutoff_0_3000nm
 from netCDF4 import Dataset
 
 

@@ -5,16 +5,15 @@
 """
 
 import sys
-sys.path.insert(1,'../subroutines/')
 
 import os
 import glob
 import matplotlib.pyplot as plt
 import numpy as np
-from read_ARMdata import read_cvi_aceena
-from specific_data_treatment import lwc2cflag
-from time_format_change import hhmmss2sec
-from read_aircraft import read_iwg1, read_cvi_hiscale, read_RF_NCAR
+from ..subroutines.read_ARMdata import read_cvi_aceena
+from ..subroutines.specific_data_treatment import lwc2cflag
+from ..subroutines.time_format_change import hhmmss2sec
+from ..subroutines.read_aircraft import read_iwg1, read_cvi_hiscale, read_RF_NCAR
 
 
 #%% settings
