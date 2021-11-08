@@ -5,17 +5,18 @@ This Earth System Model (ESM) aerosol-cloud diagnostics package (ESMAC Diags) is
 
 More information can be found in README_ESMAC_Diags_v1.0.pdf
 
-# Package dependencies
-This code is dependent on the following python packages:
+## To install
+This code is best run using a conda virtual environment. To install the required environment one can do
+```bash
+conda env create -f environment.yml
+```
+to set up a esmac_diags environment. Note if running this on a HPC system, you may need to load the appropriate module for anaconda. 
 
-os
-sys
-glob
-time
-numpy
-scipy
-matplotlib
-netCDF4
+Once the environment has been created you can activate it with ```conda activate esmac_diags``` and then this code can be installed with
+```bash
+pip install -e .
+```
+Which will install the code as editable allowing you to make changes to the codebase and it be reflected in the installed package. 
 
 
 # Test run
