@@ -1,0 +1,16 @@
+name: esmac_diags
+channels:
+  - conda-forge
+  - anaconda
+  - defaults
+dependencies:
+  - pip
+  - matplotlib
+  - numpy
+  - sphinx
+  - lxml
+  - conda-build
+  - pytest
+  - pytest-shutil
+  - ipython
+  - black

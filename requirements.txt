@@ -1,0 +1,10 @@
+pip
+matplotlib
+numpy
+sphinx
+lxml
+conda-build
+pytest
+pytest-shutil
+ipython
+black
