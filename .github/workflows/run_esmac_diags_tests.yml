@@ -1,0 +1,25 @@
+name: run_esmac_diags_ci.yml
+on: [push,pull_request ]
+jobs:
+  build_and_publish:
+    name: Setup Environment, and run test suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 3.7
+          mamba-version: "*"
+          channels: conda-forge,defaults
+          channel-priority: true
+          activate-environment: esmac_diags
+          environment-file: environment.yml
+      - name: Install esmac_diags
+        shell: bash -l {0}
+        run: |
+          pip install -e .
+      - name: Run Pytest
+        shell: bash -l {0}
+        run: |
+          pytest
