@@ -11,7 +11,8 @@ def read_ams(filename):
 
     Parameters
     ----------
-    filename : input filename
+    filename : str
+        input filename
 
     Returns
     -------

@@ -4,7 +4,6 @@ import numpy as np
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # global settings
-
 ############ these settings will be replaced by the settings in scripts_*.csh #############
 # set field campaign name. More settings on specific field campaigns are in next section
 campaign = 'ACEENA'
@@ -78,3 +77,7 @@ if  campaign=='ACEENA':
     
 else:
     raise ValueError("Test case should only for ACEENA. Current campaign is: "+campaign)
+
+# Long list of blah.run_plot()
+
+
