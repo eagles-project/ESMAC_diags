@@ -24,7 +24,7 @@ settings['IOP'] = 'IOP1'
 
 
 # path of the diagnostic package
-package_path = '../../'
+package_path = '/global/homes/s/sqtang/EAGLES/ESMAC_diags/'
 
 # # path of E3SM model data (h3) for preprocessing. list with the same length of Model_List
 # settings['E3SM_h3_path']=[]
@@ -88,7 +88,6 @@ else:
 # Long list of blah.run_plot()
 
 ### Create our actual plots
-plot_flight_pdf_AerosolSize.run_plot(settings)
 plot_flight_track_height.run_plot(settings)
-
+#plot_flight_timeseries_AerosolComposition.run_plot(settings)
 

@@ -17,25 +17,25 @@ from ..subroutines.read_aircraft import read_iwg1, read_cvi_hiscale, read_RF_NCA
 
 
 #%% settings
-def run_plot():
-    from settings import campaign, lat0, lon0, figpath_aircraft_timeseries
+def run_plot(settings):
+    #from settings import campaign, lat0, lon0, figpath_aircraft_timeseries
 
-    if campaign in ['HISCALE', 'ACEENA']:
-        from settings import IOP, iwgpath, cvipath
-    elif campaign in ['CSET', 'SOCRATES']:
-        from settings import RFpath
-    else:
-        raise ValueError('campaign name is not recognized: '+campaign)
+    #if campaign in ['HISCALE', 'ACEENA']:
+    #    from settings import IOP, iwgpath, cvipath
+    #elif campaign in ['CSET', 'SOCRATES']:
+    #    from settings import RFpath
+    #else:
+    #    raise ValueError('campaign name is not recognized: '+campaign)
 
     campaign = settings['campaign']
     lat0 = settings['lat0']
     lon0 = settings['lon0']
     figpath_aircraft_timeseries = settings['figpath_aircraft_timeseries']
 
-    IOP = settings['IOP']
-    iwgpath = settings['iwgpath']
-    cvipath = settings['cvipath']
-    RFpath = settings['RFpath']
+    IOP = settings.get('IOP', None)
+    iwgpath = settings.get('iwgpath', None)
+    cvipath = settings.get('cvipath', None)
+    RFpath = settings.get('RFpath', None)
 
 
         
