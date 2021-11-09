@@ -4,8 +4,6 @@
 # plot 2: plot timeseries of flight height with cloud and CVI flags
 """
 
-import sys
-
 import os
 import glob
 import matplotlib.pyplot as plt
@@ -16,8 +14,8 @@ from ..subroutines.time_format_change import hhmmss2sec
 from ..subroutines.read_aircraft import read_iwg1, read_cvi_hiscale, read_RF_NCAR
 
 
-#%% settings
 def run_plot(settings):
+    #%% settings
     #from settings import campaign, lat0, lon0, figpath_aircraft_timeseries
 
     #if campaign in ['HISCALE', 'ACEENA']:
