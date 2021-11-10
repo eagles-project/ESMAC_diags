@@ -4,6 +4,7 @@ compare the figures generated at testcase/figures/ with testcase/figures_verify
 to makesure testcase works as expected
 """
 
+import os
 from esmac_diags.plotting import plot_flight_timeseries_AerosolComposition, plot_flight_track_height
 
 
@@ -12,7 +13,8 @@ from esmac_diags.plotting import plot_flight_timeseries_AerosolComposition, plot
 settings = {}
 
 # Please change the path of the diagnostic package to your own
-package_path = '/global/homes/s/sqtang/EAGLES/ESMAC_diags/'
+package_path = os.path.dirname(os.path.abspath(__file__)) + '../../'
+#package_path = '/global/homes/s/sqtang/EAGLES/ESMAC_diags/'
 
 # set field campaign name. use ACEENA for the test case
 settings['campaign'] = 'ACEENA'
