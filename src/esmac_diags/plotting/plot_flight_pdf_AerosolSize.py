@@ -4,8 +4,6 @@
 # compare models and aircraft measurements
 """
 
-import sys
-
 import os
 import glob
 import matplotlib.pyplot as plt
@@ -18,28 +16,19 @@ from ..subroutines.read_netcdf import read_merged_size,read_extractflight
 from ..subroutines.specific_data_treatment import  avg_time_2d
 from ..subroutines.quality_control import qc_mask_cloudflag, qc_uhsas_RF_NCAR,qc_remove_neg,qc_mask_takeoff_landing
 
-#%% settings
-
 def run_plot(settings):
 
-    # from settings import campaign,  Model_List, color_model,  \
-    #     E3SM_aircraft_path, figpath_aircraft_statistics
-    
-    # if campaign in ['HISCALE', 'ACEENA']:
-    #     from settings import IOP, merged_size_path
-    # elif campaign in ['CSET', 'SOCRATES']:
-    #     from settings import RFpath
-    # else:
-    #     raise ValueError('campaign name is not recognized: '+campaign)
-
+    #%% variables from settings
     campaign = settings['campaign']
     Model_List = settings['Model_List']
     color_model = settings['color_model']
     E3SM_aircraft_path = settings['E3SM_aircraft_path']
     figpath_aircraft_statistics = settings['figpath_aircraft_statistics']
+    
     IOP = settings.get('IOP', None)
     merged_size_path = settings.get('merged_size_path', None)
 
+    #%% other settings
 
     if not os.path.exists(figpath_aircraft_statistics):
         os.makedirs(figpath_aircraft_statistics)

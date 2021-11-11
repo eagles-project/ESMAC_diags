@@ -1,6 +1,7 @@
 pip
 matplotlib
 numpy
+scipy
 sphinx
 lxml
 conda-build

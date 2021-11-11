@@ -3,6 +3,7 @@ function of some specific data treatment
 """
 
 import numpy as np
+from ..subroutines.quality_control import qc_remove_neg
 
 #%%
 def avg_time_1d(time0, data0, time):
@@ -23,7 +24,6 @@ def avg_time_1d(time0, data0, time):
     data : output data
 
     """
-    from quality_control import qc_remove_neg
     data0 = qc_remove_neg(data0)
     if data0.shape[0] != len(time0):
         raise ValueError("Arrays must have the same size")
@@ -53,7 +53,6 @@ def avg_time_2d(time0, data0, time):
     data : output data
 
     """
-    from quality_control import qc_remove_neg
     data0 = qc_remove_neg(data0)
     if data0.shape[0] != len(time0):
         raise ValueError("the first dimension of input data must have the same size with time")
@@ -119,14 +118,10 @@ def mask_model_ps(timem, psm, legnum, campaign, shipmetpath):
     datamask : mask flag of large Ps difference
 
     """
-    
-    import sys
-    sys.path.insert(1, '../subroutines/')
-    
     import glob
-    from read_ship import read_marmet
-    from read_ARMdata import read_met
-    from time_format_change import yyyymmdd2cday,  cday2mmdd
+    from ..subroutines.read_ship import read_marmet
+    from ..subroutines.read_ARMdata import read_met
+    from ..subroutines.time_format_change import yyyymmdd2cday,  cday2mmdd
     
     if campaign == 'MAGIC':
         filenameo = shipmetpath + 'marmet' + legnum + '.txt'

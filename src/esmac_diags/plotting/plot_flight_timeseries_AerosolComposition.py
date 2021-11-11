@@ -13,20 +13,9 @@ from ..subroutines.read_aircraft import read_ams,read_iwg1
 from ..subroutines.read_netcdf import read_merged_size,read_extractflight
 from ..subroutines.quality_control import qc_mask_qcflag,qc_remove_neg
 
-
 def run_plot(settings):
-    #%% settings
-    
-    # from settings import campaign, Model_List, color_model, \
-    #     E3SM_aircraft_path, figpath_aircraft_timeseries
-    
-    # if campaign in ['HISCALE', 'ACEENA']:
-    #     from settings import IOP, merged_size_path, amspath, iwgpath
-    # elif campaign in ['CSET', 'SOCRATES']:
-    #     raise ValueError('CSET and SOCRATES do not have composition data')
-    # else:
-    #     raise ValueError('campaign name is not recognized: '+campaign)
-        
+
+    #%% variables from settings
     campaign = settings['campaign']
     Model_List = settings['Model_List']
     color_model = settings['color_model']
@@ -42,6 +31,8 @@ def run_plot(settings):
         raise ValueError('CSET and SOCRATES do not have composition data')
     elif campaign not in ['HISCALE', 'ACEENA']:
         raise ValueError('campaign name is not recognized: '+campaign)
+
+    #%% other settings
     
     if not os.path.exists(figpath_aircraft_timeseries):
         os.makedirs(figpath_aircraft_timeseries)
@@ -204,14 +195,14 @@ def run_plot(settings):
             ax1.plot(timem2, so4_m[mm],color=color_model[mm],linewidth=1, label=Model_List[mm])
         # ax1.set_yscale('log')
         ax1.tick_params(color='k',labelsize=12)
-        ylim1 = ax1.get_ylim()
+        # ylim1 = ax1.get_ylim()
         
         ax2.plot(time_ams/3600,orgaaf,color='k',linewidth=1,label='OBS')
         for mm in range(nmodels):
             ax2.plot(timem2, org_m[mm],color=color_model[mm],linewidth=1, label=Model_List[mm])
         # ax2.set_yscale('log')
         ax2.tick_params(color='k',labelsize=12)
-        ylim2 = ax2.get_ylim()
+        # ylim2 = ax2.get_ylim()
         
         ax1.legend(loc='center right', shadow=False, fontsize='large',bbox_to_anchor=(1.25, .5))
         ax2.legend(loc='center right', shadow=False, fontsize='large',bbox_to_anchor=(1.25, .5))
