@@ -125,7 +125,7 @@ def run_plot(settings):
             time=np.ma.compressed(time)
             size=size*1000.
             merge = qc_mask_cloudflag(merge,cflag)
-            
+            merge = qc_remove_neg(merge)
             # average in time for quicker plot
             time2=np.arange(300,86400,600)
             data2 = avg_time_2d(time,merge,time2)

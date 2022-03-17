@@ -59,6 +59,8 @@ def run_plot(settings):
     for filename in lst:
         (times_obs,so4sfc,timeunit,so4sfcunit)=read_acsm(filename,'sulfate')
         (times_obs,orgsfc,timeunit,orgsfcunit)=read_acsm(filename,'total_organics')
+        so4sfc = qc_remove_neg(so4sfc)
+        orgsfc = qc_remove_neg(orgsfc)
         timestr=timeunit.split(' ')
         date=timestr[2]
         cday=yyyymmdd2cday(date,'noleap')
@@ -70,8 +72,6 @@ def run_plot(settings):
         so4_obs=np.hstack((so4_obs, so42))
         org_obs=np.hstack((org_obs, org2))
     
-    so4_obs=qc_remove_neg(so4_obs)
-    org_obs=qc_remove_neg(org_obs)
     org_obs=qc_acsm_org_max(org_obs)
         
         

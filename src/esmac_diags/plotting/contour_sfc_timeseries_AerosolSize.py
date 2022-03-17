@@ -63,6 +63,7 @@ def run_plot(settings):
             timestr=timeunit.split(' ')
             date=timestr[2]
             cday=yyyymmdd2cday(date,'noleap')
+            data = qc_remove_neg(data)
             # average in time for quicker plot
             time2=np.arange(0,86400,dt_res)
             data2 = avg_time_2d(time,data,time2)
@@ -131,6 +132,7 @@ def run_plot(settings):
             smps=data[1:-1,:]
             flag=data[-1,:]
             smps=qc_mask_qcflag(smps.T,flag).T
+            smps=qc_remove_neg(smps)
             cday=yyyymmdd2cday('2016-08-27','noleap')
             # average in time for quicker plot
             time2 = np.arange(time[0],time[-1],dt_res)

@@ -9,10 +9,10 @@ import glob
 import numpy as np
 import scipy.stats
 from ..subroutines.read_ARMdata import read_cpc, read_uhsas
-from ..subroutines.read_netcdf import read_E3SM
+from ..subroutines.read_netcdf import read_E3SM, read_ship_exhaustfree
 from ..subroutines.time_format_change import  cday2mmdd
 from ..subroutines.specific_data_treatment import mask_model_ps, avg_time_1d
-from ..subroutines.quality_control import qc_mask_qcflag, qc_remove_neg
+from ..subroutines.quality_control import qc_mask_qcflag, qc_remove_neg,qc_cn_max
 
 
 def run_plot(settings):
@@ -23,6 +23,7 @@ def run_plot(settings):
     shipcpcpath = settings['shipcpcpath']
     shipmetpath = settings['shipmetpath']
     shipuhsaspath = settings['shipuhsaspath']
+    shipcn_exhaustfree_path = settings['shipcn_exhaustfree_path']
     E3SM_ship_path = settings['E3SM_ship_path']
     figpath_ship_statistics = settings['figpath_ship_statistics']
 
@@ -31,15 +32,14 @@ def run_plot(settings):
         os.makedirs(figpath_ship_statistics)
     missing_value = np.nan
     
-    #%% find files
+    #%% read model
     lst = glob.glob(E3SM_ship_path+'Ship_CNsize_'+campaign+'_'+Model_List[0]+'_shipleg*.nc')
     lst.sort()
     
     nmodels = len(Model_List)
-    cpcall = np.empty(0)
-    uhsasall = np.empty(0)
     ncn10all = []
     ncn100all = []
+    timemall = np.empty(0)
     for mm in range(nmodels):
         ncn10all.append(np.empty(0))
         ncn100all.append(np.empty(0))
@@ -54,140 +54,135 @@ def run_plot(settings):
             raise ValueError('please check campaign name: '+campaign)
         print('legnum '+format(legnum))
         
-        #%% read in model
-        datam = list()
-        databins = list()
+
         for mm in range(nmodels):
             filenamem = E3SM_ship_path+'Ship_CNsize_'+campaign+'_'+Model_List[mm]+'_shipleg'+legnum+'.nc'
         
             (timem,NCNall,timeunitm,datamunit,datamlongname)=read_E3SM(filenamem,'NCNall')
             (timem,data,timeunitm,datamunit,datamlongname)=read_E3SM(filenamem,'NCN')
-        
-            datam.append(data*1e-6)    # change unit from 1/m3 to 1/cm3
-            databins.append(NCNall*1e-6)    # change unit from 1/m3 to 1/cm3
             
             # mask data where model grid is not at ocean surface (Ps is too different than obs)
             filenamem = E3SM_ship_path+'Ship_vars_'+campaign+'_'+Model_List[mm]+'_shipleg'+legnum+'.nc'
             (timem,psm,timeunitx,psmunit,psmlongname)=read_E3SM(filenamem,'PS')
             datamask = mask_model_ps(timem,0.01*psm,legnum,campaign,shipmetpath)
             
-            datam[mm][datamask]=np.nan
-            
-        year0 = str(int(timeunitm.split()[2][0:4])+1)
+            datam = data*1e-6    # change unit from 1/m3 to 1/cm3
+            datam[datamask]=np.nan
         
-        #%% read in observations
-        # find the days related to the ship leg
-        day = [int(a) for a in timem]
-        day = list(set(day))
-        day.sort()
-    
-        # CPC    
-        t_cpc=np.empty(0)
-        cpc=np.empty(0)
-        for dd in day:
+            # Calculate model aerosol number concentration for UHSAS size range
+            datam2=np.nansum(NCNall[100:1000,:],0) * 1e-6    # change unit from 1/m3 to 1/cm3
+            datam2[datamask]=np.nan
+
+            ncn10all[mm] = np.hstack((ncn10all[mm],datam))
+            ncn100all[mm] = np.hstack((ncn100all[mm],datam2))
             
             if campaign=='MAGIC':
+                if int(legnum)<=9:
+                    timemall = np.hstack((timemall, timem))
+                else:
+                    timemall = np.hstack((timemall, timem+365))
+            elif campaign=='MARCUS':
+                if int(legnum)<=2:
+                    timemall = np.hstack((timemall, timem))
+                else:
+                    timemall = np.hstack((timemall, timem+365))
+                
+                
+    #%% read in observation
+    if campaign=='MAGIC':
+        t_cpc = np.empty(0)
+        t_uhsas = np.empty(0)
+        cpcall = np.empty(0)
+        uhsasall = np.empty(0)
+            
+        for ll in range(len(lst)):       
+            # use lat/lon from extracted model data
+            filenamem = lst[ll]
+            legnum=lst[ll][-5:-3]
+            (timem,[lat1,lon1],timeunitm,varmunit,varmlongname)=read_E3SM(filenamem,['lat','lon'])
+                
+            print('legnum '+format(legnum))
+            # find the days related to the ship leg
+            day = [int(a) for a in timem]
+            day = list(set(day))
+            day.sort()
+            
+            # read in CPC    
+            for dd in day:
                 if int(legnum)<=9:
                     if dd<=365:  # year 2012
                         filenameo = glob.glob(shipcpcpath+'magaoscpcfM1.a1.2012'+cday2mmdd(dd,calendar='noleap')+'.*')
                     else:
                         filenameo = glob.glob(shipcpcpath+'magaoscpcfM1.a1.2013'+cday2mmdd(dd-365,calendar='noleap')+'.*')
+                    cday = dd
                 else:
                     filenameo = glob.glob(shipcpcpath+'magaoscpcfM1.a1.2013'+cday2mmdd(dd,calendar='noleap')+'.*')
+                    cday = dd+365
                 if len(filenameo)==0:
                     continue  # some days may be missing
-            elif campaign=='MARCUS':
-                if int(legnum)<=2:
-                    if dd<=365:  # year 2012
-                        filenameo = glob.glob(shipcpcpath+'maraoscpcf1mM1.b1.2017'+cday2mmdd(dd,calendar='noleap')+'.*')
-                    else:
-                        filenameo = glob.glob(shipcpcpath+'maraoscpcf1mM1.b1.2018'+cday2mmdd(dd-365,calendar='noleap')+'.*')
-                else:
-                    filenameo = glob.glob(shipcpcpath+'maraoscpcf1mM1.b1.2018'+cday2mmdd(dd,calendar='noleap')+'.*')
-                if len(filenameo)==0:
-                    continue  # some days may be missing
-                    
-                    
-            (time,obs,qc,timeunit,dataunit)=read_cpc(filenameo[0])
-            obs = qc_mask_qcflag(obs,qc)
-            t_cpc=np.hstack((t_cpc, dd+time/86400))
-            cpc=np.hstack((cpc, obs))
+                (time,obs,qc,timeunit,dataunit)=read_cpc(filenameo[0])
+                obs=np.ma.filled(obs)
+                obs=qc_mask_qcflag(obs,qc)
+                obs=qc_cn_max(obs,10)
+                obs = qc_remove_neg(obs)
+                
+                time2 = np.arange(150., 86400., 300.)
+                obs2 = avg_time_1d(time, obs, time2)
+                t_cpc=np.hstack((t_cpc, cday+time2/86400))
+                cpcall=np.hstack((cpcall, obs2))
+
             
-        # if time expands two years, add 365 days to the second year
-        if t_cpc[0]>t_cpc[-1]:
-            t_cpc[t_cpc<=t_cpc[-1]]=t_cpc[t_cpc<=t_cpc[-1]]+365
-    
-        # UHSAS
-        t_uh=np.empty(0)
-        uhsas=np.empty(0)
-        for dd in day:
-            
-            if campaign=='MAGIC':
+            # read in UHSAS
+            for dd in day:
                 if int(legnum)<=9:
                     if dd<=365:  # year 2012
                         filenameo = glob.glob(shipuhsaspath+'magaosuhsasM1.a1.2012'+cday2mmdd(dd,calendar='noleap')+'.*.cdf')
                     else:
                         filenameo = glob.glob(shipuhsaspath+'magaosuhsasM1.a1.2013'+cday2mmdd(dd-365,calendar='noleap')+'.*.cdf')
+                    cday = dd
                 else:
                     filenameo = glob.glob(shipuhsaspath+'magaosuhsasM1.a1.2013'+cday2mmdd(dd,calendar='noleap')+'.*.cdf')
-            elif campaign=='MARCUS':
-                if int(legnum)<=2:
-                    if dd<=365:  # year 2012
-                        filenameo = glob.glob(shipuhsaspath+'maraosuhsasM1.a1.2017'+cday2mmdd(dd,calendar='noleap')+'.*')
-                    else:
-                        filenameo = glob.glob(shipuhsaspath+'maraosuhsasM1.a1.2018'+cday2mmdd(dd-365,calendar='noleap')+'.*')
-                else:
-                    filenameo = glob.glob(shipuhsaspath+'maraosuhsasM1.a1.2018'+cday2mmdd(dd,calendar='noleap')+'.*')
-            
-            if len(filenameo)==0:
-                continue  # some days may be missing
-            if len(filenameo)>1:
-                raise ValueError('find too many files: '+filenameo)
+                    cday = dd+365
+
+                if len(filenameo)==0:
+                    continue  # some days may be missing
+                if len(filenameo)>1:
+                    raise ValueError('find too many files')
+                    
+                (time,dmin,dmax,obs,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
+                obs=np.ma.filled(obs)
+                obs=qc_remove_neg(obs)
+                obs = np.nansum(obs[:, dmin>=100],1)
+                obs=qc_cn_max(obs,100)
+                time2 = np.arange(150., 86400., 300.)
+                obs2 = avg_time_1d(time,obs,time2)
+                t_uhsas = np.hstack((t_uhsas,time2/86400+cday))
+                uhsasall = np.hstack((uhsasall, obs2))
                 
-            (time,dmin,dmax,obs,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
-            obs=np.ma.filled(obs)
-            obs=qc_remove_neg(obs)
-            uhsas=np.hstack((uhsas, np.nansum(obs,1)))
-            t_uh = np.hstack((t_uh,time/86400+dd))
+                
+    elif campaign=='MARCUS':
+        (t_cpc, cpc, timeunit, cpcunit, cpc_longname) = read_ship_exhaustfree(shipcn_exhaustfree_path + \
+                                                     'CPC_UHSAS_exhaustfree_1hr.nc', 'CPC')
+        (t_uhsas, uhsas, timeunit, uhsasunit, uhsas_longname) = read_ship_exhaustfree(shipcn_exhaustfree_path + \
+                                                     'CPC_UHSAS_exhaustfree_1hr.nc', 'UHSAS100')
+        cpcall = qc_remove_neg(cpc)
+        uhsasall = qc_remove_neg(uhsas)
             
-        # if no obs available, fill one data with NaN
-        if len(t_uh)==0:
-            t_uh=[timem[0],timem[1]]
-            uhsas=np.full((2),np.nan)
-            
-        # if time expands two years, add 365 days to the second year
-        if t_uh[0]>t_uh[-1]:
-            t_uh[t_uh<=t_uh[-1]]=t_uh[t_uh<=t_uh[-1]]+365
-        
-        
-        #%% Calculate model aerosol number concentration for UHSAS size range
-        b1 = int(dmin[0])
-        b2 = int(dmax[-1])
-        datam2=list()
-        for mm in range(nmodels):
-            datam2.append(np.nansum(databins[mm][b1-1:b2,:],0))
-            datam2[mm][datamask]=np.nan
-        
-        #%% average into 1hr resolution
-        time0 = np.arange(timem[0],timem[-1],1./24)
-        cpc = avg_time_1d(t_cpc,cpc,time0)
-        uhsas = avg_time_1d(t_uh,uhsas,time0)
-        for mm in range(nmodels):
-            datam[mm] = avg_time_1d(timem,datam[mm],time0)
-            datam2[mm] = avg_time_1d(timem,datam2[mm],time0)
-            
-        #%% 
-        cpcall = np.hstack((cpcall,cpc))
-        uhsasall = np.hstack((uhsasall,uhsas))
-        for mm in range(nmodels):
-            ncn10all[mm] = np.hstack((ncn10all[mm],datam[mm]))
-            ncn100all[mm] = np.hstack((ncn100all[mm],datam2[mm]))
-            
+        idx = np.logical_and(t_cpc>=timemall[0]-0.04, t_cpc<=timemall[-1]+0.04)
+        t_cpc = t_cpc[idx]
+        t_uhsas = t_uhsas[idx]
+        cpcall = cpcall[idx]
+        uhsasall = uhsasall[idx]
              
     #%% calculate statistics
     
-    if ncn10all[0].shape != cpcall.shape or ncn100all[0].shape != uhsasall.shape:
-        raise ValueError('observation and model dimensions are inconsitent ')
+    time0 = np.arange(timemall[0],timemall[-1],1./24)
+    cpcall = avg_time_1d(t_cpc,cpcall,time0)
+    uhsasall = avg_time_1d(t_uhsas,uhsasall,time0)
+    for mm in range(nmodels):
+        ncn10all[mm] = avg_time_1d(timemall,ncn10all[mm],time0)
+        ncn100all[mm] = avg_time_1d(timemall,ncn100all[mm],time0)
+        
     
     # select only valid data in obs and the corresponding data in models (all data are not NAN)
     idx10 = sum(np.vstack((~np.isnan(ncn10all),~np.isnan(cpcall))))==nmodels+1

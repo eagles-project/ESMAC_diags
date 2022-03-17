@@ -7,7 +7,7 @@ import glob
 import matplotlib.pyplot as plt
 import numpy as np
 from ..subroutines.read_ARMdata import read_cpc, read_uhsas
-from ..subroutines.read_netcdf import read_E3SM
+from ..subroutines.read_netcdf import read_E3SM, read_ship_exhaustfree
 from ..subroutines.time_format_change import  cday2mmdd
 from ..subroutines.specific_data_treatment import mask_model_ps
 from ..subroutines.quality_control import qc_mask_qcflag,qc_remove_neg,qc_cn_max
@@ -19,6 +19,7 @@ def run_plot(settings):
     color_model = settings['color_model']
     shipcpcpath = settings['shipcpcpath']
     shipuhsaspath = settings['shipuhsaspath']
+    shipcn_exhaustfree_path = settings['shipcn_exhaustfree_path']
     shipmetpath = settings['shipmetpath']
     E3SM_ship_path = settings['E3SM_ship_path']
     figpath_ship_timeseries = settings['figpath_ship_timeseries']
@@ -60,18 +61,24 @@ def run_plot(settings):
             
         year0 = str(int(timeunitm.split()[2][0:4])+1)
         
-        #%% read in observations
-        # find the days related to the ship leg
-        day = [int(a) for a in timem]
-        day = list(set(day))
-        day.sort()
-    
-        # CPC    
-        t_cpc=np.empty(0)
-        cpc=np.empty(0)
-        for dd in day:
+        # Calculate model aerosol number concentration for UHSAS size range
+        datam2=list()
+        for mm in range(nmodels):
+            datam2.append(np.nansum(databins[mm][100:1000,:],0))
             
-            if campaign=='MAGIC':
+        #%% read in observations
+        if campaign=='MAGIC':
+        
+            # find the days related to the ship leg
+            day = [int(a) for a in timem]
+            day = list(set(day))
+            day.sort()
+        
+            # CPC    
+            t_cpc=np.empty(0)
+            cpc=np.empty(0)
+            for dd in day:
+                
                 if int(legnum)<=9:
                     if dd<=365:  # year 2012
                         filenameo = glob.glob(shipcpcpath+'magaoscpcfM1.a1.2012'+cday2mmdd(dd,calendar='noleap')+'.*')
@@ -81,35 +88,23 @@ def run_plot(settings):
                     filenameo = glob.glob(shipcpcpath+'magaoscpcfM1.a1.2013'+cday2mmdd(dd,calendar='noleap')+'.*')
                 if len(filenameo)==0:
                     continue  # some days may be missing
-            elif campaign=='MARCUS':
-                if int(legnum)<=2:
-                    if dd<=365:  # year 2012
-                        filenameo = glob.glob(shipcpcpath+'maraoscpcf1mM1.b1.2017'+cday2mmdd(dd,calendar='noleap')+'.*')
-                    else:
-                        filenameo = glob.glob(shipcpcpath+'maraoscpcf1mM1.b1.2018'+cday2mmdd(dd-365,calendar='noleap')+'.*')
-                else:
-                    filenameo = glob.glob(shipcpcpath+'maraoscpcf1mM1.b1.2018'+cday2mmdd(dd,calendar='noleap')+'.*')
-                if len(filenameo)==0:
-                    continue  # some days may be missing
-                    
-                    
-            (time,obs,qc,timeunit,dataunit)=read_cpc(filenameo[0])
-            obs=qc_mask_qcflag(obs,qc)
-            t_cpc=np.hstack((t_cpc, dd+time/86400))
-            cpc=np.hstack((cpc, obs))
-            
-        cpc=qc_remove_neg(cpc)
-        cpc=qc_cn_max(cpc,10)
-        # if time expands two years, add 365 days to the second year
-        if t_cpc[0]>t_cpc[-1]:
-            t_cpc[t_cpc<=t_cpc[-1]]=t_cpc[t_cpc<=t_cpc[-1]]+365
     
-        # UHSAS
-        t_uh=np.empty(0)
-        uhsas=np.empty(0)
-        for dd in day:
-            
-            if campaign=='MAGIC':
+                        
+                (time,obs,qc,timeunit,dataunit)=read_cpc(filenameo[0])
+                obs=qc_mask_qcflag(obs,qc)
+                t_cpc=np.hstack((t_cpc, dd+time/86400))
+                cpc=np.hstack((cpc, obs))
+                
+            cpc=qc_remove_neg(cpc)
+            cpc=qc_cn_max(cpc,10)
+            # if time expands two years, add 365 days to the second year
+            if t_cpc[0]>t_cpc[-1]:
+                t_cpc[t_cpc<=t_cpc[-1]]=t_cpc[t_cpc<=t_cpc[-1]]+365
+        
+            # UHSAS
+            t_uh=np.empty(0)
+            uhsas=np.empty(0)
+            for dd in day:
                 if int(legnum)<=9:
                     if dd<=365:  # year 2012
                         filenameo = glob.glob(shipuhsaspath+'magaosuhsasM1.a1.2012'+cday2mmdd(dd,calendar='noleap')+'.*.cdf')
@@ -117,43 +112,46 @@ def run_plot(settings):
                         filenameo = glob.glob(shipuhsaspath+'magaosuhsasM1.a1.2013'+cday2mmdd(dd-365,calendar='noleap')+'.*.cdf')
                 else:
                     filenameo = glob.glob(shipuhsaspath+'magaosuhsasM1.a1.2013'+cday2mmdd(dd,calendar='noleap')+'.*.cdf')
-            elif campaign=='MARCUS':
-                if int(legnum)<=2:
-                    if dd<=365:  # year 2012
-                        filenameo = glob.glob(shipuhsaspath+'maraosuhsasM1.a1.2017'+cday2mmdd(dd,calendar='noleap')+'.*')
-                    else:
-                        filenameo = glob.glob(shipuhsaspath+'maraosuhsasM1.a1.2018'+cday2mmdd(dd-365,calendar='noleap')+'.*')
-                else:
-                    filenameo = glob.glob(shipuhsaspath+'maraosuhsasM1.a1.2018'+cday2mmdd(dd,calendar='noleap')+'.*')
-            
-            if len(filenameo)==0:
-                continue  # some days may be missing
-            if len(filenameo)>1:
-                raise ValueError('find too many files')
+
+                if len(filenameo)==0:
+                    continue  # some days may be missing
+                if len(filenameo)>1:
+                    raise ValueError('find too many files')
+                    
+                (time,dmin,dmax,obs,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
+                obs=np.ma.filled(obs)
+                obs=qc_remove_neg(obs)
+                uhsas=np.hstack((uhsas, np.nansum(obs,1)))
+                t_uh = np.hstack((t_uh,time/86400+dd))
                 
-            (time,dmin,dmax,obs,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
-            obs=np.ma.filled(obs)
-            obs=qc_remove_neg(obs)
-            uhsas=np.hstack((uhsas, np.nansum(obs,1)))
-            t_uh = np.hstack((t_uh,time/86400+dd))
-            
-        uhsas=qc_cn_max(uhsas,100)
-        # if no obs available, fill one data with NaN
-        if len(t_uh)==0:
-            t_uh=[timem[0],timem[1]]
-            uhsas=np.full((2),np.nan)
-            
-        # if time expands two years, add 365 days to the second year
-        if t_uh[0]>t_uh[-1]:
-            t_uh[t_uh<=t_uh[-1]]=t_uh[t_uh<=t_uh[-1]]+365
+            uhsas=qc_cn_max(uhsas,100)
+            # if no obs available, fill one data with NaN
+            if len(t_uh)==0:
+                t_uh=[timem[0],timem[1]]
+                uhsas=np.full((2),np.nan)
                 
-        #%% Calculate model aerosol number concentration for UHSAS size range
-        b1 = int(dmin[0])
-        b2 = int(dmax[-1])
-        datam2=list()
-        for mm in range(nmodels):
-            datam2.append(np.nansum(databins[mm][b1-1:b2,:],0))
-            # datam2[mm][datamask]=np.nan
+            # if time expands two years, add 365 days to the second year
+            if t_uh[0]>t_uh[-1]:
+                t_uh[t_uh<=t_uh[-1]]=t_uh[t_uh<=t_uh[-1]]+365
+                
+        elif campaign=='MARCUS':
+            (t_cpc, cpc, timeunit, cpcunit, cpc_longname) = read_ship_exhaustfree(shipcn_exhaustfree_path + \
+                                                         'CPC_UHSAS_exhaustfree_1hr.nc', 'CPC')
+            (t_uh, uhsas, timeunit, uhsasunit, uhsas_longname) = read_ship_exhaustfree(shipcn_exhaustfree_path + \
+                                                         'CPC_UHSAS_exhaustfree_1hr.nc', 'UHSAS100')
+            cpc = qc_remove_neg(cpc)
+            uhsas = qc_remove_neg(uhsas)
+            
+            if int(legnum)>2:
+                t_cpc = t_cpc-365
+                t_uh = t_uh-365
+            
+            idx = np.logical_and(t_cpc>=timem[0]-0.04, t_cpc<=timem[-1]+0.04)
+            t_cpc = t_cpc[idx]
+            t_uh = t_uh[idx]
+            cpc = cpc[idx]
+            uhsas = uhsas[idx]
+     
         
         #%% make plot
             

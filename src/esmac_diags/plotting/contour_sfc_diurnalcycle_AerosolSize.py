@@ -62,6 +62,7 @@ def run_plot(settings):
             cday=yyyymmdd2cday(date,'noleap')
             # average in time for quicker plot
             time2=np.arange(300,86400,600)
+            data=qc_remove_neg(data)
             data2 = avg_time_2d(time,data,time2)
             t_uhsas=np.hstack((t_uhsas, cday+time2/86400))
             uhsas=np.vstack((uhsas, data2))

@@ -3,7 +3,6 @@ function of some specific data treatment
 """
 
 import numpy as np
-from ..subroutines.quality_control import qc_remove_neg
 
 #%%
 def avg_time_1d(time0, data0, time):
@@ -24,7 +23,6 @@ def avg_time_1d(time0, data0, time):
     data : output data
 
     """
-    data0 = qc_remove_neg(data0)
     if data0.shape[0] != len(time0):
         raise ValueError("Arrays must have the same size")
     data = np.full((len(time)), np.nan)
@@ -53,7 +51,6 @@ def avg_time_2d(time0, data0, time):
     data : output data
 
     """
-    data0 = qc_remove_neg(data0)
     if data0.shape[0] != len(time0):
         raise ValueError("the first dimension of input data must have the same size with time")
     data = np.full((len(time), data0.shape[1]), np.nan)

@@ -9,9 +9,10 @@ import glob
 import matplotlib.pyplot as plt
 import numpy as np
 from ..subroutines.read_ARMdata import read_uhsas
-from ..subroutines.read_netcdf import read_E3SM
+from ..subroutines.read_netcdf import read_E3SM, read_ship_exhaustfree
 from ..subroutines.time_format_change import cday2mmdd,yyyymmdd2cday
 from ..subroutines.specific_data_treatment import  avg_time_2d
+from ..subroutines.quality_control import qc_remove_neg
 
 def run_plot(settings):
     #%% variables from settings
@@ -19,6 +20,7 @@ def run_plot(settings):
     Model_List = settings['Model_List']
     color_model = settings['color_model']
     shipuhsaspath = settings['shipuhsaspath']
+    shipcn_exhaustfree_path = settings['shipcn_exhaustfree_path']
     E3SM_ship_path = settings['E3SM_ship_path']
     figpath_ship_statistics = settings['figpath_ship_statistics']
 
@@ -27,6 +29,75 @@ def run_plot(settings):
     if not os.path.exists(figpath_ship_statistics):
         os.makedirs(figpath_ship_statistics)
     
+    #%% read in observations
+    
+    nbins = 99 # for UHSAS at MAGIC
+    pdfall_o = np.empty((0,nbins))
+    
+    if campaign=='MAGIC':
+        startdate='2012-09-22'
+        enddate='2013-09-26'
+    elif campaign=='MARCUS':
+        startdate='2017-10-30'
+        enddate='2018-03-22'
+    cday1=yyyymmdd2cday(startdate,'noleap')
+    cday2=yyyymmdd2cday(enddate,'noleap')
+    if startdate[0:4]!=enddate[0:4]:
+        cday2=cday2+365  # cover two years
+    
+    if campaign=='MAGIC':
+        uhsasall=list()
+        ntimes = list()
+        for cc in range(cday1,cday2+1):
+            if cc<=365:
+                yyyymmdd=startdate[0:4]+cday2mmdd(cc)
+            else:
+                yyyymmdd=enddate[0:4]+cday2mmdd(cc-365)
+                
+            filenameo = glob.glob(shipuhsaspath+'magaosuhsasM1.a1.'+yyyymmdd+'*')
+            if len(filenameo)==0:
+                continue  
+            elif len(filenameo)>1:
+                raise ValueError('find too many files')
+            
+            print(yyyymmdd)
+            
+            (time,dmin,dmax,uhsas,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
+            
+            uhsas=np.ma.filled(uhsas)
+            uhsas = qc_remove_neg(uhsas)
+            # average in time for quicker plot
+            time0=np.arange(1800,86400,3600)
+            data0 = avg_time_2d(time,uhsas,time0)
+            pdfall_o = np.vstack((pdfall_o,data0))
+            
+            # average for each file to reduce computational time
+            ntimes.append(sum(uhsas[:,0]>=0))  # number of valid values
+            meandata=np.nanmean(uhsas,0)
+            meandata[np.isnan(meandata)]=0
+            uhsasall.append(meandata) 
+            
+        size_u = (dmin+dmax)/2
+        
+        # mean pdf
+        ntotal=sum(ntimes)
+        pdf_obs=sum([uhsasall[ii]*ntimes[ii]/ntotal for ii in range(len(ntimes))])
+         
+    elif campaign=='MARCUS':
+        (time, dmin, timeunit, dunit, d_longname) = read_ship_exhaustfree(shipcn_exhaustfree_path + \
+                                                     'CPC_UHSAS_exhaustfree_1hr.nc', 'size_low')
+        (time, dmax, timeunit, dunit, d_longname) = read_ship_exhaustfree(shipcn_exhaustfree_path + \
+                                                     'CPC_UHSAS_exhaustfree_1hr.nc', 'size_high')
+        (time, uhsas, timeunit, uhsasunit, uhsas_longname) = read_ship_exhaustfree(shipcn_exhaustfree_path + \
+                                                     'CPC_UHSAS_exhaustfree_1hr.nc', 'UHSAS')
+        uhsas = qc_remove_neg(uhsas)
+        
+        size_u = (dmin+dmax)/2
+        
+        # mean pdf
+        pdfall_o = np.array(uhsas[~np.isnan(uhsas[:,0]), :])
+        pdf_obs = np.nanmean(pdfall_o, axis=0)
+        
     
     #%% read in model
     nmodels=len(Model_List)
@@ -34,6 +105,7 @@ def run_plot(settings):
     pdfall_m = [np.empty((3000,0)) for mm in range(nmodels)]
     
     lst = glob.glob(E3SM_ship_path+'Ship_CNsize_'+campaign+'_'+Model_List[0]+'_shipleg*.nc')
+    lst.sort()
     
     for mm in range(nmodels):
         data2=list()
@@ -43,13 +115,14 @@ def run_plot(settings):
                 legnum=lst[ll][-5:-3]
             elif campaign=='MARCUS':
                 legnum=lst[ll][-4]
-            print(legnum)
+            print('legnum '+format(legnum))
             
             filenamem = E3SM_ship_path+'Ship_CNsize_'+campaign+'_'+Model_List[mm]+'_shipleg'+legnum+'.nc'
             (timem,data,timeunitm,datamunit,datamlongname)=read_E3SM(filenamem,'NCNall')
             
             # average for each file to reduce computational time
             ntimes.append(sum(data[0,:]>0))  # number of valid values
+            data = qc_remove_neg(data)
             data=data*1e-6   # change unit from 1/m3 to 1/cm3
             
             # average in time for quicker plot
@@ -65,61 +138,6 @@ def run_plot(settings):
         data3=[data2[ii]*ntimes[ii]/ntotal for ii in range(len(ntimes))]
         pdf_model.append(sum(data3))
         
-    #%% read in observations
-    
-    nbins = 99 # for UHSAS at MAGIC
-    pdfall_o = np.empty((nbins,0))
-    
-    if campaign=='MAGIC':
-        startdate='2012-09-22'
-        enddate='2013-09-26'
-    elif campaign=='MARCUS':
-        startdate='2017-10-30'
-        enddate='2018-03-22'
-    cday1=yyyymmdd2cday(startdate,'noleap')
-    cday2=yyyymmdd2cday(enddate,'noleap')
-    if startdate[0:4]!=enddate[0:4]:
-        cday2=cday2+365  # cover two years
-    
-    uhsasall=list()
-    ntimes = list()
-    for cc in range(cday1,cday2+1):
-        if cc<=365:
-            yyyymmdd=startdate[0:4]+cday2mmdd(cc)
-        else:
-            yyyymmdd=enddate[0:4]+cday2mmdd(cc-365)
-            
-        if campaign=='MAGIC':
-            filenameo = glob.glob(shipuhsaspath+'magaosuhsasM1.a1.'+yyyymmdd+'*')
-        elif campaign=='MARCUS':
-            filenameo = glob.glob(shipuhsaspath+'maraosuhsasM1.a1.'+yyyymmdd+'*')
-        if len(filenameo)==0:
-            continue  
-        elif len(filenameo)>1:
-            raise ValueError('find too many files')
-        
-        print(yyyymmdd)
-        
-        (time,dmin,dmax,uhsas,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
-        
-        uhsas=np.ma.filled(uhsas)
-        # average in time for quicker plot
-        time0=np.arange(1800,86400,3600)
-        data0 = avg_time_2d(time,uhsas,time0)
-        pdfall_o = np.column_stack((pdfall_o,data0.T))
-        
-        # average for each file to reduce computational time
-        ntimes.append(sum(uhsas[:,0]>=0))  # number of valid values
-        meandata=np.nanmean(uhsas,0)
-        meandata[np.isnan(meandata)]=0
-        uhsasall.append(meandata) 
-        
-    size_u = (dmin+dmax)/2
-    
-    # mean pdf
-    ntotal=sum(ntimes)
-    pdf_obs=sum([uhsasall[ii]*ntimes[ii]/ntotal for ii in range(len(ntimes))])
-    
     #%% change to dN/dlnDp
     dlnDp_u=np.empty(nbins)
     for bb in range(len(size_u)):
@@ -132,14 +150,14 @@ def run_plot(settings):
         pdf_model[mm]=pdf_model[mm]/dlnDp
     
     #%%
-    pct1_o = [np.nanpercentile(pdfall_o[i,:]/dlnDp_u[i],10) for i in range(nbins)]
-    pct2_o = [np.nanpercentile(pdfall_o[i,:]/dlnDp_u[i],90) for i in range(nbins)]
+    pct1_o = [np.nanpercentile(pdfall_o[:,i]/dlnDp_u[i],10) for i in range(nbins)]
+    pct2_o = [np.nanpercentile(pdfall_o[:,i]/dlnDp_u[i],90) for i in range(nbins)]
     pct1_m = [[] for mm in range(nmodels)]
     pct2_m = [[] for mm in range(nmodels)]
     for mm in range(nmodels):
         pct1_m[mm] = [np.nanpercentile(pdfall_m[mm][i,:]/dlnDp[i],10) for i in range(3000)]
         pct2_m[mm] = [np.nanpercentile(pdfall_m[mm][i,:]/dlnDp[i],90) for i in range(3000)]
-    
+
     #%% plot
     figname = figpath_ship_statistics+'pdf_AerosolSize_'+campaign+'.png'
     

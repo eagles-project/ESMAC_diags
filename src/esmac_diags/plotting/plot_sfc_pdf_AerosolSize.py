@@ -12,7 +12,7 @@ from ..subroutines.read_surface import read_smpsb_pnnl,read_smps_bin
 from ..subroutines.read_ARMdata import read_uhsas, read_smps_bnl
 from ..subroutines.read_netcdf import read_E3SM
 from ..subroutines.specific_data_treatment import  avg_time_2d
-from ..subroutines.quality_control import qc_mask_qcflag,qc_correction_nanosmps
+from ..subroutines.quality_control import qc_mask_qcflag,qc_correction_nanosmps, qc_remove_neg
 
 def run_plot(settings):
     #%% variables from settings
@@ -63,6 +63,7 @@ def run_plot(settings):
             timestr=timeunit.split(' ')
             date=timestr[2]
             cday=yyyymmdd2cday(date,'noleap')
+            data = qc_remove_neg(data)
             # average in time for quicker plot
             time2=np.arange(1800,86400,3600)
             data2 = avg_time_2d(time,data,time2)
@@ -89,6 +90,7 @@ def run_plot(settings):
                 (time,size,flag,timeunit,dataunit,smps_longname)=read_smps_bnl(filename,'status_flag')
                 (time,size,data,timeunit,smpsunit,smps_longname)=read_smps_bnl(filename,'number_size_distribution')
                 data=qc_mask_qcflag(data,flag)
+                data = qc_remove_neg(data)
                 timestr=timeunit.split(' ')
                 date=timestr[2]
                 cday=yyyymmdd2cday(date,'noleap')
@@ -107,6 +109,7 @@ def run_plot(settings):
                 (timen,sizen,flagn,timenunit,datanunit,long_name)=read_smps_bnl(filename2,'status_flag')
                 (timen,sizen,datan,timenunit,nanounit,nanoname)=read_smps_bnl(filename2,'number_size_distribution')
                 datan=qc_mask_qcflag(datan,flagn)
+                data = qc_remove_neg(data)
                 timestr=timenunit.split(' ')
                 date=timestr[2]
                 cday=yyyymmdd2cday(date,'noleap')
@@ -128,6 +131,7 @@ def run_plot(settings):
             smps=data[1:-1,:]
             flag=data[-1,:]
             smps=qc_mask_qcflag(smps.T,flag).T
+            smps = qc_remove_neg(smps)
             cday=yyyymmdd2cday('2016-08-27')
             # average in time for quicker plot
             time2=np.arange(time[0],time[-1]+1800,3600)

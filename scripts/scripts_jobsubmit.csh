@@ -1,7 +1,7 @@
 #!/bin/csh
 
 #SBATCH --nodes=1
-#SBATCH --time=05:00:00
+#SBATCH --time=08:25:00
 #SBATCH --qos=regular
 #SBATCH --constraint=knl
 #SBATCH --account=m3525
@@ -11,6 +11,6 @@
 #module load python
 #conda activate esmac_diags
 
-python run_plotting.py
+python run_plot_all.py
 
 exit

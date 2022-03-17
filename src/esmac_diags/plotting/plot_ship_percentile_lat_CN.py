@@ -7,7 +7,7 @@ import glob
 import matplotlib.pyplot as plt
 import numpy as np
 from ..subroutines.read_ARMdata import read_cpc, read_uhsas
-from ..subroutines.read_netcdf import read_E3SM
+from ..subroutines.read_netcdf import read_E3SM, read_ship_exhaustfree
 from ..subroutines.time_format_change import  cday2mmdd
 from ..subroutines.quality_control import qc_mask_qcflag,qc_remove_neg,qc_cn_max
 
@@ -19,6 +19,7 @@ def run_plot(settings):
     latbin = settings['latbin']
     shipcpcpath = settings['shipcpcpath']
     shipuhsaspath = settings['shipuhsaspath']
+    shipcn_exhaustfree_path = settings['shipcn_exhaustfree_path']
     E3SM_ship_path = settings['E3SM_ship_path']
     figpath_ship_statistics = settings['figpath_ship_statistics']
 
@@ -67,33 +68,30 @@ def run_plot(settings):
         uhsas_m.append(uh_tmp)
             
     #%% read in observation
-    cpc_o = list()
-    uhsas_o = list()
-    for bb in range(latlen):
-        cpc_o.append(np.empty(0))
-        uhsas_o.append(np.empty(0))
-        
-    for ll in range(len(lst)):       
-        # use lat/lon from extracted model data
-        filenamem = lst[ll]
-        if campaign=='MAGIC':
-            legnum=lst[ll][-5:-3]
-        elif campaign=='MARCUS':
-            legnum=lst[ll][-4]
-        (timem,[lat1,lon1],timeunitm,varmunit,varmlongname)=read_E3SM(filenamem,['lat','lon'])
-        lat1[lat1<-9000]=np.nan
-        lon1[lon1<-9000]=np.nan
+    if campaign=='MAGIC':
+        cpc_o = list()
+        uhsas_o = list()
+        for bb in range(latlen):
+            cpc_o.append(np.empty(0))
+            uhsas_o.append(np.empty(0))
             
-        # find the days related to the ship leg
-        day = [int(a) for a in timem]
-        day = list(set(day))
-        day.sort()
-        
-        # read in CPC    
-        t_cpc=np.empty(0)
-        cpc=np.empty(0)
-        for dd in day:
-            if campaign=='MAGIC':
+        for ll in range(len(lst)):       
+            # use lat/lon from extracted model data
+            filenamem = lst[ll]
+            legnum=lst[ll][-5:-3]
+            (timem,[lat1,lon1],timeunitm,varmunit,varmlongname)=read_E3SM(filenamem,['lat','lon'])
+            lat1[lat1<-9000]=np.nan
+            lon1[lon1<-9000]=np.nan
+                
+            # find the days related to the ship leg
+            day = [int(a) for a in timem]
+            day = list(set(day))
+            day.sort()
+            
+            # read in CPC    
+            t_cpc=np.empty(0)
+            cpc=np.empty(0)
+            for dd in day:
                 if int(legnum)<=9:
                     if dd<=365:  # year 2012
                         filenameo = glob.glob(shipcpcpath+'magaoscpcfM1.a1.2012'+cday2mmdd(dd,calendar='noleap')+'.*')
@@ -103,37 +101,26 @@ def run_plot(settings):
                     filenameo = glob.glob(shipcpcpath+'magaoscpcfM1.a1.2013'+cday2mmdd(dd,calendar='noleap')+'.*')
                 if len(filenameo)==0:
                     continue  # some days may be missing
-            elif campaign=='MARCUS':
-                if int(legnum)<=2:
-                    if dd<=365:  # year 2012
-                        filenameo = glob.glob(shipcpcpath+'maraoscpcf1mM1.b1.2017'+cday2mmdd(dd,calendar='noleap')+'.*')
-                    else:
-                        filenameo = glob.glob(shipcpcpath+'maraoscpcf1mM1.b1.2018'+cday2mmdd(dd-365,calendar='noleap')+'.*')
-                else:
-                    filenameo = glob.glob(shipcpcpath+'maraoscpcf1mM1.b1.2018'+cday2mmdd(dd,calendar='noleap')+'.*')
-                if len(filenameo)==0:
-                    continue  # some days may be missing
-                 
-            (time,obs,qc,timeunit,dataunit)=read_cpc(filenameo[0])
-            obs=qc_mask_qcflag(obs,qc)
-            t_cpc=np.hstack((t_cpc, dd+time/86400))
-            cpc=np.hstack((cpc, obs))
-        cpc=qc_remove_neg(cpc)
-        cpc=qc_cn_max(cpc,10)
-        # if time expands two years, add 365 days to the second year
-        if t_cpc[0]>t_cpc[-1]:
-            t_cpc[t_cpc<=t_cpc[-1]]=t_cpc[t_cpc<=t_cpc[-1]]+365
-        lat2=np.interp(t_cpc,timem,lat1)
-        # separate into latitude bins
-        for bb in range(latlen):
-            idx = np.logical_and(lat2>=latmin[bb], lat2<latmax[bb])
-            cpc_o[bb]=np.hstack((cpc_o[bb],cpc[idx]))  
-        
-        # read in UHSAS
-        t_uh=np.empty(0)
-        uhsas=np.empty(0)
-        for dd in day:
-            if campaign=='MAGIC':
+                     
+                (time,obs,qc,timeunit,dataunit)=read_cpc(filenameo[0])
+                obs=qc_mask_qcflag(obs,qc)
+                t_cpc=np.hstack((t_cpc, dd+time/86400))
+                cpc=np.hstack((cpc, obs))
+            cpc=qc_remove_neg(cpc)
+            cpc=qc_cn_max(cpc,10)
+            # if time expands two years, add 365 days to the second year
+            if t_cpc[0]>t_cpc[-1]:
+                t_cpc[t_cpc<=t_cpc[-1]]=t_cpc[t_cpc<=t_cpc[-1]]+365
+            lat2=np.interp(t_cpc,timem,lat1)
+            # separate into latitude bins
+            for bb in range(latlen):
+                idx = np.logical_and(lat2>=latmin[bb], lat2<latmax[bb])
+                cpc_o[bb]=np.hstack((cpc_o[bb],cpc[idx]))  
+            
+            # read in UHSAS
+            t_uh=np.empty(0)
+            uhsas=np.empty(0)
+            for dd in day:
                 if int(legnum)<=9:
                     if dd<=365:  # year 2012
                         filenameo = glob.glob(shipuhsaspath+'magaosuhsasM1.a1.2012'+cday2mmdd(dd,calendar='noleap')+'.*.cdf')
@@ -141,40 +128,53 @@ def run_plot(settings):
                         filenameo = glob.glob(shipuhsaspath+'magaosuhsasM1.a1.2013'+cday2mmdd(dd-365,calendar='noleap')+'.*.cdf')
                 else:
                     filenameo = glob.glob(shipuhsaspath+'magaosuhsasM1.a1.2013'+cday2mmdd(dd,calendar='noleap')+'.*.cdf')
-            elif campaign=='MARCUS':
-                if int(legnum)<=2:
-                    if dd<=365:  # year 2012
-                        filenameo = glob.glob(shipuhsaspath+'maraosuhsasM1.a1.2017'+cday2mmdd(dd,calendar='noleap')+'.*')
-                    else:
-                        filenameo = glob.glob(shipuhsaspath+'maraosuhsasM1.a1.2018'+cday2mmdd(dd-365,calendar='noleap')+'.*')
-                else:
-                    filenameo = glob.glob(shipuhsaspath+'maraosuhsasM1.a1.2018'+cday2mmdd(dd,calendar='noleap')+'.*')
-            
-            if len(filenameo)==0:
-                continue  # some days may be missing
-            if len(filenameo)>1:
-                raise ValueError('find too many files')
+
+                if len(filenameo)==0:
+                    continue  # some days may be missing
+                if len(filenameo)>1:
+                    raise ValueError('find too many files')
+                    
+                (time,dmin,dmax,obs,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
+                obs=np.ma.filled(obs)
+                obs=qc_remove_neg(obs)
+                uhsas=np.hstack((uhsas, np.nansum(obs,1)))
+                t_uh = np.hstack((t_uh,time/86400+dd))
                 
-            (time,dmin,dmax,obs,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
-            obs=np.ma.filled(obs)
-            obs=qc_remove_neg(obs)
-            uhsas=np.hstack((uhsas, np.nansum(obs,1)))
-            t_uh = np.hstack((t_uh,time/86400+dd))
+            uhsas=qc_cn_max(uhsas,100)
+            # if no obs available, fill one data with NaN
+            if len(t_uh)==0:
+                t_uh=[timem[0],timem[1]]
+                uhsas=np.full((2),np.nan)
+            # if time expands two years, add 365 days to the second year
+            if t_uh[0]>t_uh[-1]:
+                t_uh[t_uh<=t_uh[-1]]=t_uh[t_uh<=t_uh[-1]]+365
+            lat3=np.interp(t_uh,timem,lat1)
+            # separate into latitude bins
+            for bb in range(latlen):
+                idx = np.logical_and(lat3>=latmin[bb], lat3<latmax[bb])
+                uhsas_o[bb]=np.hstack((uhsas_o[bb],uhsas[idx]))  
+                
+    elif campaign=='MARCUS':
+        (time, lat, timeunit, latunit, lat_longname) = read_ship_exhaustfree(shipcn_exhaustfree_path + \
+                                                     'CPC_UHSAS_exhaustfree_1hr.nc', 'lat')
+        (time, lon, timeunit, lonunit, lon_longname) = read_ship_exhaustfree(shipcn_exhaustfree_path + \
+                                                     'CPC_UHSAS_exhaustfree_1hr.nc', 'lon')
+        (time, cpc, timeunit, cpcunit, cpc_longname) = read_ship_exhaustfree(shipcn_exhaustfree_path + \
+                                                     'CPC_UHSAS_exhaustfree_1hr.nc', 'CPC')
+        (time, uhsas, timeunit, uhsasunit, uhsas_longname) = read_ship_exhaustfree(shipcn_exhaustfree_path + \
+                                                     'CPC_UHSAS_exhaustfree_1hr.nc', 'UHSAS100')
+        cpc = qc_remove_neg(cpc)
+        uhsas = qc_remove_neg(uhsas)
             
-        uhsas=qc_cn_max(uhsas,100)
-        # if no obs available, fill one data with NaN
-        if len(t_uh)==0:
-            t_uh=[timem[0],timem[1]]
-            uhsas=np.full((2),np.nan)
-        # if time expands two years, add 365 days to the second year
-        if t_uh[0]>t_uh[-1]:
-            t_uh[t_uh<=t_uh[-1]]=t_uh[t_uh<=t_uh[-1]]+365
-        lat3=np.interp(t_uh,timem,lat1)
+        cpc_o = list()
+        uhsas_o = list()
         # separate into latitude bins
         for bb in range(latlen):
-            idx = np.logical_and(lat3>=latmin[bb], lat3<latmax[bb])
-            uhsas_o[bb]=np.hstack((uhsas_o[bb],uhsas[idx]))  
-            
+            idx = np.logical_and(lat>=latmin[bb], lat<latmax[bb])
+            cpc_o.append(cpc[idx])
+            uhsas_o.append(uhsas[idx])
+    
+    
     #%% 
     for bb in range(latlen):
         cpc_o[bb] = cpc_o[bb][~np.isnan(cpc_o[bb])]
@@ -206,7 +206,7 @@ def run_plot(settings):
                 medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
                 vert=True, patch_artist=True)    # need patch_artist to fill color in box
     ax1.tick_params(color='k',labelsize=15)
-    ax1.set_yscale('log')
+    # ax1.set_yscale('log')
     ax1.set_xlim(-1,latlen)
     ax1.set_xticks(np.arange(-0.5*dlat,latlen-1,2))
     ax1.set_xticklabels([])
@@ -229,9 +229,9 @@ def run_plot(settings):
                 medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
                 vert=True, patch_artist=True)    # need patch_artist to fill color in box
     ax2.tick_params(color='k',labelsize=15)
-    ax2.set_yscale('log')
-    ax2.set_ylim(10,3000)
-    ax2.set_yticks([10,100,1000])
+    # ax2.set_yscale('log')
+    # ax2.set_ylim(10,3000)
+    # ax2.set_yticks([10,100,1000])
     ax2.set_xlim(-1,latlen)
     ax2.set_xticks(np.arange(-0.5*dlat,latlen-1,2))
     ax2.set_xticklabels([int(np.floor(a)) for a in latbin[0::2]])
