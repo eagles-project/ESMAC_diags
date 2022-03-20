@@ -6,6 +6,7 @@
 import os
 import glob
 import matplotlib.pyplot as plt
+import matplotlib.ticker
 import numpy as np
 from ..subroutines.time_format_change import yyyymmdd2cday, cday2mmdd
 from ..subroutines.read_surface import read_smpsb_pnnl,read_smps_bin
@@ -219,6 +220,13 @@ def run_plot(settings):
     ax.set_xlabel('Diameter (nm)',fontsize=13)
     ax.set_ylabel('#/dlnDp (cm$^{-3}$)',fontsize=13)
     ax.set_title(campaign+' '+IOP,fontsize=14)
+    
+    y_major = matplotlib.ticker.LogLocator(base = 10.0, numticks = 5)
+    ax.yaxis.set_major_locator(y_major)
+    y_minor = matplotlib.ticker.LogLocator(base = 10.0, subs = np.arange(1.0, 10.0) * 0.1, numticks = 10)
+    ax.yaxis.set_minor_locator(y_minor)
+    ax.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+    plt.grid(True,linestyle=':')
     
     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
     # plt.close()

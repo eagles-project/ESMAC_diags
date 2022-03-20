@@ -7,6 +7,7 @@
 import os
 import glob
 import matplotlib.pyplot as plt
+import matplotlib.ticker
 import numpy as np
 # from time_format_change import  hhmmss2sec,yyyymmdd2cday
 from ..subroutines.read_aircraft import read_cpc
@@ -324,6 +325,20 @@ def run_plot(settings):
     l=ax3.legend(loc='lower center', shadow=False, fontsize='medium')
     
     ax1.set_title('size distribution for ACEENA '+IOP,fontsize=15)
+    
+    
+    y_major = matplotlib.ticker.LogLocator(base = 10.0, numticks = 5)
+    ax1.yaxis.set_major_locator(y_major)
+    ax2.yaxis.set_major_locator(y_major)
+    ax3.yaxis.set_major_locator(y_major)
+    y_minor = matplotlib.ticker.LogLocator(base = 10.0, subs = np.arange(1.0, 10.0) * 0.1, numticks = 10)
+    ax1.yaxis.set_minor_locator(y_minor)
+    ax1.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+    ax2.yaxis.set_minor_locator(y_minor)
+    ax2.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+    ax3.yaxis.set_minor_locator(y_minor)
+    ax3.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+    plt.grid(True,linestyle=':')
     
     ax3.text(200,3000,'Near Surface ('+str(pdf_sfc_obs.shape[1])+' legs)',fontsize=12)
     ax2.text(200,3000,'Near Clouds ('+str(pdf_near_obs.shape[1])+' legs)',fontsize=12)

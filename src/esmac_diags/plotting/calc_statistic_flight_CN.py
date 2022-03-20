@@ -10,7 +10,7 @@ import numpy as np
 import scipy.stats
 from ..subroutines.read_aircraft import read_cpc, read_RF_NCAR
 from ..subroutines.read_netcdf import read_merged_size,read_extractflight
-from ..subroutines.quality_control import qc_cpc_air, qc_remove_neg, qc_mask_takeoff_landing
+from ..subroutines.quality_control import qc_cpc_air, qc_remove_neg, qc_cn_max, qc_mask_takeoff_landing
 
 def run_plot(settings):
     #%% variables from settings
@@ -162,7 +162,10 @@ def run_plot(settings):
                 raise ValueError('find too many files: '+filename)
             
             # some quality checks
-            uhsas100=qc_remove_neg(uhsas100)
+            cpc10 = qc_cn_max(cpc10, 10)
+            cpc10 = qc_remove_neg(cpc10)
+            uhsas100 = qc_cn_max(uhsas100, 100)
+            uhsas100 = qc_remove_neg(uhsas100)
             
             # exclude 30min after takeoff and before landing
             cpc10 = qc_mask_takeoff_landing(time_cpc,cpc10)

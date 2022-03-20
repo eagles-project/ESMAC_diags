@@ -6,6 +6,7 @@
 import os
 import glob
 import matplotlib.pyplot as plt
+import matplotlib.ticker
 import numpy as np
 from ..subroutines.time_format_change import  hhmmss2sec,yyyymmdd2cday
 from ..subroutines.read_ARMdata import read_pblhtmpl1
@@ -314,6 +315,17 @@ def run_plot(settings):
     ax0.set_title('size distribution for Hi-Scale '+IOP,fontsize=15)
     fig.text(.65,.83,'Above PBL ('+str(n_above)+' legs)',fontsize=12)
     fig.text(.65,.43,'Below PBL ('+str(n_below)+' legs)',fontsize=12)
+    
+    y_major = matplotlib.ticker.LogLocator(base = 10.0, numticks = 5)
+    ax0.yaxis.set_major_locator(y_major)
+    ax1.yaxis.set_major_locator(y_major)
+    y_minor = matplotlib.ticker.LogLocator(base = 10.0, subs = np.arange(1.0, 10.0) * 0.1, numticks = 10)
+    ax0.yaxis.set_minor_locator(y_minor)
+    ax0.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+    ax1.yaxis.set_minor_locator(y_minor)
+    ax1.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+    plt.grid(True,linestyle=':')
+
     # fig.text(.68,.83,'Above PBL ('+format(n_above/n_total*100,'.1f')+'%)',fontsize=12)
     # fig.text(.68,.43,'Below PBL ('+format(n_below/n_total*100,'.1f')+'%)',fontsize=12)
     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
