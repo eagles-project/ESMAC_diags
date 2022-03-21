@@ -169,3 +169,36 @@ def read_merged_size(filename, varname):
     
     f.close()
     return(time, size, data, timeunit, dataunit, long_name)
+
+#%% read exhaust-free ship data data
+def read_ship_exhaustfree(filename, varname):
+    """
+    read variables from exhaust-free ship data
+
+    Parameters
+    ----------
+    filename : string
+        filename
+    varname : string
+        variable name
+
+    Returns
+    -------
+    time : time of data
+    data : data of the variable
+    timeunit : unit of time
+    dataunit : unit of data
+    long_name : longname of data
+    """
+    f = Dataset(filename, 'r')
+    # read in variables
+    t_id = f.variables['time']
+    time = t_id[:]
+    timeunit = t_id.units
+    d_id = f.variables[varname]
+    data = d_id[:]
+    dataunit = d_id.units
+    long_name = d_id.long_name
+    
+    f.close()
+    return(time, data, timeunit, dataunit, long_name)

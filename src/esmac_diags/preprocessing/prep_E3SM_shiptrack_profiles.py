@@ -39,7 +39,7 @@ def run_prep(settings):
         
     #%% set variables to be read
     variable_names = ['T', 'U', 'V', 'Q', 'RELHUM', 'RHW', 'RHI', 'CLOUD', 'LWC', 'IWC',
-                    'CLDLIQ', 'CLDICE', 'NUMLIQ', "AREI", "AREL", "ICLDIWP", "ICLDTWP"]
+                    'CLDLIQ', 'CLDICE', 'NUMLIQ', "AREI", "AREL"]
     varlen = len(variable_names)
     
     #%% get all ship data

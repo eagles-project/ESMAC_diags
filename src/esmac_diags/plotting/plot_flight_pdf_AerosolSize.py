@@ -7,6 +7,7 @@
 import os
 import glob
 import matplotlib.pyplot as plt
+import matplotlib.ticker
 import numpy as np
 from ..subroutines.read_aircraft import read_RF_NCAR
 from ..subroutines.specific_data_treatment import lwc2cflag
@@ -125,7 +126,7 @@ def run_plot(settings):
             time=np.ma.compressed(time)
             size=size*1000.
             merge = qc_mask_cloudflag(merge,cflag)
-            
+            merge = qc_remove_neg(merge)
             # average in time for quicker plot
             time2=np.arange(300,86400,600)
             data2 = avg_time_2d(time,merge,time2)
@@ -228,6 +229,13 @@ def run_plot(settings):
     ax.set_xlim(0.67,4500)
     ax.set_xlabel('Diameter (nm)',fontsize=13)
     ax.set_ylabel('#/dlnDp (cm$^{-3}$)',fontsize=13)
+    
+    y_major = matplotlib.ticker.LogLocator(base = 10.0, numticks = 5)
+    ax.yaxis.set_major_locator(y_major)
+    y_minor = matplotlib.ticker.LogLocator(base = 10.0, subs = np.arange(1.0, 10.0) * 0.1, numticks = 10)
+    ax.yaxis.set_minor_locator(y_minor)
+    ax.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+    plt.grid(True,linestyle=':')
 
     if campaign in ['HISCALE', 'ACEENA']:
         ax.set_title(campaign+' '+IOP,fontsize=14)

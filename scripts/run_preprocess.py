@@ -14,7 +14,7 @@ settings = {}
 
 # set field campaign name. More settings on specific field campaigns are in next section
 # HISCALE, ACEENA, CSET, SOCRATES, MAGIC, MARCUS
-settings['campaign'] = 'MAGIC'
+settings['campaign'] = 'HISCALE'
 
 # set model names. 
 settings['Model_List'] = ['E3SMv1']
@@ -156,6 +156,11 @@ def add_other_setting(settings):
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # running command
 all_settings = add_other_setting(settings)
-prep_obs_mergesize_HISCALE.run_prep(all_settings)
-prep_E3SM_flighttrack_bins.run_prep(all_settings)
+if all_settings['campaign'] == 'HISCALE':
+       prep_obs_mergesize_HISCALE.run_prep(all_settings)
+if all_settings['campaign'] == 'ACEENA':
+       prep_obs_mergesize_ACEENA.run_prep(all_settings)
+#prep_obs_mergesize_HISCALE.run_prep(all_settings)
+
+#prep_E3SM_flighttrack_bins.run_prep(all_settings)
     

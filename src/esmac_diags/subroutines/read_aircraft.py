@@ -236,7 +236,7 @@ def read_fims(filename):
     varlist: list of variable names
     """
     
-    f=open(filename, 'r')
+    f=open(filename, 'r', errors='replace')
     
     # read in data:
     

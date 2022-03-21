@@ -11,6 +11,7 @@ import re
 import numpy as np
 from ..subroutines.read_aircraft import read_fims, read_fims_bin, read_iwg1, read_pcasp, read_cvi_hiscale as read_cvi
 from ..subroutines.time_format_change import hhmmss2sec
+from ..subroutines.quality_control import qc_fims_bin, qc_mask_qcflag, qc_mask_cloudflag
 from netCDF4 import Dataset
 
 def run_prep(settings):
@@ -84,20 +85,21 @@ def run_prep(settings):
         # read in data
         if len(filename_f) == 1:
             (data0, fimslist) = read_fims(filename_f[0])
-            # remove some unrealistic data    
-            data2 = data0[1:-2, :]
-            data2[np.isnan(data2)] = 1e8
-            data2[:, data2[0, :] > 1e4] = 1e8
-            data2[np.logical_or(data2 < 0, data2 > 1e4)] = np.nan
-            data0[1:-2, :] = data2
             time_fims = data0[0, :]
-            # change data from #/dlnDp to number
-            data2 = data0[1:-2, :]*dlnDp_f
+            T2 = data0[-1,:]
+            p2 = data0[-2,:]*1000.
+            # remove some unrealistic data and change data from #/dlnDp to number
+            data2 = qc_fims_bin(data0[1:-2, :]) * dlnDp_f
+            T2 = np.interp(time,time_fims,T2)
+            p2 = np.interp(time,time_fims,p2)
             fims = np.empty([30, len(time)])
             for ii in range(30):
                 fims[ii, :] = np.interp(time, time_fims, data2[ii, :])
             idx = np.logical_or(time > time_fims[-1], time < time_fims[0])
             fims[:, idx] = np.nan
+            #!!! FIMS measurements are in instrument temperature and pressure
+            for tt in range(len(time)):
+                fims[:,tt] = fims[:,tt]*((p_amb[tt]/p2[tt])*((T2[tt]+273.15)/(T_amb[tt]+273.15)))
         elif len(filename_f) == 0:
             time_fims = time
             fims = np.nan*np.empty([len(d_fims), len(time)])
@@ -131,10 +133,10 @@ def run_prep(settings):
             flag = data0[-2, :]
             pcasp_total = data0[-5, :]
             # remove some questionable data
-            # pcasp[np.isnan(pcasp)] = -9999
-            # pcasp[np.logical_or(pcasp <= 0, pcasp > 1e6)] = np.nan
-            pcasp[:, flag != 0] = np.nan
-            pcasp[:, cldflag == 1] = np.nan
+            pcasp2 = pcasp.T
+            pcasp2 = qc_mask_qcflag(pcasp2, flag)
+            pcasp2 = qc_mask_cloudflag(pcasp2, cldflag)
+            pcasp = pcasp2.T
             if not all(time_pcasp == time):
                 raise ValueError('PCASP time is inconsistent with FIMS')
         elif len(filename_p) == 0:
@@ -173,7 +175,7 @@ def run_prep(settings):
             cvi_qc = np.nan*np.empty([len(time)])
         else:
             raise ValueError('find more than one file: ' + filename_c)
-        cvi_mode[cvi_qc != 0] = -9999
+        cvi_mode = qc_mask_qcflag(cvi_mode, cvi_qc)
             
         #%% now merge fims and pcasp
         timelen = len(time)
@@ -386,7 +388,7 @@ def run_prep(settings):
         
         # global attributes
         import time as ttt
-        f.description = "Merged size distribution from FIMS and PCASP"
+        f.description = "Merged size distribution from FIMS and PCASP, in ambient condition"
         f.create_time = ttt.ctime(ttt.time())
         
         f.close()

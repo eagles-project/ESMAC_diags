@@ -34,16 +34,40 @@ def qc_mask_qcflag(data, qc):
         raise ValueError("Error: input data should be 1-d or 2-d")
     return(data)
 
-#%%
-def qc_mask_qcflag_cpc(data, qc):
-    """
-    mask data with qc_flag, with some exceptions
-    maximum value flag for CPC is too low (8000 cm-3) that some reasonable large values at SGP are flagged 
-    retain these data by keeping qc flag >20
-    """
-    data[np.logical_and(qc>0, qc <= 20)] = np.nan
-    return(data)
+#%% mask data with qc_flag only for specific bit.
+# this is only for CPC since QC in some bits may be good data and should be retained
+# according to Singh, Ashish <asingh@bnl.gov>, only the following qc_bit is critical 
+# 	C1/CPCf (I guess this is sgpaoscpcC1*) – bit_value 7, 8 
+# 	S1/CPCF – bit value 11, 12, 13, 14 
+# 	S1/CPCu or CPCuf- bit value 4, 5, 6, 15, 16  
 
+def qc_mask_qcflag_cpc(data,qc):
+    data_out = np.array(data)
+    qc = qc.astype(np.int)
+    for tt in range(len(qc)):
+        if qc[tt] != 0:
+            qc_bin = bin(qc[tt])
+            qc_bit = []
+            for ii in range(len(qc_bin)-2):
+                if qc_bin[-1-ii]=='1':
+                    qc_bit.append(ii+1)
+            if any([x in qc_bit for x in [7,8,11,12,13,14]]):
+                data_out[tt] = np.nan
+    return(data_out)
+
+def qc_mask_qcflag_cpcu(data,qc):
+    data_out = np.array(data)
+    qc = qc.astype(np.int)
+    for tt in range(len(qc)):
+        if qc[tt] != 0:
+            qc_bin = bin(qc[tt])
+            qc_bit = []
+            for ii in range(len(qc_bin)-2):
+                if qc_bin[-1-ii]=='1':
+                    qc_bit.append(ii+1)
+            if any([x in qc_bit for x in [4, 5, 6, 15, 16]]):
+                data_out[tt] = np.nan
+    return(data_out)
 #%%
 def qc_mask_takeoff_landing(time, data):
     """
@@ -143,6 +167,16 @@ def qc_correction_nanosmps(data):
     """
     data = data/3.8
     return(data)
+
+#%%
+def qc_fims_bin(data):
+    """
+    remove some suspicious value of FIMS measurements
+    """
+    data2 = np.array(data)
+    data2[:, data2[0, :] > 3e4] = np.nan
+    data2[np.logical_or(data2 < 0, data2 > 1e5)] = np.nan
+    return(data2)
 
 #%%
 def qc_acsm_org_max(data):

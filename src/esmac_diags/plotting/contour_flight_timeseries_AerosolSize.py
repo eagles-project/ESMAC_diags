@@ -13,6 +13,7 @@ from ..subroutines.read_aircraft import read_RF_NCAR
 from ..subroutines.specific_data_treatment import lwc2cflag, avg_time_2d
 # from time_format_change import yyyymmdd2cday, hhmmss2sec
 from ..subroutines.read_netcdf import read_merged_size,read_extractflight
+from ..subroutines.quality_control import qc_remove_neg
 
 def run_plot(settings):
     
@@ -117,8 +118,7 @@ def run_plot(settings):
             sizeh = size
             sizel = np.hstack((2*size[0]-size[1],  size[0:-1]))
             
-        # merge=merge.T
-        # time=time/3600.
+        merge=qc_remove_neg(merge)
         ## average in time for quicker plot
         time2=np.arange(time[0],time[-1],60)
         data2 = avg_time_2d(time,merge,time2)
@@ -145,14 +145,14 @@ def run_plot(settings):
         leveltick=[0.1,1,10,100,1000,10000]
         levellist=np.arange(np.log(leveltick[0]),11,.5)
         
-        merge[merge<0.01]=0.01
+        merge[merge<0.01]=0.1
         h1 = ax[0].contourf(time,size,np.log(merge),levellist,cmap=plt.get_cmap('jet'))
         
         d_mam=np.arange(1,3001)
         h2=[]
         for mm in range(nmodels):
             datam = data_m[mm]
-            datam[datam<0.01]=0.01
+            datam[datam<0.01]=0.1
             h_m = ax[mm+1].contourf(timem,d_mam,np.log(datam),levellist,cmap=plt.get_cmap('jet'))
             h2.append(h_m)
     

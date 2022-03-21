@@ -54,8 +54,7 @@ def run_prep(settings):
         variable1d_names = ['PS', 'PBLH', 'FLNT', 'FSNT', 'FLNS', 'FSNS', "LHFLX", "SHFLX",
                             'TREFHT','PRECT','PRECL', "TGCLDLWP", "TGCLDIWP"]
         variable2d_names = ['T', 'U', 'V', 'Q', 'RELHUM', 'RHW', 'RHI', 'CLOUD',
-                            'CLDLIQ', 'CLDICE', 'NUMLIQ', 'NUMICE', 'NUMRAI', 'NUMSNO', 'RAINQM', 'SNOWQM',
-                            'CCN1', 'CCN3', 'CCN5', "AREI", "AREL", "ICLDIWP", "ICLDTWP",
+                            'CLDLIQ', 'CLDICE', 'NUMLIQ', 'NUMICE', 'CCN1', 'CCN3', 'CCN5', "AREI", "AREL", 
                             'bc_a1', 'bc_a3', 'bc_a4', 'dst_a1', 'dst_a3', 'mom_a1', 'mom_a2', 'mom_a3', 'mom_a4',
                             'ncl_a1', 'ncl_a2', 'ncl_a3', 'pom_a1', 'pom_a3', 'pom_a4', 'so4_a1', 'so4_a2', 'so4_a3',
                             'soa_a1', 'soa_a2', 'soa_a3', 'num_a1', 'num_a2', 'num_a3', 'num_a4',

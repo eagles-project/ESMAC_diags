@@ -87,24 +87,24 @@ def run_prep(settings):
         # read in data
         if len(filename_f) == 1:
             (data0, fimslist) = read_fims(filename_f[0])
-            # remove some unrealistic data    
-            # data2 = data0[1:-2, :]
-            # data2[np.isnan(data2)] = 1e8
-            # data2[:, data2[0, :]>1e4] = 1e8
-            # data2[np.logical_or(data2<0, data2>1e4)] = np.nan
             time_fims = data0[0, :]
             # change data from #/dlnDp to number
-            data2 = data0[1:-3, :]*dlnDp_f
-            
+            data2 = data0[1:-3, :] * dlnDp_f
             # TD mode or AMB mode. remove TD mode
             TD_AMB = data0[-1, :]
-            data2[:, TD_AMB != 0] = -9999.
-            
+            data2[:, TD_AMB != 0] = -9999.            
+            T2 = data0[-2,:]
+            p2 = data0[-3,:]*1000.
+            T2 = np.interp(time,time_fims,T2)
+            p2 = np.interp(time,time_fims,p2)
             fims = np.empty([30, len(time)])
             for ii in range(30):
                 fims[ii, :] = np.interp(time, time_fims, data2[ii, :])
             idx = np.logical_or(time>time_fims[-1], time<time_fims[0])
             fims[:, idx] = np.nan
+            #!!! FIMS measurements are in instrument temperature and pressure
+            for tt in range(len(time)):
+                fims[:,tt] = fims[:,tt]*((p_amb[tt]/p2[tt])*((T2[tt]+273.15)/(T_amb[tt]+273.15)))
         elif len(filename_f) == 0:
             time_fims = time
             fims = np.nan*np.empty([len(d_fims), len(time)])

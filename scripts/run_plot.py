@@ -14,7 +14,7 @@ settings = {}
 
 # set field campaign name. More settings on specific field campaigns are in next section
 # HISCALE, ACEENA, CSET, SOCRATES, MAGIC, MARCUS
-settings['campaign'] = 'HISCALE'
+settings['campaign'] = 'MARCUS'
 
 # set model names. 
 settings['Model_List'] = ['E3SMv1']
@@ -25,11 +25,11 @@ settings['color_model'] = ['r','b','g']
 
 # set field campaign IOPs. Only used for HISCALE and ACEENA. 
 # IOP1/IOP2 
-settings['IOP'] = 'IOP2'
+settings['IOP'] = 'IOP1'
 
 # Please specify the path of your data and for figure output
-settings['figpath'] = '/global/cscratch1/sd/sqtang/EAGLES/Aerosol_diag_pkg/figures/'
-settings['datapath'] = '/global/cscratch1/sd/sqtang/EAGLES/Aerosol_diag_pkg/data/'
+settings['figpath'] = '../figures/'
+settings['datapath'] = '../data/'
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -156,6 +156,8 @@ def add_other_setting(settings):
         settings['shipmetpath'] = datapath+'/obs/ship/raynolds-marmet/'
         settings['shipccnpath'] = datapath+'/obs/ship/magaosccn100M1.a1/'
         settings['shipcpcpath'] = datapath+'/obs/ship/magaoscpcfM1.a1/'
+        settings['shipcn_exhaustfree_path'] = 'N/A'
+        settings['shipccn_exhaustfree_path'] = 'N/A'
         settings['shipmwrpath'] = datapath+'/obs/ship/magmwrret1liljclouM1.s2/'
         settings['shipuhsaspath'] = datapath+'/obs/ship/magaosuhsasM1.a1/'
         #### pre-processed model data path ######    
@@ -173,6 +175,8 @@ def add_other_setting(settings):
         settings['shipmetpath'] = datapath+'/obs/ship/maraadmetX1.b1/'
         settings['shipccnpath'] = datapath+'/obs/ship/maraosccn1colavgM1.b1/'
         settings['shipcpcpath'] = datapath+'/obs/ship/maraoscpcf1mM1.b1/'
+        settings['shipcn_exhaustfree_path'] = datapath+'/obs/ship/ship_exhaustfree/'
+        settings['shipccn_exhaustfree_path'] = datapath+'/obs/ship/ship_exhaustfree/'
         settings['shipmwrpath'] = datapath+'/obs/ship/marmwrret1liljclouM1.s2/'
         settings['shipuhsaspath'] = datapath+'/obs/ship/maraosuhsasM1.a1/'
         #### pre-processed model data path ######    
@@ -216,5 +220,24 @@ def add_other_setting(settings):
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # running command
 all_settings = add_other_setting(settings)
-plot_flight_track_height.run_plot(all_settings)
-plot_sfc_pdf_AerosolSize.run_plot(all_settings)
+#contour_flight_timeseries_AerosolSize.run_plot(all_settings)
+#plot_flight_track_height.run_plot(all_settings)
+#plot_sfc_pdf_AerosolSize.run_plot(all_settings)
+#plot_flight_pdf_AerosolSize.run_plot(all_settings)
+# plot_sfc_diurnalcycle_CN.run_plot(all_settings)
+
+#plot_ship_timeseries_met.run_plot(all_settings)
+#plot_ship_timeseries_CN.run_plot(all_settings)
+#plot_ship_timeseries_CCN.run_plot(all_settings)
+## statistics
+#plot_ship_percentile_lat_met.run_plot(all_settings)
+#plot_ship_percentile_lat_CN.run_plot(all_settings)
+#plot_ship_percentile_lat_CCN.run_plot(all_settings)
+#plot_ship_percentile_lat_LWP.run_plot(all_settings)
+#plot_ship_pdf_AerosolSize.run_plot(all_settings)
+#contour_ship_timeseries_AerosolSize.run_plot(all_settings)
+calc_statistic_ship_CN.run_plot(all_settings)
+#plot_ship_pdf_AerosolSize.run_plot(all_settings)
+#plot_ship_percentile_lat_CN.run_plot(all_settings)
+#plot_ship_percentile_lat_CCN.run_plot(all_settings)
+# contour_ship_timeseries_AerosolSize.run_plot(all_settings)

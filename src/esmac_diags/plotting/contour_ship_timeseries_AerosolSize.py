@@ -5,7 +5,7 @@ import glob
 import matplotlib.pyplot as plt
 import numpy as np
 from ..subroutines.read_ARMdata import read_uhsas
-from ..subroutines.read_netcdf import read_E3SM
+from ..subroutines.read_netcdf import read_E3SM, read_ship_exhaustfree
 from ..subroutines.time_format_change import cday2mmdd
 from ..subroutines.specific_data_treatment import  avg_time_2d
 from ..subroutines.quality_control import qc_remove_neg
@@ -16,6 +16,7 @@ def run_plot(settings):
     campaign = settings['campaign']
     Model_List = settings['Model_List']
     shipuhsaspath = settings['shipuhsaspath']
+    shipcn_exhaustfree_path = settings['shipcn_exhaustfree_path']
     E3SM_ship_path = settings['E3SM_ship_path']
     figpath_ship_timeseries = settings['figpath_ship_timeseries']
 
@@ -60,16 +61,16 @@ def run_plot(settings):
         year0 = str(int(timeunitm.split()[2][0:4])+1)
         
         #%% read in observations
-        # find the days related to the ship leg
-        day = [int(a) for a in timem]
-        day = list(set(day))
-        day.sort()
-        
-        nbins = 99 # for UHSAS at MAGIC
-        t_uh=np.empty(0)
-        uhsasall=np.empty((0,nbins))
-        for dd in day:
-            if campaign=='MAGIC':
+        if campaign=='MAGIC':
+            # find the days related to the ship leg
+            day = [int(a) for a in timem]
+            day = list(set(day))
+            day.sort()
+            
+            nbins = 99 # for UHSAS at MAGIC
+            t_uh=np.empty(0)
+            uhsasall=np.empty((0,nbins))
+            for dd in day:
                 if int(legnum)<=9:
                     if dd<=365:  # year 2012
                         filenameo = glob.glob(shipuhsaspath+'magaosuhsasM1.a1.2012'+cday2mmdd(dd,calendar='noleap')+'.*.cdf')
@@ -77,52 +78,63 @@ def run_plot(settings):
                         filenameo = glob.glob(shipuhsaspath+'magaosuhsasM1.a1.2013'+cday2mmdd(dd-365,calendar='noleap')+'.*.cdf')
                 else:
                     filenameo = glob.glob(shipuhsaspath+'magaosuhsasM1.a1.2013'+cday2mmdd(dd,calendar='noleap')+'.*.cdf')
-            elif campaign=='MARCUS':
-                if int(legnum)<=2:
-                    if dd<=365:  # year 2012
-                        filenameo = glob.glob(shipuhsaspath+'maraosuhsasM1.a1.2017'+cday2mmdd(dd,calendar='noleap')+'.*')
-                    else:
-                        filenameo = glob.glob(shipuhsaspath+'maraosuhsasM1.a1.2018'+cday2mmdd(dd-365,calendar='noleap')+'.*')
-                else:
-                    filenameo = glob.glob(shipuhsaspath+'maraosuhsasM1.a1.2018'+cday2mmdd(dd,calendar='noleap')+'.*')
+
+                if len(filenameo)==0:
+                    continue  # some days may be missing
+                if len(filenameo)>1:
+                    raise ValueError('find too many files: ' + filenameo)
+                
+                
+                (time,dmin,dmax,uhsas,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
+                
+                uhsas=np.ma.filled(uhsas)
+                uhsas=qc_remove_neg(uhsas)
+                
+                # average in time for quicker plot
+                time2=np.arange(1800,86400,3600)
+                data2 = avg_time_2d(time,uhsas,time2)
+                uhsasall=np.vstack((uhsasall, data2))
+                t_uh = np.hstack((t_uh,time2/86400+dd))
+                
+            # if no obs available, fill one data with NaN
+            if len(t_uh)==0:
+                t_uh=[timem[0],timem[1]]
+                uhsasall=np.full((2,nbins),np.nan)
+                
+            # if time expands two years, add 365 days to the second year
+            if t_uh[0]>t_uh[-1]:
+                t_uh[t_uh<=t_uh[-1]]=t_uh[t_uh<=t_uh[-1]]+365
+                
+            size_u = (dmin+dmax)/2
+            dsize_u = dmax-dmin
             
-            if len(filenameo)==0:
-                continue  # some days may be missing
-            if len(filenameo)>1:
-                raise ValueError('find too many files: ' + filenameo)
+            uhsasall=qc_remove_neg(uhsasall)
             
+            # change to dN/dlnDp
+            dlnDp_u=np.empty(nbins)
+            for bb in range(len(size_u)):
+                dlnDp_u[bb]=np.log(dmax[bb]/dmin[bb])
+                uhsasall[:,bb]=uhsasall[:,bb]/dlnDp_u[bb]
+                
+        elif campaign=='MARCUS':
+            (t_uh, dmin, timeunit, dunit, d_longname) = read_ship_exhaustfree(shipcn_exhaustfree_path + \
+                                                         'CPC_UHSAS_exhaustfree_1hr.nc', 'size_low')
+            (t_uh, dmax, timeunit, dunit, d_longname) = read_ship_exhaustfree(shipcn_exhaustfree_path + \
+                                                         'CPC_UHSAS_exhaustfree_1hr.nc', 'size_high')
+            (t_uh, uhsas, timeunit, uhsasunit, uhsas_longname) = read_ship_exhaustfree(shipcn_exhaustfree_path + \
+                                                         'CPC_UHSAS_exhaustfree_1hr.nc', 'UHSAS')
+            uhsasall = np.array(qc_remove_neg(uhsas))
+            size_u = (dmin+dmax)/2
             
-            (time,dmin,dmax,uhsas,timeunit,uhunit,uhlongname)=read_uhsas(filenameo[0])
+            if int(legnum)>2:
+                t_uh = t_uh-365
             
-            uhsas=np.ma.filled(uhsas)
-            uhsas=qc_remove_neg(uhsas)
+            nbins = 99 # for UHSAS at MAGIC
+            dlnDp_u=np.empty(nbins)
+            for bb in range(len(size_u)):
+                dlnDp_u[bb]=np.log(dmax[bb]/dmin[bb])
+                uhsasall[:,bb]=uhsasall[:,bb]/dlnDp_u[bb]
             
-            # average in time for quicker plot
-            time2=np.arange(1800,86400,3600)
-            data2 = avg_time_2d(time,uhsas,time2)
-            uhsasall=np.vstack((uhsasall, data2))
-            t_uh = np.hstack((t_uh,time2/86400+dd))
-            
-        # if no obs available, fill one data with NaN
-        if len(t_uh)==0:
-            t_uh=[timem[0],timem[1]]
-            uhsasall=np.full((2,nbins),np.nan)
-            
-        # if time expands two years, add 365 days to the second year
-        if t_uh[0]>t_uh[-1]:
-            t_uh[t_uh<=t_uh[-1]]=t_uh[t_uh<=t_uh[-1]]+365
-            
-        size_u = (dmin+dmax)/2
-        dsize_u = dmax-dmin
-        
-        uhsasall=qc_remove_neg(uhsasall)
-        
-        # change to dN/dlnDp
-        dlnDp_u=np.empty(nbins)
-        for bb in range(len(size_u)):
-            dlnDp_u[bb]=np.log(dmax[bb]/dmin[bb])
-            uhsasall[:,bb]=uhsasall[:,bb]/dlnDp_u[bb]
-        
         #%% make plot
             
         figname = figpath_ship_timeseries+'timeseries_AerosolSize_'+campaign+'_ship'+legnum+'.png'

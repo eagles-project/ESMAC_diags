@@ -114,9 +114,8 @@ def run_prep(settings):
         for mm in range(len(Model_List)):
             model = Model_List[mm]
             variable_names = ['T', 'U', 'V', 'Q', 'RELHUM', 'RHW', 'RHI', 'CLOUD', 'CLDLIQ', 'NUMLIQ',
-                              'CLDICE', 'NUMICE', 'RAINQM', 'NUMRAI', 'AWNI', 'AWNC', 'AQRAIN', 'AQSNOW',
-                              'AREI', 'AREL', 'FICE', 'IWC', 'LWC', 'ICLDIWP', 'ICLDTWP', 'ICWNC', 'ICINC',
-                              'WP2_CLUBB', 'CCN1', 'CCN3', 'CCN5', 'bc_a1', 'bc_a3', 'bc_a4', 'dst_a1', 'dst_a3',
+                              'CLDICE', 'NUMICE', 'AWNI', 'AWNC','AREI', 'AREL', 'FICE', 'IWC', 'LWC', 
+                              'CCN1', 'CCN3', 'CCN5', 'bc_a1', 'bc_a3', 'bc_a4', 'dst_a1', 'dst_a3',
                               'mom_a1', 'mom_a2', 'mom_a3', 'mom_a4', 'ncl_a1', 'ncl_a2', 'ncl_a3',
                               'pom_a1', 'pom_a3', 'pom_a4', 'so4_a1', 'so4_a2', 'so4_a3',
                               'soa_a1', 'soa_a2', 'soa_a3', 'num_a1', 'num_a2', 'num_a3', 'num_a4',

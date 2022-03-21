@@ -60,6 +60,7 @@ def run_plot(settings):
         for filename in lst:
             (time,data,qc,timeunit,cpcunit)=read_cpc(filename)
             data = qc_mask_qcflag(data,qc)
+            data = qc_remove_neg(data)
             timestr=timeunit.split(' ')
             date=timestr[2]
             cday=yyyymmdd2cday(date,'noleap')
@@ -90,6 +91,7 @@ def run_plot(settings):
             (time,dmin,dmax,data,timeunit,uhsasunit,long_name)=read_uhsas(filename)
             # sum up uhsas data for size >100nm
             data=np.ma.filled(data,np.nan)
+            data = qc_remove_neg(data)
             idx100 = dmin>=100
             data1=np.nansum(data[:,idx100],1)
             # average in time for consistent comparison with model
@@ -120,6 +122,7 @@ def run_plot(settings):
             for filename in lst:
                 (time,data,qc,timeunit,cpcunit)=read_cpc(filename)
                 data = qc_mask_qcflag_cpc(data,qc)
+                data = qc_remove_neg(data)
                 timestr=timeunit.split(' ')
                 date=timestr[2]
                 cday=yyyymmdd2cday(date,'noleap')
@@ -147,6 +150,7 @@ def run_plot(settings):
             for filename in lst:
                 (time,data,qc,timeunit,cpcuunit)=read_cpc(filename)
                 data = qc_mask_qcflag_cpc(data,qc)
+                data = qc_remove_neg(data)
                 timestr=timeunit.split(' ')
                 date=timestr[2]
                 cday=yyyymmdd2cday(date,'noleap')
@@ -157,7 +161,6 @@ def run_plot(settings):
                 data2 = avg_time_1d(np.array(time),np.array(data),time2)
                 t_cpcu=np.hstack((t_cpcu, cday+time2/86400))
                 cpcu=np.hstack((cpcu, data2))
-            cpcu = qc_remove_neg(cpcu)
             # # average in time for consistent comparison with model
             # t_cpcu2=np.arange(t_cpcu[0]*24,t_cpcu[-1]*24,1)/24.
             # cpcu2=avg_time_1d(t_cpcu,cpcu,t_cpcu2)
@@ -176,6 +179,7 @@ def run_plot(settings):
             (time,dmin,dmax,data,timeunit,uhsasunit,long_name)=read_uhsas(filename)
             # sum up uhsas data for size >100nm
             data=np.ma.filled(data,np.nan)
+            data = qc_remove_neg(data)
             idx100 = dmin>=100
             data1=np.nansum(data[:,idx100],1)
             # average in time for consistent comparison with model

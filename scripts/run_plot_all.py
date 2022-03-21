@@ -37,8 +37,8 @@ settings['IOP'] = 'IOP1'
 #############
 
 # Please specify the path of your data and for figure output
-settings['figpath'] = '/global/cscratch1/sd/sqtang/EAGLES/Aerosol_diag_pkg/figures/'
-settings['datapath'] = '/global/cscratch1/sd/sqtang/EAGLES/Aerosol_diag_pkg/data/'
+settings['figpath'] = '../figures/'
+settings['datapath'] = '../data/'
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -165,6 +165,8 @@ def add_other_setting(settings):
         settings['shipmetpath'] = datapath+'/obs/ship/raynolds-marmet/'
         settings['shipccnpath'] = datapath+'/obs/ship/magaosccn100M1.a1/'
         settings['shipcpcpath'] = datapath+'/obs/ship/magaoscpcfM1.a1/'
+        settings['shipcn_exhaustfree_path'] = 'N/A'
+        settings['shipccn_exhaustfree_path'] = 'N/A'
         settings['shipmwrpath'] = datapath+'/obs/ship/magmwrret1liljclouM1.s2/'
         settings['shipuhsaspath'] = datapath+'/obs/ship/magaosuhsasM1.a1/'
         #### pre-processed model data path ######    
@@ -182,6 +184,8 @@ def add_other_setting(settings):
         settings['shipmetpath'] = datapath+'/obs/ship/maraadmetX1.b1/'
         settings['shipccnpath'] = datapath+'/obs/ship/maraosccn1colavgM1.b1/'
         settings['shipcpcpath'] = datapath+'/obs/ship/maraoscpcf1mM1.b1/'
+        settings['shipcn_exhaustfree_path'] = datapath+'/obs/ship/ship_exhaustfree/'
+        settings['shipccn_exhaustfree_path'] = datapath+'/obs/ship/ship_exhaustfree/'
         settings['shipmwrpath'] = datapath+'/obs/ship/marmwrret1liljclouM1.s2/'
         settings['shipuhsaspath'] = datapath+'/obs/ship/maraosuhsasM1.a1/'
         #### pre-processed model data path ######    
@@ -289,13 +293,13 @@ def plot_all(settings):
         plot_ship_timeseries_met.run_plot(settings)
         plot_ship_timeseries_CN.run_plot(settings)
         plot_ship_timeseries_CCN.run_plot(settings)
+        contour_ship_timeseries_AerosolSize.run_plot(settings)
         # statistics
         plot_ship_percentile_lat_met.run_plot(settings)
         plot_ship_percentile_lat_CN.run_plot(settings)
         plot_ship_percentile_lat_CCN.run_plot(settings)
         plot_ship_percentile_lat_LWP.run_plot(settings)
         plot_ship_pdf_AerosolSize.run_plot(settings)
-        contour_ship_timeseries_AerosolSize.run_plot(settings)
         calc_statistic_ship_CN.run_plot(settings)
             
     print('*********** end plotting **************')

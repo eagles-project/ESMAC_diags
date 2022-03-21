@@ -11,7 +11,7 @@ from ..subroutines.time_format_change import yyyymmdd2cday,cday2mmdd
 from ..subroutines.read_ARMdata import read_cpc
 from ..subroutines.read_netcdf import read_E3SM
 from ..subroutines.specific_data_treatment import  avg_time_1d
-from ..subroutines.quality_control import qc_mask_qcflag_cpc
+from ..subroutines.quality_control import qc_mask_qcflag_cpc, qc_remove_neg
 
 def run_plot(settings):
     #%% variables from settings
@@ -52,6 +52,7 @@ def run_plot(settings):
         for filename in lst:
             (time,data,qc,timeunit,cpcunit)=read_cpc(filename)
             data=qc_mask_qcflag_cpc(data,qc)
+            data=qc_remove_neg(data)
             timestr=timeunit.split(' ')
             date=timestr[2]
             cday=yyyymmdd2cday(date,'noleap')
@@ -80,6 +81,7 @@ def run_plot(settings):
             for filename in lst:
                 (time,data,qc,timeunit,cpcunit)=read_cpc(filename)
                 data=qc_mask_qcflag_cpc(data,qc)
+                data=qc_remove_neg(data)
                 timestr=timeunit.split(' ')
                 date=timestr[2]
                 cday=yyyymmdd2cday(date,'noleap')
@@ -104,6 +106,7 @@ def run_plot(settings):
             for filename in lst:
                 (time,data,qc,timeunit,cpcuunit)=read_cpc(filename)
                 data=qc_mask_qcflag_cpc(data,qc)
+                data=qc_remove_neg(data)
                 timestr=timeunit.split(' ')
                 date=timestr[2]
                 cday=yyyymmdd2cday(date,'noleap')
