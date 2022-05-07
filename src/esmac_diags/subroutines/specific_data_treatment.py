@@ -4,61 +4,201 @@ function of some specific data treatment
 
 import numpy as np
 
+#%% 
+def calc_cdnc_ARM(lwp,cod,H):
+    """
+    calculate cloud droplet number concentration using ARM surface-based retrievals
+    references: https://www.arm.gov/publications/tech_reports/doe-sc-arm-tr-140.pdf 
+
+    Parameters
+    ----------
+    lwp : numpy array
+        liquid water path, unit: mm (kg/m2)
+    cod : numpy array
+        cloud optical depth, unit: N/A
+    H : numpy array
+        cloud depth, unit: m
+
+    Returns
+    -------
+    Nd : output data
+        column-integrated layer-mean cloud droplet number concentration. 
+        unit: cm-3
+
+    """
+    # constants and parameters
+    C1 = 0.05789
+    k = 0.74
+    rho_liq = 1000.   # unit: kg/m3
+    
+    Nd = 1e-6*(C1/k)*(2.**0.5)*(rho_liq**2)*(cod**3)/(lwp**2)/H 
+    Nd[Nd == 0] = np.nan
+    return(Nd)
+
+#%% 
+def calc_cdnc_VISST(lwp, ctt, cod, adiabaticity=0.8):
+    """
+    calculate cloud droplet number concentration using VISST satellite retrievals
+    options for different adiabaticity
+    default value is 80% (0.8) adiabaticity following the reference
+    references: follows Bennartz (2007, JGR)
+
+    Parameters
+    ----------
+    lwp : numpy array
+        liquid water path, unit: mm (kg/m2)
+    ctt : numpy array
+        average cloud temperature, for liquid only, unit: K
+    cod : numpy array
+        cloud optical depth, unit: N/A
+
+    Returns
+    -------
+    Nd : output data
+        column-integrated layer-mean cloud droplet number concentration. 
+        unit: cm-3
+
+    """
+    # constants and parameters
+    G = 9.8
+    Cp = 1005.7
+    Rd = 287.
+    Rv = 461.
+    lv = 2.477e6 #at 10 C
+    epsilon = Rd/Rv
+    pres_const = 85000. #Pa (used by Bennartz, 2007, JGR), could use cloud top pressure, but shouldn't alter estimates much
+    Q = 2.
+    k = 0.74 #Bennartz uses 0.8 +/- 0.1 but can be 0.5-0.9
+    rho_liq = 1000.
+        
+    rho_air = pres_const/(Rd*ctt)
+    es = 611.2*np.exp(17.62*(ctt-273.15)/(243.12 + ctt - 273.15))
+    ws = epsilon*es/(pres_const - es)
+    gamma_w = G*((1 + lv*ws/(Rd*ctt))/(Cp + lv**2*ws*epsilon/(Rd*ctt**2)))
+    gamma_ad = (((epsilon + ws)*ws*lv*gamma_w)/(Rd*ctt**2) - (G*ws*pres_const/(Rd*ctt*(pres_const - es))))*rho_air
+    Nd = 1e-6*(cod**3/k)*((2*(1e-3*lwp))**(-2.5))*((0.6*np.pi*Q)**(-3))*((3./(4.*np.pi*rho_liq))**(-2))*((adiabaticity*gamma_ad)**0.5) 
+    return(Nd)
+
+#%% 
+def calc_clouddepth_VISST(lwp, ctt, adiabaticity=0.8):
+    """
+    calculate cloud depth using VISST satellite retrievals
+    options for different adiabaticity
+    default value is 80% (0.8) adiabaticity following the reference
+    references: follows Bennartz (2007, JGR)
+
+    Parameters
+    ----------
+    lwp : numpy array
+        liquid water path, unit: mm (kg/m2)
+    ctt : numpy array
+        average cloud temperature, for liquid only, unit: K
+
+    Returns
+    -------
+    Nd : output data
+        column-integrated layer-mean cloud droplet number concentration. 
+        unit: cm-3
+
+    """
+    # constants and parameters
+    G = 9.8
+    Cp = 1005.7
+    Rd = 287.
+    Rv = 461.
+    lv = 2.477e6 #at 10 C
+    epsilon = Rd/Rv
+    pres_const = 85000. #Pa (used by Bennartz, 2007, JGR), could use cloud top pressure, but shouldn't alter estimates much
+        
+    rho_air = pres_const/(Rd*ctt)
+    es = 611.2*np.exp(17.62*(ctt-273.15)/(243.12 + ctt - 273.15))
+    ws = epsilon*es/(pres_const - es)
+    gamma_w = G*((1 + lv*ws/(Rd*ctt))/(Cp + lv**2*ws*epsilon/(Rd*ctt**2)))
+    gamma_ad = (((epsilon + ws)*ws*lv*gamma_w)/(Rd*ctt**2) - (G*ws*pres_const/(Rd*ctt*(pres_const - es))))*rho_air
+    H = (2.*1e-3*lwp/(adiabaticity*gamma_ad))**0.5
+    return(H)
+
+#%% 
+def find_nearest(xall, yall, x, y):
+    """
+    find the index of nearest point at 2-d space
+    for E3SM spectrum element core output, so xall and yall are longitude and latitude
+    but in 1-dimensional
+
+    Parameters
+    ----------
+    xall : 1-d numpy array
+        x dimension value of the 2d space
+    yall : 1-d numpy array
+        y dimension value of the 2d space.
+    x : float or int
+        x value of the given point.
+    y : float or int
+        y value of the given point.
+
+    Returns
+    -------
+    None.
+
+    """
+    distance = np.square(xall-x) + np.square(yall-y)
+    idx = distance.argmin()
+    return(idx)
+
 #%%
-def avg_time_1d(time0, data0, time):
+def insolation(time, lon, lat, leap_year='noleap'):
     """
-    average 1d data into coarser time resolution
+    calculate insolation from given time and location
 
     Parameters
     ----------
-    time0 : numpy array
-        time dimension for input data
-    data0 : numpy array
-        input data
-    time : numpy array
-        time dimension for output data
+    time : 1-d numpy array
+        time in calendar day
+    lon : float
+        longitude
+    lat : float
+        latitude
+    leap_year : str
+        leap year has 366 days for a year
 
     Returns
     -------
-    data : output data
+    ins : 1-d numpy array
+        insolation (W/m2) for the given time and lat/lon
 
     """
-    if data0.shape[0] != len(time0):
-        raise ValueError("Arrays must have the same size")
-    data = np.full((len(time)), np.nan)
-    dt = (time[1]-time[0])/2
-    for tt in range(len(time)):
-        idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
-        data[tt] = np.nanmean(data0[idx], axis = 0)
-    return(data)
-
-# 
-def avg_time_2d(time0, data0, time):
-    """
-    average 2d data into coarser time resolution
-
-    Parameters
-    ----------
-    time0 : numpy array
-        time dimension for input data
-    data0 : numpy array
-        input data
-    time : numpy array
-        time dimension for output data
-
-    Returns
-    -------
-    data : output data
-
-    """
-    if data0.shape[0] != len(time0):
-        raise ValueError("the first dimension of input data must have the same size with time")
-    data = np.full((len(time), data0.shape[1]), np.nan)
-    dt = (time[1]-time[0])/2
-    for tt in range(len(time)):
-        idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
-        data[tt, :] = np.nanmean(data0[idx, :], axis = 0)
-    return(data)
+    
+    days_in_year = 365.0
+    # check if this is for the leap year
+    if leap_year=='leap':
+        days_in_year = 366.0
+    
+    thepi = 3.14159265
+    tw=2.0*thepi*(time-1.)/days_in_year
+    
+    # eccentricity
+    ecc= 1.000110+0.034221*np.cos(tw)+0.001280*np.sin(tw)+ 0.000719*np.cos(2.0*tw)+0.000077*np.sin(2.0*tw)
+    
+    pif=thepi/180.0
+    
+    delta=0.006918 - 0.399912*np.cos(tw) + 0.070257*np.sin(tw) - 0.006758*np.cos(2.*tw) + \
+        0.000907*np.sin(2.*tw) - 0.002697*np.cos(3.*tw) + 0.001480*np.sin(3.*tw)
+    
+    cr1=pif*279.367 + 0.985647*days_in_year/360.0*tw
+    
+    dt=-105.4*np.sin(cr1)+596.2*np.sin(2*cr1)+4.3*np.sin(3*cr1)-12.7*np.sin(4*cr1)- \
+        429.2*np.cos(cr1)-2.1*np.cos(2*cr1)+19.3*np.cos(3*cr1) # in seconds
+    
+    tt=dt/86400.0*2.0*thepi/days_in_year + tw
+    
+    cosz = np.sin(lat*pif)*np.sin(delta) - np.cos(lat*pif)*np.cos(delta)*np.cos(tt*days_in_year+lon*pif)
+    
+    ins=1368.2*cosz*ecc
+    #ins=1378.95*cosz*ecc
+    
+    ins[ins<0]=0.0
+    
+    return(ins)
 
 #%%
 def lwc2cflag(lwc, lwcunit):

@@ -1,47 +1,88 @@
 """
-# all quality controls for data in ESMAC_Diags
-# examples of quality controls:
-# 1. qc flags in ARM data
-# 2. minimum and maximum cutoffs
-# 3. systematic data corrections
-# 4. additional data masking
+all quality controls for data in ESMAC_Diags
+examples of quality controls:
+1. qc flags in ARM data
+2. minimum and maximum cutoffs
+3. systematic data corrections
+4. additional data masking
 """
+
 import numpy as np
 
-#%%
-def qc_mask_cloudflag(data, cflag):
+
+#%% 
+def qc_mask_cloudflag(data,cflag):
     """
-    mask data with cloud flag, typically remove cloud_flag = 1 
+    mask data with cloud flag, typically remove cloud_flag=1 
+
+    Parameters
+    ----------
+    data : numpy array
+        input data
+    cflag : numpy array, int format
+        cloud flag data. remove when cflag==1
+
+    Returns
+    -------
+    data : output data
+
     """
-    if len(data.shape) == 1:
-        data[cflag == 1] = np.nan
-    elif len(data.shape) == 2:
-        data[cflag == 1, :] = np.nan
+    if len(data.shape)==1:
+        data[cflag==1]=np.nan
+    elif len(data.shape)==2:
+        data[cflag==1,:]=np.nan
     else: 
-        raise ValueError("Error: input data should be 1-d or 2-d")
+        raise ValueError("dimension of input data and flag data are inconsistent")
     return(data)
 
-#%%
-def qc_mask_qcflag(data, qc):
+#%% 
+def qc_mask_qcflag(data,qc):
     """
-    mask data with qc_flag, typically remove all qc_flag  !=  0 
+    mask data with quality-control flags, typically remove all qc != 0
+
+    Parameters
+    ----------
+    data : numpy array
+        input data
+    qc : numpy array, int format
+        quality control flag data. remove when qc!=0
+
+    Returns
+    -------
+    data : output data
+
     """
-    if len(data.shape) == 1:
-        data[qc != 0] = np.nan
-    elif len(data.shape) == 2:
-        data[qc != 0, :] = np.nan
+    if len(data.shape)==1:
+        data[qc!=0]=np.nan
+    elif len(data.shape)==2:
+        data[qc!=0,:]=np.nan
     else: 
-        raise ValueError("Error: input data should be 1-d or 2-d")
+        raise ValueError("dimension of input data and flag data are inconsistent")
     return(data)
 
-#%% mask data with qc_flag only for specific bit.
-# this is only for CPC since QC in some bits may be good data and should be retained
-# according to Singh, Ashish <asingh@bnl.gov>, only the following qc_bit is critical 
-# 	C1/CPCf (I guess this is sgpaoscpcC1*) – bit_value 7, 8 
-# 	S1/CPCF – bit value 11, 12, 13, 14 
-# 	S1/CPCu or CPCuf- bit value 4, 5, 6, 15, 16  
-
+#%% 
 def qc_mask_qcflag_cpc(data,qc):
+    """
+    mask data with quality-control flags, only for specific bit.
+    
+    this is only for CPC since QC in some bits may be good data and should be retained.
+    according to Singh, Ashish <asingh@bnl.gov>, only the following qc_bit is critical 
+     	C1/CPCf (I guess this is sgpaoscpcC1*) – bit_value 7, 8 
+     	S1/CPCF – bit value 11, 12, 13, 14 
+     	S1/CPCu or CPCuf- bit value 4, 5, 6, 15, 16  
+
+    Parameters
+    ----------
+    data : numpy array
+        input data
+    qc : numpy array, int format
+        quality control flag data.
+
+    Returns
+    -------
+    data : output data
+
+    """
     data_out = np.array(data)
     qc = qc.astype(np.int)
     for tt in range(len(qc)):
@@ -68,8 +109,9 @@ def qc_mask_qcflag_cpcu(data,qc):
             if any([x in qc_bit for x in [4, 5, 6, 15, 16]]):
                 data_out[tt] = np.nan
     return(data_out)
-#%%
-def qc_mask_takeoff_landing(time, data):
+
+#%% 
+def qc_mask_takeoff_landing(time,data):
     """
     mask aircraft takeoff/landing time
     mask time is set as 30min to exclude possible land contamination for ocean measurements
@@ -86,23 +128,29 @@ def qc_mask_takeoff_landing(time, data):
 
     """
     # time should be in unit of seconds
-    idx = np.logical_or(time<(time[0]+1800), time>(time[-1]-1800))
-    if len(data.shape) == 1:
-        data[idx] = np.nan
-    elif len(data.shape) == 2:
-        data[:, idx] = np.nan
+    idx=np.logical_or(time<(time[0]+1800), time>(time[-1]-1800))
+    if len(data.shape)==1:
+        data[idx]=np.nan
+    elif len(data.shape)==2:
+        data[:,idx]=np.nan
     else:
-        raise ValueError("Error: input data should be 1-d or 2-d")
+        raise ValueError("input data can only be 1-d or 2-d array")
     return(data)
 
-#%%
-def qc_remove_neg(data):
+#%% 
+def qc_remove_neg(data, remove_zero='False'):
     """
     remove negative values
+    options of keep or remove zero value
     """
-    data[data<0] = np.nan
+    if remove_zero == 'False' or remove_zero == 'false':
+        data[data<0]=np.nan
+    elif remove_zero == 'True' or remove_zero == 'true':
+        data[data<=0]=np.nan
+    else:
+        raise ValueError("remove_zero can only be true or false")
     return(data)
-
+    
 #%%
 def qc_ccn_max(ccn, SS):
     """
@@ -123,7 +171,7 @@ def qc_ccn_max(ccn, SS):
     """
     ccn[np.logical_and(SS<0.2, ccn>2000)] = np.nan
     ccn[np.logical_and(SS<0.6, ccn>4000)] = np.nan
-    ccn[ccn>5000] = np.nan
+    ccn[ccn>8000] = np.nan
     return(ccn)
     
 #%%
@@ -174,8 +222,8 @@ def qc_fims_bin(data):
     remove some suspicious value of FIMS measurements
     """
     data2 = np.array(data)
-    data2[:, data2[0, :] > 3e4] = np.nan
-    data2[np.logical_or(data2 < 0, data2 > 1e5)] = np.nan
+    # data2[:, data2[0, :] > 3e4] = np.nan
+    data2[np.logical_or(data2 < 0, data2 > 3e4)] = np.nan
     return(data2)
 
 #%%

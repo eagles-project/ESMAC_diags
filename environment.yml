@@ -15,3 +15,6 @@ dependencies:
   - ipython
   - black
   - netCDF4
+  - xarray
+  - pandas
+  - dask
