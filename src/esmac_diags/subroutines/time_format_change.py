@@ -132,6 +132,28 @@ def cday2mmdd(cday,calendar='noleap'):
     return(mmdd)
 
 #%%
+def datetime2cday(time):
+    """
+    change the time format from datetime64 to float of calendar day
+
+    Parameters
+    ----------
+    time : numpy array of DateTime64 format
+        input time array
+
+    Returns
+    -------
+    cday0 : calendar day of yyyy-mm-dd hh:mm:ss in float format
+
+    """
+    
+    # change time to calendar day
+    sec_from_Jan1 = time.astype('datetime64[s]') - time.astype('datetime64[Y]')
+    calday = sec_from_Jan1.astype('float64')/86400 + 1
+    
+    return(calday)
+
+#%%
 
 def timeunit2cday(timeunit,calendar='leap'):
     """

@@ -1,24 +1,37 @@
-#  calculate aerosol number concentration with 1nm 
-#  increment from 1nm to 3000nm (dimension [size, level, time])
-# 
-#  rewritten from Kai Zhang and Jian Sun's NCL code
-#  cutoff_CTRL_regions_0_3000nm.ncl
-#  
-#  Shuaiqi Tang
-#  2021.4.30
+'''
+  calculate aerosol number concentration with 1nm 
+  increment from 1nm to 3000nm (dimension [size, level, time])
 
-#  dnall={dn1,dn2,dn3,dn4,...} is number median diameter of each mode in m (dgnd_a*)
-#  numall={num1,num2,num3,...} is number concentration in each mode in #/kg (num_a*)
-#  T is temperature in K
-#  P is pressure in Pa
-####################################################################
+  rewritten from Kai Zhang and Jian Sun's NCL code
+  cutoff_CTRL_regions_0_3000nm.ncl
+  
+  Shuaiqi Tang
+  2021.4.30
 
+'''
 
 import numpy as np
 import scipy.special
 
-# sub function 
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def func_cutoff_NN(num,dn,lnsg,dmax,dmin):
+    """
+    function of calculate total number concentration between two cutoff size
+    in a log-normal distribution
+    
+    Parameters
+    ----------
+    num : total number concentration of the log-normal distribution
+    dn : median size of the distribution
+    lnsg: log value of geometric standard deviation of the distribution
+    dmax: maximum value of cutoff size
+    dmin: minimum value of cutoff size
+
+    Returns
+    -------
+    nc: total number between dmin and dmax
+    
+    """
     logdr = np.log(dmax/dn)
     logdl = np.log(dmin/dn)
     # erf is the error function
@@ -27,10 +40,30 @@ def func_cutoff_NN(num,dn,lnsg,dmax,dmin):
     nc = 0.5*num*(erfr-erfl)
     return(nc)
 
-# main function to calculate CN size of 1-3000nm bins from 4 or 5 (with nucleation mode) modes
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# 
 def calc_CNsize_cutoff_0_3000nm(dnall,numall,T,P):
+    """
+    main function to calculate CN size of 1nm bins from 1-3000nm in
+    MAM4 or MAM5 (with nucleation mode) aerosol modes in CESM or E3SM
     
-        
+    Parameters
+    ----------
+    numall : [num_a1, num_a2, num_a3, num_a4]
+            number concentration in each mode in #/kg (num_a*)
+    dnall : [dgnd_a01, dgnd_a02, dgnd_a03, dgnd_a04]
+            number median diameter of each mode in m (dgnd_a*)
+    T: temperature, in K
+    P: pressure, in Pa
+
+    Returns
+    -------
+    ncut: numpy array of [3000, size_of_num_a1]
+            aerosol number in 1-3000nm bins with 1nm increment
+    
+    """
+    
     nmode = len(dnall)
     if nmode!=4 and nmode!=5:
         raise ValueError("Error: Currently only apply for MAM4 and MAM5 with 4 or 5 modes")

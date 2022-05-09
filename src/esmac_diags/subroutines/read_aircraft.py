@@ -3,6 +3,8 @@ functions of reading aircraft data, mostly ascii format
 """
 import numpy as np
 from netCDF4 import Dataset
+from .time_format_change import hhmmss2sec
+
 #%% 
 # filename='../../data/HiScale/obs/aircraft/shilling-ams\\HiScaleAMS_G1_20160425_R0.ict'
 def read_ams(filename):    
@@ -49,6 +51,68 @@ def read_ams(filename):
     f.close()
     # data2[data2<-9990]=np.nan
     return(data2, varlist)
+
+#%% 
+def read_beasd(filename):    
+    """
+    read best estimate aerosol size distribution data
+
+    Parameters
+    ----------
+    filename : str
+        input filename
+
+    Returns
+    -------
+    data2: beasd variables
+    varlist: list of variable names
+    size_h : upper bound of size bin
+    size_l : lower bound of size bin
+    size_m : middle value of size bin
+
+    """    
+    
+    f=open(filename,'r')
+    
+    # read in data:
+    h='aaa'
+    while h[0:24]!='UPPER_BIN_SIZE_nanometer':
+        h=f.readline()
+    h=h.strip()
+    size_h=h.split(',')
+    h=f.readline()
+    h=h.strip()
+    size_l=h.split(',')
+    h=f.readline()
+    h=h.strip()
+    size_m=h.split(',')
+    
+    size_h = np.array([np.float32(x.split(' ')[-1]) for x in size_h])
+    size_m = np.array([np.float32(x.split(' ')[-1]) for x in size_m])
+    size_l = np.array([np.float32(x.split(' ')[-1]) for x in size_l])
+    
+    while h[0:3]!='R0:':
+        h=f.readline()
+    h=f.readline()
+    h=h.strip()
+    varlist=h.split(',')
+    data=[]
+    if 'data2' in locals():
+        del(data2)
+    for line in f:
+        line=line.strip()  # remove \n
+        columns = line.split(',')
+        source = []
+        for i in range(0,len(columns)):
+            source.append(float(columns[i]))
+        data.append(source)
+        if 'data2' not in locals():
+            data2=np.asarray(source)
+        else:
+            data2=np.column_stack((data2, source))    
+    f.close()
+    
+    return(data2,varlist, size_h, size_l, size_m)
 
 
 #%% 
@@ -159,7 +223,8 @@ def read_ccn_socrates(filename):
     # read in data:
     
     h='aaa'
-    while h[0:14]!='Start_UTC, CCN':
+    # for CCNscanning or CCNspectra data
+    while h[0:14] not in ['Start_UTC, CCN', 'Start_UTC, Sto']:
         h=f.readline()
     h=h.strip()
     varlist=h.split(',')
@@ -386,6 +451,76 @@ def read_kappa(filename):
     
     f.close()
     return(data2, varname)
+
+#%% read mergedSD data
+# filename = 'C:/Users/tang357/OneDrive - PNNL/EAGLES/python_diag_pkg/ESMAC_Diags_Tool/'+\
+#     'data/HISCALE/obs/aircraft/mergedSD/aaf.g1.hiscale.mergedSD.20160903a.txt'
+def read_mergedSD(filename):   
+    """
+    READ in mergedSD data
+
+    Parameters
+    ----------
+    filename : input filename
+
+    Returns
+    -------
+    time2: time in seconds
+    n_total: total droplet number concentration
+    n_bins: measured cloud droplet number concentration in each size bin
+    d_min: lower bound of each size bins
+    d_max: upper bound of each size bins
+    d_mean: center diameter for each size bin
+    """ 
+
+    f=open(filename, 'r')
+    varname=f.readline()
+    # varunit=f.readline()
+    varname=varname.strip()
+    varname=varname.split(',')
+    varname=varname[1:]
+    # get droplet size information
+    dmin=[]
+    dmax=[]
+    dmean=[]
+    for i in range(1,len(varname)):
+        d_str = varname[i].split('_')
+        d1 = np.float64(d_str[1].replace('p','.'))
+        d2 = np.float64(d_str[2].replace('p','.'))
+        dmean.append((d1+d2)/2)
+        dmin.append(d1)
+        dmax.append(d2)
+    dmin = np.array(dmin)
+    dmax = np.array(dmax)
+    dmean = np.array(dmean)
+    # read in time and data
+    date=[]
+    time2=np.array([])
+    if 'data2' in locals():
+        del(data2)
+    for line in f:
+        line=line.strip()  # remove \n
+        if line==[]:
+            continue
+        columns = line.split(',')
+        # print(columns[0])
+        time = columns[0].split()
+        date.append(time[0])
+        time2 = np.hstack((time2, hhmmss2sec(time[1])))
+        source = []
+        for i in range(1, len(columns)):
+            source.append(float(columns[i]))
+        # data.append(source)
+        if not('data2' in locals()):
+            data2=np.asarray(source)
+        else:
+            data2=np.column_stack((data2, source))
+    
+    f.close()
+    n_total = data2[0,:]
+    n_bins = data2[1:, :]
+    return(time2, n_total, n_bins, dmean, dmin, dmax)
+
 
 #%% read OPC
 # filename='../data/opciso/OPCISO_G1_20170707103233_R3_ACEENA_001s.ict'
