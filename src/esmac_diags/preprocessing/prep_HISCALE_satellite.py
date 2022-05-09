@@ -85,6 +85,9 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     ctt_liq = visstdata['cloud_temperature'][:,y_idx,x_idx,2]
     ctp_liq = visstdata['cloud_pressure_top'][:,y_idx,x_idx,2]
     cth_liq = visstdata['cloud_height_top'][:,y_idx,x_idx,2]
+    ctt_all = visstdata['cloud_temperature'][:,y_idx,x_idx,0]
+    ctp_all = visstdata['cloud_pressure_top'][:,y_idx,x_idx,0]
+    cth_all = visstdata['cloud_height_top'][:,y_idx,x_idx,0]
     cf_all = visstdata['cloud_percentage'][:,y_idx,x_idx,0]
     cf_liq = visstdata['cloud_percentage'][:,y_idx,x_idx,2]
     cf_allz = visstdata['cloud_percentage_level'][:,y_idx,x_idx,0]
@@ -119,6 +122,9 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
         ctt_liq = xr.concat([ctt_liq, visstdata['cloud_temperature'][:,y_idx,x_idx,2]], dim="time")
         ctp_liq = xr.concat([ctp_liq, visstdata['cloud_pressure_top'][:,y_idx,x_idx,2]], dim="time")
         cth_liq = xr.concat([cth_liq, visstdata['cloud_height_top'][:,y_idx,x_idx,2]], dim="time")
+        ctt_all = xr.concat([ctt_all, visstdata['cloud_temperature'][:,y_idx,x_idx,0]], dim="time")
+        ctp_all = xr.concat([ctp_all, visstdata['cloud_pressure_top'][:,y_idx,x_idx,0]], dim="time")
+        cth_all = xr.concat([cth_all, visstdata['cloud_height_top'][:,y_idx,x_idx,0]], dim="time")
         cf_all = xr.concat([cf_all, visstdata['cloud_percentage'][:,y_idx,x_idx,0]], dim="time")
         cf_liq = xr.concat([cf_liq, visstdata['cloud_percentage'][:,y_idx,x_idx,2]], dim="time")
         cf_allz = xr.concat([cf_allz, visstdata['cloud_percentage_level'][:,y_idx,x_idx,0]], dim="time")
@@ -189,9 +195,12 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     cf_low_new = avg_time_1d(vissttime, cf_low, time_new)
     cf_mid_new = avg_time_1d(vissttime, cf_mid, time_new)
     cf_high_new = avg_time_1d(vissttime, cf_high, time_new)
-    ctt_new = avg_time_1d(vissttime, ctt_liq, time_new)
-    ctp_new = avg_time_1d(vissttime, ctp_liq, time_new)
-    cth_new = avg_time_1d(vissttime, cth_liq, time_new)
+    ctt_new = avg_time_1d(vissttime, ctt_all, time_new)
+    ctp_new = avg_time_1d(vissttime, ctp_all, time_new)
+    cth_new = avg_time_1d(vissttime, cth_all, time_new)
+    ctt_liq_new = avg_time_1d(vissttime, ctt_liq, time_new)
+    ctp_liq_new = avg_time_1d(vissttime, ctp_liq, time_new)
+    cth_liq_new = avg_time_1d(vissttime, cth_liq, time_new)
     lw_new = avg_time_1d(vissttime, bb_lw_all, time_new)
     sw_new = avg_time_1d(vissttime, bb_sw_all, time_new)
         
@@ -352,17 +361,26 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
                     'ctt': (['time'], np.float32(ctt_new)),
                     'cth': (['time'], np.float32(cth_new)),
                     'ctp': (['time'], np.float32(ctp_new)),
+                    'ctt_liq': (['time'], np.float32(ctt_liq_new)),
+                    'cth_liq': (['time'], np.float32(cth_liq_new)),
+                    'ctp_liq': (['time'], np.float32(ctp_liq_new)),
                     },
                      coords={'time': ('time', time_new)})
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
     ds['time'].attrs["standard_name"] = "time"
-    ds['ctt'].attrs["long_name"] = 'cloud top temperature for liquid clouds'
+    ds['ctt'].attrs["long_name"] = 'cloud top temperature'
     ds['ctt'].attrs["units"] = 'K'
-    ds['ctp'].attrs["long_name"] = 'cloud top pressure for liquid clouds'
+    ds['ctp'].attrs["long_name"] = 'cloud top pressure'
     ds['ctp'].attrs["units"] = 'hPa'
-    ds['cth'].attrs["long_name"] = 'cloud top height for liquid clouds'
+    ds['cth'].attrs["long_name"] = 'cloud top height'
     ds['cth'].attrs["units"] = 'km'
+    ds['ctt_liq'].attrs["long_name"] = 'cloud top temperature for liquid clouds'
+    ds['ctt_liq'].attrs["units"] = 'K'
+    ds['ctp_liq'].attrs["long_name"] = 'cloud top pressure for liquid clouds'
+    ds['ctp_liq'].attrs["units"] = 'hPa'
+    ds['cth_liq'].attrs["long_name"] = 'cloud top height for liquid clouds'
+    ds['cth_liq'].attrs["units"] = 'km'
     
     ds.attrs["title"] = 'cloud top temperature, pressure and height from VISST 0.5x0.5 data'
     ds.attrs["description"] = 'for liquid clouds only'
@@ -462,7 +480,8 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     bb_lw = visstdata['broadband_longwave_flux'][x_idx, y_idx]
     bb_sw_albedo = visstdata['broadband_shortwave_albedo'][x_idx, y_idx]
     visstdata.close()
-    for file in lst[1:]:
+    for ii in range(1,len(lst)):
+        file = lst[sortidx[ii]]
         print(file)
         visstdata = xr.open_dataset(file)
         lat = visstdata['latitude'][x_idx, y_idx]
@@ -684,11 +703,11 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
     ds['time'].attrs["standard_name"] = "time"
-    ds['ctt'].attrs["long_name"] = 'cloud top temperature for liquid clouds'
+    ds['ctt'].attrs["long_name"] = 'cloud top temperature'
     ds['ctt'].attrs["units"] = 'K'
-    ds['ctp'].attrs["long_name"] = 'cloud top pressure for liquid clouds'
+    ds['ctp'].attrs["long_name"] = 'cloud top pressure'
     ds['ctp'].attrs["units"] = 'hPa'
-    ds['cth'].attrs["long_name"] = 'cloud top height for liquid clouds'
+    ds['cth'].attrs["long_name"] = 'cloud top height'
     ds['cth'].attrs["units"] = 'km'
     
     ds.attrs["title"] = 'cloud top temperature, pressure and height from VISST 4x4km data'
