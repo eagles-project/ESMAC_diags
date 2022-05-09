@@ -5,6 +5,7 @@ This document describes the version 2.0.0 of Earth System Model (ESM) aerosol-cl
 
 More information can be found in README_ESMAC_Diags_v2.0.0.pdf
 
+
 ## To install
 This code is best run using a conda virtual environment. To install the required environment one can do
 ```bash
