@@ -119,6 +119,41 @@ def calc_clouddepth_VISST(lwp, ctt, adiabaticity=0.8):
     return(H)
 
 #%% 
+def calc_Reff_from_REL(rel, dz, cf_liq, icwnc):
+    """
+    calculate vertical averaged cloud effective radius from 
+    in-cloud effective radius (REL) in E3SM output
+    weighted by cloud fraction
+    
+    Parameters
+    ----------
+    rel : 2-d numpy array (time, height)
+        in-cloud effective radius. variable 'REL' in E3SM output
+    dz : 1-d numpy array (height)
+        height interval in meter. for vertical weighting calculation
+    cf_liq : 2-d numpy array (time, height)
+        liquid cloud fraction (unit : 1) for weighting calculation
+    icwnc : 2-d numpy array (time, height)
+        in-cloud liquid number concentration (m-3). variable 'ICWNC' in E3SM output
+        for data filter purpose
+
+    Returns
+    -------
+    Reff : vertical-mean effective radius in um
+    """
+    
+    cloud_tmp = np.array(cf_liq)
+    # filter out small cloud fraction
+    for ii in range(cf_liq.shape[1]):
+        # cloud fraction <= 1% or in cloud Nd < 1 cm-3
+        idx = np.logical_or(cf_liq[:,ii]<=0.01, icwnc[:,ii]<1e-6)
+        cloud_tmp[idx, ii] = 0
+    weight = cloud_tmp * dz
+
+    reff = np.sum(rel*weight,axis=1)/np.sum(weight,axis=1)
+    return(reff)
+
+#%% 
 def find_nearest(xall, yall, x, y):
     """
     find the index of nearest point at 2-d space

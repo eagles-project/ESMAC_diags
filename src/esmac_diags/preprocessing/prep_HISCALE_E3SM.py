@@ -18,7 +18,7 @@ import esmac_diags
 from esmac_diags.subroutines.read_aircraft import read_iwg1
 from esmac_diags.subroutines.time_format_change import hhmmss2sec
 from esmac_diags.subroutines.time_resolution_change import median_time_1d, median_time_2d
-from esmac_diags.subroutines.specific_data_treatment import find_nearest
+from esmac_diags.subroutines.specific_data_treatment import find_nearest, calc_Reff_from_REL
 from esmac_diags.subroutines.CN_mode_to_size import calc_CNsize_cutoff_0_3000nm
 from netCDF4 import Dataset
 
@@ -127,8 +127,8 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         lon_new=lon_new+360   # make longitude consistent with E3SM from 0 to 360
     
         #%% read in E3SM data
-        variable3d_names = ['T', 'Q', 'U', 'V', 'Z3', 'REI', 'REL', 
-                            'CCN1', 'CCN3', 'CCN4', 'CCN5', 'CLDICE', 'CLDLIQ', 'CLOUD',  
+        variable3d_names = ['T', 'Q', 'U', 'V', 'Z3', 'REI', 'REL', 'CCN1', 'CCN3', 'CCN4', 'CCN5', 
+                            'CLDICE', 'CLDLIQ', 'CLOUD',  'FREQL',
                             'IWC', 'LWC', 'ICWNC', 'ICINC', ]
         variables = list()
         variables_new = list()
@@ -869,13 +869,17 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     
     # cloud optical depth and effective radius
     rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
+    freql = e3smdata['FREQL'+'_'+E3SMdomain_range].load()
+    icwnc = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
     cod_a = e3smdata['TOT_CLD_VISTAU'+'_'+E3SMdomain_range].load()
     solin = e3smdata['SOLIN'+'_'+E3SMdomain_range].load()
     rel = rel[:,:,x_idx]
+    freql = freql[:,:,x_idx]
+    icwnc = icwnc[:,:,x_idx]
     cod_a = cod_a[:,:,x_idx]
     solin = solin[:,x_idx]
-    # calculate mean effective radius. use weight caculated above (weight = cloud*dz)
-    reff = np.sum(rel.data*weight,axis=1)/np.sum(weight,axis=1)
+    # calculate mean effective radius. 
+    reff = calc_Reff_from_REL(rel.data, dz, freql.data, icwnc.data)
     reff[reff==0] = np.nan
     # calculate mean optical depth
     cod = np.sum(cod_a.data,axis=1)
@@ -1008,13 +1012,17 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         
         # cloud optical depth and effective radius
         rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
+        freql = e3smdata['FREQL'+'_'+E3SMdomain_range].load()
+        icwnc = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
         cod_a = e3smdata['TOT_CLD_VISTAU'+'_'+E3SMdomain_range].load()
         solin = e3smdata['SOLIN'+'_'+E3SMdomain_range].load()
         rel = rel[:,:,x_idx]
+        freql = freql[:,:,x_idx]
+        icwnc = icwnc[:,:,x_idx]
         cod_a = cod_a[:,:,x_idx]
         solin = solin[:,x_idx]
-        # calculate mean effective radius. use weight caculated above (weight = cloud*dz)
-        reff = np.sum(rel.data*weight,axis=1)/np.sum(weight,axis=1)
+        # calculate mean effective radius. 
+        reff = calc_Reff_from_REL(rel.data, dz, freql.data, icwnc.data)
         reff[reff==0] = np.nan
         # calculate mean optical depth
         cod = np.sum(cod_a.data,axis=1)

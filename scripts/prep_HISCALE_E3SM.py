@@ -14,8 +14,8 @@ warnings.filterwarnings("ignore")
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settings
 input_path = '../raw_data/model/'
 output_path = '../prep_data/HISCALE/model/'
-input_filehead = 'E3SMv2_HISCALE_test'
-output_filehead = 'E3SMv2_HISCALE'
+input_filehead = 'E3SMv1_HISCALE_test'
+output_filehead = 'E3SMv1_HISCALE'
 
 # iwg data path for aircraft information
 iwgpath = '../raw_data/obs/HISCALE/aircraft/mei-iwg1/'
@@ -30,6 +30,6 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # output time in 1min (dt=60s) resolution for flight track and 1hr (dt=3600s) for other data
 prep.prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, iwgpath, dt=60)
-prep.prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3600)
-prep.prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, height_out, lev_out=lev_out, dt=3600)
+#prep.prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3600)
+#prep.prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, height_out, lev_out=lev_out, dt=3600)
 

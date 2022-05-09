@@ -585,7 +585,7 @@ def hist(data, figsize=(8, 5), yscale='linear',xlimit=None, ylimit=None,
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def jointhist(xdata, ydata, figsize=None, xedges=None, yedges=None, weight=None,
-              normalize_x=False, xlimit=None, ylimit=None, 
+              normalize_x=False, xlimit=None, ylimit=None, vmin=None,vmax=None,
               xlabel=None, ylabel=None, title=None, **kwargs):
     """
     plot joint histogram of two variables
@@ -643,6 +643,11 @@ def jointhist(xdata, ydata, figsize=None, xedges=None, yedges=None, weight=None,
         H_count[H_count == 0] = np.nan
         H_norm.append(H_count)
 
+    if vmin is None:
+        vmin = 0
+    if vmax is None:
+        vmax = np.nanmax(H_norm[0])
+        
     # plot joint histogram
     X, Y = np.meshgrid(xedges, yedges)
     plt.rcParams.update({'font.size': 16})    
@@ -653,7 +658,7 @@ def jointhist(xdata, ydata, figsize=None, xedges=None, yedges=None, weight=None,
         fig.subplots_adjust(hspace=0)
         h1=[]
         for mm in range(ndata):
-            h = ax[0,mm].pcolormesh(X, Y, H_norm[mm], **kwargs)
+            h = ax[0,mm].pcolormesh(X, Y, H_norm[mm], vmin=vmin,vmax=vmax,**kwargs)
             h1.append(h)
             ax[1,mm].plot(0.5*(X[0,0:-1]+X[0,1:]), pdf_x[mm],color='k')
             ax[1,mm].set_yticks([])
@@ -681,7 +686,7 @@ def jointhist(xdata, ydata, figsize=None, xedges=None, yedges=None, weight=None,
         ax = []
         for mm in range(ndata):
             ax1 = fig.add_subplot(1,ndata,mm+1)
-            h = ax1.pcolormesh(X, Y, H_norm[mm], **kwargs)
+            h = ax1.pcolormesh(X, Y, H_norm[mm],vmin=vmin,vmax=vmax, **kwargs)
             ax.append(ax1)
             h1.append(h)
             if xlimit is not None:
@@ -704,7 +709,7 @@ def jointhist(xdata, ydata, figsize=None, xedges=None, yedges=None, weight=None,
     return(fig, ax)
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def heatmap(xdata, ydata, zdata, figsize=None, xedges=None, yedges=None,
+def heatmap(xdata, ydata, zdata, figsize=None, xedges=None, yedges=None,vmin=None,vmax=None,
               xlabel=None, ylabel=None, zlabel=None, title=None, **kwargs):
     """
     plot heatmaps (*median* value of zdata in each x-y bin) 
@@ -733,6 +738,10 @@ def heatmap(xdata, ydata, zdata, figsize=None, xedges=None, yedges=None,
         xedges = np.arange(21)*np.nanmax(xdata[0])/20.
     if yedges is None:
         yedges = np.arange(21)*np.nanmax(ydata[0])/20.
+    if vmin is None:
+        vmin = 0
+    if vmax is None:
+        vmax = np.nanmax(zdata[0])
     if title is None:
         title = [None for i in range(ndata)]
     if figsize is None:
@@ -764,7 +773,7 @@ def heatmap(xdata, ydata, zdata, figsize=None, xedges=None, yedges=None,
     for mm in range(ndata):
         ax1 = fig.add_subplot(1,ndata,mm+1)
         ax.append(ax1)
-        h0 = ax[mm].imshow(heatmaps[mm].T, origin='lower', **kwargs)
+        h0 = ax[mm].imshow(heatmaps[mm].T, vmin=vmin, vmax=vmax, origin='lower', **kwargs)
         h.append(h0)
         ax[mm].grid()
         ax[mm].set_xticks(xticks)
