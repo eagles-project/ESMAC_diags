@@ -3,7 +3,7 @@
 
 This Earth System Model (ESM) aerosol-cloud diagnostics package (ESMAC Diags) is currently used to evaluate aerosols, clouds and aerosol-cloud interactions simulated by the Department of Energy’s (DOE) Energy Exascale Earth System Model (E3SM). The first version (v1.0) focuses on comparing simulated aerosol properties with in-situ aircraft, ship and surface measurements. Various types of diagnostics and metrics are performed for aerosol number, size distribution, chemical composition, and CCN concentration to assess how well E3SM represents observed aerosol properties across spatial scales. Metrics for various meteorological and aerosol precursor quantities from the same field campaigns are also included. Version 2 is under development focusing on aerosol-cloud interactions.
 
-More information can be found in README_ESMAC_Diags_v1.0-beta.pdf
+More information can be found in README_ESMAC_Diags_v1.0.0.pdf or the journal paper https://doi.org/10.5194/gmd-15-4055-2022.
 
 ## To install
 This code is best run using a conda virtual environment. To install the required environment one can do
