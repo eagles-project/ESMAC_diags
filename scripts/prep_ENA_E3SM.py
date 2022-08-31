@@ -1,24 +1,21 @@
 """
-prepare all observational data from HISCALE
+prepare all observational data for ENA
 inlcude:
-    prep_HISCALE_E3SM in src/esmac_diags/preprocessing/
+    prep_ENA_E3SM in src/esmac_diags/preprocessing/
 """
 
 import numpy as np
 import esmac_diags
-import esmac_diags.preprocessing.prep_HISCALE_E3SM as prep
+import esmac_diags.preprocessing.prep_ENA_E3SM as prep
 
 import warnings
 warnings.filterwarnings("ignore")
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settings
 input_path = '../raw_data/model/'
-output_path = '../prep_data/HISCALE/model/'
-input_filehead = 'E3SMv1_SGP_ENA_2011_2020'
-output_filehead = 'E3SMv1_HISCALE'
-
-# iwg data path for aircraft information
-iwgpath = '../raw_data/obs/HISCALE/aircraft/mei-iwg1/'
+output_path = '../prep_data/ENA/model/'
+input_filehead = 'E3SMv2_SGP_ENA_2011_2020'
+output_filehead = 'E3SMv2_ENA'
 
 # vertical coordinates for output
 lev_out=np.arange(25.,1001,25.)
@@ -28,8 +25,11 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
                     10000,10500,11000,11500,12000,12500,13000,14000,15000,16000,17000,18000])
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# output time in 1min (dt=60s) resolution for flight track and 1hr (dt=3600s) for other data
-# prep.prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, iwgpath, dt=60)
+# output time in 1hr (dt=3600s) for other data
 prep.prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3600)
-# prep.prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, height_out, lev_out=lev_out, dt=3600)
+prep.prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, height_out, lev_out=lev_out, dt=3600)
 
+input_filehead = 'E3SMv1_SGP_ENA_2011_2020'
+output_filehead = 'E3SMv1_ENA'
+prep.prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3600)
+prep.prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, height_out, lev_out=lev_out, dt=3600)

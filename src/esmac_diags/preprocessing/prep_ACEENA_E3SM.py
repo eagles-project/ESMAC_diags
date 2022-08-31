@@ -1,8 +1,8 @@
 """
 prepare E3SM output data 
-for surface (include remote sensing and satellite) and aircraft measurements in HISCALE campaign
+for surface (include remote sensing and satellite) and aircraft measurements in ACEENA campaign
 input data is regional hourly output data in E3SM
-all variables has a region appendix similar to "lat_260e_to_265e_34n_to_39n"
+all variables has a region appendix similar to "lat_330e_to_335e_37n_to_42n"
 """
 
 import glob
@@ -24,12 +24,12 @@ from esmac_diags.subroutines.CN_mode_to_size import calc_CNsize_cutoff_0_3000nm
 from netCDF4 import Dataset
 
 #%% test settings
-# # input_path = '/global/cscratch1/sd/sqtang/EAGLES/E3SM_output/E3SMv1_hourly/'
-# # output_path = '../../../data/HISCALE/model/'
-# input_path = '../../../data/HISCALE/model/E3SMv2_out/'
-# output_path = 'C:/Users/tang357/Downloads/HISCALE/'
-# input_filehead = 'E3SMv1_HISCALE_test'
-# output_filehead = 'E3SMv1_HISCALE'
+# input_path = '/global/cscratch1/sd/sqtang/EAGLES/E3SM_output/E3SMv1_hourly/'
+# output_path = '../../../data/ACEENA/model/'
+# input_path = '../../../data/ACEENA/model/E3SMv1_out/'
+# output_path = 'C:/Users/tang357/Downloads/ACEENA/'
+# input_filehead = 'E3SMv1_SGP_ENA_2011_2020'
+# output_filehead = 'E3SMv1_ACEENA'
 
 # lev_out=np.arange(25.,1001,25.)
 # height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900,1000,\
@@ -39,8 +39,8 @@ from netCDF4 import Dataset
 
 # dt = 3600
     
-# # dt = 60
-# # iwgpath = '../../../data/HISCALE/obs/aircraft/mei-iwg1/'
+# dt = 60
+# iwgpath = '../../../data/ACEENA/obs/aircraft/IWG/'
 
 # import warnings
 # warnings.filterwarnings("ignore")
@@ -79,23 +79,19 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         os.makedirs(output_path)
         
     #%% settings specific for each site
-    # HISCALE
-    E3SMdomain_range = '260e_to_265e_34n_to_39n'    # domain range in E3SM regional output
+    # ACEENA
+    E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
     
     #%% find all data
-    lst0 = glob.glob(iwgpath + '*.a2.txt')
-    lst0.sort()
+    lst = glob.glob(iwgpath + '*.a2.txt')
+    lst.sort()
     
-    for filename in lst0[:]:
+    for filename in lst[:]:
         
         # get date
-        fname = re.split('hiscale.|.a2', filename)
+        fname = re.split('aceena.|.a2', filename)
         date = fname[-2]
         print(date)
-        if date[-1] == 'a':
-            flightidx = 1
-        else:
-            flightidx = 2
         
         #%% read in IWG data
         (iwg, iwgvars) = read_iwg1(filename)
@@ -109,6 +105,12 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         legnum = np.empty(timelen)
         T_amb = np.empty(timelen)
         p_amb = np.empty(timelen)
+        if date == '20180216a':
+            iwg.insert(1403, list(iwg[1403]))
+            tstr = iwg[1403][1]
+            tstr = tstr[0:-1] + str(int(tstr[-1])-1)
+            iwg[1403][1] = tstr
+            del iwg[-1]
         for t in range(timelen):
             lat[t] = float(iwg[t][2])
             lon[t] = float(iwg[t][3])
@@ -146,10 +148,10 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         soa_all = list()
         phi_all = np.empty((999,0))
         
-        lst = glob.glob(input_path + input_filehead+'.*'+timestr[0]+'-00000.nc')
-        if len(lst)!=1:
-            raise ValueError('Should only contain one file: '+lst)
-        e3smdata = xr.open_dataset(lst[0])
+        lstm = glob.glob(input_path + input_filehead+'.*'+timestr[0]+'-00000.nc')
+        if len(lstm)!=1:
+            raise ValueError('Should only contain one file: '+lstm)
+        e3smdata = xr.open_dataset(lstm[0])
         e3smtime = e3smdata.indexes['time'].to_datetimeindex()
         lonm = e3smdata['lon'+'_'+E3SMdomain_range].load()
         latm = e3smdata['lat'+'_'+E3SMdomain_range].load()
@@ -304,7 +306,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         idx = variable3d_names.index('ICINC')
         variables_new[idx] = np.array(variables_new[idx])*1e-6
         variables[idx].attrs['units']='#/cm3'
-    
+        
         #%% output 
         
         outfile = output_path + output_filehead + '_flight_'+date+'.nc'
@@ -395,11 +397,11 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         # global attributes
         f.title = 'preprocessed E3SM data along aircraft track at the nearest time, grid, and vertical level'
         f.aircraftfile = filename.split('/')[-1]
-        f.modelfile = lst[0].split('/')[-1]
+        f.modelfile = lstm[0].split('/')[-1]
         f.date = ttt.ctime(ttt.time())
         
         f.close()
-        
+    
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, 
@@ -437,21 +439,20 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
         os.makedirs(output_path)
         
     #%% settings specific for each site
-    # HISCALE
-    lat0 = 36.6059
-    lon0 = -97.48792
-    E3SMdomain_range = '260e_to_265e_34n_to_39n'    # domain range in E3SM regional output
+    # ACEENA
+    lat0 = 39.09527
+    lon0 = -28.0339
+    E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
     
     # output time range and resolution
-    time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     #%% read in data
     
-    lst = glob.glob(input_path + input_filehead+'.*2016-04-2?-00000.nc') + \
-            glob.glob(input_path + input_filehead+'.*2016-05-??-00000.nc') + \
-            glob.glob(input_path + input_filehead+'.*2016-06-0?-00000.nc') + \
-            glob.glob(input_path + input_filehead+'.*2016-08-2?-00000.nc') + \
-            glob.glob(input_path + input_filehead+'.*2016-09-??-00000.nc') 
+    lst = glob.glob(input_path + input_filehead+'.*2017-06-2?-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2017-07-??-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2018-01-??-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2018-02-??-00000.nc') 
     lst.sort()
     # first data
     e3smdata = xr.open_dataset(lst[0])
@@ -753,23 +754,22 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         os.makedirs(output_path)
     
     #%% settings specific for each site
-    # HISCALE
-    lat0 = 36.6059
-    lon0 = -97.48792
-    E3SMdomain_range = '260e_to_265e_34n_to_39n'    # domain range in E3SM regional output
+    # ACEENA
+    lat0 = 39.09527
+    lon0 = -28.0339
+    E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
     
     # output time range and resolution
-    time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     #%% read in data
     variable_names = list()
     variables = list()
     
-    lst = glob.glob(input_path + input_filehead+'.*2016-04-2?-00000.nc') + \
-            glob.glob(input_path + input_filehead+'.*2016-05-??-00000.nc') + \
-            glob.glob(input_path + input_filehead+'.*2016-06-0?-00000.nc') + \
-            glob.glob(input_path + input_filehead+'.*2016-08-2?-00000.nc') + \
-            glob.glob(input_path + input_filehead+'.*2016-09-??-00000.nc') 
+    lst = glob.glob(input_path + input_filehead+'.*2017-06-2?-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2017-07-??-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2018-01-??-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2018-02-??-00000.nc') 
     lst.sort()
     # first data
     e3smdata = xr.open_dataset(lst[0])

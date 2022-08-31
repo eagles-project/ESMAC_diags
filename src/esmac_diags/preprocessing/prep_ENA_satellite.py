@@ -1,5 +1,5 @@
 """
-prepare satellite data from ACEENA
+prepare long-term satellite data for ENA site
 options of output data into coarser resolution
 """
 
@@ -10,18 +10,17 @@ import xarray as xr
 import pandas as pd
 import time as ttt
 import esmac_diags
-from esmac_diags.subroutines.time_resolution_change import avg_time_1d, avg_time_2d
+from esmac_diags.subroutines.time_resolution_change import avg_time_1d, avg_time_2d, avg_time_3d
 from esmac_diags.subroutines.time_format_change import datetime2cday
 from esmac_diags.subroutines.specific_data_treatment import calc_cdnc_VISST, calc_clouddepth_VISST, insolation
 
-# visstgridpath = '../../../data/ACEENA/obs/satellite/visst/grid/'
-# visstpixpath = '../../../data/ACEENA/obs/satellite/visst/pix_3x3/'
-# predatapath = 'C:/Users/tang357/Downloads/ACEENA/'
+# visstgridpath = 'C:/Users/tang357/OneDrive - PNNL/EAGLES/python_diag_pkg/ESMAC_Diags_v1/data/ACEENA/obs/satellite/visst/grid/'
+# predatapath = '../../../prep_data/ENA/'
+# year='2017'
 # dt=3600
 
-
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
+def prep_VISST_grid(visstgridpath, predatapath, year, dt=3600):
     """
     prepare VISST-satellite data in grid level (0.5x0.5 degrees)
 
@@ -31,6 +30,8 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
         input datapath
     predatapath : str
         output datapath
+    year : int
+        specify the year of data
     dt : float
         time resolution (unit: sec) of output
 
@@ -39,6 +40,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     None.
 
     """
+    year = str(year)   # change to string
                                
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
@@ -51,7 +53,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     y_idx = 7
     
     #%% read in data
-    lst = glob.glob(os.path.join(visstgridpath, '*visstgrid*.cdf'))
+    lst = glob.glob(os.path.join(visstgridpath, '*visstgrid*.c1.'+year+'*.cdf'))
     filetime = [a.split('.c1.')[1] for a in lst]
     sortidx = np.argsort(filetime)
     # first data
@@ -162,7 +164,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     Nd_ad_array[ind] = np.nan
     
     #%% re-shape the data into coarser resolution
-    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
+    time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
     Nd_new = avg_time_1d(vissttime, Nd_array, time_new)
     H_new = avg_time_1d(vissttime, H, time_new)
@@ -189,7 +191,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     
     
     #%% output file
-    outfile = predatapath + 'Nd_VISSTgrid_ACEENA.nc'
+    outfile = predatapath + 'Nd_VISSTgrid_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'Nd': (['time'], np.float32(Nd_new)),
@@ -209,7 +211,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'Hcld_VISSTgrid_ACEENA.nc'
+    outfile = predatapath + 'Hcld_VISSTgrid_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'Hcld': (['time'], np.float32(H_new)),
@@ -228,7 +230,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'LWP_VISSTgrid_ACEENA.nc'
+    outfile = predatapath + 'LWP_VISSTgrid_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'lwp': (['time'], np.float32(lwp_new)),
@@ -246,7 +248,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'IWP_VISSTgrid_ACEENA.nc'
+    outfile = predatapath + 'IWP_VISSTgrid_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'iwp': (['time'], np.float32(iwp_new)),
@@ -264,7 +266,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'Reff_VISSTgrid_ACEENA.nc'
+    outfile = predatapath + 'Reff_VISSTgrid_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'reff': (['time'], np.float32(reff_new)),
@@ -282,7 +284,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'cod_VISSTgrid_ACEENA.nc'
+    outfile = predatapath + 'cod_VISSTgrid_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'cod': (['time'], np.float32(cod_new)),
@@ -300,7 +302,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'cloudfraction_VISSTgrid_ACEENA.nc'
+    outfile = predatapath + 'cloudfraction_VISSTgrid_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'cldtot': (['time'], np.float32(cf_all_new)),
@@ -326,7 +328,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'cloudtop_VISSTgrid_ACEENA.nc'
+    outfile = predatapath + 'cloudtop_VISSTgrid_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'ctt': (['time'], np.float32(ctt_new)),
@@ -350,7 +352,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'lwflx_VISSTgrid_ACEENA.nc'
+    outfile = predatapath + 'lwflx_VISSTgrid_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'lwnettoa': (['time'], np.float32(lw_new)),
@@ -368,7 +370,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'swflx_VISSTgrid_ACEENA.nc'
+    outfile = predatapath + 'swflx_VISSTgrid_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'swnettoa': (['time'], np.float32(sw_new)),
@@ -384,7 +386,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     ds.attrs["date"] = ttt.ctime(ttt.time())
     ds.to_netcdf(outfile, mode='w')
     
-    outfile = predatapath + 'albedo_VISSTgrid_ACEENA.nc'
+    outfile = predatapath + 'albedo_VISSTgrid_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'albedo': (['time'], np.float32(albedo_new)),
@@ -399,7 +401,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     ds.attrs["date"] = ttt.ctime(ttt.time())
     ds.to_netcdf(outfile, mode='w')
         
-    outfile = predatapath + 'solarzenith_VISSTgrid_ACEENA.nc'
+    outfile = predatapath + 'solarzenith_VISSTgrid_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'solar_zenith_angle': (['time'], np.float32(solar_zenith_new)),
@@ -415,7 +417,450 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
+def prep_VISST_grid_allgrids(visstgridpath, predatapath, year, dt=3600):
+    """
+    prepare VISST-satellite data in grid level (0.5x0.5 degrees) for all grids in the domain
+
+    Parameters
+    ----------
+    visstgridpath : str
+        input datapath
+    predatapath : str
+        output datapath
+    year : int
+        specify the year of data
+    dt : float
+        time resolution (unit: sec) of output
+
+    Returns
+    -------
+    None.
+
+    """
+    year = str(year)   # change to string
+                               
+    if not os.path.exists(predatapath):
+        os.makedirs(predatapath)
+    
+# %% settings
+
+    
+    #%% read in data
+    lst = glob.glob(os.path.join(visstgridpath, '*visstgrid*.c1.'+year+'*.cdf'))
+    filetime = [a.split('.c1.')[1] for a in lst]
+    sortidx = np.argsort(filetime)
+    # first data
+    visstdata = xr.open_dataset(lst[sortidx[0]])
+    vissttime = visstdata['time']
+    lat = visstdata['latitude']
+    lon = visstdata['longitude']
+            
+    solar_zenith = visstdata['solar_zenith_angle'][:,:,:]
+    clearsky_vis_reflectance = visstdata['clearsky_vis_reflectance'][:,:,:]
+    vis_reflectance_all = visstdata['visible_reflectance'][:,:,:,0]
+    vis_reflectance_clr = visstdata['visible_reflectance'][:,:,:,1]
+    lwp = visstdata['water_path'][:,:,:,1]
+    iwp = visstdata['water_path'][:,:,:,0]
+    sfc_net_sw = visstdata['surface_net_shortwave_flux'][:,:,:]
+    sfc_net_lw = visstdata['surface_net_longwave_flux'][:,:,:]
+    sfc_down_sw = visstdata['surface_down_shortwave_flux'][:,:,:]
+    sfc_down_lw = visstdata['surface_down_longwave_flux'][:,:,:]
+    reff_liq = visstdata['particle_size'][:,:,:,1]
+    cod_liq_linavg = visstdata['optical_depth_linear'][:,:,:,2]
+    cod_liq_logavg = visstdata['optical_depth_log'][:,:,:,2]
+    ctt_liq = visstdata['cloud_temperature'][:,:,:,2]
+    ctp_liq = visstdata['cloud_pressure_top'][:,:,:,2]
+    cth_liq = visstdata['cloud_height_top'][:,:,:,2]
+    cf_all = visstdata['cloud_percentage'][:,:,:,0]
+    cf_liq = visstdata['cloud_percentage'][:,:,:,2]
+    cf_allz = visstdata['cloud_percentage_level'][:,:,:,0]
+    cf_low = visstdata['cloud_percentage_level'][:,:,:,1]
+    cf_mid = visstdata['cloud_percentage_level'][:,:,:,2]
+    cf_high = visstdata['cloud_percentage_level'][:,:,:,3]
+    bb_lw_all = visstdata['broadband_longwave_flux'][:,:,:,0]
+    bb_sw_albedo_all = visstdata['broadband_shortwave_albedo'][:,:,:,0]
+    bb_lw_clr = visstdata['broadband_longwave_flux'][:,:,:,1]
+    bb_sw_albedo_clr = visstdata['broadband_shortwave_albedo'][:,:,:,1]
+    visstdata.close()
+    for ii in range(1,len(lst)):
+        file = lst[sortidx[ii]]
+        print(file)
+        visstdata = xr.open_dataset(file)
+        vissttime = xr.concat([vissttime, visstdata['time']], dim="time")
+        solar_zenith = xr.concat([solar_zenith, visstdata['solar_zenith_angle'][:,:,:]], dim="time")
+        clearsky_vis_reflectance = xr.concat([clearsky_vis_reflectance, visstdata['clearsky_vis_reflectance'][:,:,:]], dim="time")
+        vis_reflectance_all = xr.concat([vis_reflectance_all, visstdata['visible_reflectance'][:,:,:,0]], dim="time")
+        vis_reflectance_clr = xr.concat([vis_reflectance_clr, visstdata['visible_reflectance'][:,:,:,1]], dim="time")
+        lwp = xr.concat([lwp, visstdata['water_path'][:,:,:,1]], dim="time")
+        iwp = xr.concat([iwp, visstdata['water_path'][:,:,:,0]], dim="time")
+        sfc_net_sw = xr.concat([sfc_net_sw, visstdata['surface_net_shortwave_flux'][:,:,:]], dim="time")
+        sfc_net_lw = xr.concat([sfc_net_lw, visstdata['surface_net_longwave_flux'][:,:,:]], dim="time")
+        sfc_down_sw = xr.concat([sfc_down_sw, visstdata['surface_down_shortwave_flux'][:,:,:]], dim="time")
+        sfc_down_lw = xr.concat([sfc_down_lw, visstdata['surface_down_longwave_flux'][:,:,:]], dim="time")
+        reff_liq = xr.concat([reff_liq, visstdata['particle_size'][:,:,:,1]], dim="time")
+        cod_liq_linavg = xr.concat([cod_liq_linavg, visstdata['optical_depth_linear'][:,:,:,2]], dim="time")
+        cod_liq_logavg = xr.concat([cod_liq_logavg, visstdata['optical_depth_log'][:,:,:,2]], dim="time")
+        ctt_liq = xr.concat([ctt_liq, visstdata['cloud_temperature'][:,:,:,2]], dim="time")
+        ctp_liq = xr.concat([ctp_liq, visstdata['cloud_pressure_top'][:,:,:,2]], dim="time")
+        cth_liq = xr.concat([cth_liq, visstdata['cloud_height_top'][:,:,:,2]], dim="time")
+        cf_all = xr.concat([cf_all, visstdata['cloud_percentage'][:,:,:,0]], dim="time")
+        cf_liq = xr.concat([cf_liq, visstdata['cloud_percentage'][:,:,:,2]], dim="time")
+        cf_allz = xr.concat([cf_allz, visstdata['cloud_percentage_level'][:,:,:,0]], dim="time")
+        cf_low = xr.concat([cf_low, visstdata['cloud_percentage_level'][:,:,:,1]], dim="time")
+        cf_mid = xr.concat([cf_mid, visstdata['cloud_percentage_level'][:,:,:,2]], dim="time")
+        cf_high = xr.concat([cf_high, visstdata['cloud_percentage_level'][:,:,:,3]], dim="time")
+        bb_lw_all = xr.concat([bb_lw_all, visstdata['broadband_longwave_flux'][:,:,:,0]], dim="time")
+        bb_lw_clr = xr.concat([bb_lw_clr, visstdata['broadband_longwave_flux'][:,:,:,1]], dim="time")
+        bb_sw_albedo_all = xr.concat([bb_sw_albedo_all, visstdata['broadband_shortwave_albedo'][:,:,:,0]], dim="time")
+        bb_sw_albedo_clr = xr.concat([bb_sw_albedo_clr, visstdata['broadband_shortwave_albedo'][:,:,:,1]], dim="time")
+        visstdata.close()
+        
+    #%% calculate TOA SW flux from albedo
+    
+    # change time to calendar day
+    calday = datetime2cday(vissttime.data)
+    # calculate insolation
+    ins = np.ones_like(bb_sw_albedo_all)
+    for yy in range(len(lat)):
+        for xx in range(len(lon)):
+            ins[:,xx,yy] = insolation(calday, lon[xx].data, lat[yy].data, leap_year='leap')
+    
+    # calculate net SW flux
+    bb_sw_all = ins * (1 - bb_sw_albedo_all*0.01)
+    
+    #%% retrieve CDNC
+    lwp = lwp.data   
+    ctt = ctt_liq.data
+    cod = cod_liq_linavg.data
+    H = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=0.8)   # LWP convert from g/m2 to kg/m2
+    H_ad = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=1.0)
+    Nd = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=0.8)
+    Nd_ad = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=1.0)
+    
+    #filter out columns with ice and bad retrievals
+    H_array = np.array(H)
+    H_ad_array = np.array(H_ad)
+    Nd_array = np.array(Nd)
+    Nd_ad_array = np.array(Nd_ad)
+    
+    ind = np.array(iwp > 0)
+    H_array[ind] = np.nan
+    H_ad_array[ind] = np.nan
+    Nd_array[ind] = np.nan
+    Nd_ad_array[ind] = np.nan
+    
+    ind = np.isinf(Nd_array)
+    H_array[ind] = np.nan
+    H_ad_array[ind] = np.nan
+    Nd_array[ind] = np.nan
+    Nd_ad_array[ind] = np.nan
+    
+    Nd[Nd>1e10] = np.nan
+    
+    #%% re-shape the data into coarser resolution
+    time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
+    
+    Nd_new = avg_time_3d(vissttime, Nd_array, time_new)
+    H_new = avg_time_3d(vissttime, H, time_new)
+    lwp_new = avg_time_3d(vissttime, lwp, time_new)
+    iwp_new = avg_time_3d(vissttime, iwp, time_new)
+    swnetsfc_new = avg_time_3d(vissttime, sfc_net_sw, time_new)
+    lwnetsfc_new = avg_time_3d(vissttime, sfc_net_lw, time_new)
+    swdnsfc_new = avg_time_3d(vissttime, sfc_down_sw, time_new)
+    lwdnsfc_new = avg_time_3d(vissttime, sfc_down_lw, time_new)
+    reff_new = avg_time_3d(vissttime, reff_liq, time_new)
+    cod_new = avg_time_3d(vissttime, cod_liq_linavg, time_new)
+    codlog_new = avg_time_3d(vissttime, cod_liq_logavg, time_new)
+    cf_all_new = avg_time_3d(vissttime, cf_allz, time_new)
+    cf_low_new = avg_time_3d(vissttime, cf_low, time_new)
+    cf_mid_new = avg_time_3d(vissttime, cf_mid, time_new)
+    cf_high_new = avg_time_3d(vissttime, cf_high, time_new)
+    ctt_new = avg_time_3d(vissttime, ctt_liq, time_new)
+    ctp_new = avg_time_3d(vissttime, ctp_liq, time_new)
+    cth_new = avg_time_3d(vissttime, cth_liq, time_new)
+    lw_new = avg_time_3d(vissttime, bb_lw_all, time_new)
+    sw_new = avg_time_3d(vissttime, bb_sw_all, time_new)
+    albedo_new = avg_time_3d(vissttime, bb_sw_albedo_all, time_new)
+    solar_zenith_new = avg_time_3d(vissttime, solar_zenith, time_new)
+    
+    
+    #%% output file
+    outfile = predatapath + 'Nd_VISSTallgrid_ENA_'+year+'.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'Nd': (['time','lat','lon'], np.float32(Nd_new)),
+                    },
+                     coords={'time': ('time', time_new), 'lon':('lon',lon.data), 'lat':('lat',lat.data)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lon'].attrs["long_name"] = lon.long_name
+    ds['lon'].attrs["units"] = lon.units
+    ds['lat'].attrs["long_name"] = lat.long_name
+    ds['lat'].attrs["units"] = lat.units
+    ds['Nd'].attrs["long_name"] = 'cloud droplet number concentration'
+    ds['Nd'].attrs["units"] = '#/cm3'
+    
+    ds.attrs["title"] = 'cloud droplet number concentration retrieved from VISST 0.5x0.5 data'
+    ds.attrs["description"] = 'retrieved following Bennartz 2007, assuming adiabaticity = 0.8'
+    ds.attrs["reference"] = 'https://doi.org/10.1029/2006JD007547'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    
+    ds.to_netcdf(outfile, mode='w')
+    
+    #
+    outfile = predatapath + 'Hcld_VISSTallgrid_ENA_'+year+'.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'Hcld': (['time','lat','lon'], np.float32(H_new)),
+                    },
+                     coords={'time': ('time', time_new), 'lon':('lon',lon.data), 'lat':('lat',lat.data)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lon'].attrs["long_name"] = lon.long_name
+    ds['lon'].attrs["units"] = lon.units
+    ds['lat'].attrs["long_name"] = lat.long_name
+    ds['lat'].attrs["units"] = lat.units
+    ds['Hcld'].attrs["long_name"] = 'cloud depth for liquid cloud only'
+    ds['Hcld'].attrs["units"] = 'm'
+    
+    ds.attrs["title"] = 'liquid cloud depth retrieved from VISST 0.5x0.5 data'
+    ds.attrs["description"] = 'retrieved from LWP and cloud top temperature assuming adiabaticity = 0.8'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    
+    ds.to_netcdf(outfile, mode='w')
+    
+    #
+    outfile = predatapath + 'LWP_VISSTallgrid_ENA_'+year+'.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'lwp': (['time','lat','lon'], np.float32(lwp_new)),
+                    },
+                     coords={'time': ('time', time_new), 'lon':('lon',lon.data), 'lat':('lat',lat.data)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lon'].attrs["long_name"] = lon.long_name
+    ds['lon'].attrs["units"] = lon.units
+    ds['lat'].attrs["long_name"] = lat.long_name
+    ds['lat'].attrs["units"] = lat.units
+    ds['lwp'].attrs["long_name"] = 'liquid water path'
+    ds['lwp'].attrs["units"] = 'g/m2'
+    
+    ds.attrs["title"] = 'liquid water path from VISST 0.5x0.5 data'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    
+    ds.to_netcdf(outfile, mode='w')
+    
+    #
+    outfile = predatapath + 'IWP_VISSTallgrid_ENA_'+year+'.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'iwp': (['time','lat','lon'], np.float32(iwp_new)),
+                    },
+                     coords={'time': ('time', time_new), 'lon':('lon',lon.data), 'lat':('lat',lat.data)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lon'].attrs["long_name"] = lon.long_name
+    ds['lon'].attrs["units"] = lon.units
+    ds['lat'].attrs["long_name"] = lat.long_name
+    ds['lat'].attrs["units"] = lat.units
+    ds['iwp'].attrs["long_name"] = 'ice water path'
+    ds['iwp'].attrs["units"] = 'g/m2'
+    
+    ds.attrs["title"] = 'ice water path from VISST 0.5x0.5 data'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    
+    ds.to_netcdf(outfile, mode='w')
+    
+    #
+    outfile = predatapath + 'Reff_VISSTallgrid_ENA_'+year+'.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'reff': (['time','lat','lon'], np.float32(reff_new)),
+                    },
+                     coords={'time': ('time', time_new), 'lon':('lon',lon.data), 'lat':('lat',lat.data)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lon'].attrs["long_name"] = lon.long_name
+    ds['lon'].attrs["units"] = lon.units
+    ds['lat'].attrs["long_name"] = lat.long_name
+    ds['lat'].attrs["units"] = lat.units
+    ds['reff'].attrs["long_name"] = 'effective radius for liquid clouds'
+    ds['reff'].attrs["units"] = 'um'
+    
+    ds.attrs["title"] = 'liquid clouds effective radius from VISST 0.5x0.5 data'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    
+    ds.to_netcdf(outfile, mode='w')
+    
+    #
+    outfile = predatapath + 'cod_VISSTallgrid_ENA_'+year+'.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'cod': (['time','lat','lon'], np.float32(cod_new)),
+                    },
+                     coords={'time': ('time', time_new), 'lon':('lon',lon.data), 'lat':('lat',lat.data)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lon'].attrs["long_name"] = lon.long_name
+    ds['lon'].attrs["units"] = lon.units
+    ds['lat'].attrs["long_name"] = lat.long_name
+    ds['lat'].attrs["units"] = lat.units
+    ds['cod'].attrs["long_name"] = 'cloud optical depth for liquid clouds'
+    ds['cod'].attrs["units"] = 'N/A'
+    
+    ds.attrs["title"] = 'liquid clouds opical depth from VISST 0.5x0.5 data'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    
+    ds.to_netcdf(outfile, mode='w')
+    
+    #
+    outfile = predatapath + 'cloudfraction_VISSTallgrid_ENA_'+year+'.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'cldtot': (['time','lat','lon'], np.float32(cf_all_new)),
+                    'cldhigh': (['time','lat','lon'], np.float32(cf_high_new)),
+                    'cldmid': (['time','lat','lon'], np.float32(cf_mid_new)),
+                    'cldlow': (['time','lat','lon'], np.float32(cf_low_new)),
+                    },
+                     coords={'time': ('time', time_new), 'lon':('lon',lon.data), 'lat':('lat',lat.data)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lon'].attrs["long_name"] = lon.long_name
+    ds['lon'].attrs["units"] = lon.units
+    ds['lat'].attrs["long_name"] = lat.long_name
+    ds['lat'].attrs["units"] = lat.units
+    ds['cldtot'].attrs["long_name"] = 'cloud fraction for all heights'
+    ds['cldtot'].attrs["units"] = '%'
+    ds['cldhigh'].attrs["long_name"] = 'cloud fraction for high clouds (>6km)'
+    ds['cldhigh'].attrs["units"] = '%'
+    ds['cldmid'].attrs["long_name"] = 'cloud fraction for middle clouds (2-6km)'
+    ds['cldmid'].attrs["units"] = '%'
+    ds['cldlow'].attrs["long_name"] = 'cloud fraction for low clouds (0-2km)'
+    ds['cldlow'].attrs["units"] = '%'
+    
+    ds.attrs["title"] = 'cloud fraction from VISST 0.5x0.5 data'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    ds.to_netcdf(outfile, mode='w')
+    
+    #
+    outfile = predatapath + 'cloudtop_VISSTallgrid_ENA_'+year+'.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'ctt': (['time','lat','lon'], np.float32(ctt_new)),
+                    'cth': (['time','lat','lon'], np.float32(cth_new)),
+                    'ctp': (['time','lat','lon'], np.float32(ctp_new)),
+                    },
+                     coords={'time': ('time', time_new), 'lon':('lon',lon.data), 'lat':('lat',lat.data)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lon'].attrs["long_name"] = lon.long_name
+    ds['lon'].attrs["units"] = lon.units
+    ds['lat'].attrs["long_name"] = lat.long_name
+    ds['lat'].attrs["units"] = lat.units
+    ds['ctt'].attrs["long_name"] = 'cloud top temperature for liquid clouds'
+    ds['ctt'].attrs["units"] = 'K'
+    ds['ctp'].attrs["long_name"] = 'cloud top pressure for liquid clouds'
+    ds['ctp'].attrs["units"] = 'hPa'
+    ds['cth'].attrs["long_name"] = 'cloud top height for liquid clouds'
+    ds['cth'].attrs["units"] = 'km'
+    
+    ds.attrs["title"] = 'cloud top temperature, pressure and height from VISST 0.5x0.5 data'
+    ds.attrs["description"] = 'for liquid clouds only'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    ds.to_netcdf(outfile, mode='w')
+    
+    #
+    outfile = predatapath + 'lwflx_VISSTallgrid_ENA_'+year+'.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'lwnettoa': (['time','lat','lon'], np.float32(lw_new)),
+                    },
+                     coords={'time': ('time', time_new), 'lon':('lon',lon.data), 'lat':('lat',lat.data)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lon'].attrs["long_name"] = lon.long_name
+    ds['lon'].attrs["units"] = lon.units
+    ds['lat'].attrs["long_name"] = lat.long_name
+    ds['lat'].attrs["units"] = lat.units
+    ds['lwnettoa'].attrs["long_name"] = 'net LW flux at TOA'
+    ds['lwnettoa'].attrs["units"] = 'W/m2'
+    
+    ds.attrs["title"] = 'net longwave flux at TOA from VISST 0.5x0.5 data'
+    ds.attrs["description"] = 'upward positive'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    ds.to_netcdf(outfile, mode='w')
+    
+    #
+    outfile = predatapath + 'swflx_VISSTallgrid_ENA_'+year+'.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'swnettoa': (['time','lat','lon'], np.float32(sw_new)),
+                    },
+                     coords={'time': ('time', time_new), 'lon':('lon',lon.data), 'lat':('lat',lat.data)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lon'].attrs["long_name"] = lon.long_name
+    ds['lon'].attrs["units"] = lon.units
+    ds['lat'].attrs["long_name"] = lat.long_name
+    ds['lat'].attrs["units"] = lat.units
+    ds['swnettoa'].attrs["long_name"] = 'net SW flux at TOA'
+    ds['swnettoa'].attrs["units"] = 'W/m2'
+    ds.attrs["title"] = 'net shortwave flux at TOA from VISST 0.5x0.5 data'
+    ds.attrs["description"] = 'calculate from insolation and SW albedo, downward positive'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    ds.to_netcdf(outfile, mode='w')
+    
+    outfile = predatapath + 'albedo_VISSTallgrid_ENA_'+year+'.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'albedo': (['time','lat','lon'], np.float32(albedo_new)),
+                    },
+                     coords={'time': ('time', time_new), 'lon':('lon',lon.data), 'lat':('lat',lat.data)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lon'].attrs["long_name"] = lon.long_name
+    ds['lon'].attrs["units"] = lon.units
+    ds['lat'].attrs["long_name"] = lat.long_name
+    ds['lat'].attrs["units"] = lat.units
+    ds['albedo'].attrs["long_name"] = 'broadband shortwave albedo at TOA'
+    ds['albedo'].attrs["units"] = '%'
+    ds.attrs["title"] = 'broadband_shortwave_albedo at TOA from VISST 0.5x0.5 data'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    ds.to_netcdf(outfile, mode='w')
+        
+    outfile = predatapath + 'solarzenith_VISSTallgrid_ENA_'+year+'.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'solar_zenith_angle': (['time','lat','lon'], np.float32(solar_zenith_new)),
+                    },
+                     coords={'time': ('time', time_new), 'lon':('lon',lon.data), 'lat':('lat',lat.data)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lon'].attrs["long_name"] = lon.long_name
+    ds['lon'].attrs["units"] = lon.units
+    ds['lat'].attrs["long_name"] = lat.long_name
+    ds['lat'].attrs["units"] = lat.units
+    ds['solar_zenith_angle'].attrs["long_name"] = solar_zenith.long_name
+    ds['solar_zenith_angle'].attrs["units"] = solar_zenith.units
+    ds.attrs["title"] = 'solar zenith angle from VISST 0.5x0.5 data'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    ds.to_netcdf(outfile, mode='w')
+
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def prep_VISST_pixel(visstpixpath, predatapath, year, dt=3600):
     """
     prepare VISST-satellite data in pixel level (4km)
 
@@ -425,6 +870,8 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
         input datapath
     predatapath : str
         output datapath
+    year : int
+        specify the year of data
     dt : float
         time resolution (unit: sec) of output
 
@@ -433,6 +880,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     None.
 
     """
+    year = str(year)   # change to string
                                
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
@@ -444,7 +892,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     y_idx = 1
     
     #%% read in data
-    lst = glob.glob(os.path.join(visstpixpath, '*visstpx2d*.cdf'))
+    lst = glob.glob(os.path.join(visstpixpath, '*visstpx2d*.c1.'+year+'*.cdf'))
     # lst = glob.glob(os.path.join(visstpixpath, 'enavisstpx2*.c1.201802*.cdf'))
     filetime = [a.split('.c1.')[1] for a in lst]
     sortidx = np.argsort(filetime)
@@ -468,7 +916,8 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     bb_lw = visstdata['broadband_longwave_flux'][x_idx, y_idx]
     bb_sw_albedo = visstdata['broadband_shortwave_albedo'][x_idx, y_idx]
     visstdata.close()
-    for file in lst[1:]:
+    for ii in range(1,len(lst)):
+        file = lst[sortidx[ii]]
         print(file)
         visstdata = xr.open_dataset(file)
         lat = visstdata['latitude'][x_idx, y_idx]
@@ -549,7 +998,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     iwp[phase!=2] = np.nan
     
     #%% re-shape the data into coarser resolution
-    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
+    time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
     Nd_new = avg_time_1d(vissttime, Nd_array, time_new)
     H_new = avg_time_1d(vissttime, H, time_new)
@@ -565,7 +1014,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     albedo_new = avg_time_1d(vissttime, bb_sw_albedo, time_new)
     
     #%% output file
-    outfile = predatapath + 'Nd_VISSTpix_ACEENA.nc'
+    outfile = predatapath + 'Nd_VISSTpix_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'Nd': (['time'], np.float32(Nd_new)),
@@ -585,7 +1034,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'Hcld_VISSTpix_ACEENA.nc'
+    outfile = predatapath + 'Hcld_VISSTpix_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'Hcld': (['time'], np.float32(H_new)),
@@ -604,7 +1053,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'LWP_VISSTpix_ACEENA.nc'
+    outfile = predatapath + 'LWP_VISSTpix_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'lwp': (['time'], np.float32(lwp_new)),
@@ -622,7 +1071,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'IWP_VISSTpix_ACEENA.nc'
+    outfile = predatapath + 'IWP_VISSTpix_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'iwp': (['time'], np.float32(iwp_new)),
@@ -640,7 +1089,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'Reff_VISSTpix_ACEENA.nc'
+    outfile = predatapath + 'Reff_VISSTpix_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'reff': (['time'], np.float32(reff_new)),
@@ -658,7 +1107,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'cod_VISSTpix_ACEENA.nc'
+    outfile = predatapath + 'cod_VISSTpix_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'cod': (['time'], np.float32(cod_new)),
@@ -676,7 +1125,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'cloudtop_VISSTpix_ACEENA.nc'
+    outfile = predatapath + 'cloudtop_VISSTpix_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'ctt': (['time'], np.float32(ctt_new)),
@@ -701,7 +1150,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'lwflx_VISSTpix_ACEENA.nc'
+    outfile = predatapath + 'lwflx_VISSTpix_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'lwnettoa': (['time'], np.float32(lw_new)),
@@ -720,7 +1169,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
     #
-    outfile = predatapath + 'swflx_VISSTpix_ACEENA.nc'
+    outfile = predatapath + 'swflx_VISSTpix_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'swnettoa': (['time'], np.float32(sw_new)),
@@ -738,7 +1187,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     
     ds.to_netcdf(outfile, mode='w')
     
-    outfile = predatapath + 'albedo_VISSTpix_ACEENA.nc'
+    outfile = predatapath + 'albedo_VISSTpix_ENA_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'albedo': (['time'], np.float32(albedo_new)),

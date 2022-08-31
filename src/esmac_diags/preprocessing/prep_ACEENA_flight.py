@@ -13,14 +13,15 @@ import esmac_diags
 from esmac_diags.subroutines.time_format_change import hhmmss2sec
 from esmac_diags.subroutines.time_resolution_change import avg_time_1d, avg_time_2d, \
                     median_time_1d, median_time_2d
-from esmac_diags.subroutines.read_aircraft import read_ams, read_fims, read_fims_bin, read_iwg1, \
-                    read_pcasp, read_cpc, read_wcm, read_opc, read_mergedSD
+from esmac_diags.subroutines.read_aircraft import read_ams, read_beasd, read_iwg1, \
+                    read_fims, read_fims_bin, read_pcasp, read_cpc, read_wcm, read_opc, read_mergedSD
 from esmac_diags.subroutines.read_ARMdata import read_cvi_aceena, read_ccn
 from esmac_diags.subroutines.quality_control import qc_fims_bin, qc_remove_neg, \
                     qc_mask_qcflag, qc_mask_cloudflag
 
 # iwgpath = '../../../data/ACEENA/obs/aircraft/IWG/'
 # amspath = '../../../data/ACEENA/obs/aircraft/shilling-hrfams/'
+# beasdpath = '../../../data/ACEENA/obs/aircraft/beasd/'
 # ccnpath = '../../../data/ACEENA/obs/aircraft/ccn_aaf/'
 # wcmpath = '../../../data/ACEENA/obs/aircraft/wcm_ACEENA/'
 # fimspath = '../../../data/ACEENA/obs/aircraft/FIMS/'
@@ -29,8 +30,8 @@ from esmac_diags.subroutines.quality_control import qc_fims_bin, qc_remove_neg, 
 # cpcpath = '../../../data/ACEENA/obs/aircraft/cpc_aaf/'
 # opcpath = '../../../data/ACEENA/obs/aircraft/opciso/'
 # mergeSDpath = '../../../data/ACEENA/obs/aircraft/mergedSD/'
-# merged_size_path = 'C:/Users/tang357/Downloads/ACEENA/'
-# prep_data_path = 'C:/Users/tang357/Downloads/ACEENA/'
+# merged_size_path = 'C:/Users/tang357/Downloads/pre_data/ACEENA/flight/'
+# prep_data_path = 'C:/Users/tang357/Downloads/pre_data/ACEENA/flight/'
 
 # dt=60
 
@@ -247,6 +248,166 @@ def prep_AMS(amspath, iwgpath, prep_data_path, dt=60):
         
         f.close()
 
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def prep_beasd(beasdpath,iwgpath, prep_data_path, dt=60):
+    """
+    prepare best-estimate aerosol size distribution data
+    
+    Parameters
+    ----------
+    beasdpath : str
+        input path for BEASD data
+    iwgpath : str
+        input path for IWG
+    prep_data_path : str
+        output path
+    dt : float
+        time resolution (unit: sec) of output
+
+    Returns
+    -------
+    None.
+    
+    """    
+    if not os.path.exists(prep_data_path):
+        os.makedirs(prep_data_path)
+
+    #%% find all data
+    lst = glob.glob(iwgpath + '*.a2.txt')
+    lst.sort()
+    
+    for filename in lst[:]:
+        
+        # get date
+        fname = re.split('aceena.|.a2', filename)
+        date = fname[-2]
+        print(date)
+        
+        #%% read in IWG data
+        (iwg, iwgvars) = read_iwg1(filename)
+        timelen = len(iwg)
+        # get lat, lon, height, time
+        lon = np.empty(timelen)
+        lat = np.empty(timelen)
+        height = np.empty(timelen)
+        time = np.empty(timelen)
+        cldflag = np.empty(timelen)
+        legnum = np.empty(timelen)
+        T_amb = np.empty(timelen)
+        p_amb = np.empty(timelen)
+        if date == '20180216a':
+            iwg.insert(1403, list(iwg[1403]))
+            tstr = iwg[1403][1]
+            tstr = tstr[0:-1] + str(int(tstr[-1])-1)
+            iwg[1403][1] = tstr
+            del iwg[-1]
+        for t in range(timelen):
+            lat[t] = float(iwg[t][2])
+            lon[t] = float(iwg[t][3])
+            height[t] = float(iwg[t][4])
+            T_amb[t] = float(iwg[t][20])
+            p_amb[t] = float(iwg[t][23])
+            cldflag[t] = int(iwg[t][35])
+            legnum[t] = int(iwg[t][-1])
+            timestr = iwg[t][1].split(' ')
+            time[t] = hhmmss2sec(timestr[1])
+            
+        #%% read in BEASD data
+        lst2 = glob.glob(beasdpath + 'BEASD_G1_' + date[0:8] +'*R1_ACE-ENA_001s.ict')
+        lst2.sort()
+        
+        if len(lst2)==0:
+            print('does not find any BEASD data, skip this date...')
+            continue
+            
+        (data2,varlist, dia_merge_h, dia_merge_l, d_merge)=read_beasd(lst2[0])
+        time2 = data2[0,:]
+        Cloud_flag = data2[-3,:]
+        CVI_flag = data2[-4,:]
+        TD_flag = data2[-5,:]
+        FCDP_flag = data2[-6,:]
+        CAS_flag = data2[-7,:]
+        PCASP_flag = data2[-8,:]
+        FIMS_flag = data2[-9,:]
+        conc_merge = data2[1:-9, :]
+        
+        # quality controls
+        conc_merge = qc_remove_neg(conc_merge)
+        all_flag = Cloud_flag+CVI_flag+PCASP_flag+FIMS_flag+TD_flag
+        conc_merge = qc_mask_qcflag(conc_merge.T, all_flag)
+    
+        # remove the lowest few bins that FIMS has many false zeros
+        conc_merge[:, 0:3] = np.nan
+    
+        if not all(time2 == time):
+            raise ValueError('BEASD time is inconsistent with IWG')
+            
+        #%% re-shape the data into coarser resolution
+        
+        time_new = np.arange(np.round(time[0]/dt), np.round(time[-1]/dt)) *dt
+        
+        lon1 = median_time_1d(time, lon, time_new)
+        lat1 = median_time_1d(time, lat, time_new)
+        height1 = median_time_1d(time, height, time_new)
+        merge1 = avg_time_2d(time, conc_merge, time_new)
+        # merge1 = median_time_forflight_2d(time, conc_merge, time_new, height)
+    
+        #%% output data
+        outfile = prep_data_path + 'beasd_ACEENA_' + date + '.nc'
+        
+        # define filename
+        f = Dataset(outfile, 'w', format = 'NETCDF4')
+        
+        # define dimensions
+        f.createDimension('time', len(time_new))  
+        f.createDimension('size', len(d_merge)) 
+        
+        # create variable list
+        time_o = f.createVariable("time", "f8", ("time", ))
+        size_o = f.createVariable("size", "f8", ("size", ))
+        sizeh_o = f.createVariable("size_high", "f8", ("size", ))
+        sizel_o = f.createVariable("size_low", "f8", ("size", ))
+        lon_o = f.createVariable("lon", 'f8', ("time", ))
+        lat_o = f.createVariable("lat", 'f8', ("time", ))
+        height_o = f.createVariable("height", 'f8', ("time", ))
+        merge_o = f.createVariable('size_distribution_merged', 'f8', ("time", "size"))
+        
+        # write data
+        time_o[:] = time_new
+        size_o[:] = d_merge
+        sizeh_o[:] = dia_merge_h
+        sizel_o[:] = dia_merge_l
+        lon_o[:] = lon1
+        lat_o[:] = lat1  
+        height_o[:] = height1
+        merge_o[:, :] = merge1
+        
+        # attributes
+        time_o.units = "seconds since " + date[0:4] + '-' + date[4:6] + '-' + date[6:8] + " 00:00:00"
+        size_o.units = 'nm'
+        size_o.long_name = 'center of size bin'
+        sizeh_o.units = 'nm'
+        sizeh_o.long_name = 'upper bound of size bin'
+        sizel_o.units = 'nm'
+        sizel_o.long_name = 'lower bound of size bin'
+        lon_o.units = 'degree east'
+        lon_o.long_name = 'Longitude'
+        lat_o.units = 'degree north'
+        lat_o.long_name = 'Latitude'
+        height_o.units = 'm MSL'
+        height_o.long_name = 'height'
+        merge_o.units = '#/cm3'
+        merge_o.long_name = 'merged size distribution'
+    
+        # global attributes
+        f.title = "Best Estimate Aerosol Size Distribution"
+        f.description = 'mean value of each time window, in ambient condition'
+        f.description2 = 'The first 3 bins (size<13.7nm) are removed since FIMS report many false zeros'
+        f.input_file = lst2[0].split('/')[-1]
+        f.create_time = ttt.ctime(ttt.time())
+        
+        f.close()
+            
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_CCN(ccnpath, iwgpath, prep_data_path, dt=60):
     """
@@ -682,6 +843,10 @@ def prep_mergeSD(mergeSDpath, iwgpath, prep_data_path, dt=60):
         # quality check
         Nd = qc_remove_neg(Nd)
         Ndsize = qc_remove_neg(Ndsize)
+        
+        # remove small Nd values <10cm-3. which is 10000 #/L
+        Nd[Nd<10000] = np.nan
+        Ndsize[:, np.isnan(Nd)] = np.nan
     
         # unit change from dNd/Dp to Nd
         Dp = dmax-dmin
@@ -699,21 +864,21 @@ def prep_mergeSD(mergeSDpath, iwgpath, prep_data_path, dt=60):
         merge1 = avg_time_2d(time2, Ndsize.T, time_new)
         
         #%% 
-        import matplotlib.pyplot as plt
-        fig,(ax1,ax2) = plt.subplots(2,1,figsize=(8,4))
-        ax1.contourf(time2, dmean, np.log(Ndsize))
-        ax2.contourf(time_new, dmean, np.log(merge1.T))
-        ax1.set_yscale('log')
-        ax2.set_yscale('log')
-        ax1.set_title(date)
+        # import matplotlib.pyplot as plt
+        # fig,(ax1,ax2) = plt.subplots(2,1,figsize=(8,4))
+        # ax1.contourf(time2, dmean, np.log(Ndsize))
+        # ax2.contourf(time_new, dmean, np.log(merge1.T))
+        # ax1.set_yscale('log')
+        # ax2.set_yscale('log')
+        # ax1.set_title(date)
         
-        fig,ax=plt.subplots(figsize=(4,3))
-        ax.plot(dmean,np.nanmean(Ndsize,1))
-        ax.plot(dmean,np.nanmean(merge1,0),'r.')
-        ax.set_xscale('log')
-        ax.set_yscale('log')
-        ax.set_title(date)
-        # e
+        # fig,ax=plt.subplots(figsize=(4,3))
+        # ax.plot(dmean,np.nanmean(Ndsize,1))
+        # ax.plot(dmean,np.nanmean(merge1,0),'r.')
+        # ax.set_xscale('log')
+        # ax.set_yscale('log')
+        # ax.set_title(date)
+        # # e
     
         #%% output data
         outfile = prep_data_path + 'mergedSD_ACEENA_' + date + '.nc'
@@ -769,7 +934,7 @@ def prep_mergeSD(mergeSDpath, iwgpath, prep_data_path, dt=60):
         
         # global attributes
         f.title = "ARM MergedSD product of droplet size distribution from FCDP, 2-DS and HVPS, in ambient condition"
-        f.description = 'average of each time window'
+        f.description = 'mean value of each time window'
         f.create_time = ttt.ctime(ttt.time())
         
         f.close()
@@ -2075,3 +2240,5 @@ def prep_WCM(wcmpath, iwgpath, prep_data_path, dt=60):
         f.create_time = ttt.ctime(ttt.time())
         
         f.close()
+# prep_beasd(beasdpath,iwgpath, prep_data_path, dt=60)
+# prep_mergeSD(mergeSDpath, iwgpath, prep_data_path, dt=60)

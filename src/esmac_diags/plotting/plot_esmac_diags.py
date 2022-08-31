@@ -167,14 +167,14 @@ def mean_size(size, data, figsize=(8,6), xlimit=None, ylimit=None, xscale='log',
                  xlabel=None, ylabel=None, title=None, legend=None, linestyles=None,
                  marker=None, color=['k','b','g','c','r','orange','gray']):
     """
-    plot timeseries
+    plot mean particle size distribution
 
     Parameters
     ----------
     size : list of 1-d xarrays
         input of size coordinate
     data : list of 1-d xarrays
-        input timeseries
+        input mean size distribution data
         other plotting parameters (marker, etc.) should also be list
     
     Returns
@@ -215,6 +215,77 @@ def mean_size(size, data, figsize=(8,6), xlimit=None, ylimit=None, xscale='log',
 
     return(fig, ax)
 
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def mean_size_witherror(size, data, figsize=(8,6), xlimit=None, ylimit=None, xscale='log',yscale='log',
+                 xlabel=None, ylabel=None, title=None, legend=None, linestyles=None,
+                 marker=None, color=['k','b','g','c','r','orange','gray']):
+    """
+    plot mean particle size distribution with error bar
+
+    Parameters
+    ----------
+    size : list of 1-d xarrays
+        input of size coordinate
+    data : list of 2-d xarrays
+        input timeseries with size
+        other plotting parameters (marker, etc.) should also be list
+    
+    Returns
+    -------
+    fig : Figure
+    ax : Axes
+
+    """
+    
+    ndata = len(data)
+    if marker is None:
+        marker = [None for mm in range(ndata)]
+    if linestyles is None:
+        linestyles = ['-' for mm in range(ndata)]
+    if legend is None:
+        legend = [None for mm in range(ndata)]
+    
+    if xlimit is None and xscale=='log':
+        xlimit = (np.min([np.min(x) for x in size]), np.max([np.max(x) for x in size]))
+    if ylimit is None and yscale=='log':
+        ylimit = [np.nanmin([np.min(y) for y in data]+[1e-2]), np.nanmax([np.max(y) for y in data]+[1e4])]
+        ylimit[0] = np.max([ylimit[0], 1e-4])
+        
+    plt.rcParams.update({'font.size': 16})
+    fig,ax = plt.subplots(figsize=figsize)
+    for nn in range(ndata):
+        data_nozero = np.array(data[nn])
+        # data_nozero[data_nozero==0] = np.nan
+        pct = np.array([np.nanpercentile(data_nozero[:,i],[5,95]) for i in range(data_nozero.shape[1])])
+        mediandata = np.nanmedian(data_nozero,axis=0)
+        meandata = np.nanmean(data[nn],axis=0)
+        
+        ax.plot(size[nn],meandata,marker=marker[nn],linestyle=linestyles[nn],color=color[nn],label=legend[nn])
+        if marker[nn]=='.':
+            ax.errorbar(size[nn],meandata,yerr=[meandata-pct[:,0], meandata+pct[:,1]], 
+                        marker='.',linestyle=linestyles[nn],color=color[nn], alpha=0.5)
+            # ax.errorbar(size[nn][1:-1:5],meandata[1:-1:5],yerr=[meandata[1:-1:5]-pct[nn][1:-1:5,0], meandata[1:-1:5]+pct[nn][1:-1:5,1]], 
+            #             marker='.',linestyle=linestyles[nn],color=color[nn], alpha=0.5)
+        elif linestyles[nn]=='-':
+            ax.fill_between(size[nn], pct[:,0], pct[:,1], alpha=0.2, facecolor=color[nn])
+        # if marker[nn]=='.':
+        #     ax.errorbar(size[nn],meandata,yerr=std[nn], 
+        #                 marker='.',linestyle=linestyles[nn],color=color[nn], alpha=0.5)
+        # elif linestyles[nn]=='-':
+        #     ax.fill_between(size[nn], meandata-std[nn],meandata+std[nn], alpha=0.2, facecolor=color[nn])
+            
+    ax.legend()
+    ax.set_ylim(ylimit)
+    ax.set_xlim(xlimit)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_xscale(xscale)
+    ax.set_yscale(yscale)
+    ax.grid()
+    ax.set_title(title, fontsize=20)
+    plt.tight_layout()
+
+    return(fig, ax)
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def diurnalcycle(data, nozero_percentile=False, figsize=(8,6), 
@@ -348,10 +419,13 @@ def diurnalcycle_2d(data, y=None, figsize=None, x=np.arange(24),
     
     data_dc = []
     for nn in range(ndata):
-        data_dc.append(data[nn].groupby('time.hour').mean())
+        dc = data[nn].groupby('time.hour').mean()
+        if dc.shape[0] == 24:
+            dc = dc.T
+        data_dc.append(dc)
         
     if y is None:
-        y = [np.arange(data[mm].shape[0]) for mm in range(ndata)]
+        y = [np.arange(data_dc[mm].shape[0]) for mm in range(ndata)]
     if levellist is None:
         levellist = np.linspace(np.nanmin(data_dc[0]), np.nanmax(data_dc[0]), 10)
     if title is None:
@@ -456,7 +530,7 @@ def seasonalcycle(data,figsize=(9,6), xlimit=(0.5,12.5), xticks=np.arange(1,13,1
             dataa = data_nozero.groupby('time.month')
         else:
             dataa = data[nn].groupby('time.month')
-        datab = [dataa[i].data for i in range(12)]
+        datab = [dataa[i].data for i in range(1,13)]
         datac = [d[~np.isnan(d)] for d in datab]
         ax.boxplot(datac,whis=(10,90),showmeans=False,showfliers=False,
                 positions=np.arange(1,13)+p_shift[nn],widths=0.15,
@@ -510,10 +584,13 @@ def seasonalcycle_2d(data, figsize=None, x=np.arange(12)+1, y=None,
     
     data_sc = []
     for nn in range(ndata):
-        data_sc.append(data[nn].groupby('time.month').mean())
+        sc = data[nn].groupby('time.month').mean()
+        if sc.shape[0] == 12:
+            sc = sc.T
+        data_sc.append(sc)
         
     if y is None:
-        y=np.arange(data[0].shape[0])
+        y = [np.arange(data_sc[mm].shape[0]) for mm in range(ndata)]
     if levellist is None:
         levellist = np.linspace(np.nanmin(data_sc[0]), np.nanmax(data_sc[0]), 10)
     if title is None:
@@ -526,7 +603,7 @@ def seasonalcycle_2d(data, figsize=None, x=np.arange(12)+1, y=None,
     fig = plt.figure(figsize=figsize)
     for nn in range(ndata):
         ax1 = fig.add_subplot(1,ndata,nn+1)
-        h0=ax1.contourf(x,y,data_sc[nn],levellist, **kwargs)
+        h0=ax1.contourf(x,y[nn],data_sc[nn],levellist, **kwargs)
         ax1.set_xlim(xlimit)
         ax1.set_ylim(ylimit)
         ax1.set_xticks(xticks)
@@ -791,7 +868,7 @@ def heatmap(xdata, ydata, zdata, figsize=None, xedges=None, yedges=None,vmin=Non
             ax[0].set_ylabel(ylabel)
     cax = plt.axes([0.92, 0.2, 0.02, 0.6])
     fig.colorbar(h[0], cax=cax) 
-    plt.text(1, 0, zlabel)
+    fig.text(0.97, 0.1, zlabel, ha='right')
     
     return(fig, ax)
     
@@ -936,6 +1013,67 @@ def bar(dataall, figsize=None, datalabel=None, varlabel=None, xlabel=None, ylabe
     ax.legend(loc='right', shadow=False, bbox_to_anchor=(1.02+0.6/ndata, 0.5))
 
     return(fig, ax)
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def percentiles(*arg, figsize=None, xlimit=None, ylimit=None, 
+                 xlabel=None, ylabel=None, title=None, legend=None, 
+                 color=['k','b','g','c','r']):
+    """
+    plot vertical percentiles for aircraft measurements
+
+    Parameters
+    ----------
+    arg : list of 1-d arrays 
+        input timeseries for each variable
+    
+    Returns
+    -------
+    fig : Figure
+    ax : Axes
+
+    """
+    
+    nvars = len(arg)
+    ndata=len(arg[0])
+    for nn in range(nvars):
+        if len(arg[nn])!=ndata:
+            raise ValueError('each input variable should have same number of arrays')
+    
+    if legend is None:
+        legend = [None for mm in range(ndata)]
+    if xlabel is None:
+        xlabel = ['Var # '+str(nn+1) for nn in range(nvars)]
+    if figsize is None:
+        figsize = (nvars*3,4)
+    
+    # make plot
+    # set position shift so that they are not overlapped
+    p_shift = np.arange(ndata)
+    p_shift = (p_shift - p_shift.mean())*0.2
+    plt.rcParams.update({'font.size': 16})
+    fig, ax = plt.subplots(figsize=figsize)
+    for mm in range(ndata):
+        c = color[mm]
+        data_var = []
+        for nn in range(nvars):
+            data_tmp = arg[nn][mm]
+            data_var.append(data_tmp[~np.isnan(data_tmp)])  # exclude NaNs
+        ax.boxplot(data_var, whis=(5,95),showmeans=True,showfliers=False,
+                positions=np.arange(nvars)+p_shift[mm],widths=0.15,
+                boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
+                meanprops=dict(markerfacecolor='w', markeredgecolor=c,marker='o'),
+                medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
+                vert=True, patch_artist=True)    # need patch_artist to fill color in box
+        ax.plot([],c=c, label=legend[mm])
+    if legend[0] is not None:
+        ax.legend(loc='upper right', fontsize='medium')
+    ax.set_xticks(np.arange(nvars))
+    ax.set_xticklabels(xlabel)
+    ax.set_xlim(xlimit)
+    ax.set_ylim(ylimit)
+    ax.set_title(title)
+
+    return(fig, ax)    
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def percentile_lat(data, lat, latbin, figsize=(8,2), xlimit=None, ylimit=None, 

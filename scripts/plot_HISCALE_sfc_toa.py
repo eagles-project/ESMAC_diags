@@ -164,6 +164,11 @@ time_visst = obsdata['time'].load()
 nd_sat = obsdata['Nd'].load()
 obsdata.close()
 
+filename = prep_sat_path + 'Nd_VISSTpix_'+site+'.nc'
+obsdata = xr.open_dataset(filename)
+time_pix = obsdata['time'].load()
+nd_sat_pix = obsdata['Nd'].load()
+obsdata.close()
 
 filename = prep_sat_path + 'Reff_VISSTgrid_'+site+'.nc'
 obsdata = xr.open_dataset(filename)
@@ -284,10 +289,11 @@ lwp_m[lwp_m<20]=np.nan
 lwp_m2[lwp_m2<20]=np.nan
 
 # remove Nd less than 1 cm-3
-ndrop[ndrop<11] = np.nan
-nd_sat[nd_sat<11] = np.nan
-nd_m[nd_m<11] = np.nan
-nd_m2[nd_m2<11] = np.nan
+ndrop[ndrop<1] = np.nan
+nd_sat[nd_sat<1] = np.nan
+nd_sat_pix[nd_sat_pix<1] = np.nan
+nd_m[nd_m<1] = np.nan
+nd_m2[nd_m2<1] = np.nan
 
 # remove Nd greater than 2000
 ndrop[ndrop>2000] = np.nan
@@ -295,14 +301,14 @@ nd_m[nd_m>2000] = np.nan
 nd_m2[nd_m2>2000] = np.nan
 
 # trim for the same time period
-# IOP = 'IOP1'
-# time1 = np.datetime64('2016-04-25')
-# time2 = np.datetime64('2016-05-22')
-# time = pd.date_range(start='2016-04-25', end='2016-05-22', freq="H")
-IOP = 'IOP2'
-time1 = np.datetime64('2016-08-28')
-time2 = np.datetime64('2016-09-23')
-time = pd.date_range(start='2016-08-28', end='2016-09-23', freq="H")
+IOP = 'IOP1'
+time1 = np.datetime64('2016-04-25')
+time2 = np.datetime64('2016-05-22')
+time = pd.date_range(start='2016-04-25', end='2016-05-22', freq="H")
+# IOP = 'IOP2'
+# time1 = np.datetime64('2016-08-28')
+# time2 = np.datetime64('2016-09-23')
+# time = pd.date_range(start='2016-08-28', end='2016-09-23', freq="H")
 
 # surface
 org = org[np.logical_and(time_acsm>=time1, time_acsm<=time2)]
@@ -342,6 +348,7 @@ smps_all = smps_all[np.logical_and(time_smps>=time1, time_smps<=time2), :]
 cod_sat = cod_sat[np.logical_and(time_visst>=time1, time_visst<=time2)]
 lwp_sat = lwp_sat[np.logical_and(time_visst>=time1, time_visst<=time2)]
 nd_sat = nd_sat[np.logical_and(time_visst>=time1, time_visst<=time2)]
+nd_sat_pix = nd_sat_pix[np.logical_and(time_pix>=time1, time_pix<=time2)]
 reff_sat = reff_sat[np.logical_and(time_visst>=time1, time_visst<=time2)]
 lwnettoa = lwnettoa[np.logical_and(time_visst>=time1, time_visst<=time2)]
 swnettoa = swnettoa[np.logical_and(time_visst>=time1, time_visst<=time2)]
@@ -409,6 +416,18 @@ precip_m2 = precip_m2*3600*1000   # m/s to mm/hr
 precip_m[precip_m<0.02] = 0
 precip_m2[precip_m2<0.02] = 0
 
+
+#%%
+
+w0 = np.ones_like(ndrop)/sum(~np.isnan(ndrop.data))
+w00 = np.ones_like(nd_sat)/sum(~np.isnan(nd_sat.data))
+w000 = np.ones_like(nd_sat_pix)/sum(~np.isnan(nd_sat_pix.data))
+w1 = np.ones_like(nd_m)/sum(~np.isnan(nd_m.data))
+w2 = np.ones_like(nd_m2)/sum(~np.isnan(nd_m2.data))
+fig,ax = plot.hist([ndrop,nd_sat,nd_sat_pix],  weights=[w0,w00,w000], 
+                    legend = ['Ndrop','Satellite','pix'], color=['k','blue','green'],
+                    title = 'Nd '+site+' '+IOP, bins=np.arange(0,410,20), ylabel='Fraction', xlabel='cm$^{-3}$')
+e
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if not os.path.exists(figpath):
     os.makedirs(figpath)
@@ -496,13 +515,13 @@ if not os.path.exists(figpath):
 # ax.set_xlim(time1,time2)
 # fig.savefig(figpath+'timeseries_cod_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-fig,ax = plot.timeseries([time,time,time,time], [lwp_mfrsr, lwp_sat, lwp_m, lwp_m2], 
-                        legend = ['MFRSR','VISST','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-                        title='LWP '+site+' '+IOP,xlabel=None, ylabel="g/m$^2$")
-ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-ax.set_xlim(time1,time2)
-fig.savefig(figpath+'timeseries_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.timeseries([time,time,time,time], [lwp_mfrsr, lwp_sat, lwp_m, lwp_m2], 
+#                         legend = ['MFRSR','VISST','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+#                         title='LWP '+site+' '+IOP,xlabel=None, ylabel="g/m$^2$")
+# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# ax.set_xlim(time1,time2)
+# fig.savefig(figpath+'timeseries_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 # fig,ax = plot.timeseries([time,time,time], [LTS700,LTS850], legend = ['Theta(700hPa-sfc)','Theta(850hPa-sfc)'], 
 #                         color=['b','r'], marker='.', figsize=(10,3), xlabel=None, ylabel="K")
@@ -511,13 +530,13 @@ fig.savefig(figpath+'timeseries_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inche
 # ax.set_xlim(time1,time2)
 # fig.savefig(figpath+'timeseries_LTS_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-fig,ax = plot.timeseries([time,time,time,time], [ndrop,nd_sat, nd_m, nd_m2], marker='.',
-                          legend = ['Ndrop (ARM)','Nd (satellite)','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-                          title='Nd '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
-ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-ax.set_xlim(time1,time2)
-fig.savefig(figpath+'timeseries_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.timeseries([time,time,time,time], [ndrop,nd_sat, nd_m, nd_m2], marker='.',
+#                           legend = ['Ndrop (ARM)','Nd (satellite)','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+#                           title='Nd '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
+# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# ax.set_xlim(time1,time2)
+# fig.savefig(figpath+'timeseries_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 # fig,ax = plot.timeseries([time,time,time,time], [reff,reff_sat,reff_m,reff_m2],  marker='.',
 #                         legend = ['MFRSR','VISST','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
@@ -752,15 +771,15 @@ fig.savefig(figpath+'timeseries_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches
 #                     title='Cloud Optical Depth '+site+' '+IOP, bins=np.arange(0,90,5), ylabel='Fraction', xlabel=None)
 # fig.savefig(figpath+'hist_cod_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w1 = np.ones_like(lwp_armbe)/sum(~np.isnan(lwp_armbe.data))
-w0 = np.ones_like(lwp_mfrsr)/sum(~np.isnan(lwp_mfrsr.data))
-w00 = np.ones_like(lwp_sat)/sum(~np.isnan(lwp_sat.data))
-w1 = np.ones_like(lwp_m)/sum(~np.isnan(lwp_m.data))
-w2 = np.ones_like(lwp_m2)/sum(~np.isnan(lwp_m2.data))
-fig,ax = plot.hist([lwp_mfrsr, lwp_sat, lwp_m, lwp_m2], weights=[w0,w00,w1,w2], 
-                    legend = ['MFRSR','VISST','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-                    title='LWP '+site+' '+IOP, bins=np.arange(10,440,20), ylabel='Fraction', xlabel="g/m$^2$")
-fig.savefig(figpath+'hist_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# # w1 = np.ones_like(lwp_armbe)/sum(~np.isnan(lwp_armbe.data))
+# w0 = np.ones_like(lwp_mfrsr)/sum(~np.isnan(lwp_mfrsr.data))
+# w00 = np.ones_like(lwp_sat)/sum(~np.isnan(lwp_sat.data))
+# w1 = np.ones_like(lwp_m)/sum(~np.isnan(lwp_m.data))
+# w2 = np.ones_like(lwp_m2)/sum(~np.isnan(lwp_m2.data))
+# fig,ax = plot.hist([lwp_mfrsr, lwp_sat, lwp_m, lwp_m2], weights=[w0,w00,w1,w2], 
+#                     legend = ['MFRSR','VISST','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+#                     title='LWP '+site+' '+IOP, bins=np.arange(10,440,20), ylabel='Fraction', xlabel="g/m$^2$")
+# fig.savefig(figpath+'hist_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 # w1 = np.ones_like(LTS700)/sum(~np.isnan(LTS700.data))
 # w2 = np.ones_like(LTS850)/sum(~np.isnan(LTS850.data))

@@ -1,24 +1,24 @@
 """
-prepare all observational data from HISCALE
+prepare all observational data from ACEENA
 inlcude:
-    prep_HISCALE_E3SM in src/esmac_diags/preprocessing/
+    prep_ACEENA_E3SM in src/esmac_diags/preprocessing/
 """
 
 import numpy as np
 import esmac_diags
-import esmac_diags.preprocessing.prep_HISCALE_E3SM as prep
+import esmac_diags.preprocessing.prep_ACEENA_E3SM as prep
 
 import warnings
 warnings.filterwarnings("ignore")
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settings
 input_path = '../raw_data/model/'
-output_path = '../prep_data/HISCALE/model/'
+output_path = '../prep_data/ACEENA/model/'
 input_filehead = 'E3SMv1_SGP_ENA_2011_2020'
-output_filehead = 'E3SMv1_HISCALE'
+output_filehead = 'E3SMv1_ACEENA'
 
 # iwg data path for aircraft information
-iwgpath = '../raw_data/obs/HISCALE/aircraft/mei-iwg1/'
+iwgpath = '../raw_data/obs/ACEENA/aircraft/IWG/'
 
 # vertical coordinates for output
 lev_out=np.arange(25.,1001,25.)

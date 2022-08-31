@@ -14,6 +14,7 @@ import esmac_diags
 # from esmac_diags.subroutines.read_ship import read_marmet
 from esmac_diags.subroutines.time_resolution_change import avg_time_1d, median_time_1d, median_time_2d
 from esmac_diags.subroutines.quality_control import  qc_remove_neg, qc_mask_qcflag, qc_cn_max, qc_ccn_max
+from esmac_diags.subroutines.specific_data_treatment import calc_cldfrac_from_highres
 
 # shipmetpath = '../../../data/MAGIC/obs/ship/magmarinemetM1.b1/'
 # mwrpath = '../../../data/MAGIC/obs/ship/magmwrret1liljclouM1.s2/'
@@ -21,7 +22,7 @@ from esmac_diags.subroutines.quality_control import  qc_remove_neg, qc_mask_qcfl
 # ccnpath = '../../../data/MAGIC/obs/ship/magaosccn100M1.a1/'
 # uhsaspath = '../../../data/MAGIC/obs/ship/magaosuhsasM1.a1/'
 # Ndpath = '../../../data/MAGIC/obs/ship/Cloud_Micro_Retrieval/'
-# prep_data_path = 'C:/Users/tang357/Downloads/MAGIC/'
+# prep_data_path = 'C:/Users/tang357/Downloads/prep_data/MAGIC/ship/'
 
 # dt=3600
 
@@ -90,10 +91,7 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
     
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time2[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time2[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
     
     lon1 = median_time_1d(time, lon, time_new)
     lat1 = median_time_1d(time, lat, time_new)
@@ -238,10 +236,7 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     uhsas100 = qc_cn_max(uhsas100,100)
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time2[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time2[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
     
     lon1 = median_time_1d(time, lon, time_new)
     lat1 = median_time_1d(time, lat, time_new)
@@ -342,10 +337,7 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
     
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time2[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time2[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
     
     lon1 = median_time_1d(time, lon, time_new)
     lat1 = median_time_1d(time, lat, time_new)
@@ -437,15 +429,17 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     lwp = qc_mask_qcflag(lwp, qc_lwp)
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time2[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time2[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
     
     lon1 = avg_time_1d(time, lon, time_new)
     lat1 = avg_time_1d(time, lat, time_new)
     lwp1 = avg_time_1d(time2, lwp, time_new)
     lwp1 = qc_remove_neg(lwp1)
+    
+    #%% calculate cloud fraction from LWP
+    # from MWR handbook: a value of LWP that is +/- 0.03 mm of zero could be clear sky
+    lwp_thres = 30
+    cf_out = calc_cldfrac_from_highres(lwp, time2, time_new, thres=lwp_thres)
     
     #%% output file
     outfile = prep_data_path + 'LWP_MAGIC.nc'
@@ -456,7 +450,6 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
                     'lwp': (['time'], lwp1),
                     },
                      coords={'time': ('time', time_new)})
-    
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
     ds['time'].attrs["standard_name"] = "time"
@@ -466,13 +459,33 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     ds['lon'].attrs["units"] = "degree_east"
     ds['lwp'].attrs["long_name"] = lwp.long_name
     ds['lwp'].attrs["units"] = lwp.units
-    
     ds.attrs["input data_example"] = lst2[0].split('/')[-1]
     ds.attrs["description"] = 'average into '+str(int(dt))+'sec resolution'
     ds.attrs["creation_date"] = ttt.ctime(ttt.time())
-    
     ds.to_netcdf(outfile, mode='w')
-    
+        
+    outfile = prep_data_path + 'totcld_MAGIC.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'lat': (['time'], lat1),
+                    'lon': (['time'], lon1),
+                    'cldfrac': (['time'], cf_out),
+                    },
+                     coords={'time': ('time', time_new)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lat'].attrs["long_name"] = "latitude"
+    ds['lat'].attrs["units"] = "degree_north"
+    ds['lon'].attrs["long_name"] = "longitude"
+    ds['lon'].attrs["units"] = "degree_east"
+    ds['cldfrac'].attrs["long_name"] = 'total cloud fraction'
+    ds['cldfrac'].attrs["units"] = '%'
+    ds.attrs["input data_example"] = lst2[0].split('/')[-1]
+    ds.attrs["description"] = 'calculated from LWP with threshold of '+str(lwp_thres)+' g/m2'
+    ds.attrs["creation_date"] = ttt.ctime(ttt.time())
+    ds.to_netcdf(outfile, mode='w')
+
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_Nd_Wu_etal(Ndpath, prep_data_path, dt=3600):
     """
@@ -524,15 +537,13 @@ def prep_Nd_Wu_etal(Ndpath, prep_data_path, dt=3600):
     reall = qc_remove_neg(reall)
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time[0]))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time[-1]))[:10]
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
     
     nd_new = median_time_1d(time, ndall, time_new)
     re_new = median_time_1d(time, reall, time_new)
     
     #%% output file
-    outfile = prep_data_path + 'Nd_Reff_WuDong_MAGIC.nc'
+    outfile = prep_data_path + 'Nd_Reff_Wu_etal_MAGIC.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                      'cdnc': ('time', np.float32(nd_new)),
@@ -556,5 +567,3 @@ def prep_Nd_Wu_etal(Ndpath, prep_data_path, dt=3600):
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
-
-        

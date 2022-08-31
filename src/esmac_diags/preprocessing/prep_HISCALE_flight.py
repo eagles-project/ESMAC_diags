@@ -18,7 +18,7 @@ from esmac_diags.subroutines.quality_control import qc_fims_bin, qc_remove_neg, 
                     qc_mask_qcflag, qc_mask_cloudflag
 
 
-#%% test settings
+# #%% test settings
 # iwgpath = '../../../data/HISCALE/obs/aircraft/mei-iwg1/'
 # amspath = '../../../data/HISCALE/obs/aircraft/shilling-ams/'
 # beasdpath = '../../../data/HISCALE/obs/aircraft/pekour-aafbe/'
@@ -29,8 +29,8 @@ from esmac_diags.subroutines.quality_control import qc_fims_bin, qc_remove_neg, 
 # cvipath = '../../../data/HISCALE/obs/aircraft/pekour-cvi/'
 # cpcpath = '../../../data/HISCALE/obs/aircraft/mei-cpc/'
 # mergeSDpath = '../../../data/HISCALE/obs/aircraft/mergedSD/'
-# merged_size_path = 'C:/Users/tang357/Downloads/HISCALE/'
-# prep_data_path = 'C:/Users/tang357/Downloads/HISCALE/'
+# merged_size_path = 'C:/Users/tang357/Downloads/pre_data/HISCALE/flight/'
+# prep_data_path = 'C:/Users/tang357/Downloads/pre_data/HISCALE/flight/'
 
 # dt=60
 
@@ -327,7 +327,7 @@ def prep_beasd(beasdpath,iwgpath, prep_data_path, dt=60):
         lon1 = median_time_1d(time, lon, time_new)
         lat1 = median_time_1d(time, lat, time_new)
         height1 = median_time_1d(time, height, time_new)
-        merge1 = median_time_2d(time, conc_merge, time_new)
+        merge1 = avg_time_2d(time, conc_merge, time_new)
         # merge1 = median_time_forflight_2d(time, conc_merge, time_new, height)
     
         #%% output data
@@ -379,7 +379,7 @@ def prep_beasd(beasdpath,iwgpath, prep_data_path, dt=60):
     
         # global attributes
         f.title = "Best Estimate Aerosol Size Distribution"
-        f.description = 'median value of each time window, in ambient condition'
+        f.description = 'mean value of each time window, in ambient condition'
         f.description2 = 'The first 3 bins (size<13.7nm) are removed since FIMS report many false zeros'
         f.input_file = filename2.split('/')[-1]
         f.create_time = ttt.ctime(ttt.time())
@@ -751,11 +751,26 @@ def prep_mergeSD(mergeSDpath, iwgpath, prep_data_path, dt=60):
             continue
         else:
             raise ValueError('find too many files')
-    
+            
+        # some flights in HISCALE has slightly different size, change to be consistent
+        if date=='20160425a' or date=='20160427a' or date=='20160428a':
+            dmax[11] = 24.
+            dmin[11] = 21.
+            dmean[11] = 22.5
+        elif date=='20160503a' or date=='20160506a' or date=='20160507a':
+            Ndsize = np.vstack((Ndsize[0:12,:], Ndsize[13:,:]))
+            dmin = np.hstack((dmin[:12], dmin[13:]))
+            dmax = np.hstack((dmax[:12], dmax[13:]))
+            dmean = np.hstack((dmean[:12], dmean[13:]))
+        
         # quality check
         Nd = qc_remove_neg(Nd, remove_zero='True')
         Ndsize = qc_remove_neg(Ndsize)
     
+        # remove small Nd values <10cm-3. which is 10000 #/L
+        Nd[Nd<10000] = np.nan
+        Ndsize[:, np.isnan(Nd)] = np.nan
+        
         # unit change from dNd/Dp to Nd
         Dp = dmax-dmin
         for tt in range(Ndsize.shape[1]):   
@@ -845,7 +860,7 @@ def prep_mergeSD(mergeSDpath, iwgpath, prep_data_path, dt=60):
         
         # global attributes
         f.title = "ARM MergedSD product of droplet size distribution from FCDP, 2-DS and HVPS, in ambient condition"
-        f.description = 'average of each time window'
+        f.description = 'mean value of each time window'
         f.create_time = ttt.ctime(ttt.time())
         
         f.close()
@@ -1913,3 +1928,4 @@ def prep_WCM(wcmpath, iwgpath, prep_data_path, dt=60):
 # prep_mergesize_HISCALE_withCPC(cpcpath, fimspath, pcasppath, iwgpath, cvipath, merged_size_path)
 # prep_PCASP100(pcasppath, iwgpath, prep_data_path)
 # prep_WCM(wcmpath, iwgpath, prep_data_path)
+# prep_mergeSD(mergeSDpath, iwgpath, prep_data_path)

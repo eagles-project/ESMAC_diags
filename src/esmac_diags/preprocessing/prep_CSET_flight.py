@@ -19,7 +19,7 @@ from esmac_diags.subroutines.specific_data_treatment import lwc2cflag
 
 
 # RFpath = '../../../data/CSET/obs/aircraft/aircraft_lowrate/'
-# prep_data_path = 'C:/Users/tang357/Downloads/CSET/'
+# prep_data_path = 'C:/Users/tang357/Downloads/prep_data/CSET/flight/'
 
 # dt=60
 
@@ -94,8 +94,8 @@ def prep_CNsize(RFpath, prep_data_path, dt=60):
         lat1 = median_time_1d(time, lat, time_new)
         height1 = median_time_1d(time, height, time_new)
         
-        # uhsas1 = avg_time_2d(time, uhsas, time_new)
-        uhsas1 = median_time_2d(time, uhsas, time_new)
+        uhsas1 = avg_time_2d(time, uhsas, time_new)
+        # uhsas1 = median_time_2d(time, uhsas, time_new)
         # pcasp1 = median_time_2d(time, pcasp, time_new)
         
         #%% output data
@@ -147,7 +147,7 @@ def prep_CNsize(RFpath, prep_data_path, dt=60):
     
         # global attributes
         f.title = "Aerosol size distribution from UHSAS"
-        f.description = 'median value of each time window'
+        f.description = 'mean value of each time window'
         f.input_file = filename.split('/')[-1]
         f.create_time = ttt.ctime(ttt.time())
         
@@ -427,6 +427,16 @@ def prep_Nd(RFpath, prep_data_path, dt=60):
         # change all units to #/L
         cdp = cdp * 1000        #cdp unit is #/cm3
     
+        # total number
+        ndall_cdp = np.sum(cdp,axis=1)
+        
+        # remove small Nd samples, 10 cm-3 (10000 L-1) 
+        idx = ndall_cdp<10000   
+        ndall_cdp[idx] = np.nan
+        cdp[idx,:] = np.nan
+        c1dc[idx,:] = np.nan
+        c2dca[idx,:] = np.nan
+        
         #%% re-shape the data into coarser resolution
         
         time_new = np.arange(np.round(time[0]/dt), np.round(time[-1]/dt)) *dt
@@ -437,7 +447,8 @@ def prep_Nd(RFpath, prep_data_path, dt=60):
         nd_1dc = avg_time_2d(time, c1dc, time_new)
         nd_cdp = avg_time_2d(time, cdp, time_new)
         nd_2dca = avg_time_2d(time, c2dca, time_new)
-        nd_2dcr = avg_time_2d(time, c2dcr, time_new)
+        # nd_2dcr = median_time_2d(time, c2dcr, time_new)
+        ndall = avg_time_1d(time, ndall_cdp, time_new)
     
         #%% output data
         outfile = prep_data_path + 'Nd_size_CSET_' + date + '.nc'
@@ -462,6 +473,7 @@ def prep_Nd(RFpath, prep_data_path, dt=60):
         nd1_o = f.createVariable('Nd_1dc', 'f8', ("time", "size_1dc"))
         nd2_o = f.createVariable('Nd_2dc', 'f8', ("time", "size_2dc"))
         ndc_o = f.createVariable('Nd_cdp', 'f8', ("time", "size_cdp"))
+        ndall_o = f.createVariable('Nd', 'f8', ("time", ))
         
         # write data
         time_o[:] = time_new
@@ -474,6 +486,7 @@ def prep_Nd(RFpath, prep_data_path, dt=60):
         nd1_o[:, :] = nd_1dc
         nd2_o[:, :] = nd_2dca
         ndc_o[:, :] = nd_cdp
+        ndall_o[:] = ndall
         
         # attributes
         time_o.units = "seconds since " + date[0:4] + '-' + date[4:6] + '-' + date[6:8] + " 00:00:00"
@@ -495,12 +508,16 @@ def prep_Nd(RFpath, prep_data_path, dt=60):
         nd2_o.long_name = 'cloud droplet number concentration in each bin from 2DC'
         ndc_o.units = '#/L'
         ndc_o.long_name = 'cloud droplet number concentration in each bin from CDP'
+        ndall_o.units = '#/L'
+        ndall_o.long_name = 'total cloud droplet number concentration sum from CDP bins'
     
         
         # global attributes
         f.title = "cloud droplet size distribution from CDP, 2-DC or 1-DC, in ambient condition"
-        f.description = 'average of each time window'
+        f.description = 'mean value of each time window'
         f.create_time = ttt.ctime(ttt.time())
         
         f.close()
-     
+        
+# prep_Nd(RFpath, prep_data_path, dt=60)
+# prep_CNsize(RFpath, prep_data_path, dt=60)

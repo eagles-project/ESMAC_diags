@@ -374,7 +374,7 @@ fig,ax = plot.percentile_z([nd, nd_m, nd_m2], [height,height,height],
                       height_bin, figsize=(3,8), title='Nd',
                       xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
 fig.savefig(figpath+'percentile_z_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
+#%%
 fig,ax = plot.percentile_z([reff, reff_m, reff_m2], [height,height,height], 
                       height_bin, figsize=(3,8), title='Reff',
                       xlabel='$\mu$m', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )

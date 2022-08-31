@@ -123,3 +123,56 @@ def bias_corrcoef_RMSE(data1,data2,outfile,label1='data',label2='reference'):
         f.write(format(rmse,'10.2f'))
             
     return(bias,corrcoef,rmse)
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def linear_regress(xdata,ydata,outfile,legend=None,labelx='xdata',labely='ydata'):
+    """
+    calculate mean bias, correlation coefficient (include p-value) and RMSE of data1 related to data2
+
+    Parameters
+    ----------
+    xdata : list of 1-d xarrays
+        input timeseries of xdata for linear regression
+    ydata : list of 1-d xarrays
+        input timeseries of ydata for linear regression
+    outfile : str
+        filename of output statistics
+    legend : list of str
+        label/description for each element in xdata/ydata
+    labelx : str
+        label/description of xdata
+    labely : str
+        label/description of ydata 
+    
+    Returns
+    -------
+    [slope, intercept, r_value, p_value, std_err]
+
+    """
+    ndata = len(xdata)
+    if legend is None:
+        legend=['data_'+str(i) for i in range(ndata)]
+        
+    dataout = []
+    samplesize = []
+    for nn in range(ndata):
+        idx = np.logical_and(~np.isnan(xdata[nn]), ~np.isnan(ydata[nn]))
+        slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(xdata[nn][idx], ydata[nn][idx])
+        dataout.append([slope, intercept, r_value, p_value, std_err])
+        samplesize.append(np.int64(sum(idx)))
+    
+    # print('write statistics to file '+outfile)
+    with open(outfile, 'w') as f:
+        f.write('linear regression (y = ax + b) results for: ')
+        f.write('\n x: '+labelx + '    y: '+labely)
+        f.write('\n')
+        f.write('\n data(sample#)    slope   intercept   r_value   p_value   std_err')
+        for nn in range(ndata):
+            f.write('\n '+legend[nn]+'('+str(samplesize[nn])+')')
+            f.write(format(dataout[nn][0],'10.2f'))
+            f.write(format(dataout[nn][1],'10.2f'))
+            f.write(format(dataout[nn][2],'10.2f'))
+            f.write(format(dataout[nn][3],'10.4f'))
+            f.write(format(dataout[nn][4],'10.2f'))
+            
+    return(dataout,samplesize)
