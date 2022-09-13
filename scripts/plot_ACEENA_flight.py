@@ -20,10 +20,10 @@ site = 'ACEENA'
 
 # path of prepared files
 prep_model_path = '../prep_data/'+site+'/model/'
-prep_obs_path = 'C:/Users/tang357/Downloads/'+site+'/'
+prep_obs_path = '../prep_data/'+site+'/flight/'
 
 # path of output figures
-figpath= 'C:/Users/tang357/Downloads/figures/'+site+'/flight/'
+figpath= '../figures/'+site+'/flight/'
 
 height_bin = np.arange(100,4300,300)
 
@@ -142,26 +142,26 @@ LWC = xr.DataArray(data=np.interp(nd.time,LWC.time, LWC), coords=dict(time=nd.ti
 if not os.path.exists(figpath):
     os.makedirs(figpath)
 
-# #%% 1d histogram
-# w1 = np.ones_like(org)/sum(~np.isnan(org.data))
-# w2 = np.ones_like(so4)/sum(~np.isnan(so4.data))
-# w3 = np.ones_like(nh4)/sum(~np.isnan(nh4.data))
-# w4 = np.ones_like(no3)/sum(~np.isnan(no3.data))
-# w5 = np.ones_like(chl)/sum(~np.isnan(chl.data))
-# fig,ax = plot.hist([org,so4], weights=[w1,w2], bins=np.arange(0,1.2,0.1),
-#                           legend = ['organic','SO4'], color=['limegreen', 'red'],
-#                           ylabel='Fraction', xlabel='${\mu}$g/m$^{3}$')
-# fig.savefig(figpath+'hist_org_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.hist([nh4,no3,chl], weights=[w3,w4,w5], bins=np.arange(0,0.14,0.01),
-#                           legend = ['NH4','NO3','Chl'], color=['b', 'orange', 'magenta'],
-#                           ylabel='Fraction', xlabel='${\mu}$g/m$^{3}$')
-# fig.savefig(figpath+'hist_NH4_NO3_Chl_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+#%% 1d histogram
+w1 = np.ones_like(org)/sum(~np.isnan(org.data))
+w2 = np.ones_like(so4)/sum(~np.isnan(so4.data))
+w3 = np.ones_like(nh4)/sum(~np.isnan(nh4.data))
+w4 = np.ones_like(no3)/sum(~np.isnan(no3.data))
+w5 = np.ones_like(chl)/sum(~np.isnan(chl.data))
+fig,ax = plot.hist([org,so4], weights=[w1,w2], bins=np.arange(0,1.2,0.1),
+                          legend = ['organic','SO4'], color=['limegreen', 'red'],
+                          ylabel='Fraction', xlabel='${\mu}$g/m$^{3}$')
+fig.savefig(figpath+'hist_org_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig,ax = plot.hist([nh4,no3,chl], weights=[w3,w4,w5], bins=np.arange(0,0.14,0.01),
+                          legend = ['NH4','NO3','Chl'], color=['b', 'orange', 'magenta'],
+                          ylabel='Fraction', xlabel='${\mu}$g/m$^{3}$')
+fig.savefig(figpath+'hist_NH4_NO3_Chl_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w2 = np.ones_like(ccn1)/sum(~np.isnan(ccn1.data))
-# w3 = np.ones_like(ccn3)/sum(~np.isnan(ccn3.data))
-# fig,ax = plot.hist([ccn1,ccn3], weights=[w2,w3], legend = ['0.1%CCN','0.3%CCN'], 
-#                     bins=np.arange(0,410,20), ylabel='Fraction', xlabel='cm$^{-3}$')
-# fig.savefig(figpath+'hist_CCN_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w2 = np.ones_like(ccn1)/sum(~np.isnan(ccn1.data))
+w3 = np.ones_like(ccn3)/sum(~np.isnan(ccn3.data))
+fig,ax = plot.hist([ccn1,ccn3], weights=[w2,w3], legend = ['0.1%CCN','0.3%CCN'], 
+                    bins=np.arange(0,410,20), ylabel='Fraction', xlabel='cm$^{-3}$')
+fig.savefig(figpath+'hist_CCN_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 # w1 = np.ones_like(cpc3)/sum(~np.isnan(cpc3.data))
 # w2 = np.ones_like(cpc10)/sum(~np.isnan(cpc10.data))

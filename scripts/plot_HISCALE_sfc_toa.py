@@ -18,175 +18,175 @@ import matplotlib.dates as mdates
 # set site name.
 site = 'HISCALE'
 
-# path of prepared files
 prep_model_path = '../prep_data/'+site+'/model/'
 prep_sfc_path = '../prep_data/'+site+'/surface/'
 prep_sat_path = '../prep_data/'+site+'/satellite/'
+time_hiscale = np.hstack((  \
+    pd.date_range(start='2016-04-25', end='2016-05-21', freq="3600s"), \
+    pd.date_range(start='2016-08-28', end='2016-09-23', freq="3600s")  \
+    ))
+# time_hiscale = pd.date_range(start='2016-04-25', end='2016-05-21', freq="3600s")
+
+            
 # path of output figures
 figpath= '../figures/'+site+'/sfc_toa/'
+if not os.path.exists(figpath):
+    os.makedirs(figpath)
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # read in data
-filename = prep_sfc_path + 'sfc_ACSM_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_acsm = obsdata['time'].load()
+obsdata = xr.open_dataset(prep_sfc_path + 'sfc_ACSM_'+site+'.nc')
 org = obsdata['org'].load()
 so4 = obsdata['so4'].load()
 nh4 = obsdata['nh4'].load()
 no3 = obsdata['no3'].load()
 chl = obsdata['chl'].load()
 obsdata.close()
+org_hiscale = org.sel(time=time_hiscale)
+so4_hiscale = so4.sel(time=time_hiscale)
+nh4_hiscale = nh4.sel(time=time_hiscale)
+no3_hiscale = no3.sel(time=time_hiscale)
+chl_hiscale = chl.sel(time=time_hiscale)
 
-lst = sorted(glob.glob(prep_sfc_path + 'sfc_CCN_'+site+'_*.nc'))
-obsdata = xr.open_mfdataset(lst)
-time_ccn = obsdata['time'].load()
-ccn1 = obsdata['CCN1'].load()
+obsdata = xr.open_dataset(prep_sfc_path + 'totcld_'+site+'.nc')
+cld_arscl = obsdata['tot_cld_arscl'].load()
+cld_tsi = obsdata['tot_cld_tsi'].load()
+cld_visst = obsdata['tot_cld_visst'].load()
+obsdata.close()
+cld_arscl_hiscale = cld_arscl.sel(time=time_hiscale)
+cld_tsi_hiscale = cld_tsi.sel(time=time_hiscale)
+cld_visst_hiscale = cld_visst.sel(time=time_hiscale)
+obsdata = xr.open_dataset(prep_sfc_path + 'cloud_2d_'+site+'.nc')
+height_o = obsdata['height'].load()
+cloud_2d = obsdata['cloud'].load()
+obsdata.close()
+cloud_2d_hiscale = cloud_2d.sel(time=time_hiscale)
+obsdata = xr.open_mfdataset(sorted(glob.glob(prep_sfc_path + 'sfc_CCN_'+site+'_*.nc')))
 ccn2 = obsdata['CCN2'].load()
-ccn5 = obsdata['CCN5'].load()
 obsdata.close()
-
-filename = prep_sfc_path + 'sfc_CPC_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_cpc = obsdata['time'].load()
-cpc3 = obsdata['cpc3'].load()
+ccn2_hiscale = ccn2.sel(time=time_hiscale)
+obsdata = xr.open_dataset(prep_sfc_path + 'sfc_CPC_'+site+'.nc')
 cpc10 = obsdata['cpc10'].load()
+cpc3 = obsdata['cpc3'].load()
 obsdata.close()
-
-filename = prep_sfc_path + 'cod_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_cod = obsdata['time'].load()
+cpc3_hiscale = cpc3.sel(time=time_hiscale)
+cpc10_hiscale = cpc10.sel(time=time_hiscale)
+obsdata = xr.open_dataset(prep_sfc_path + 'cod_'+site+'.nc')
 cod = obsdata['cod'].load()
 obsdata.close()
-
-filename = prep_sfc_path + 'LWP_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_lwp = obsdata['time'].load()
+cod_hiscale = cod.sel(time=time_hiscale)
+obsdata = xr.open_dataset(prep_sfc_path + 'LWP_'+site+'.nc')
 lwp_armbe = obsdata['lwp_armbe'].load()
 lwp_mfrsr = obsdata['lwp_mfrsr'].load()
 obsdata.close()
-
-filename = prep_sfc_path + 'LTS_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_lts = obsdata['time'].load()
-LTS700 = obsdata['LTS700'].load()
-LTS850 = obsdata['LTS850'].load()
-obsdata.close()
-
-# filename = prep_sfc_path + 'Nd_ARMretrieval_'+site+'.nc'
-# obsdata = xr.open_dataset(filename)
-# time_nd_arm = obsdata['time'].load()
-# Nd_arm = obsdata['cdnc'].load()
-# obsdata.close()
-
-filename = prep_sfc_path + 'Ndrop_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_ndrop = obsdata['time'].load()
+lwp_armbe_hiscale = lwp_armbe.sel(time=time_hiscale)
+lwp_mfrsr_hiscale = lwp_mfrsr.sel(time=time_hiscale)
+obsdata = xr.open_dataset(prep_sfc_path + 'Ndrop_'+site+'.nc')
 ndrop = obsdata['cdnc'].load()
 obsdata.close()
-
-filename = prep_sfc_path + 'reff_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_reff = obsdata['time'].load()
+ndrop_hiscale = ndrop.sel(time=time_hiscale)
+obsdata = xr.open_dataset(prep_sfc_path + 'reff_'+site+'.nc')
 reff = obsdata['reff'].load()
 obsdata.close()
-
-filename = prep_sfc_path + 'precip_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_pr = obsdata['time'].load()
+reff_hiscale = reff.sel(time=time_hiscale)
+obsdata = xr.open_dataset(prep_sfc_path + 'precip_'+site+'.nc')
 precip = obsdata['precip'].load()
 obsdata.close()
+precip_hiscale = precip.sel(time=time_hiscale)
 
-filename = prep_sfc_path + 'sfc_radiation_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_rad = obsdata['time'].load()
+obsdata = xr.open_dataset(prep_sfc_path + 'sfc_radiation_'+site+'.nc')
 lwdnsfc = obsdata['lwdn'].load()
 swdnsfc = obsdata['swdn'].load()
 lwupsfc = obsdata['lwup'].load()
 swupsfc = obsdata['swup'].load()
 obsdata.close()
+lwnetsfc = lwupsfc - lwdnsfc
+swnetsfc = swdnsfc - swupsfc
+lwnetsfc_hiscale = lwnetsfc.sel(time=time_hiscale)
+swnetsfc_hiscale = swnetsfc.sel(time=time_hiscale)
 
-filename = prep_sfc_path + 'sfc_SMPS_'+site+'_IOP1.nc'
-obsdata = xr.open_dataset(filename)
+obsdata = xr.open_dataset(prep_sfc_path + 'sfc_UHSAS_'+site+'.nc')
+size_uhsas = obsdata['size'].load()
+dmin_hiscale = obsdata['size_low'].load()
+dmax_hiscale = obsdata['size_high'].load()
+uhsas100 = obsdata['uhsas100'].load()
+uhsas_all = obsdata['uhsas_all'].load()
+obsdata.close()
+uhsas100_hiscale = uhsas100.sel(time=time_hiscale)
+uhsasall_hiscale = uhsas_all.sel(time=time_hiscale)
+dlogDp_uhsas = np.mean(np.log10(dmax_hiscale/dmin_hiscale))
+
+obsdata = xr.open_dataset(prep_sfc_path + 'sfc_SMPS_'+site+'_IOP1.nc')
 time1 = obsdata['time'].load()
-smpsall_1 = obsdata['dN_dlogDp'].load()
 smps100_1 = obsdata['smps100_dlogDp'].load()
+smpsall_1 = obsdata['dN_dlogDp'].load()
 size1 = obsdata['size'].load()
 obsdata.close()
-filename = prep_sfc_path + 'sfc_SMPS_'+site+'_IOP2.nc'
-obsdata = xr.open_dataset(filename)
+obsdata = xr.open_dataset(prep_sfc_path + 'sfc_SMPS_'+site+'_IOP2.nc')
 time2 = obsdata['time'].load()
-smpsall_2 = obsdata['dN_dlogDp'].load()
 smps100_2 = obsdata['smps100_dlogDp'].load()
+smpsall_2 = obsdata['dN_dlogDp'].load()
 size2 = obsdata['size'].load()
 obsdata.close()
 time_smps = xr.concat((time1,time2),dim='time')
-smpsall_2_resize = np.full((smpsall_2.shape[0], smpsall_1.shape[1]), np.nan)
-smpsall_2_resize[:, 73:183] = smpsall_2
-smps_all = np.vstack((smpsall_1.data, smpsall_2_resize))
 size_smps = size1
-smps_all = xr.DataArray(data=smps_all, coords=dict(time=time_smps,size=size_smps), attrs=smpsall_1.attrs)
 smps100 = xr.concat((smps100_1,smps100_2),dim='time')
+smps_all = xr.concat((smpsall_1,smpsall_2.interp(size=smpsall_1['size'])),dim='time')
+# SMPS data is already dN/dlogDp, total number concentration must multiply by dlogDp
+dlogDp_smps = np.mean(np.log10(size_smps[1:].data/size_smps[0:-1].data))
+smps100 = smps100 * dlogDp_smps
+smps_all = smps_all * dlogDp_smps
+smps100_hiscale = smps100.sel(time=time_hiscale)
+smpsall_hiscale = smps_all.sel(time=time_hiscale)
 
-filename = prep_sfc_path + 'totcld_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_totcld = obsdata['time'].load()
-cld_arscl = obsdata['tot_cld_arscl'].load()
-cld_tsi = obsdata['tot_cld_tsi'].load()
-cld_visst = obsdata['tot_cld_visst'].load()
+obsdata = xr.open_mfdataset(prep_sfc_path + 'cloudheight_ARSCL_'+site+'.nc')
+cth = obsdata['cth'].load()
+cbh = obsdata['cbh'].load()
+cths = obsdata['cths'].load()
 obsdata.close()
-
-filename = prep_sfc_path + 'sfc_UHSAS_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_uhsas = obsdata['time'].load()
-uhsas_all = obsdata['uhsas_all'].load()
-uhsas100 = obsdata['uhsas100'].load()
-size_uhsas = obsdata['size'].load()
-sizel_uhsas = obsdata['size_low'].load()
-sizeh_uhsas = obsdata['size_high'].load()
-obsdata.close()
+cth_hiscale = cth.sel(time=time_hiscale)
+cbh_hiscale = cbh.sel(time=time_hiscale)
 
 # satellite data
-filename = prep_sat_path + 'cod_VISSTgrid_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_visst = obsdata['time'].load()
+obsdata = xr.open_dataset(prep_sat_path + 'albedo_VISSTgrid_'+site+'.nc')
+albedo_sat = obsdata['albedo'].load()
+obsdata.close()
+albedo_hiscale = albedo_sat.sel(time=time_hiscale)
+obsdata = xr.open_dataset(prep_sat_path + 'cloudfraction_VISSTgrid_'+site+'.nc')
+cfall_sat = obsdata['cldtot'].load()
+cflow_sat = obsdata['cldlow'].load()
+obsdata.close()
+cfall_sat_hiscale = cfall_sat.sel(time=time_hiscale)
+obsdata = xr.open_dataset(prep_sat_path + 'cloudtop_VISSTgrid_'+site+'.nc')
+ctt_sat = obsdata['ctt'].load()
+cth_sat = obsdata['cth'].load()
+obsdata.close()
+ctt_sat_hiscale = ctt_sat.sel(time=time_hiscale)
+cth_sat_hiscale = cth_sat.sel(time=time_hiscale)
+obsdata = xr.open_dataset(prep_sat_path + 'cod_VISSTgrid_'+site+'.nc')
 cod_sat = obsdata['cod'].load()
 obsdata.close()
-
-filename = prep_sat_path + 'LWP_VISSTgrid_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_visst = obsdata['time'].load()
-lwp_sat = obsdata['lwp'].load()
-obsdata.close()
-
-filename = prep_sat_path + 'Nd_VISSTgrid_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_visst = obsdata['time'].load()
-nd_sat = obsdata['Nd'].load()
-obsdata.close()
-
-filename = prep_sat_path + 'Nd_VISSTpix_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_pix = obsdata['time'].load()
-nd_sat_pix = obsdata['Nd'].load()
-obsdata.close()
-
-filename = prep_sat_path + 'Reff_VISSTgrid_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_visst = obsdata['time'].load()
+cod_sat_hiscale = cod_sat.sel(time=time_hiscale)
+obsdata = xr.open_dataset(prep_sat_path + 'Reff_VISSTgrid_'+site+'.nc')
 reff_sat = obsdata['reff'].load()
 obsdata.close()
-
-filename = prep_sat_path + 'lwflx_VISSTgrid_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_visst = obsdata['time'].load()
+reff_sat_hiscale = reff_sat.sel(time=time_hiscale)
+obsdata = xr.open_dataset(prep_sat_path + 'LWP_VISSTgrid_'+site+'.nc')
+lwp_sat = obsdata['lwp'].load()
+obsdata.close()
+lwp_sat_hiscale = lwp_sat.sel(time=time_hiscale)
+obsdata = xr.open_dataset(prep_sat_path + 'Nd_VISSTgrid_'+site+'.nc')
+nd_sat = obsdata['Nd'].load()
+obsdata.close()
+nd_sat_hiscale = nd_sat.sel(time=time_hiscale)
+obsdata = xr.open_dataset(prep_sat_path + 'lwflx_VISSTgrid_'+site+'.nc')
 lwnettoa = obsdata['lwnettoa'].load()
 obsdata.close()
-
-filename = prep_sat_path + 'swflx_VISSTgrid_'+site+'.nc'
-obsdata = xr.open_dataset(filename)
-time_visst = obsdata['time'].load()
+lwnettoa_hiscale = lwnettoa.sel(time=time_hiscale)
+obsdata = xr.open_dataset(prep_sat_path + 'swflx_VISSTgrid_'+site+'.nc')
 swnettoa = obsdata['swnettoa'].load()
 obsdata.close()
+swnettoa_hiscale = swnettoa.sel(time=time_hiscale)
 
 # E3SM data
 filename = prep_model_path + 'E3SMv1_'+site+'_sfc.nc'
@@ -194,24 +194,28 @@ modeldata = xr.open_dataset(filename)
 time_m = modeldata['time'].load()
 bc_m = modeldata['bc'].load()
 dst_m = modeldata['dst'].load()
-ncl_m = modeldata['ncl'].load()
-pom_m = modeldata['pom'].load()
 mom_m = modeldata['mom'].load()
+pom_m = modeldata['pom'].load()
+ncl_m = modeldata['ncl'].load()
 so4_m = modeldata['so4'].load()
 soa_m = modeldata['soa'].load()
-ccn1_m = modeldata['CCN3'].load()
 ccn2_m = modeldata['CCN4'].load()
-ccn5_m = modeldata['CCN5'].load()
 ncn3_m = modeldata['NCN3'].load()
 ncn10_m = modeldata['NCN10'].load()
 ncn100_m = modeldata['NCN100'].load()
-ncn_m = modeldata['NCNall'].load()
+CNsize_m = modeldata['NCNall'].load()
 cod_m = modeldata['cod'].load()
 reff_m = modeldata['reff'].load()
 lwp_m = modeldata['TGCLDLWP'].load()
 nd_m = modeldata['Nd_mean'].load()
 precip_m = modeldata['PRECT'].load()
 cld_m = modeldata['CLDTOT'].load()
+cbh_m = modeldata['cbh'].load()
+cth_m = modeldata['cth'].load()
+Hcld_m = modeldata['clddepth'].load()
+cldlow_m = modeldata['CLDLOW'].load()
+cldmid_m = modeldata['CLDMED'].load()
+cldhgh_m = modeldata['CLDHGH'].load()
 lwdnsfc_m = modeldata['FLDS'].load()
 lwnetsfc_m = modeldata['FLNS'].load()
 lwnettoa_m = modeldata['FLNT'].load()
@@ -222,33 +226,65 @@ swdntoa_m = modeldata['SOLIN'].load()
 swnettoa_m = modeldata['FSNT'].load()
 swuptoa_m = modeldata['FSUTOA'].load()
 modeldata.close()
-# lwupsfc_m = lwnetsfc_m + lwdnsfc_m
-# swupsfc_m = swdnsfc_m - swnetsfc_m
+lwupsfc_m = lwnetsfc_m + lwdnsfc_m
+swupsfc_m = swdnsfc_m - swnetsfc_m
+albedo_m = swuptoa_m/swdntoa_m*100
 org_m = pom_m + mom_m + soa_m
+bc_m_hiscale = bc_m.sel(time=time_hiscale)
+dst_m_hiscale = dst_m.sel(time=time_hiscale)
+org_m_hiscale = org_m.sel(time=time_hiscale)
+so4_m_hiscale = so4_m.sel(time=time_hiscale)
+ncl_m_hiscale = ncl_m.sel(time=time_hiscale)
+ccn2_m_hiscale = ccn2_m.sel(time=time_hiscale)
+ncn3_m_hiscale = ncn3_m.sel(time=time_hiscale)
+ncn10_m_hiscale = ncn10_m.sel(time=time_hiscale)
+ncn100_m_hiscale = ncn100_m.sel(time=time_hiscale)
+CNsize_m_hiscale = CNsize_m.sel(time=time_hiscale)
+cod_m_hiscale = cod_m.sel(time=time_hiscale)
+reff_m_hiscale = reff_m.sel(time=time_hiscale)
+lwp_m_hiscale = lwp_m.sel(time=time_hiscale)
+nd_m_hiscale = nd_m.sel(time=time_hiscale)
+precip_m_hiscale = precip_m.sel(time=time_hiscale)
+cld_m_hiscale = cld_m.sel(time=time_hiscale)
+cbh_m_hiscale = cbh_m.sel(time=time_hiscale)
+cth_m_hiscale = cth_m.sel(time=time_hiscale)
+Hcld_m_hiscale = Hcld_m.sel(time=time_hiscale)
+cldlow_m_hiscale = cldlow_m.sel(time=time_hiscale)
+cldmid_m_hiscale = cldmid_m.sel(time=time_hiscale)
+cldhgh_m_hiscale = cldhgh_m.sel(time=time_hiscale)
+lwnetsfc_m_hiscale = lwnetsfc_m.sel(time=time_hiscale)
+lwnettoa_m_hiscale = lwnettoa_m.sel(time=time_hiscale)
+swnetsfc_m_hiscale = swnetsfc_m.sel(time=time_hiscale)
+swnettoa_m_hiscale = swnettoa_m.sel(time=time_hiscale)
+albedo_m_hiscale = albedo_m.sel(time=time_hiscale)
 
 filename = prep_model_path + 'E3SMv2_'+site+'_sfc.nc'
 modeldata = xr.open_dataset(filename)
 time_m2 = modeldata['time'].load()
 bc_m2 = modeldata['bc'].load()
 dst_m2 = modeldata['dst'].load()
-ncl_m2 = modeldata['ncl'].load()
-pom_m2 = modeldata['pom'].load()
 mom_m2 = modeldata['mom'].load()
+pom_m2 = modeldata['pom'].load()
+ncl_m2 = modeldata['ncl'].load()
 so4_m2 = modeldata['so4'].load()
 soa_m2 = modeldata['soa'].load()
-ccn1_m2 = modeldata['CCN3'].load()
 ccn2_m2 = modeldata['CCN4'].load()
-ccn5_m2 = modeldata['CCN5'].load()
 ncn3_m2 = modeldata['NCN3'].load()
 ncn10_m2 = modeldata['NCN10'].load()
 ncn100_m2 = modeldata['NCN100'].load()
-ncn_m2 = modeldata['NCNall'].load()
+CNsize_m2 = modeldata['NCNall'].load()
 cod_m2 = modeldata['cod'].load()
 reff_m2 = modeldata['reff'].load()
 lwp_m2 = modeldata['TGCLDLWP'].load()
 nd_m2 = modeldata['Nd_mean'].load()
 precip_m2 = modeldata['PRECT'].load()
 cld_m2 = modeldata['CLDTOT'].load()
+cbh_m2 = modeldata['cbh'].load()
+cth_m2 = modeldata['cth'].load()
+Hcld_m2 = modeldata['clddepth'].load()
+cldlow_m2 = modeldata['CLDLOW'].load()
+cldmid_m2 = modeldata['CLDMED'].load()
+cldhgh_m2 = modeldata['CLDHGH'].load()
 lwdnsfc_m2 = modeldata['FLDS'].load()
 lwnetsfc_m2 = modeldata['FLNS'].load()
 lwnettoa_m2 = modeldata['FLNT'].load()
@@ -259,711 +295,583 @@ swdntoa_m2 = modeldata['SOLIN'].load()
 swnettoa_m2 = modeldata['FSNT'].load()
 swuptoa_m2 = modeldata['FSUTOA'].load()
 modeldata.close()
-# lwupsfc_m2 = lwnetsfc_m2 + lwdnsfc_m2
-# swupsfc_m2 = swdnsfc_m2 - swnetsfc_m2
+lwupsfc_m2 = lwnetsfc_m2 + lwdnsfc_m2
+swupsfc_m2 = swdnsfc_m2 - swnetsfc_m2
+albedo_m2 = swuptoa_m2/swdntoa_m2*100
 org_m2 = pom_m2 + mom_m2 + soa_m2
+bc_m2_hiscale = bc_m2.sel(time=time_hiscale)
+dst_m2_hiscale = dst_m2.sel(time=time_hiscale)
+org_m2_hiscale = org_m2.sel(time=time_hiscale)
+so4_m2_hiscale = so4_m2.sel(time=time_hiscale)
+ncl_m2_hiscale = ncl_m2.sel(time=time_hiscale)
+ccn2_m2_hiscale = ccn2_m2.sel(time=time_hiscale)
+ncn3_m2_hiscale = ncn3_m2.sel(time=time_hiscale)
+ncn10_m2_hiscale = ncn10_m2.sel(time=time_hiscale)
+ncn100_m2_hiscale = ncn100_m2.sel(time=time_hiscale)
+CNsize_m2_hiscale = CNsize_m2.sel(time=time_hiscale)
+cod_m2_hiscale = cod_m2.sel(time=time_hiscale)
+reff_m2_hiscale = reff_m2.sel(time=time_hiscale)
+lwp_m2_hiscale = lwp_m2.sel(time=time_hiscale)
+nd_m2_hiscale = nd_m2.sel(time=time_hiscale)
+precip_m2_hiscale = precip_m2.sel(time=time_hiscale)
+cld_m2_hiscale = cld_m2.sel(time=time_hiscale)
+cbh_m2_hiscale = cbh_m2.sel(time=time_hiscale)
+cth_m2_hiscale = cth_m2.sel(time=time_hiscale)
+Hcld_m2_hiscale = Hcld_m2.sel(time=time_hiscale)
+cldlow_m2_hiscale = cldlow_m2.sel(time=time_hiscale)
+cldmid_m2_hiscale = cldmid_m2.sel(time=time_hiscale)
+cldhgh_m2_hiscale = cldhgh_m2.sel(time=time_hiscale)
+lwnetsfc_m2_hiscale = lwnetsfc_m2.sel(time=time_hiscale)
+lwnettoa_m2_hiscale = lwnettoa_m2.sel(time=time_hiscale)
+swnetsfc_m2_hiscale = swnetsfc_m2.sel(time=time_hiscale)
+swnettoa_m2_hiscale = swnettoa_m2.sel(time=time_hiscale)
+albedo_m2_hiscale = albedo_m2.sel(time=time_hiscale)
 
+filename = prep_model_path + 'E3SMv1_'+site+'_profiles.nc'
+modeldata = xr.open_dataset(filename)
+height_m = modeldata['height'].load()
+cf_e3sm = modeldata['cloud_z'].load()
+modeldata.close()
+cloud_m_hiscale = cf_e3sm.sel(time=time_hiscale)
+
+filename = prep_model_path + 'E3SMv2_'+site+'_profiles.nc'
+modeldata = xr.open_dataset(filename)
+height_m2 = modeldata['height'].load()
+cf_e3sm2 = modeldata['cloud_z'].load()
+modeldata.close()
+cloud_m2_hiscale = cf_e3sm2.sel(time=time_hiscale)
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # specific data treatments
 
 # divided by dlogDp in size distribution
-dlogDp_uhsas = np.log10(sizeh_uhsas/sizel_uhsas)
-uhsas_all = uhsas_all/dlogDp_uhsas
-
 dlogDp_e3sm = np.log10(np.arange(2,3002)/np.arange(1,3001))
-ncn_m = ncn_m.T/dlogDp_e3sm
-ncn_m2 = ncn_m2.T/dlogDp_e3sm
+CNsize_m_hiscale = CNsize_m_hiscale.T/dlogDp_e3sm
+CNsize_m2_hiscale = CNsize_m2_hiscale.T/dlogDp_e3sm
+smpsall_hiscale = smpsall_hiscale / dlogDp_smps
+uhsasall_hiscale = uhsasall_hiscale / dlogDp_uhsas
 
-# SMPS data is already dN/dlogDp, total number concentration must multiply by dlogDp
-dlogDp_smps = np.log10(size_smps[1:].data/size_smps[0:-1].data)
-smps100 = smps100 * np.mean(dlogDp_smps)
+pdf_uhsas_hiscale = np.nanmean(uhsasall_hiscale,axis=0)
+pdf_smps_hiscale = np.nanmean(smpsall_hiscale,axis=0)
+pdf_m_hiscale = np.nanmean(CNsize_m_hiscale,axis=0)
+pdf_m2_hiscale = np.nanmean(CNsize_m2_hiscale,axis=0)
 
-# remove LWP less than 20 g/m2
-lwp_armbe[lwp_armbe<20]=np.nan
-# lwp_armbe[lwp_armbe>200]=np.nan
-lwp_mfrsr[lwp_mfrsr<20]=np.nan
-# lwp_mfrsr[lwp_mfrsr>200]=np.nan
-lwp_sat[lwp_sat<20]=np.nan
-lwp_m[lwp_m<20]=np.nan
-lwp_m2[lwp_m2<20]=np.nan
+ndrop_hiscale[ndrop_hiscale<10] = np.nan
+nd_sat_hiscale[nd_sat_hiscale<10] = np.nan
+nd_m_hiscale[nd_m_hiscale<10] = np.nan
+nd_m2_hiscale[nd_m2_hiscale<10] = np.nan
+ndrop_hiscale[ndrop_hiscale>500] = np.nan
+nd_sat_hiscale[nd_sat_hiscale>500] = np.nan
+nd_m_hiscale[nd_m_hiscale>500] = np.nan
+nd_m2_hiscale[nd_m2_hiscale>500] = np.nan
 
-# remove Nd less than 1 cm-3
-ndrop[ndrop<1] = np.nan
-nd_sat[nd_sat<1] = np.nan
-nd_sat_pix[nd_sat_pix<1] = np.nan
-nd_m[nd_m<1] = np.nan
-nd_m2[nd_m2<1] = np.nan
+lwp_armbe_hiscale[lwp_armbe_hiscale<20] = np.nan
+lwp_mfrsr_hiscale[lwp_mfrsr_hiscale<20] = np.nan
+lwp_sat_hiscale[lwp_sat_hiscale<20] = np.nan
+lwp_m_hiscale[lwp_m_hiscale<20] = np.nan
+lwp_m2_hiscale[lwp_m2_hiscale<20] = np.nan
 
-# remove Nd greater than 2000
-ndrop[ndrop>2000] = np.nan
-nd_m[nd_m>2000] = np.nan
-nd_m2[nd_m2>2000] = np.nan
-
-# trim for the same time period
-IOP = 'IOP1'
-time1 = np.datetime64('2016-04-25')
-time2 = np.datetime64('2016-05-22')
-time = pd.date_range(start='2016-04-25', end='2016-05-22', freq="H")
-# IOP = 'IOP2'
-# time1 = np.datetime64('2016-08-28')
-# time2 = np.datetime64('2016-09-23')
-# time = pd.date_range(start='2016-08-28', end='2016-09-23', freq="H")
-
-# surface
-org = org[np.logical_and(time_acsm>=time1, time_acsm<=time2)]
-so4 = so4[np.logical_and(time_acsm>=time1, time_acsm<=time2)]
-nh4 = nh4[np.logical_and(time_acsm>=time1, time_acsm<=time2)]
-no3 = no3[np.logical_and(time_acsm>=time1, time_acsm<=time2)]
-chl = chl[np.logical_and(time_acsm>=time1, time_acsm<=time2)]
-ccn1 = ccn1[np.logical_and(time_ccn>=time1, time_ccn<=time2)]
-ccn2 = ccn2[np.logical_and(time_ccn>=time1, time_ccn<=time2)]
-ccn5 = ccn5[np.logical_and(time_ccn>=time1, time_ccn<=time2)]
-cpc3 = cpc3[np.logical_and(time_cpc>=time1, time_cpc<=time2)]
-cpc10 = cpc10[np.logical_and(time_cpc>=time1, time_cpc<=time2)]
-cod = cod[np.logical_and(time_cod>=time1, time_cod<=time2)]
-lwp_armbe = lwp_armbe[np.logical_and(time_lwp>=time1, time_lwp<=time2)]
-lwp_mfrsr = lwp_mfrsr[np.logical_and(time_lwp>=time1, time_lwp<=time2)]
-LTS700 = LTS700[np.logical_and(time_lts>=time1, time_lts<=time2)]
-LTS850 = LTS850[np.logical_and(time_lts>=time1, time_lts<=time2)]
-ndrop = ndrop[np.logical_and(time_ndrop>=time1, time_ndrop<=time2)]
-reff = reff[np.logical_and(time_reff>=time1, time_reff<=time2)]
-precip = precip[np.logical_and(time_pr>=time1, time_pr<=time2)]
-lwdnsfc = lwdnsfc[np.logical_and(time_rad>=time1, time_rad<=time2)]
-swdnsfc = swdnsfc[np.logical_and(time_rad>=time1, time_rad<=time2)]
-lwupsfc = lwupsfc[np.logical_and(time_rad>=time1, time_rad<=time2)]
-swupsfc = swupsfc[np.logical_and(time_rad>=time1, time_rad<=time2)]
-smps100 = smps100[np.logical_and(time_smps>=time1, time_smps<=time2)]
-uhsas100 = uhsas100[np.logical_and(time_uhsas>=time1, time_uhsas<=time2)]
-cld_arscl = cld_arscl[np.logical_and(time_totcld>=time1, time_totcld<=time2)]
-cld_tsi = cld_tsi[np.logical_and(time_totcld>=time1, time_totcld<=time2)]
-cld_visst = cld_visst[np.logical_and(time_totcld>=time1, time_totcld<=time2)]
-lwnetsfc = lwupsfc - lwdnsfc
-swnetsfc = swdnsfc - swupsfc
-
-uhsas_all = uhsas_all[np.logical_and(time_uhsas>=time1, time_uhsas<=time2), :]
-smps_all = smps_all[np.logical_and(time_smps>=time1, time_smps<=time2), :]
-
-# satellite
-cod_sat = cod_sat[np.logical_and(time_visst>=time1, time_visst<=time2)]
-lwp_sat = lwp_sat[np.logical_and(time_visst>=time1, time_visst<=time2)]
-nd_sat = nd_sat[np.logical_and(time_visst>=time1, time_visst<=time2)]
-nd_sat_pix = nd_sat_pix[np.logical_and(time_pix>=time1, time_pix<=time2)]
-reff_sat = reff_sat[np.logical_and(time_visst>=time1, time_visst<=time2)]
-lwnettoa = lwnettoa[np.logical_and(time_visst>=time1, time_visst<=time2)]
-swnettoa = swnettoa[np.logical_and(time_visst>=time1, time_visst<=time2)]
-
-# E3SMv1 data
-bc_m = bc_m[np.logical_and(time_m>=time1, time_m<=time2)]
-dst_m = dst_m[np.logical_and(time_m>=time1, time_m<=time2)]
-ncl_m = ncl_m[np.logical_and(time_m>=time1, time_m<=time2)]
-so4_m = so4_m[np.logical_and(time_m>=time1, time_m<=time2)]
-org_m = org_m[np.logical_and(time_m>=time1, time_m<=time2)]
-ccn1_m = ccn1_m[np.logical_and(time_m>=time1, time_m<=time2)]
-ccn2_m = ccn2_m[np.logical_and(time_m>=time1, time_m<=time2)]
-ccn5_m = ccn5_m[np.logical_and(time_m>=time1, time_m<=time2)]
-ncn3_m = ncn3_m[np.logical_and(time_m>=time1, time_m<=time2)]
-ncn10_m = ncn10_m[np.logical_and(time_m>=time1, time_m<=time2)]
-ncn100_m = ncn100_m[np.logical_and(time_m>=time1, time_m<=time2)]
-cod_m = cod_m[np.logical_and(time_m>=time1, time_m<=time2)]
-reff_m = reff_m[np.logical_and(time_m>=time1, time_m<=time2)]
-lwp_m = lwp_m[np.logical_and(time_m>=time1, time_m<=time2)]
-nd_m = nd_m[np.logical_and(time_m>=time1, time_m<=time2)]
-precip_m = precip_m[np.logical_and(time_m>=time1, time_m<=time2)]
-cld_m = cld_m[np.logical_and(time_m>=time1, time_m<=time2)]
-lwdnsfc_m = lwdnsfc_m[np.logical_and(time_m>=time1, time_m<=time2)]
-swdnsfc_m = swdnsfc_m[np.logical_and(time_m>=time1, time_m<=time2)]
-swnetsfc_m = swnetsfc_m[np.logical_and(time_m>=time1, time_m<=time2)]
-lwnetsfc_m = lwnetsfc_m[np.logical_and(time_m>=time1, time_m<=time2)]
-swnettoa_m = swnettoa_m[np.logical_and(time_m>=time1, time_m<=time2)]
-lwnettoa_m = lwnettoa_m[np.logical_and(time_m>=time1, time_m<=time2)]
-
-ncn_m = ncn_m[np.logical_and(time_m>=time1, time_m<=time2)]
-
-# E3SMv2 data
-bc_m2 = bc_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-dst_m2 = dst_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-ncl_m2 = ncl_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-so4_m2 = so4_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-org_m2 = org_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-ccn1_m2 = ccn1_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-ccn2_m2 = ccn2_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-ccn5_m2 = ccn5_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-ncn3_m2 = ncn3_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-ncn10_m2 = ncn10_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-ncn100_m2 = ncn100_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-cod_m2 = cod_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-reff_m2 = reff_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-lwp_m2 = lwp_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-nd_m2 = nd_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-precip_m2 = precip_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-cld_m2 = cld_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-lwdnsfc_m2 = lwdnsfc_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-swdnsfc_m2 = swdnsfc_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-swnetsfc_m2 = swnetsfc_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-lwnetsfc_m2 = lwnetsfc_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-swnettoa_m2 = swnettoa_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-lwnettoa_m2 = lwnettoa_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-
-ncn_m2 = ncn_m2[np.logical_and(time_m2>=time1, time_m2<=time2)]
-
+cod_hiscale[cod_hiscale<2] = np.nan
+cod_sat_hiscale[cod_sat_hiscale<2] = np.nan
+cod_m_hiscale[cod_m_hiscale<2] = np.nan
+cod_m2_hiscale[cod_m2_hiscale<2] = np.nan
+cod_hiscale[cod_hiscale>100] = np.nan
+cod_sat_hiscale[cod_sat_hiscale>100] = np.nan
+cod_m_hiscale[cod_m_hiscale>100] = np.nan
+cod_m2_hiscale[cod_m2_hiscale>100] = np.nan
 
 # unit change:
-precip_m = precip_m*3600*1000   # m/s to mm/hr
-precip_m2 = precip_m2*3600*1000   # m/s to mm/hr
+precip_m_hiscale = precip_m_hiscale*3600*1000   # m/s to mm/hr
+precip_m2_hiscale = precip_m2_hiscale*3600*1000   # m/s to mm/hr
+cloud_m_hiscale = cloud_m_hiscale*100  # fraction to %
+cloud_m2_hiscale = cloud_m2_hiscale*100  # fraction to %
+height_o = height_o.data*0.001   # m to km
+height_m = height_m.data*0.001   # m to km
+height_m2 = height_m2.data*0.001   # m to km
 
 # set a small threshold of E3SM precipitation
-precip_m[precip_m<0.02] = 0
-precip_m2[precip_m2<0.02] = 0
+precip_m_hiscale[precip_m_hiscale<0.02] = 0
+precip_m2_hiscale[precip_m2_hiscale<0.02] = 0
 
 
-#%%
-
-w0 = np.ones_like(ndrop)/sum(~np.isnan(ndrop.data))
-w00 = np.ones_like(nd_sat)/sum(~np.isnan(nd_sat.data))
-w000 = np.ones_like(nd_sat_pix)/sum(~np.isnan(nd_sat_pix.data))
-w1 = np.ones_like(nd_m)/sum(~np.isnan(nd_m.data))
-w2 = np.ones_like(nd_m2)/sum(~np.isnan(nd_m2.data))
-fig,ax = plot.hist([ndrop,nd_sat,nd_sat_pix],  weights=[w0,w00,w000], 
-                    legend = ['Ndrop','Satellite','pix'], color=['k','blue','green'],
-                    title = 'Nd '+site+' '+IOP, bins=np.arange(0,410,20), ylabel='Fraction', xlabel='cm$^{-3}$')
-e
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if not os.path.exists(figpath):
-    os.makedirs(figpath)
 
-# #%% bar plot
-# datagroup0 = [org,so4,nh4,no3,chl, [], []]
-# datagroup1 = [org_m, so4_m, [], [], [], bc_m, dst_m]
-# datagroup2 = [org_m2, so4_m2, [], [], [], bc_m2, dst_m2]
+#%% bar plot
+# datagroup0 = [org_hiscale,so4_hiscale,nh4_hiscale,no3_hiscale,chl_hiscale, [], []]
+# datagroup1 = [org_m_hiscale, so4_m_hiscale, [], [], [], bc_m_hiscale, dst_m_hiscale]
+# datagroup2 = [org_m2_hiscale, so4_m2_hiscale, [], [], [], bc_m2_hiscale, dst_m2_hiscale]
 # dataall=[datagroup0,datagroup1, datagroup2,]
 # labelall = ['Organic', 'SO$_4$', 'NH$_4$', 'NO$_3$', 'Chl', 'BC', 'Dust']
 # colorall = ['limegreen', 'red', 'lightblue', 'orange', 'cyan', 'k', 'silver']
 # fig,ax = plot.bar(dataall, datalabel=['Obs','E3SMv1','E3SMv2',], xlabel=None, ylabel='unit: $\mu$g/m$^3$', 
-#                   title='Aerosol Composition  '+site+' '+IOP, varlabel= labelall, colorall=colorall)
-# fig.savefig(figpath+'bar_composition_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+#                   title='Aerosol Composition  '+site, varlabel= labelall, colorall=colorall)
+# fig.savefig(figpath+'bar_composition_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 # #%% timeseries
-# fig,ax = plot.timeseries([time,time,time], [org,org_m,org_m2], 
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [org_hiscale,org_m_hiscale,org_m2_hiscale], 
 #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                           title='Total Organic '+site+' '+IOP, xlabel=None, ylabel='${\mu}$g/m$^{3}$')
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_org_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.timeseries([time,time,time], [so4,so4_m,so4_m2], 
+#                           title='Total Organic '+site, xlabel=None, ylabel='${\mu}$g/m$^{3}$')
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_org_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [so4_hiscale,so4_m_hiscale,so4_m2_hiscale], 
 #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'],  
-#                           title='Sulfate '+site+' '+IOP, xlabel=None, ylabel='${\mu}$g/m$^{3}$')
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+#                           title='Sulfate '+site, xlabel=None, ylabel='${\mu}$g/m$^{3}$')
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_so4_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.timeseries([time,time,time], [ccn1,ccn1_m,ccn1_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                         title='0.1%CCN '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_CCN1_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.timeseries([time,time,time], [ccn2,ccn2_m,ccn2_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                         title='0.2%CCN '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.timeseries([time,time,time], [ccn5,ccn5_m,ccn5_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                          title='0.5%CCN '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_CCN5_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# if IOP=='IOP1':
-#     fig,ax = plot.timeseries([time,time,time], [cpc3,ncn3_m,ncn3_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                              title='CN(>3nm) '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
-#     ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-#     ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-#     ax.set_xlim(time1,time2)
-#     fig.savefig(figpath+'timeseries_CPC3_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     fig,ax = plot.timeseries([time,time,time], [cpc10,ncn10_m,ncn10_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                              title='CN(>10nm) '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
-#     ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-#     ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-#     ax.set_xlim(time1,time2)
-#     fig.savefig(figpath+'timeseries_CPC10_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     fig,ax = plot.timeseries([time,time,time,time], [smps100,uhsas100,ncn100_m,ncn100_m2], 
-#                             legend = ['SMPS','UHSAS','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-#                             title='CN(>100nm) '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
-#     ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-#     ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-#     ax.set_xlim(time1,time2)
-#     fig.savefig(figpath+'timeseries_CN100_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# elif IOP=='IOP2':
-#     fig,ax = plot.timeseries([time,time,time], [smps100,ncn100_m,ncn100_m2], 
-#                              legend = ['SMPS','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                             title='CN(>100nm) '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
-#     ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-#     ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-#     ax.set_xlim(time1,time2)
-#     fig.savefig(figpath+'timeseries_CN100_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# fig,ax = plot.timeseries([time,time,time,time], [cod,cod_sat,cod_m,cod_m2], marker='.',
-#                          legend = ['MFRSR','VISST','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-#                         title='cloud optical depth '+site+' '+IOP, xlabel=None, ylabel=None)
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_cod_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# fig,ax = plot.timeseries([time,time,time,time], [lwp_mfrsr, lwp_sat, lwp_m, lwp_m2], 
-#                         legend = ['MFRSR','VISST','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-#                         title='LWP '+site+' '+IOP,xlabel=None, ylabel="g/m$^2$")
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# fig,ax = plot.timeseries([time,time,time], [LTS700,LTS850], legend = ['Theta(700hPa-sfc)','Theta(850hPa-sfc)'], 
-#                         color=['b','r'], marker='.', figsize=(10,3), xlabel=None, ylabel="K")
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_LTS_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# fig,ax = plot.timeseries([time,time,time,time], [ndrop,nd_sat, nd_m, nd_m2], marker='.',
-#                           legend = ['Ndrop (ARM)','Nd (satellite)','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-#                           title='Nd '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# fig,ax = plot.timeseries([time,time,time,time], [reff,reff_sat,reff_m,reff_m2],  marker='.',
-#                         legend = ['MFRSR','VISST','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-#                         title='Reff '+site+' '+IOP,xlabel=None, ylabel='$\mu$m')
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_reff_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# fig,ax = plot.timeseries([time,time,time], [precip,precip_m,precip_m2],  
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], 
 #                          legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                         title='Precip '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='mm/hr')
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_precip_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+#                         title='0.2%CCN '+site, xlabel=None, ylabel='cm$^{-3}$')
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_CCN2_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.timeseries([time,time,time], [lwnetsfc,lwnetsfc_m,lwnetsfc_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                         title='Sfc. net LW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_LWsfc_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.timeseries([time,time,time], [swnetsfc,swnetsfc_m,swnetsfc_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                         title='Sfc. net SW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_SWsfc_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.timeseries([time,time,time], [lwnettoa,lwnettoa_m,lwnettoa_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                         title='TOA. net LW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_LWtoa_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.timeseries([time,time,time], [swnettoa,swnettoa_m,swnettoa_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                         title='TOA. net SW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_SWtoa_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [cpc3_hiscale,ncn3_m_hiscale,ncn3_m2_hiscale], 
+#                          legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                           title='CN(>3nm) '+site, xlabel=None, ylabel='cm$^{-3}$')
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_CPC3_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [cpc10_hiscale,ncn10_m_hiscale,ncn10_m2_hiscale], 
+#                          legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                           title='CN(>10nm) '+site, xlabel=None, ylabel='cm$^{-3}$')
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_CPC10_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [smps100_hiscale,uhsas100_hiscale,ncn100_m_hiscale,ncn100_m2_hiscale], 
+#                         legend = ['SMPS','UHSAS','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+#                         title='CN(>100nm) '+site, xlabel=None, ylabel='cm$^{-3}$')
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_CN100_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.timeseries([time,time,time,time], [cld_arscl,cld_visst,cld_m,cld_m2], 
-#                         legend = ['ARSCL','VISST','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-#                         title='Cloud fraction '+site+' '+IOP,xlabel=None, ylabel="%")
-# ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-# ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# ax.set_xlim(time1,time2)
-# fig.savefig(figpath+'timeseries_totcld_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [cod_hiscale,cod_sat_hiscale,cod_m_hiscale,cod_m2_hiscale], 
+#                           legend = ['MFRSR','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'], #marker='.',
+#                         title='cloud optical depth '+site, xlabel=None, ylabel=None)
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_cod_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# if IOP=='IOP1':
-#     fig,ax = plot.timeseries_size([time,time,time,time], [size_uhsas,size_smps, np.arange(1,3001), np.arange(1,3001)], 
-#                                   [uhsas_all.T.data, smps_all.T.data, ncn_m.T.data, ncn_m2.T.data], 
-#                                   legend = ['UHSAS','SMPS','E3SMv1','E3SMv2'],
-#                               ylabel='Diameter (nm)', ylimit=(3,1000),
-#                               title = 'Aerosol Size Distribution (dN/dlogDp, cm$^{-3}$)')
-# elif IOP=='IOP2':
-#     fig,ax = plot.timeseries_size([time,time,time], [size_smps, np.arange(1,3001), np.arange(1,3001)], 
-#                                   [smps_all.T.data, ncn_m.T.data, ncn_m2.T.data], legend = ['SMPS','E3SMv1','E3SMv2'],
-#                               ylabel='Diameter (nm)', ylimit=(3,1000),
-#                               title = 'Aerosol Size Distribution (dN/dlogDp, cm$^{-3}$)')    
-# for ax_i in ax:
-#     ax_i.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-#     ax_i.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-# fig.savefig(figpath+'aerosol_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [lwp_armbe_hiscale, lwp_sat_hiscale, lwp_m_hiscale, lwp_m2_hiscale], 
+#                         legend = ['ARMBE','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+#                         title='LWP '+site,xlabel=None, ylabel="g/m$^2$")
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_LWP_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [ndrop_hiscale,nd_sat_hiscale, nd_m_hiscale, nd_m2_hiscale], 
+#                           legend = ['Ndrop','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'], #marker='.',
+#                           title='Nd '+site, xlabel=None, ylabel='cm$^{-3}$')
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [reff_hiscale,reff_sat_hiscale,reff_m_hiscale,reff_m2_hiscale],  
+#                         legend = ['MFRSR','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],marker='.',
+#                         title='Reff '+site,xlabel=None, ylabel='$\mu$m')
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_reff_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [precip_hiscale,precip_m_hiscale,precip_m2_hiscale],  
+#                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                         title='Precip '+site, figsize=(10,3), xlabel=None, ylabel='mm/hr')
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_precip_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [lwnetsfc_hiscale,lwnetsfc_m_hiscale,lwnetsfc_m2_hiscale], 
+#                          legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                         title='Sfc. net LW Flux '+site, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_LWsfc_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [swnetsfc_hiscale,swnetsfc_m_hiscale,swnetsfc_m2_hiscale], 
+#                          legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                         title='Sfc. net SW Flux '+site, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_SWsfc_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [lwnettoa_hiscale,lwnettoa_m_hiscale,lwnettoa_m2_hiscale], 
+#                          legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                         title='TOA. net LW Flux '+site, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_LWtoa_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [swnettoa_hiscale,swnettoa_m_hiscale,swnettoa_m2_hiscale], 
+#                          legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                         title='TOA. net SW Flux '+site, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_SWtoa_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [cld_arscl_hiscale,cld_visst_hiscale,cld_m_hiscale,cld_m2_hiscale], 
+#                         legend = ['ARSCL','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+#                         title='Cloud fraction '+site,xlabel=None, ylabel="%")
+# # ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# # ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'timeseries_totcld_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# #%%
+# fig,ax = plot.timeseries_size([time_hiscale,time_hiscale,time_hiscale,time_hiscale], 
+#                               [size_uhsas,size_smps, np.arange(1,3001), np.arange(1,3001)], 
+#                               [uhsasall_hiscale.T.data, smpsall_hiscale.T.data, CNsize_m_hiscale.T.data, CNsize_m2_hiscale.T.data], 
+#                               legend = ['UHSAS','SMPS','E3SMv1','E3SMv2'],
+#                           ylabel='Diameter (nm)', ylimit=(3,1000),
+#                           title = 'Aerosol Size Distribution (dN/dlogDp, cm$^{-3}$)')
+# # for ax_i in ax:
+# #     ax_i.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# #     ax_i.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'aerosol_size_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# fig,ax = plot.timeseries_2d([time_hiscale,time_hiscale,time_hiscale], 
+#                             [height_o, height_m, height_m2], 
+#                             [cloud_2d_hiscale.T.data, cloud_m_hiscale.T.data, cloud_m2_hiscale.T.data], 
+#                               yticks=[0,3,6,9,12], ylimit=(0,12), ylabel='Height (m)',cmap='jet', #ylimit=(3,1000),
+#                               legend = ['Obs','E3SMv1','E3SMv2'], title = 'Cloud Fraction (%)')
+# # for ax_i in ax:
+# #     ax_i.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+# #     ax_i.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+# fig.savefig(figpath+'cloud_2d_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 # #%% diurnal cycle
-# fig,ax = plot.diurnalcycle([org,org_m,org_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                           title='Organic '+site+' '+IOP, xlabel='Time (UTC)', ylabel='${\mu}$g/m$^{3}$')
-# fig.savefig(figpath+'diurnalcycle_org_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.diurnalcycle([so4,so4_m,so4_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                           title='Sulfate '+site+' '+IOP, xlabel='Time (UTC)', ylabel='${\mu}$g/m$^{3}$')
-# fig.savefig(figpath+'diurnalcycle_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle([org_hiscale,org_m_hiscale,org_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                           title='Organic '+site, xlabel='Time (UTC)', ylabel='${\mu}$g/m$^{3}$')
+# fig.savefig(figpath+'diurnalcycle_org_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle([so4_hiscale,so4_m_hiscale,so4_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                           title='Sulfate '+site, xlabel='Time (UTC)', ylabel='${\mu}$g/m$^{3}$')
+# fig.savefig(figpath+'diurnalcycle_so4_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.diurnalcycle([ccn1,ccn1_m,ccn1_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                         title='0.1%CCN '+site+' '+IOP, xlabel='Time (UTC)', ylabel='cm$^{-3}$')
-# fig.savefig(figpath+'diurnalcycle_CCN1_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.diurnalcycle([ccn2,ccn2_m,ccn2_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                         title='0.2%CCN '+site+' '+IOP, xlabel='Time (UTC)', ylabel='cm$^{-3}$')
-# fig.savefig(figpath+'diurnalcycle_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.diurnalcycle([ccn5,ccn5_m,ccn5_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                         title='0.5%CCN '+site+' '+IOP, xlabel='Time (UTC)', ylabel='cm$^{-3}$')
-# fig.savefig(figpath+'diurnalcycle_CCN5_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle([ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                         title='0.2%CCN '+site, xlabel='Time (UTC)', ylabel='cm$^{-3}$')
+# fig.savefig(figpath+'diurnalcycle_CCN2_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# if IOP=='IOP1':
-#     fig,ax = plot.diurnalcycle([cpc3,ncn3_m,ncn3_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                             title='CN(>3nm) '+site+' '+IOP, xlabel='Time (UTC)', ylabel='cm$^{-3}$')
-#     fig.savefig(figpath+'diurnalcycle_CPC3_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     fig,ax = plot.diurnalcycle([cpc10,ncn10_m,ncn10_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                             title='CN(>10nm) '+site+' '+IOP, xlabel='Time (UTC)', ylabel='cm$^{-3}$')
-#     fig.savefig(figpath+'diurnalcycle_CPC10_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     fig,ax = plot.diurnalcycle([smps100,uhsas100,ncn100_m,ncn100_m2], legend = ['SMPS100','UHSAS100','E3SMv1','E3SMv2'], 
-#                             title='CN(>100nm) '+site+' '+IOP, color=['k','gray','r','b'], xlabel='Time (UTC)',ylabel='cm$^{-3}$')
-#     fig.savefig(figpath+'diurnalcycle_CN100_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# elif IOP=='IOP2':
-#     fig,ax = plot.diurnalcycle([smps100,ncn100_m,ncn100_m2], legend = ['SMPS','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                             title='CN(>100nm) '+site+' '+IOP, xlabel='Time (UTC)',ylabel='cm$^{-3}$')
-#     fig.savefig(figpath+'diurnalcycle_CN100_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle([cpc3_hiscale,ncn3_m_hiscale,ncn3_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                         title='CN(>3nm) '+site, xlabel='Time (UTC)', ylabel='cm$^{-3}$')
+# fig.savefig(figpath+'diurnalcycle_CPC3_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle([cpc10_hiscale,ncn10_m_hiscale,ncn10_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                         title='CN(>10nm) '+site, xlabel='Time (UTC)', ylabel='cm$^{-3}$')
+# fig.savefig(figpath+'diurnalcycle_CPC10_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle([smps100_hiscale,uhsas100_hiscale,ncn100_m_hiscale,ncn100_m2_hiscale], legend = ['SMPS100','UHSAS100','E3SMv1','E3SMv2'], 
+#                         title='CN(>100nm) '+site, color=['k','gray','r','b'], xlabel='Time (UTC)',ylabel='cm$^{-3}$')
+# fig.savefig(figpath+'diurnalcycle_CN100_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.diurnalcycle( [cod, cod_sat, cod_m, cod_m2], legend = ['MFRSR','VISST','E3SMv1','E3SMv2'], color=['k','gray','r','b'], 
-#                         title='Cloud optical depth '+site+' '+IOP, xlabel='Time (UTC)', ylabel=None)
-# fig.savefig(figpath+'diurnalcycle_cod_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle( [cod_hiscale, cod_sat_hiscale, cod_m_hiscale, cod_m2_hiscale], 
+#                            legend = ['MFRSR','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'], 
+#                         title='Cloud optical depth '+site, xlabel='Time (UTC)', ylabel=None)
+# fig.savefig(figpath+'diurnalcycle_cod_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.diurnalcycle([lwp_mfrsr,lwp_sat, lwp_m, lwp_m2], legend = ['MFRSR','VISST','E3SMv1','E3SMv2'], 
-#                         title='LWP '+site+' '+IOP, color=['k','gray','r','b'], xlabel='Time (UTC)',ylabel="g/m$^2$")
-# fig.savefig(figpath+'diurnalcycle_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle([lwp_armbe_hiscale,lwp_sat_hiscale, lwp_m_hiscale, lwp_m2_hiscale], 
+#                            legend = ['ARMBE','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+#                         title='LWP '+site,  xlabel='Time (UTC)',ylabel="g/m$^2$")
+# fig.savefig(figpath+'diurnalcycle_LWP_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# # fig,ax = plot.diurnalcycle([LTS700,LTS850], legend = ['Theta(700hPa-sfc)','Theta(850hPa-sfc)'], 
-# #                         color=['b','r'], xlabel='Time (UTC)', ylabel="K")
-# # fig.savefig(figpath+'diurnalcycle_LTS_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle([ndrop_hiscale, nd_sat_hiscale, nd_m_hiscale,nd_m2_hiscale], 
+#                            legend = ['Ndrop', 'Satellite', 'E3SMv1', 'E3SMv2'], color=['k','gray','r','b'], 
+#                           title='Nd '+site, xlabel='Time (UTC)', ylabel='cm$^{-3}$')
+# fig.savefig(figpath+'diurnalcycle_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.diurnalcycle([ndrop, nd_sat, nd_m,nd_m2], legend = ['Ndrop (ARM)', 'Nd (satellite)', 'E3SMv1', 'E3SMv2'], 
-#                           title='Nd '+site+' '+IOP, color=['k','gray','r','b'], xlabel='Time (UTC)', ylabel='cm$^{-3}$')
-# fig.savefig(figpath+'diurnalcycle_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle([reff_hiscale, reff_sat_hiscale, reff_m_hiscale, reff_m2_hiscale], 
+#                            legend = ['MFRSR','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+#                         title='droplet effective radius '+site, xlabel='Time (UTC)', ylabel='$\mu$m')
+# fig.savefig(figpath+'diurnalcycle_reff_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.diurnalcycle([reff, reff_sat, reff_m, reff_m2], legend = ['MFRSR','VISST','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-#                         title='droplet effective radius '+site+' '+IOP, xlabel='Time (UTC)', ylabel='$\mu$m')
-# fig.savefig(figpath+'diurnalcycle_reff_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle( [precip_hiscale,precip_m_hiscale,precip_m2_hiscale], 
+#                            legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                         nozero_percentile=True, title='Precipitation '+site, xlabel='Time (UTC)',ylabel='mm/hr')
+# fig.savefig(figpath+'diurnalcycle_precip_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.diurnalcycle( [precip,precip_m,precip_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                         nozero_percentile=True, title='Precipitation '+site+' '+IOP, xlabel='Time (UTC)',ylabel='mm/hr')
-# fig.savefig(figpath+'diurnalcycle_precip_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle([lwnetsfc_hiscale,lwnetsfc_m_hiscale,lwnetsfc_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                         title='Sfc. net LW Flux '+site, xlabel='Time (UTC)',ylabel='W/m$^2$')
+# fig.savefig(figpath+'diurnalcycle_LWsfc_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle([swnetsfc_hiscale,swnetsfc_m_hiscale,swnetsfc_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                         title='Sfc. net SW Flux '+site, xlabel='Time (UTC)', ylabel='W/m$^2$')
+# fig.savefig(figpath+'diurnalcycle_SWsfc_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle([lwnettoa_hiscale,lwnettoa_m_hiscale,lwnettoa_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                         title='TOA. net LW Flux '+site, xlabel='Time (UTC)', ylabel='W/m$^2$')
+# fig.savefig(figpath+'diurnalcycle_LWtoa_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle([swnettoa_hiscale,swnettoa_m_hiscale,swnettoa_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+#                         title='TOA. net SW Flux '+site, xlabel='Time (UTC)', ylabel='W/m$^2$')
+# fig.savefig(figpath+'diurnalcycle_SWtoa_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.diurnalcycle([lwnetsfc,lwnetsfc_m,lwnetsfc_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                         title='Sfc. net LW Flux '+site+' '+IOP, xlabel='Time (UTC)',ylabel='W/m$^2$')
-# fig.savefig(figpath+'diurnalcycle_LWsfc_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.diurnalcycle([swnetsfc,swnetsfc_m,swnetsfc_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                         title='Sfc. net SW Flux '+site+' '+IOP, xlabel='Time (UTC)', ylabel='W/m$^2$')
-# fig.savefig(figpath+'diurnalcycle_SWsfc_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.diurnalcycle([lwnettoa,lwnettoa_m,lwnettoa_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                         title='TOA. net LW Flux '+site+' '+IOP, xlabel='Time (UTC)', ylabel='W/m$^2$')
-# fig.savefig(figpath+'diurnalcycle_LWtoa_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.diurnalcycle([swnettoa,swnettoa_m,swnettoa_m2], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                         title='TOA. net SW Flux '+site+' '+IOP, xlabel='Time (UTC)', ylabel='W/m$^2$')
-# fig.savefig(figpath+'diurnalcycle_SWtoa_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.diurnalcycle([cld_arscl_hiscale,cld_visst_hiscale,cld_m_hiscale,cld_m2_hiscale],
+#                            legend = ['ARSCL','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+#                             title='Total cloud fraction '+site, xlabel='Time (UTC)', ylabel="%")
+# fig.savefig(figpath+'diurnalcycle_totcld_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.diurnalcycle([cld_arscl,cld_visst,cld_m,cld_m2], legend = ['ARSCL','VISST','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-#                            title='Total cloud fraction '+site+' '+IOP, xlabel='Time (UTC)', ylabel="%")
-# fig.savefig(figpath+'diurnalcycle_totcld_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# if IOP=='IOP1':
-#     fig,ax = plot.diurnalcycle_2d([uhsas_all.T, smps_all.T, ncn_m.T, ncn_m2.T], 
-#                                   y=[size_uhsas,size_smps, np.arange(1,3001), np.arange(1,3001)], 
-#                                   title= ['UHSAS','SMPS','E3SMv1','E3SMv2'],
-#                                   levellist=np.arange(0,11500,200), xlabel='Time (UTC)', ylabel='Diameter (nm)', 
-#                                   ylimit=(3,1000),cmap='jet')
-# elif IOP=='IOP2':
-#     fig,ax = plot.diurnalcycle_2d([smps_all.T, ncn_m.T, ncn_m2.T], y=[size_smps, np.arange(1,3001), np.arange(1,3001)], 
-#                                   title= ['SMPS','E3SMv1','E3SMv2'],
-#                                   levellist=np.arange(0,10000,200), xlabel='Time (UTC)', ylabel='Diameter (nm)', 
-#                                   ylimit=(3,1000),cmap='jet')
+# fig,ax = plot.diurnalcycle_2d([uhsasall_hiscale.T, smpsall_hiscale.T, CNsize_m_hiscale.T, CNsize_m2_hiscale.T], 
+#                               y=[size_uhsas,size_smps, np.arange(1,3001), np.arange(1,3001)], 
+#                               title= ['UHSAS','SMPS','E3SMv1','E3SMv2'],
+#                               levellist=np.arange(0,11500,200), xlabel='Time (UTC)', ylabel='Diameter (nm)', 
+#                               ylimit=(3,1000),cmap='jet')
 # for ax_i in ax:
 #     ax_i.set_yscale('log')
-# fig.savefig(figpath+'diurnalcycle_aerosol_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig.savefig(figpath+'diurnalcycle_aerosol_size_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# fig,ax = plot.diurnalcycle_2d([cloud_2d_hiscale, cloud_m_hiscale, cloud_m2_hiscale], 
+#                               y = [height_o, height_m, height_m2],
+#                         yticks=[0,3,6,9,12], ylimit=(0,12), ylabel='Height (km)',  cmap='jet',
+#                         levellist=np.arange(0,45,1),
+#                          title= ['Obs', 'E3SMv1', 'E3SMv2',])
+# fig.savefig(figpath+'diurnalcycle_cloud2d_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 # #%% 1d histogram
-# w0 = np.ones_like(org)/sum(~np.isnan(org.data))
-# w1 = np.ones_like(org_m)/sum(~np.isnan(org_m.data))
-# w2 = np.ones_like(org_m2)/sum(~np.isnan(org_m2.data))
-# fig,ax = plot.hist([org,org_m,org_m2], weights=[w0,w1,w2],
-#                         legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,10.2,0.5), 
-#                           title='Total Organic '+site+' '+IOP,ylabel='Fraction', xlabel='${\mu}$g/m$^{3}$')
-# fig.savefig(figpath+'hist_org_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# w0 = np.ones_like(so4)/sum(~np.isnan(so4.data))
-# w1 = np.ones_like(so4_m)/sum(~np.isnan(so4_m.data))
-# w2 = np.ones_like(so4_m2)/sum(~np.isnan(so4_m2.data))
-# fig,ax = plot.hist([so4,so4_m,so4_m2], weights=[w0,w1,w2],
-#                         legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,8.2,0.5), 
-#                           title='Sulfate '+site+' '+IOP, ylabel='Fraction', xlabel='${\mu}$g/m$^{3}$')
-# fig.savefig(figpath+'hist_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w0 = np.ones_like(ccn1)/sum(~np.isnan(ccn1.data))
-# w1 = np.ones_like(ccn1_m)/sum(~np.isnan(ccn1_m.data))
-# w2 = np.ones_like(ccn1_m2)/sum(~np.isnan(ccn1_m2.data))
-# fig,ax = plot.hist([ccn1,ccn1_m,ccn1_m2], weights=[w0,w1,w2],
-#                     legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,1100,50), 
-#                     title='CCN (SS=0.1%) '+site+' '+IOP, ylabel='Fraction', xlabel='cm$^{-3}$')
-# fig.savefig(figpath+'hist_CCN1_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# w0 = np.ones_like(ccn2)/sum(~np.isnan(ccn2.data))
-# w1 = np.ones_like(ccn2_m)/sum(~np.isnan(ccn2_m.data))
-# w2 = np.ones_like(ccn2_m2)/sum(~np.isnan(ccn2_m2.data))
-# fig,ax = plot.hist([ccn2,ccn2_m,ccn2_m2], weights=[w0,w1,w2],
-#                     legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,1800,50), 
-#                     title='CCN (SS=0.2%) '+site+' '+IOP, ylabel='Fraction', xlabel='cm$^{-3}$')
-# fig.savefig(figpath+'hist_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# w0 = np.ones_like(ccn5)/sum(~np.isnan(ccn5.data))
-# w1 = np.ones_like(ccn5_m)/sum(~np.isnan(ccn5_m.data))
-# w2 = np.ones_like(ccn5_m2)/sum(~np.isnan(ccn5_m2.data))
-# fig,ax = plot.hist([ccn5,ccn5_m,ccn5_m2], weights=[w0,w1,w2],
-#                     legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,2500,100), 
-#                     title='CCN (SS=0.5%) '+site+' '+IOP, ylabel='Fraction', xlabel='cm$^{-3}$')
-# fig.savefig(figpath+'hist_CCN5_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# w1 = np.ones_like(org_hiscale)/sum(~np.isnan(org_hiscale.data))
+# w2 = np.ones_like(org_m_hiscale)/sum(~np.isnan(org_m_hiscale.data))
+# w3 = np.ones_like(org_m2_hiscale)/sum(~np.isnan(org_m2_hiscale.data))
+# fig,ax = plot.hist([org_hiscale,org_m_hiscale,org_m2_hiscale], weights=[w1,w2,w3], bins=np.arange(0,10,0.3),
+#                     legend =['Obs','E3SMv1','E3SMv2',], color=['k','r','b'],
+#                     title = 'Total Organic '+site, ylabel='Fraction', xlabel='${\mu}$g/m$^{3}$')
+# fig.savefig(figpath+'hist_org_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# if IOP=='IOP1':
-#     w0 = np.ones_like(cpc3)/sum(~np.isnan(cpc3.data))
-#     w1 = np.ones_like(ncn3_m)/sum(~np.isnan(ncn3_m.data))
-#     w2 = np.ones_like(ncn3_m2)/sum(~np.isnan(ncn3_m2.data))
-#     fig,ax = plot.hist([cpc3,ncn3_m,ncn3_m2], weights=[w0,w1,w2], bins=np.arange(0,29000,1000),
-#                        legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-#                             title='Aerosol number (>3nm) '+site+' '+IOP, ylabel='Fraction', xlabel='cm$^{-3}$')
-#     fig.savefig(figpath+'hist_CPC3_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     w0 = np.ones_like(cpc10)/sum(~np.isnan(cpc10.data))
-#     w1 = np.ones_like(ncn10_m)/sum(~np.isnan(ncn10_m.data))
-#     w2 = np.ones_like(ncn10_m2)/sum(~np.isnan(ncn10_m2.data))
-#     fig,ax = plot.hist([cpc10,ncn10_m,ncn10_m2], weights=[w0,w1,w2], bins=np.arange(0,22000,1000),
-#                        legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'],
-#                         title='Aerosol number (>10nm) '+site+' '+IOP,ylabel='Fraction', xlabel='cm$^{-3}$')
-#     fig.savefig(figpath+'hist_CPC10_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     w0 = np.ones_like(smps100)/sum(~np.isnan(smps100.data))
-#     w00 = np.ones_like(uhsas100)/sum(~np.isnan(uhsas100.data))
-#     w1 = np.ones_like(ncn100_m)/sum(~np.isnan(ncn100_m.data))
-#     w2 = np.ones_like(ncn100_m2)/sum(~np.isnan(ncn100_m2.data))
-#     fig,ax = plot.hist([smps100,uhsas100,ncn100_m,ncn100_m2], weights=[w0,w00,w1,w2],bins=np.arange(0,2100,100), 
-#                        legend = ['SMPS100','UHSAS100','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-#                         title='Aerosol number (>100nm) '+site+' '+IOP, ylabel='Fraction', xlabel='cm$^{-3}$')
-#     fig.savefig(figpath+'hist_CN100_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# elif IOP=='IOP2':
-#     w0 = np.ones_like(smps100)/sum(~np.isnan(smps100.data))
-#     w1 = np.ones_like(ncn100_m)/sum(~np.isnan(ncn100_m.data))
-#     w2 = np.ones_like(ncn100_m2)/sum(~np.isnan(ncn100_m2.data))
-#     fig,ax = plot.hist([smps100,ncn100_m,ncn100_m2], weights=[w0,w1,w2], bins=np.arange(0,2100,100),
-#                        legend = ['SMPS100','E3SMv1','E3SMv2'], color=['k','r','b'],
-#                         title='Aerosol number (>100nm) '+site+' '+IOP,  ylabel='Fraction', xlabel='cm$^{-3}$')
-#     fig.savefig(figpath+'hist_CN100_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# w1 = np.ones_like(so4_hiscale)/sum(~np.isnan(so4_hiscale.data))
+# w2 = np.ones_like(so4_m_hiscale)/sum(~np.isnan(so4_m_hiscale.data))
+# w3 = np.ones_like(so4_m2_hiscale)/sum(~np.isnan(so4_m2_hiscale.data))
+# fig,ax = plot.hist([so4_hiscale,so4_m_hiscale,so4_m2_hiscale], weights=[w1,w2,w3], bins=np.arange(0,6,0.2),
+#                     legend =['Obs','E3SMv1','E3SMv2',], color=['k','r','b'],
+#                     title = 'Sulfate '+site, ylabel='Fraction', xlabel='${\mu}$g/m$^{3}$')
+# fig.savefig(figpath+'hist_SO4_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w0 = np.ones_like(cod)/sum(~np.isnan(cod.data))
-# w00 = np.ones_like(cod_sat)/sum(~np.isnan(cod_sat.data))
-# w1 = np.ones_like(cod_m)/sum(~np.isnan(cod_m.data))
-# w2 = np.ones_like(cod_m2)/sum(~np.isnan(cod_m2.data))
-# fig,ax = plot.hist( [cod, cod_sat, cod_m, cod_m2], weights=[w0,w00,w1,w2], 
-#                     legend = ['MFRSR','VISST','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-#                     title='Cloud Optical Depth '+site+' '+IOP, bins=np.arange(0,90,5), ylabel='Fraction', xlabel=None)
-# fig.savefig(figpath+'hist_cod_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# w1 = np.ones_like(ccn2_hiscale)/sum(~np.isnan(ccn2_hiscale.data))
+# w2 = np.ones_like(ccn2_m_hiscale)/sum(~np.isnan(ccn2_m_hiscale.data))
+# w3 = np.ones_like(ccn2_m2_hiscale)/sum(~np.isnan(ccn2_m2_hiscale.data))
+# fig,ax = plot.hist([ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], weights=[w1,w2,w3], bins=np.arange(0,1800,50),
+#                     legend =['Obs','E3SMv1','E3SMv2',], color=['k','r','b'],
+#                     title = 'CCN (SS=0.2%) '+site, ylabel='Fraction', xlabel='cm$^{-3}$')
+# fig.savefig(figpath+'hist_CCN2_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# # w1 = np.ones_like(lwp_armbe)/sum(~np.isnan(lwp_armbe.data))
-# w0 = np.ones_like(lwp_mfrsr)/sum(~np.isnan(lwp_mfrsr.data))
-# w00 = np.ones_like(lwp_sat)/sum(~np.isnan(lwp_sat.data))
-# w1 = np.ones_like(lwp_m)/sum(~np.isnan(lwp_m.data))
-# w2 = np.ones_like(lwp_m2)/sum(~np.isnan(lwp_m2.data))
-# fig,ax = plot.hist([lwp_mfrsr, lwp_sat, lwp_m, lwp_m2], weights=[w0,w00,w1,w2], 
-#                     legend = ['MFRSR','VISST','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-#                     title='LWP '+site+' '+IOP, bins=np.arange(10,440,20), ylabel='Fraction', xlabel="g/m$^2$")
-# fig.savefig(figpath+'hist_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w1 = np.ones_like(LTS700)/sum(~np.isnan(LTS700.data))
-# w2 = np.ones_like(LTS850)/sum(~np.isnan(LTS850.data))
-# fig,ax = plot.hist([LTS700,LTS850], weights=[w1,w2], legend = ['Theta(700hPa-sfc)','Theta(850hPa-sfc)'], 
-#                     color=['b','r'], ylabel='Fraction', xlabel="K")
-# fig.savefig(figpath+'hist_LTS_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# w0 = np.ones_like(cpc10_hiscale)/sum(~np.isnan(cpc10_hiscale.data))
+# w1 = np.ones_like(ncn10_m_hiscale)/sum(~np.isnan(ncn10_m_hiscale.data))
+# w2 = np.ones_like(ncn10_m2_hiscale)/sum(~np.isnan(ncn10_m2_hiscale.data))
+# fig,ax = plot.hist([cpc10_hiscale,ncn10_m_hiscale,ncn10_m2_hiscale], weights=[w0,w1,w2], bins=np.arange(0,22000,1000),
+#                     legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'],
+#                     title='Aerosol number (>10nm) '+site,ylabel='Fraction', xlabel='cm$^{-3}$')
+# fig.savefig(figpath+'hist_CPC10_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-w0 = np.ones_like(ndrop)/sum(~np.isnan(ndrop.data))
-w00 = np.ones_like(nd_sat)/sum(~np.isnan(nd_sat.data))
-w1 = np.ones_like(nd_m)/sum(~np.isnan(nd_m.data))
-w2 = np.ones_like(nd_m2)/sum(~np.isnan(nd_m2.data))
-fig,ax = plot.hist([ndrop,nd_sat,nd_m,nd_m2],  weights=[w0,w00,w1,w2], 
-                    legend = ['Ndrop','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-                    title = 'Nd '+site+' '+IOP, bins=np.arange(0,510,20), ylabel='Fraction', xlabel='cm$^{-3}$')
-fig.savefig(figpath+'hist_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# w0 = np.ones_like(smps100_hiscale)/sum(~np.isnan(smps100_hiscale.data))
+# w1 = np.ones_like(ncn100_m_hiscale)/sum(~np.isnan(ncn100_m_hiscale.data))
+# w2 = np.ones_like(ncn100_m2_hiscale)/sum(~np.isnan(ncn100_m2_hiscale.data))
+# fig,ax = plot.hist([smps100_hiscale,ncn100_m_hiscale,ncn100_m2_hiscale], weights=[w0,w1,w2], bins=np.arange(0,2100,100),
+#                     legend = ['SMPS100','E3SMv1','E3SMv2'], color=['k','r','b'],
+#                     title='Aerosol number (>100nm) '+site,  ylabel='Fraction', xlabel='cm$^{-3}$')
+# fig.savefig(figpath+'hist_CN100_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w0 = np.ones_like(reff)/sum(~np.isnan(reff.data))
-# w00 = np.ones_like(reff_sat)/sum(~np.isnan(reff_sat.data))
-# w1 = np.ones_like(reff_m)/sum(~np.isnan(reff_m.data))
-# w2 = np.ones_like(reff_m2)/sum(~np.isnan(reff_m2.data))
-# fig,ax = plot.hist([reff,reff_sat,reff_m,reff_m2], weights=[w0,w00,w1,w2], 
-#                    legend = ['MFRSR','VISST','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-#                     title = 'Cloud Effective Radius '+site+' '+IOP, bins=np.arange(0,39,2), ylabel='Fraction', xlabel='$\mu$m')
-# fig.savefig(figpath+'hist_reff_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# w0 = np.ones_like(cod_hiscale)/sum(~np.isnan(cod_hiscale.data))
+# w00 = np.ones_like(cod_sat_hiscale)/sum(~np.isnan(cod_sat_hiscale.data))
+# w1 = np.ones_like(cod_m_hiscale)/sum(~np.isnan(cod_m_hiscale.data))
+# w2 = np.ones_like(cod_m2_hiscale)/sum(~np.isnan(cod_m2_hiscale.data))
+# fig,ax = plot.hist( [cod_hiscale, cod_sat_hiscale, cod_m_hiscale, cod_m2_hiscale], weights=[w0,w00,w1,w2], 
+#                     legend = ['MFRSR','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+#                     title='Cloud Optical Depth '+site, bins=np.arange(0,61,3), ylabel='Fraction', xlabel='N/A')
+# fig.savefig(figpath+'hist_cod_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# pr0 = precip[precip!=0]
-# prm = precip_m[precip_m!=0]
-# prm2 = precip_m[precip_m2!=0]
+# w0 = np.ones_like(lwp_armbe_hiscale)/sum(~np.isnan(lwp_armbe_hiscale.data))
+# # w0 = np.ones_like(lwp_mfrsr)/sum(~np.isnan(lwp_mfrsr.data))
+# w00 = np.ones_like(lwp_sat_hiscale)/sum(~np.isnan(lwp_sat_hiscale.data))
+# w1 = np.ones_like(lwp_m_hiscale)/sum(~np.isnan(lwp_m_hiscale.data))
+# w2 = np.ones_like(lwp_m2_hiscale)/sum(~np.isnan(lwp_m2_hiscale.data))
+# fig,ax = plot.hist([lwp_mfrsr_hiscale, lwp_sat_hiscale, lwp_m_hiscale, lwp_m2_hiscale], weights=[w0,w00,w1,w2], 
+#                     legend = ['ARMBE','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+#                     title='LWP '+site, bins=np.arange(10,410,20), ylabel='Fraction', xlabel="g/m$^2$")
+# fig.savefig(figpath+'hist_LWP_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# w0 = np.ones_like(ndrop_hiscale)/sum(~np.isnan(ndrop_hiscale.data))
+# w00 = np.ones_like(nd_sat_hiscale)/sum(~np.isnan(nd_sat_hiscale.data))
+# w1 = np.ones_like(nd_m_hiscale)/sum(~np.isnan(nd_m_hiscale.data))
+# w2 = np.ones_like(nd_m2_hiscale)/sum(~np.isnan(nd_m2_hiscale.data))
+# fig,ax = plot.hist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale,nd_m2_hiscale],  weights=[w0,w00,w1,w2], 
+#                     legend = ['Ndrop','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+#                     title = 'Nd '+site, bins=np.arange(0,410,20), ylabel='Fraction', xlabel='cm$^{-3}$')
+# fig.savefig(figpath+'hist_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# w0 = np.ones_like(reff_hiscale)/sum(~np.isnan(reff_hiscale.data))
+# w00 = np.ones_like(reff_sat_hiscale)/sum(~np.isnan(reff_sat_hiscale.data))
+# w1 = np.ones_like(reff_m_hiscale)/sum(~np.isnan(reff_m_hiscale.data))
+# w2 = np.ones_like(reff_m2_hiscale)/sum(~np.isnan(reff_m2_hiscale.data))
+# fig,ax = plot.hist([reff_hiscale,reff_sat_hiscale,reff_m_hiscale,reff_m2_hiscale], weights=[w0,w00,w1,w2], 
+#                     legend = ['MFRSR','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+#                     title = 'Cloud Effective Radius '+site, bins=np.arange(4,28,1), ylabel='Fraction', xlabel='$\mu$m')
+# fig.savefig(figpath+'hist_reff_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# pr0 = precip_hiscale[precip_hiscale!=0]
+# prm = precip_m_hiscale[precip_m_hiscale!=0]
+# prm2 = precip_m_hiscale[precip_m2_hiscale!=0]
 # w0 = np.ones_like(pr0)/sum(~np.isnan(pr0.data))
 # w1 = np.ones_like(prm)/sum(~np.isnan(prm.data))
 # w2 = np.ones_like(prm2)/sum(~np.isnan(prm2.data))
 # fig,ax = plot.hist( [pr0,prm,prm2], weights=[w0,w1,w2], legend = ['Obs','E3SMv1','E3SMv2'], 
-#                    color=['k','r','b'],  bins=np.arange(0,8,.2), 
-#                     title = 'Precipitation '+site+' '+IOP, ylabel='Fraction', xlabel='mm/hr')
-# fig.savefig(figpath+'hist_precip_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+#                     color=['k','r','b'],  bins=np.arange(0,5,.1), 
+#                     title = 'Precipitation '+site, ylabel='Fraction', xlabel='mm/hr')
+# fig.savefig(figpath+'hist_precip_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w0 = np.ones_like(cld_arscl)/sum(~np.isnan(cld_arscl.data))
-# w00 = np.ones_like(cld_visst)/sum(~np.isnan(cld_visst.data))
-# w1 = np.ones_like(cld_m)/sum(~np.isnan(cld_m.data))
-# w2 = np.ones_like(cld_m2)/sum(~np.isnan(cld_m2.data))
-# fig,ax = plot.hist([cld_arscl,cld_visst,cld_m,cld_m2], weights=[w0,w00,w1,w2], legend = ['ARSCL','VISST','E3SMv1','E3SMv2'], 
-#                         color=['k','gray','r','b'], title = 'Cloud Fraction '+site+' '+IOP, ylabel='Fraction', xlabel="%")
-# fig.savefig(figpath+'hist_totcld_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
+# w0 = np.ones_like(cld_arscl_hiscale)/sum(~np.isnan(cld_arscl_hiscale.data))
+# w00 = np.ones_like(cld_visst_hiscale)/sum(~np.isnan(cld_visst_hiscale.data))
+# w1 = np.ones_like(cld_m_hiscale)/sum(~np.isnan(cld_m_hiscale.data))
+# w2 = np.ones_like(cld_m2_hiscale)/sum(~np.isnan(cld_m2_hiscale.data))
+# fig,ax = plot.hist([cld_arscl_hiscale,cld_visst_hiscale,cld_m_hiscale,cld_m2_hiscale], 
+#                    weights=[w0,w00,w1,w2],  bins=np.arange(0,101,5), 
+#                     legend = ['ARMBE','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+#                       title = 'Cloud Fraction '+site, ylabel='Fraction', xlabel="%")
+# fig.savefig(figpath+'hist_totcld_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 # #%% mean size distribution
-# if IOP=='IOP1':
-#     fig,ax = plot.mean_size([size_uhsas,size_smps,np.arange(1,3001),np.arange(1,3001)], 
-#                 [np.nanmean(uhsas_all,axis=0), np.nanmean(smps_all,axis=0), np.nanmean(ncn_m,axis=0), np.nanmean(ncn_m2,axis=0)], 
-#                 legend = ['UHSAS','SMPS','E3SMv1','E3SMv2'],color=['k','gray','r','b'], 
-#                 marker=['o','+',None,None], linestyles=['none','none','-','-'],
-#                 xlimit=(2, 2e3), ylimit=(1e-2,1e4), xlabel='Diameter (nm)', ylabel='dN/dlogDp (cm$^{-3}$)', 
-#                 title = 'Mean Aerosol Size Distribution '+site+' '+IOP)
-#     fig.savefig(figpath+'mean_aerosol_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# elif IOP=='IOP2':
-#     fig,ax = plot.mean_size([size_smps,np.arange(1,3001),np.arange(1,3001)], 
-#                             [np.nanmean(smps_all,axis=0), np.nanmean(ncn_m,axis=0), np.nanmean(ncn_m2,axis=0)], 
-#                       legend = ['SMPS','E3SMv1','E3SMv2'],color=['k','r','b'],
-#                       marker=['.',None,None], linestyles=['none','-','-'],
-#                       xlimit=(1, 3e3), ylimit=(1e-2,1e4), xlabel='Diameter (nm)', ylabel='dN/dlogDp (cm$^{-3}$)', 
-#                         title = 'Mean Aerosol Size Distribution '+site+' '+IOP)
-#     fig.savefig(figpath+'mean_aerosol_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-#%% scatter
-
-fig,ax = plot.scatter([ndrop.data, nd_sat.data, nd_m.data, nd_m2.data], 
-                      [lwp_mfrsr.data, lwp_sat.data, lwp_m.data, lwp_m2.data], 
-                      title=['MFRSR','satellite','E3SMv1','E3SMv2'], xlimit=(0,400), ylimit=(0,500),
-                    xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^{2}$)', 
-                    linear_fit=True, intercept=True)
-fig.savefig(figpath+'scatter_LWP_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-fig,ax = plot.scatter([ndrop.data, nd_sat.data, nd_m.data, nd_m2.data], 
-                      [reff.data*10, reff_sat.data*10, reff_m.data*10, reff_m2.data*10], 
-                      title=['MFRSR','satellite','E3SMv1','E3SMv2'], xlimit=(0,400), ylimit=(0,300),
-                    xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m *10)', 
-                    linear_fit=True, intercept=True)
-fig.savefig(figpath+'scatter_Reff_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-#%% joint histogram
-fig,ax = plot.jointhist([ccn2.data, ccn2.data, ccn2_m.data, ccn2_m2.data], [ndrop.data, nd_sat.data, nd_m.data, nd_m2.data], 
-                    xedges=np.arange(0,1200,100), yedges=np.arange(0,500,50), 
-                    normalize_x=False, vmin=0, vmax=0.2,
-                    xlabel=['SFC 0.2%CCN (cm$^{-3}$)','SFC 0.2%CCN (cm$^{-3}$)','SFC 0.2%CCN (cm$^{-3}$)','SFC 0.2%CCN (cm$^{-3}$)'], 
-                    ylabel='Nd (cm$^{-3}$)', title=['ARM','Satellite','E3SMv1','E3SMv2'], )
-fig.savefig(figpath+'jointhist_Nd_CCN_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-#%% heatmaps
-fig,ax = plot.heatmap([ccn2.data, ccn2.data, ccn2_m.data, ccn2_m2.data], 
-                      [lwp_mfrsr.data, lwp_sat.data, lwp_m.data, lwp_m2.data], 
-                      [ndrop.data, nd_sat.data, nd_m.data, nd_m2.data], 
-                    xedges=np.arange(50,1500,150), yedges=np.arange(0,500,50), 
-                    vmin=0, vmax=200,
-                    xlabel='0.2%CCN (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', 
-                    # title=['Ndrop_ARM (cm$^{-3}$)','Nd_Satellite (cm$^{-3}$)','Nd_E3SMv1 (cm$^{-3}$)','Nd_E3SMv2 (cm$^{-3}$)'])
-                    title=['Ndrop_ARM','Nd_Satellite','Nd_E3SMv1','Nd_E3SMv2'])
-fig.text(.94, .85,'cm$^{-3}$')      # unit of color variable
-fig.savefig(figpath+'heatmap_Nd_CCN&LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.mean_size([size_uhsas,size_smps,np.arange(1,3001),np.arange(1,3001)], 
+#             [pdf_uhsas_hiscale, pdf_smps_hiscale, pdf_m_hiscale, pdf_m2_hiscale], 
+#             legend = ['UHSAS','SMPS','E3SMv1','E3SMv2'],color=['k','gray','r','b'], 
+#             marker=['o','+',None,None], linestyles=['none','none','-','-'],
+#             xlimit=(2, 2e3), ylimit=(1e-2,1e4), xlabel='Diameter (nm)', ylabel='dN/dlogDp (cm$^{-3}$)', 
+#             title = 'Mean Aerosol Size Distribution '+site)
+# fig.savefig(figpath+'mean_aerosol_size_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 #%% calculate statistics
-# calc.mean_std_percentiles([org,org_m,org_m2],legend=['Obs','E3SMv1','E3SMv2'], 
-#                           outfile=figpath+'statistics_1var_ORG_'+site+'_'+IOP+'.txt')
-# calc.mean_std_percentiles([so4, so4_m, so4_m2],legend=['Obs','E3SMv1','E3SMv2'], 
-#                           outfile=figpath+'statistics_1var_SO4_'+site+'_'+IOP+'.txt')
-# calc.mean_std_percentiles([ccn1,ccn1_m,ccn1_m2],legend=['Obs','E3SMv1','E3SMv2'], 
-#                           outfile=figpath+'statistics_1var_CCN1_'+site+'_'+IOP+'.txt')
-# calc.mean_std_percentiles([ccn2,ccn2_m,ccn2_m2],legend=['Obs','E3SMv1','E3SMv2'], 
-#                           outfile=figpath+'statistics_1var_CCN2_'+site+'_'+IOP+'.txt')
-# calc.mean_std_percentiles([ccn5,ccn5_m,ccn5_m2],legend=['Obs','E3SMv1','E3SMv2'], 
-#                           outfile=figpath+'statistics_1var_CCN5_'+site+'_'+IOP+'.txt')
-# if IOP=='IOP1':
-#     calc.mean_std_percentiles([cpc3,ncn3_m,ncn3_m2],legend=['Obs','E3SMv1','E3SMv2'], 
-#                               outfile=figpath+'statistics_1var_CPC3_'+site+'_'+IOP+'.txt')
-#     calc.mean_std_percentiles([cpc10,ncn10_m,ncn10_m2],legend=['Obs','E3SMv1','E3SMv2'], 
-#                               outfile=figpath+'statistics_1var_CPC10_'+site+'_'+IOP+'.txt')
-#     calc.mean_std_percentiles([uhsas100, ncn100_m, ncn100_m2],legend=['Obs','E3SMv1','E3SMv2'], 
-#                               outfile=figpath+'statistics_1var_UHSAS100_'+site+'_'+IOP+'.txt')
-# calc.mean_std_percentiles([smps100, ncn100_m, ncn100_m2],legend=['Obs','E3SMv1','E3SMv2'],
-#                           outfile=figpath+'statistics_1var_SMPS100_'+site+'_'+IOP+'.txt')
-# calc.mean_std_percentiles([cod,cod_sat, cod_m, cod_m2],legend=['MFRSR','Satellite','E3SMv1','E3SMv2'],
-#                           outfile=figpath+'statistics_1var_COD_'+site+'_'+IOP+'.txt')
-# calc.mean_std_percentiles([reff,reff_sat,reff_m,reff_m2],legend=['MFRSR','Satellite','E3SMv1','E3SMv2'],
-#                           outfile=figpath+'statistics_1var_Reff_'+site+'_'+IOP+'.txt')
-# calc.mean_std_percentiles([lwp_mfrsr,lwp_armbe,lwp_sat,lwp_m,lwp_m2],legend=['MFRSR','ARMBE','Satellite','E3SMv1','E3SMv2'],
-#                           outfile=figpath+'statistics_1var_LWP_'+site+'_'+IOP+'.txt')
-# calc.mean_std_percentiles([ndrop,nd_sat,nd_m,nd_m2],legend=['Ndrop','Nd_satellite','E3SMv1','E3SMv2'],
-#                           outfile=figpath+'statistics_1var_Nd_'+site+'_'+IOP+'.txt')
-# calc.mean_std_percentiles([precip,precip_m,precip_m2],legend=['Obs','E3SMv1','E3SMv2'],
-#                           outfile=figpath+'statistics_1var_Precip_'+site+'_'+IOP+'.txt')
-# calc.mean_std_percentiles([cld_arscl,cld_visst,cld_tsi,cld_m,cld_m2],legend=['ARSCL','VISST','TSI','E3SMv1','E3SMv2'],
-#                           outfile=figpath+'statistics_1var_totcld_'+site+'_'+IOP+'.txt')
+calc.mean_std_percentiles([org_hiscale,org_m_hiscale,org_m2_hiscale],legend=['Obs','E3SMv1','E3SMv2'], 
+                          outfile=figpath+'statistics_1var_ORG_'+site+'.txt')
+calc.mean_std_percentiles([so4_hiscale, so4_m_hiscale, so4_m2_hiscale],legend=['Obs','E3SMv1','E3SMv2'], 
+                          outfile=figpath+'statistics_1var_SO4_'+site+'.txt')
+calc.mean_std_percentiles([ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale],legend=['Obs','E3SMv1','E3SMv2'], 
+                          outfile=figpath+'statistics_1var_CCN2_'+site+'.txt')
+calc.mean_std_percentiles([cpc3_hiscale,ncn3_m_hiscale,ncn3_m2_hiscale],legend=['Obs','E3SMv1','E3SMv2'], 
+                          outfile=figpath+'statistics_1var_CPC3_'+site+'.txt')
+calc.mean_std_percentiles([cpc10_hiscale,ncn10_m_hiscale,ncn10_m2_hiscale],legend=['Obs','E3SMv1','E3SMv2'], 
+                          outfile=figpath+'statistics_1var_CPC10_'+site+'.txt')
+calc.mean_std_percentiles([uhsas100_hiscale, smps100_hiscale, ncn100_m_hiscale, ncn100_m2_hiscale],legend=['UHSAS','SMPS','E3SMv1','E3SMv2'], 
+                          outfile=figpath+'statistics_1var_CN100_'+site+'.txt')
+calc.mean_std_percentiles([cod_hiscale,cod_sat_hiscale, cod_m_hiscale, cod_m2_hiscale],legend=['MFRSR','Satellite','E3SMv1','E3SMv2'],
+                          outfile=figpath+'statistics_1var_COD_'+site+'.txt')
+calc.mean_std_percentiles([reff_hiscale,reff_sat_hiscale,reff_m_hiscale,reff_m2_hiscale],legend=['MFRSR','Satellite','E3SMv1','E3SMv2'],
+                          outfile=figpath+'statistics_1var_Reff_'+site+'.txt')
+calc.mean_std_percentiles([lwp_mfrsr_hiscale,lwp_armbe_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale],
+                          legend=['MFRSR','ARMBE','Satellite','E3SMv1','E3SMv2'],
+                          outfile=figpath+'statistics_1var_LWP_'+site+'.txt')
+calc.mean_std_percentiles([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale,nd_m2_hiscale],legend=['Ndrop','Nd_satellite','E3SMv1','E3SMv2'],
+                          outfile=figpath+'statistics_1var_Nd_'+site+'.txt')
+calc.mean_std_percentiles([precip_hiscale,precip_m_hiscale,precip_m2_hiscale],legend=['Obs','E3SMv1','E3SMv2'],
+                          outfile=figpath+'statistics_1var_Precip_'+site+'.txt')
+calc.mean_std_percentiles([cld_arscl_hiscale,cld_visst_hiscale,cld_tsi_hiscale,cld_m_hiscale,cld_m2_hiscale],
+                          legend=['ARSCL','Satellite','TSI','E3SMv1','E3SMv2'],
+                          outfile=figpath+'statistics_1var_totcld_'+site+'.txt')
 
 
-# calc.bias_corrcoef_RMSE(org,org_m,label1='Obs',label2='E3SMv1', 
-#                         outfile=figpath+'statistics_ORG_E3SMv1vsOBS_'+site+'_'+IOP+'.txt')
-# calc.bias_corrcoef_RMSE(org,org_m2,label1='Obs',label2='E3SMv2', 
-#                         outfile=figpath+'statistics_ORG_E3SMv2vsOBS_'+site+'_'+IOP+'.txt')
+calc.bias_corrcoef_RMSE(org_hiscale,org_m_hiscale,label1='Obs',label2='E3SMv1', 
+                        outfile=figpath+'statistics_ORG_E3SMv1vsOBS_'+site+'.txt')
+calc.bias_corrcoef_RMSE(org_hiscale,org_m2_hiscale,label1='Obs',label2='E3SMv2', 
+                        outfile=figpath+'statistics_ORG_E3SMv2vsOBS_'+site+'.txt')
 
-# calc.bias_corrcoef_RMSE(so4, so4_m,label1='Obs',label2='E3SMv1', 
-#                         outfile=figpath+'statistics_SO4_E3SMv1vsOBS_'+site+'_'+IOP+'.txt')
-# calc.bias_corrcoef_RMSE(so4, so4_m2,label1='Obs',label2='E3SMv2', 
-#                         outfile=figpath+'statistics_SO4_E3SMv2vsOBS_'+site+'_'+IOP+'.txt')
+calc.bias_corrcoef_RMSE(so4_hiscale, so4_m_hiscale,label1='Obs',label2='E3SMv1', 
+                        outfile=figpath+'statistics_SO4_E3SMv1vsOBS_'+site+'.txt')
+calc.bias_corrcoef_RMSE(so4_hiscale, so4_m2_hiscale,label1='Obs',label2='E3SMv2', 
+                        outfile=figpath+'statistics_SO4_E3SMv2vsOBS_'+site+'.txt')
 
-# calc.bias_corrcoef_RMSE(ccn1,ccn1_m,label1='Obs',label2='E3SMv1', 
-#                         outfile=figpath+'statistics_CCN1_E3SMv1vsOBS_'+site+'_'+IOP+'.txt')
-# calc.bias_corrcoef_RMSE(ccn1,ccn1_m2,label1='Obs',label2='E3SMv2', 
-#                         outfile=figpath+'statistics_CCN1_E3SMv2vsOBS_'+site+'_'+IOP+'.txt')
+calc.bias_corrcoef_RMSE(ccn2_hiscale,ccn2_m_hiscale,label1='Obs',label2='E3SMv1', 
+                        outfile=figpath+'statistics_CCN2_E3SMv1vsOBS_'+site+'.txt')
+calc.bias_corrcoef_RMSE(ccn2_hiscale,ccn2_m2_hiscale,label1='Obs',label2='E3SMv2', 
+                        outfile=figpath+'statistics_CCN2_E3SMv2vsOBS_'+site+'.txt')
 
-# calc.bias_corrcoef_RMSE(ccn2,ccn2_m,label1='Obs',label2='E3SMv1', 
-#                         outfile=figpath+'statistics_CCN2_E3SMv1vsOBS_'+site+'_'+IOP+'.txt')
-# calc.bias_corrcoef_RMSE(ccn2,ccn2_m2,label1='Obs',label2='E3SMv2', 
-#                         outfile=figpath+'statistics_CCN2_E3SMv2vsOBS_'+site+'_'+IOP+'.txt')
+calc.bias_corrcoef_RMSE(cpc3_hiscale,ncn3_m_hiscale,label1='Obs',label2='E3SMv1', 
+                        outfile=figpath+'statistics_CN3nm_E3SMv1vsOBS_'+site+'.txt')
+calc.bias_corrcoef_RMSE(cpc3_hiscale,ncn3_m2_hiscale,label1='Obs',label2='E3SMv2', 
+                        outfile=figpath+'statistics_CN3nm_E3SMv2vsOBS_'+site+'.txt')
+calc.bias_corrcoef_RMSE(cpc10_hiscale,ncn10_m_hiscale,label1='Obs',label2='E3SMv1', 
+                        outfile=figpath+'statistics_CN10nm_E3SMv1vsOBS_'+site+'.txt')
+calc.bias_corrcoef_RMSE(cpc10_hiscale,ncn10_m2_hiscale,label1='Obs',label2='E3SMv2', 
+                        outfile=figpath+'statistics_CN10nm_E3SMv2vsOBS_'+site+'.txt')
 
-# calc.bias_corrcoef_RMSE(ccn5,ccn5_m,label1='Obs',label2='E3SMv1', 
-#                         outfile=figpath+'statistics_CCN5_E3SMv1vsOBS_'+site+'_'+IOP+'.txt')
-# calc.bias_corrcoef_RMSE(ccn5,ccn5_m2,label1='Obs',label2='E3SMv2', 
-#                         outfile=figpath+'statistics_CCN5_E3SMv2vsOBS_'+site+'_'+IOP+'.txt')
-# if IOP=='IOP1':
-#     calc.bias_corrcoef_RMSE(cpc3,ncn3_m,label1='Obs',label2='E3SMv1', 
-#                             outfile=figpath+'statistics_CN3nm_E3SMv1vsOBS_'+site+'_'+IOP+'.txt')
-#     calc.bias_corrcoef_RMSE(cpc3,ncn3_m2,label1='Obs',label2='E3SMv2', 
-#                             outfile=figpath+'statistics_CN3nm_E3SMv2vsOBS_'+site+'_'+IOP+'.txt')
-#     calc.bias_corrcoef_RMSE(cpc10,ncn10_m,label1='Obs',label2='E3SMv1', 
-#                             outfile=figpath+'statistics_CN10nm_E3SMv1vsOBS_'+site+'_'+IOP+'.txt')
-#     calc.bias_corrcoef_RMSE(cpc10,ncn10_m2,label1='Obs',label2='E3SMv2', 
-#                             outfile=figpath+'statistics_CN10nm_E3SMv2vsOBS_'+site+'_'+IOP+'.txt')
+calc.bias_corrcoef_RMSE(smps100_hiscale, ncn100_m_hiscale,label1='Obs',label2='E3SMv1', 
+                        outfile=figpath+'statistics_CN100_E3SMv1vsOBS_'+site+'.txt')
+calc.bias_corrcoef_RMSE(smps100_hiscale, ncn100_m2_hiscale,label1='Obs',label2='E3SMv2', 
+                        outfile=figpath+'statistics_CN100_E3SMv2vsOBS_'+site+'.txt')
 
-# calc.bias_corrcoef_RMSE(smps100, ncn100_m,label1='Obs',label2='E3SMv1', 
-#                         outfile=figpath+'statistics_CN100_E3SMv1vsOBS_'+site+'_'+IOP+'.txt')
-# calc.bias_corrcoef_RMSE(smps100, ncn100_m2,label1='Obs',label2='E3SMv2', 
-#                         outfile=figpath+'statistics_CN100_E3SMv2vsOBS_'+site+'_'+IOP+'.txt')
+calc.bias_corrcoef_RMSE(lwp_armbe_hiscale, lwp_m_hiscale,label1='ARMBE',label2='E3SMv1', 
+                        outfile=figpath+'statistics_lwp_E3SMv1vsOBS_'+site+'.txt')
+calc.bias_corrcoef_RMSE(lwp_armbe_hiscale, lwp_m2_hiscale,label1='ARMBE',label2='E3SMv2', 
+                        outfile=figpath+'statistics_lwp_E3SMv2vsOBS_'+site+'.txt')
 
-# calc.bias_corrcoef_RMSE(lwp_mfrsr, lwp_m,label1='Obs',label2='E3SMv1', 
-#                         outfile=figpath+'statistics_lwp_E3SMv1vsOBS_'+site+'_'+IOP+'.txt')
-# calc.bias_corrcoef_RMSE(lwp_mfrsr, lwp_m2,label1='Obs',label2='E3SMv2', 
-#                         outfile=figpath+'statistics_lwp_E3SMv2vsOBS_'+site+'_'+IOP+'.txt')
+calc.bias_corrcoef_RMSE(ndrop_hiscale, nd_m_hiscale,label1='Ndrop',label2='E3SMv1', 
+                        outfile=figpath+'statistics_Nd_E3SMv1vsOBS_'+site+'.txt')
+calc.bias_corrcoef_RMSE(ndrop_hiscale, nd_m2_hiscale,label1='Ndrop',label2='E3SMv2', 
+                        outfile=figpath+'statistics_Nd_E3SMv2vsOBS_'+site+'.txt')
 
-# calc.bias_corrcoef_RMSE(ndrop, nd_m,label1='Obs',label2='E3SMv1', 
-#                         outfile=figpath+'statistics_Nd_E3SMv1vsOBS_'+site+'_'+IOP+'.txt')
-# calc.bias_corrcoef_RMSE(ndrop, nd_m2,label1='Obs',label2='E3SMv2', 
-#                         outfile=figpath+'statistics_Nd_E3SMv2vsOBS_'+site+'_'+IOP+'.txt')
+calc.bias_corrcoef_RMSE(nd_sat_hiscale, nd_m_hiscale,label1='Satellite',label2='E3SMv1', 
+                        outfile=figpath+'statistics_Nd_E3SMv1vsSat_'+site+'.txt')
+calc.bias_corrcoef_RMSE(nd_sat_hiscale, nd_m2_hiscale,label1='Satellite',label2='E3SMv2', 
+                        outfile=figpath+'statistics_Nd_E3SMv2vsSat_'+site+'.txt')
 
-# calc.bias_corrcoef_RMSE(reff, reff_m,label1='Obs',label2='E3SMv1', 
-#                         outfile=figpath+'statistics_Reff_E3SMv1vsOBS_'+site+'_'+IOP+'.txt')
-# calc.bias_corrcoef_RMSE(reff, reff_m2,label1='Obs',label2='E3SMv2', 
-#                         outfile=figpath+'statistics_Reff_E3SMv2vsOBS_'+site+'_'+IOP+'.txt')
+calc.bias_corrcoef_RMSE(reff_hiscale, reff_m_hiscale,label1='Obs',label2='E3SMv1', 
+                        outfile=figpath+'statistics_Reff_E3SMv1vsOBS_'+site+'.txt')
+calc.bias_corrcoef_RMSE(reff_hiscale, reff_m2_hiscale,label1='Obs',label2='E3SMv2', 
+                        outfile=figpath+'statistics_Reff_E3SMv2vsOBS_'+site+'.txt')
 
+calc.bias_corrcoef_RMSE(reff_sat_hiscale, reff_m_hiscale,label1='Satellite',label2='E3SMv1', 
+                        outfile=figpath+'statistics_Reff_E3SMv1vsSat_'+site+'.txt')
+calc.bias_corrcoef_RMSE(reff_sat_hiscale, reff_m2_hiscale,label1='Satellite',label2='E3SMv2', 
+                        outfile=figpath+'statistics_Reff_E3SMv2vsSat_'+site+'.txt')
+
+# #%% joint histogram
+# fig,ax = plot.jointhist([uhsas100_hiscale,ncn100_m_hiscale,ncn100_m2_hiscale], [ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], 
+#                     xedges=np.arange(0,800,40),yedges=np.arange(0,800,40), normalize_x=True,
+#                     xlabel='CN (>100nm) (cm$^{-3}$)', ylabel='CCN (SS=0.2%) (cm$^{-3}$)', vmax=0.5,
+#                     title=['Ground','E3SMv1','E3SMv2'])
+# fig.savefig(figpath+'jointhist_CN100_CCN2_ship_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# fig,ax = plot.jointhist([ccn2_hiscale,ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], 
+#                         [ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale,nd_m2_hiscale],
+#                     xedges=np.arange(0,500,30),yedges=np.arange(0,300,20), normalize_x=True,
+#                     xlabel='CCN (SS=0.2%) (cm$^{-3}$)', ylabel='Nd (cm$^{-3}$)', vmax=0.4,
+#                     title=['Ground','Satellite','E3SMv1','E3SMv2'])
+# fig.savefig(figpath+'jointhist_CCN2_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale,nd_m2_hiscale],
+#                         [lwp_sat_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale], 
+#                     xedges=np.arange(0,300,20),yedges=np.arange(0,300,20), normalize_x=True,
+#                     xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', vmax=0.4,
+#                     title=['Ground','Satellite','E3SMv1','E3SMv2'])
+# fig.savefig(figpath+'jointhist_LWP_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale,nd_m2_hiscale],
+#                         [reff_hiscale,reff_sat_hiscale,reff_m_hiscale,reff_m2_hiscale],
+#                     xedges=np.arange(0,300,20),yedges=np.arange(4,25,1), normalize_x=True,
+#                     xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m)', vmax=0.25,
+#                     title=['Ground','Satellite','E3SMv1','E3SMv2'])
+# fig.savefig(figpath+'jointhist_Reff_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# fig,ax = plot.jointhist([cod_sat_hiscale,cod_sat_hiscale,cod_m_hiscale,cod_m2_hiscale],[lwp_armbe_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale], 
+#                     xedges=np.arange(0,40,3),yedges=np.arange(0,300,20), normalize_x=True,
+#                     xlabel='Cloud Optical Depth (N/A)', ylabel='LWP (g/m$^2$)', vmax=0.25,
+#                     title=['Ground','Satellite','E3SMv1','E3SMv2'])
+# fig.savefig(figpath+'jointhist_COD_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# #%% scatter plot
+
+# fig,ax = plot.scatter([ndrop_hiscale.data, nd_sat_hiscale.data,nd_m_hiscale.data,nd_m2_hiscale.data], 
+#                       [ccn2_hiscale.data,ccn2_hiscale.data,ccn2_m_hiscale.data,ccn2_m2_hiscale.data],
+#                       xlimit=(0,300), ylimit=(0,600),
+#                     xlabel='Nd (cm$^{-3}$)', ylabel='Surface CCN (SS=0.2%) (cm$^{-3}$)', 
+#                     title=['Ground','Satellite','E3SMv1','E3SMv2'],
+#                 linear_fit=True, intercept=False)
+# fig.savefig(figpath+'scatter_Nd_CCN2_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig,ax = plot.scatter([uhsas100_hiscale.data,ncn100_m_hiscale.data,ncn100_m2_hiscale.data], 
+#                       [ccn2_hiscale.data,ccn2_m_hiscale.data,ccn2_m2_hiscale.data],
+#                       xlimit=(0,800), ylimit=(0,800),
+#                     xlabel='Surface CN (>100nm) (cm$^{-3}$)', ylabel='Surface CCN (SS=0.2%) (cm$^{-3}$)', 
+#                     title=['Ground','E3SMv1','E3SMv2'],
+#                 linear_fit=True, intercept=True)
+# fig.savefig(figpath+'scatter_CN100_CCN2_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+# #%% heatmaps
+
+# # xedges=np.exp(np.arange(np.log(10),6.5,0.5))
+# # yedges=np.exp(np.arange(np.log(10),6.5,0.5))
+# fig,ax = plot.heatmap([ndrop_hiscale.data, nd_sat_hiscale.data,nd_m_hiscale.data,nd_m2_hiscale.data],
+#                       [lwp_sat_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale],
+#                       [albedo_hiscale,albedo_hiscale,albedo_m_hiscale,albedo_m2_hiscale],vmax=60,
+#                     xedges=np.arange(0,300,20), yedges=np.arange(10,300,20),
+#                     # xedges=xedges, yedges=yedges, 
+#                     xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', zlabel='TOA Albedo (%)',
+#                     title=['Ground','Satellite','E3SMv1','E3SMv2'])
+# fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)

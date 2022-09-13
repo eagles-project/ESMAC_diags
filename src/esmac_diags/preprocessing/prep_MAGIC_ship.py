@@ -16,12 +16,12 @@ from esmac_diags.subroutines.time_resolution_change import avg_time_1d, median_t
 from esmac_diags.subroutines.quality_control import  qc_remove_neg, qc_mask_qcflag, qc_cn_max, qc_ccn_max
 from esmac_diags.subroutines.specific_data_treatment import calc_cldfrac_from_highres
 
-# shipmetpath = '../../../data/MAGIC/obs/ship/magmarinemetM1.b1/'
-# mwrpath = '../../../data/MAGIC/obs/ship/magmwrret1liljclouM1.s2/'
-# cpcpath = '../../../data/MAGIC/obs/ship/magaoscpcfM1.a1/'
-# ccnpath = '../../../data/MAGIC/obs/ship/magaosccn100M1.a1/'
-# uhsaspath = '../../../data/MAGIC/obs/ship/magaosuhsasM1.a1/'
-# Ndpath = '../../../data/MAGIC/obs/ship/Cloud_Micro_Retrieval/'
+# shipmetpath = '../../../../ESMAC_Diags_Tool/data/MAGIC/obs/ship/magmarinemetM1.b1/'
+# mwrpath = '../../../../ESMAC_Diags_Tool/data/MAGIC/obs/ship/magmwrret1liljclouM1.s2/'
+# cpcpath = '../../../../ESMAC_Diags_Tool/data/MAGIC/obs/ship/magaoscpcfM1.a1/'
+# ccnpath = '../../../../ESMAC_Diags_Tool/data/MAGIC/obs/ship/magaosccn100M1.a1/'
+# uhsaspath = '../../../../ESMAC_Diags_Tool/data/MAGIC/obs/ship/magaosuhsasM1.a1/'
+# Ndpath = '../../../../ESMAC_Diags_Tool/data/MAGIC/obs/ship/Cloud_Micro_Retrieval/'
 # prep_data_path = 'C:/Users/tang357/Downloads/prep_data/MAGIC/ship/'
 
 # dt=3600
@@ -379,6 +379,98 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
     ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def prep_MET(shipmetpath, prep_data_path, dt=3600):
+    """
+    prepare basic meteorological fields
+    
+    Parameters
+    ----------
+    shipmetpath : str
+        input path for ship location data
+    prep_data_path : str
+        output path
+    dt : float
+        time resolution (unit: sec) of output
+
+    Returns
+    -------
+    None.
+    
+    """    
+    if not os.path.exists(prep_data_path):
+        os.makedirs(prep_data_path)
+
+    lst = glob.glob(shipmetpath+'magmarinemetM1*')
+    if len(lst)==0:
+        raise ValueError('cannot find any data')
+    
+    shipdata = xr.open_mfdataset(lst, combine='by_coords')
+    time = shipdata['time'].load()
+    lon = shipdata['lon_mean_gps'].load()
+    qc_lon = shipdata['qc_lon_mean_gps'].load()
+    lat = shipdata['lat_mean_gps'].load()
+    qc_lat = shipdata['qc_lat_mean_gps'].load()
+    # T1 = shipdata['air_temp_mean_adc'].load()
+    # qc_T1 = shipdata['qc_air_temp_mean_adc'].load()
+    # RH1 = shipdata['rh_mean_adc'].load()
+    # qc_RH1 = shipdata['qc_rh_mean_adc'].load()
+    T = shipdata['air_temp_mean_wx1'].load()
+    qc_T = shipdata['qc_air_temp_mean_wx1'].load()
+    RH = shipdata['rh_mean_wx1'].load()
+    qc_RH = shipdata['qc_rh_mean_wx1'].load()
+    ps = shipdata['bar_pressure_mean_wx1'].load()
+    qc_ps = shipdata['qc_bar_pressure_mean_wx1'].load()
+    shipdata.close()
+    
+    lat = qc_mask_qcflag(lat, qc_lat)
+    lon = qc_mask_qcflag(lon, qc_lon)
+    T = qc_mask_qcflag(T, qc_T)
+    RH = qc_mask_qcflag(RH, qc_RH)
+    ps = qc_mask_qcflag(ps, qc_ps)
+    
+    #%% re-shape the data into coarser resolution
+    time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
+    
+    lon1 = median_time_1d(time, lon, time_new)
+    lat1 = median_time_1d(time, lat, time_new)
+    T1 = median_time_1d(time, T, time_new)
+    RH1 = median_time_1d(time, RH, time_new)
+    ps1 = median_time_1d(time, ps, time_new)
+
+
+    #%% output file
+    outfile = prep_data_path + 'T_RH_Ps_MAGIC.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'lat': (['time'], lat1),
+                    'lon': (['time'], lon1),
+                    'T': (['time'], T1),
+                    'RH': (['time'], RH1),
+                    'Ps': (['time'], ps1),
+                    },
+                      coords={'time': ('time', time_new), })
+    
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lat'].attrs["long_name"] = "latitude"
+    ds['lat'].attrs["units"] = "degree_north"
+    ds['lon'].attrs["long_name"] = "longitude"
+    ds['lon'].attrs["units"] = "degree_east"
+    ds['T'].attrs["long_name"] = T.long_name
+    ds['T'].attrs["units"] = T.units
+    ds['RH'].attrs["long_name"] = RH.long_name
+    ds['RH'].attrs["units"] = RH.units
+    ds['Ps'].attrs["long_name"] = ps.long_name
+    ds['Ps'].attrs["units"] = ps.units
+    
+    ds.attrs["input data_example"] = lst[0].split('/')[-1]
+    ds.attrs["description"] = 'median value of '+str(int(dt))+'sec resolution'
+    ds.attrs["creation_date"] = ttt.ctime(ttt.time())
+    
+    ds.to_netcdf(outfile, mode='w')
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     """
     prepare LWP retrieved from MWR
@@ -441,6 +533,11 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     lwp_thres = 30
     cf_out = calc_cldfrac_from_highres(lwp, time2, time_new, thres=lwp_thres)
     
+    cf_5 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=5)
+    cf_10 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=10)
+    cf_20 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=20)
+    cf_30 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=30)
+    
     #%% output file
     outfile = prep_data_path + 'LWP_MAGIC.nc'
     print('output file '+outfile)
@@ -483,6 +580,37 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     ds['cldfrac'].attrs["units"] = '%'
     ds.attrs["input data_example"] = lst2[0].split('/')[-1]
     ds.attrs["description"] = 'calculated from LWP with threshold of '+str(lwp_thres)+' g/m2'
+    ds.attrs["creation_date"] = ttt.ctime(ttt.time())
+    ds.to_netcdf(outfile, mode='w')
+
+    outfile = prep_data_path + 'totcld_sensitivity_MAGIC.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'lat': (['time'], lat1),
+                    'lon': (['time'], lon1),
+                    'cldfrac_5': (['time'], cf_5),
+                    'cldfrac_10': (['time'], cf_10),
+                    'cldfrac_20': (['time'], cf_20),
+                    'cldfrac_30': (['time'], cf_30),
+                    },
+                     coords={'time': ('time', time_new)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lat'].attrs["long_name"] = "latitude"
+    ds['lat'].attrs["units"] = "degree_north"
+    ds['lon'].attrs["long_name"] = "longitude"
+    ds['lon'].attrs["units"] = "degree_east"
+    ds['cldfrac_5'].attrs["long_name"] = 'total cloud fraction'
+    ds['cldfrac_5'].attrs["units"] = '%'
+    ds['cldfrac_10'].attrs["long_name"] = 'total cloud fraction'
+    ds['cldfrac_10'].attrs["units"] = '%'
+    ds['cldfrac_20'].attrs["long_name"] = 'total cloud fraction'
+    ds['cldfrac_20'].attrs["units"] = '%'
+    ds['cldfrac_30'].attrs["long_name"] = 'total cloud fraction'
+    ds['cldfrac_30'].attrs["units"] = '%'
+    ds.attrs["input data_example"] = lst2[0].split('/')[-1]
+    ds.attrs["description"] = 'calculated from LWP with different LWP threshold (5/10/20/30 g/m2)'
     ds.attrs["creation_date"] = ttt.ctime(ttt.time())
     ds.to_netcdf(outfile, mode='w')
 
@@ -567,3 +695,5 @@ def prep_Nd_Wu_etal(Ndpath, prep_data_path, dt=3600):
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
+
+# prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600) 
