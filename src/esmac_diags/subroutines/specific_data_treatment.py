@@ -292,7 +292,7 @@ def lwc2cflag(lwc, lwcunit):
 
     """
     if lwcunit == 'kg/m3':
-        lwc = lwc*0.001
+        lwc = lwc*1000
         lwcunit = 'g/m3'
     elif lwcunit == 'g m-3':
         lwcunit = 'g/m3'
