@@ -25,7 +25,7 @@ def avg_time_1d(time0, data0, time):
     if data0.shape[0] != len(time0):
         raise ValueError("Arrays must have the same size")
     data = np.full((len(time)), np.nan)
-    dt = (time[1]-time[0])/2
+    dt = np.abs(time[1]-time[0])/2
     for tt in range(len(time)):
         idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
         data[tt] = np.nanmean(data0[idx], axis = 0)

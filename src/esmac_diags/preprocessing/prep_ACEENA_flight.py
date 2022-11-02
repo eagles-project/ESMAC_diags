@@ -914,11 +914,11 @@ def prep_mergeSD(mergeSDpath, iwgpath, prep_data_path, dt=60):
         
         # attributes
         time_o.units = "seconds since " + date[0:4] + '-' + date[4:6] + '-' + date[6:8] + " 00:00:00"
-        size_o.units = 'nm'
+        size_o.units = 'um'
         size_o.long_name = 'center of size bin'
-        sizeh_o.units = 'nm'
+        sizeh_o.units = 'um'
         sizeh_o.long_name = 'upper bound of size bin'
-        sizel_o.units = 'nm'
+        sizel_o.units = 'um'
         sizel_o.long_name = 'lower bound of size bin'
         lon_o.units = 'degree east'
         lon_o.long_name = 'Longitude'

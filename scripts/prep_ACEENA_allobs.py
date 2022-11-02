@@ -52,12 +52,12 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 # prepare flight data; output time in 1min (dt=60s) resolution
-# print('prepare aircraft data:')
+print('prepare aircraft data:')
 # air.prep_AMS(amspath, iwgpath, prep_data_path+'flight/', dt=60)       # aerosol composition
 # air.prep_beasd(beasdpath,iwgpath, prep_data_path+'flight/', dt=60)               # merged aerosol size distribution
 # air.prep_CCN(ccnairpath, iwgpath, prep_data_path+'flight/', dt=60)       # CCN number concentration
 # air.prep_CPC(cpcairpath, iwgpath, prep_data_path+'flight/', dt=60)       # aerosol number concentration (>3 or 10nm)
-# air.prep_mergeSD(mergeSDpath, iwgpath, prep_data_path+'flight/', dt=60) # merged cloud size distribution
+air.prep_mergeSD(mergeSDpath, iwgpath, prep_data_path+'flight/', dt=60) # merged cloud size distribution
 # air.prep_mergesize_withCPC_ACEENA(cpcairpath, fimspath, pcasppath, opcpath, 
 #                             iwgpath, cvipath, prep_data_path+'flight/', dt=60) # merged aerosol size distribution
 # air.prep_PCASP100(pcasppath, iwgpath, prep_data_path+'flight/', dt=60)# aerosol number concentration (>100nm)
@@ -82,5 +82,5 @@ print('prepare surface data:')
 # sfc.prep_precip(armbepath, prep_data_path+'surface/', dt=3600)         # surface precipitation
 # # prepare satellite data. output time in 1hr (dt=3600s) resolution
 print('prepare satellite data:')
-sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/', dt=3600)     # VISST 0.5x0.5 degree gridded data
+# sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/', dt=3600)     # VISST 0.5x0.5 degree gridded data
 # sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/', dt=3600)     # VISST 4km pixel-level data
