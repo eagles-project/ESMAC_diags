@@ -560,6 +560,12 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     cth = xr.DataArray(data=z_cldtop,  dims=["time"],
         coords=dict(time=(["time"], e3smtime)),
         attrs=dict(long_name="cloud top height",units="m"),)
+    cbt = xr.DataArray(data=T_cldbase,  dims=["time"],
+        coords=dict(time=(["time"], e3smtime)),
+        attrs=dict(long_name="cloud base temperature",units="K"),)
+    ctt = xr.DataArray(data=T_cldtop,  dims=["time"],
+        coords=dict(time=(["time"], e3smtime)),
+        attrs=dict(long_name="cloud top temperature",units="K"),)
     
     # cloud optical depth and effective radius
     rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
@@ -755,9 +761,17 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         cth_2 = xr.DataArray(data=z_cldtop,  dims=["time"],
             coords=dict(time=(["time"], e3smtime_i)),
             attrs=dict(long_name="cloud top height",units="m"),)
-        cloud_depth = xr.concat([cloud_depth, cloud_depth_2], dim="time")
+        cbt_2 = xr.DataArray(data=T_cldbase,  dims=["time"],
+            coords=dict(time=(["time"], e3smtime_i)),
+            attrs=dict(long_name="cloud base temperature",units="K"),)
+        ctt_2 = xr.DataArray(data=T_cldtop,  dims=["time"],
+            coords=dict(time=(["time"], e3smtime_i)),
+            attrs=dict(long_name="cloud top temperature",units="K"),)
         cbh = xr.concat([cbh, cbh_2], dim="time")
         cth = xr.concat([cth, cth_2], dim="time")
+        cbt = xr.concat([cbt, cbt_2], dim="time")
+        ctt = xr.concat([ctt, ctt_2], dim="time")
+        cloud_depth = xr.concat([cloud_depth, cloud_depth_2], dim="time")
         
         # cloud optical depth and effective radius
         rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
@@ -855,8 +869,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     variable_names = variable_names + ['reff','cod']
     variables = variables + [reff_mean, cod_mean]
     # cloud depth
-    variable_names = variable_names + ['cbh','cth','clddepth']
-    variables = variables + [cbh, cth, cloud_depth]
+    variable_names = variable_names + ['cbt','ctt','cbh','cth','clddepth']
+    variables = variables + [cbt, ctt, cbh, cth, cloud_depth]
     
     #%% change some units
     # composition

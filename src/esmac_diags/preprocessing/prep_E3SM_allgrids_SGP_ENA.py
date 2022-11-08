@@ -21,12 +21,12 @@ from esmac_diags.subroutines.CN_mode_to_size import calc_CNsize_cutoff_0_3000nm
 
 import warnings
 warnings.filterwarnings("ignore")
-site = 'ENA'
-input_path = '../../../raw_data/model/'
-output_path = '../../../prep_data/ENA/model/'
-input_filehead = 'E3SMv2_SGP_ENA_2011_2020'
-output_filehead = 'E3SMv2_ENA'
-dt=3600
+# site = 'ENA'
+# input_path = '../../../raw_data/model/'
+# output_path = '../../../prep_data/ENA/model/'
+# input_filehead = 'E3SMv2_SGP_ENA_2011_2020'
+# output_filehead = 'E3SMv2_ENA'
+# dt=3600
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, site, dt=3600):
@@ -224,6 +224,12 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, site
     cth = xr.DataArray(data=z_cldtop,  dims=["time", "ncol"],
         coords=dict(time=(["time"], e3smtime), ncol=(["ncol"], np.arange(1,ncols+1))),
         attrs=dict(long_name="cloud top height",units="m"),)
+    cbt = xr.DataArray(data=T_cldbase,  dims=["time", "ncol"],
+        coords=dict(time=(["time"], e3smtime), ncol=(["ncol"], np.arange(1,ncols+1))),
+        attrs=dict(long_name="cloud base temperature",units="K"),)
+    ctt = xr.DataArray(data=T_cldtop,  dims=["time", "ncol"],
+        coords=dict(time=(["time"], e3smtime), ncol=(["ncol"], np.arange(1,ncols+1))),
+        attrs=dict(long_name="cloud top temperature",units="K"),)
     thetadiff_cb = xr.DataArray(data = T_cldbase - Ts + 9.8/1005.7*z_cldbase,  dims=["time", "ncol"],
         coords=dict(time=(["time"], e3smtime), ncol=(["ncol"], np.arange(1,ncols+1))),
         attrs=dict(long_name="Theta diff between cloud base and surface",units="K"),)
@@ -425,12 +431,20 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, site
         cth_2 = xr.DataArray(data=z_cldtop,  dims=["time", "ncol"],
             coords=dict(time=(["time"], e3smtime_i), ncol=(["ncol"], np.arange(1,ncols+1))),
             attrs=dict(long_name="cloud top height",units="m"),)
+        cbt_2 = xr.DataArray(data=T_cldbase,  dims=["time", "ncol"],
+            coords=dict(time=(["time"], e3smtime_i), ncol=(["ncol"], np.arange(1,ncols+1))),
+            attrs=dict(long_name="cloud base temperature",units="K"),)
+        ctt_2 = xr.DataArray(data=T_cldtop,  dims=["time", "ncol"],
+            coords=dict(time=(["time"], e3smtime_i), ncol=(["ncol"], np.arange(1,ncols+1))),
+            attrs=dict(long_name="cloud top temperature",units="K"),)
         thetadiff_cb_2 = xr.DataArray(data = T_cldbase - Ts + 9.8/1005.7*z_cldbase,  dims=["time", "ncol"],
             coords=dict(time=(["time"], e3smtime_i), ncol=(["ncol"], np.arange(1,ncols+1))),
             attrs=dict(long_name="Theta diff between cloud base and surface",units="K"),)
         cloud_depth = xr.concat([cloud_depth, cloud_depth_2], dim="time")
         cbh = xr.concat([cbh, cbh_2], dim="time")
         cth = xr.concat([cth, cth_2], dim="time")
+        cbt = xr.concat([cbt, cbt_2], dim="time")
+        ctt = xr.concat([ctt, ctt_2], dim="time")
         thetadiff_cb = xr.concat([thetadiff_cb, thetadiff_cb_2], dim="time")
         
         # cloud optical depth and effective radius
@@ -530,8 +544,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, site
     variable_names = variable_names + ['reff','cod']
     variables = variables + [reff_mean, cod_mean]
     # cloud depth
-    variable_names = variable_names + ['cbh','cth','clddepth','thetadiff_cb']
-    variables = variables + [cbh,cth,cloud_depth,thetadiff_cb]
+    variable_names = variable_names + ['cbt','ctt','cbh','cth','clddepth','thetadiff_cb']
+    variables = variables + [cbt,ctt,cbh,cth,cloud_depth,thetadiff_cb]
     
     #%% change some units
     # composition
@@ -593,26 +607,24 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, site
     
     ds.to_netcdf(outfile, mode='w')
 
+# site = 'ENA'
+# input_path = '../../../raw_data/model/'
+# output_path = '../../../prep_data/ENA/model/'
+# input_filehead = 'E3SMv1_SGP_ENA_2011_2020'
+# output_filehead = 'E3SMv1_ENA'
+# dt=3600
+# prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, site, dt=3600)
+# input_filehead = 'E3SMv2_SGP_ENA_2011_2020'
+# output_filehead = 'E3SMv2_ENA'
+# prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, site, dt=3600)
 
-site = 'SGP'
-input_path = '../../../raw_data/model/'
-output_path = '../../../prep_data/SGP/model/'
-input_filehead = 'E3SMv1_SGP_ENA_2011_2020'
-output_filehead = 'E3SMv1_SGP'
-dt=3600
-prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, site, dt=3600)
-input_filehead = 'E3SMv2_SGP_ENA_2011_2020'
-output_filehead = 'E3SMv2_SGP'
-prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, site, dt=3600)
-
-site = 'ENA'
-input_path = '../../../raw_data/model/'
-output_path = '../../../prep_data/ENA/model/'
-input_filehead = 'E3SMv1_SGP_ENA_2011_2020'
-output_filehead = 'E3SMv1_ENA'
-dt=3600
-prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, site, dt=3600)
-input_filehead = 'E3SMv2_SGP_ENA_2011_2020'
-output_filehead = 'E3SMv2_ENA'
-prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, site, dt=3600)
-
+# site = 'SGP'
+# input_path = '../../../raw_data/model/'
+# output_path = '../../../prep_data/SGP/model/'
+# input_filehead = 'E3SMv1_SGP_ENA_2011_2020'
+# output_filehead = 'E3SMv1_SGP'
+# dt=3600
+# prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, site, dt=3600)
+# input_filehead = 'E3SMv2_SGP_ENA_2011_2020'
+# output_filehead = 'E3SMv2_SGP'
+# prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, site, dt=3600)

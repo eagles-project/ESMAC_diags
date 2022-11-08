@@ -19,8 +19,8 @@ from esmac_diags.subroutines.CN_mode_to_size import calc_CNsize_cutoff_0_3000nm
 
 # input_path = '../../../raw_data/model/'
 # output_path = '../../../prep_data/ENA/model/'
-# input_filehead = 'E3SMv2_SGP_ENA_2011_2020'
-# output_filehead = 'E3SMv2_ENA'
+# input_filehead = 'E3SMv1_SGP_ENA_2011_2020'
+# output_filehead = 'E3SMv1_ENA'
 # dt=3600
 # height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900,1000,\
 #                     1100,1200,1300,1400,1500,1600,1800,2000,2200,2400,2600,2800,3000,\
@@ -574,6 +574,12 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     cth = xr.DataArray(data=z_cldtop,  dims=["time"],
         coords=dict(time=(["time"], e3smtime)),
         attrs=dict(long_name="cloud top height",units="m"),)
+    cbt = xr.DataArray(data=T_cldbase,  dims=["time"],
+        coords=dict(time=(["time"], e3smtime)),
+        attrs=dict(long_name="cloud base temperature",units="K"),)
+    ctt = xr.DataArray(data=T_cldtop,  dims=["time"],
+        coords=dict(time=(["time"], e3smtime)),
+        attrs=dict(long_name="cloud top temperature",units="K"),)
     
     # cloud optical depth and effective radius
     rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
@@ -769,9 +775,17 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         cth_2 = xr.DataArray(data=z_cldtop,  dims=["time"],
             coords=dict(time=(["time"], e3smtime_i)),
             attrs=dict(long_name="cloud top height",units="m"),)
-        cloud_depth = xr.concat([cloud_depth, cloud_depth_2], dim="time")
+        cbt_2 = xr.DataArray(data=T_cldbase,  dims=["time"],
+            coords=dict(time=(["time"], e3smtime_i)),
+            attrs=dict(long_name="cloud base temperature",units="K"),)
+        ctt_2 = xr.DataArray(data=T_cldtop,  dims=["time"],
+            coords=dict(time=(["time"], e3smtime_i)),
+            attrs=dict(long_name="cloud top temperature",units="K"),)
         cbh = xr.concat([cbh, cbh_2], dim="time")
         cth = xr.concat([cth, cth_2], dim="time")
+        cbt = xr.concat([cbt, cbt_2], dim="time")
+        ctt = xr.concat([ctt, ctt_2], dim="time")
+        cloud_depth = xr.concat([cloud_depth, cloud_depth_2], dim="time")
     
         # cloud optical depth and effective radius
         rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
@@ -869,8 +883,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     variable_names = variable_names + ['reff','cod']
     variables = variables + [reff_mean, cod_mean]
     # cloud depth
-    variable_names = variable_names + ['cbh','cth','clddepth']
-    variables = variables + [cbh, cth, cloud_depth]
+    variable_names = variable_names + ['cbt','ctt','cbh','cth','clddepth']
+    variables = variables + [cbt, ctt, cbh, cth, cloud_depth]
     
     #%% change some units
     # composition
@@ -904,7 +918,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     # treat variables with other dimensions (e.g., size distribution)    
     f = interp1d(np.int64(e3smtime), NCNall, bounds_error=False)
     NCNall_new = f(np.int64(time_new))
-
+    
     # %% output extacted file
     varall_1d = {
             variable_names[vv]: ('time', np.float32(variables_new[vv])) for vv in range(len(variable_names))

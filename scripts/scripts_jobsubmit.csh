@@ -30,5 +30,6 @@ python prep_MARCUS_E3SM.py
 
 #python prep_ENA_E3SM.py
 #python prep_SGP_E3SM.py
+#python prep_E3SM_allgrids.py
 
 exit

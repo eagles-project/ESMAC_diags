@@ -269,6 +269,12 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, ship
     cth = xr.DataArray(data=z_cldtop,  dims=["time"],
         coords=dict(time=(["time"], e3smtime)),
         attrs=dict(long_name="cloud top height",units="m"),)
+    cbt = xr.DataArray(data=T_cldbase,  dims=["time"],
+        coords=dict(time=(["time"], e3smtime)),
+        attrs=dict(long_name="cloud base temperature",units="K"),)
+    ctt = xr.DataArray(data=T_cldtop,  dims=["time"],
+        coords=dict(time=(["time"], e3smtime)),
+        attrs=dict(long_name="cloud top temperature",units="K"),)
     
     # cloud optical depth and effective radius
     rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
@@ -373,8 +379,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, ship
     variable_names = variable_names + ['reff','cod']
     variables = variables + [reff_mean, cod_mean]
     # cloud depth
-    variable_names = variable_names + ['cbh','cth','clddepth']
-    variables = variables + [cbh, cth, cloud_depth]
+    variable_names = variable_names + ['cbt','ctt','cbh','cth','clddepth']
+    variables = variables + [cbt, ctt, cbh, cth, cloud_depth]
     
     #%% data treatments
     print(ttt.ctime(ttt.time())+': some data treatments:')
