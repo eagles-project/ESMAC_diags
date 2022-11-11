@@ -564,7 +564,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, site
     # LWC and IWC
     for vv in ['TGCLDIWP','TGCLDLWP']:
         variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *1000
-        variables[variable_names.index(vv)].attrs['units']='g/m3'
+        variables[variable_names.index(vv)].attrs['units']='g/m2'
     # cloud fraction
     for vv in ['CLDTOT','CLDLOW','CLDMED','CLDHGH']:
         variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *100
