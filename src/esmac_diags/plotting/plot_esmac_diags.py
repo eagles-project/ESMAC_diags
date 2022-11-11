@@ -434,7 +434,7 @@ def diurnalcycle_2d(data, y=None, figsize=None, x=np.arange(24),
         figsize=(6*(ndata),6)
     
     # make plot
-    plt.rcParams.update({'font.size': 16})
+    plt.rcParams.update({'font.size': 20})
     fig = plt.figure(figsize=figsize)
     for nn in range(ndata):
         ax1 = fig.add_subplot(1,ndata,nn+1)
@@ -443,7 +443,7 @@ def diurnalcycle_2d(data, y=None, figsize=None, x=np.arange(24),
         ax1.set_ylim(ylimit)
         ax1.set_xticks(xticks)
         ax1.set_xlabel(xlabel)
-        ax1.set_title(title[nn], fontsize=18)
+        ax1.set_title(title[nn], fontsize=24)
         ax1.grid()
         if nn==0:
             ax=[ax1]
@@ -599,7 +599,7 @@ def seasonalcycle_2d(data, figsize=None, x=np.arange(12)+1, y=None,
         figsize=(6*(ndata),6)
     
     # make plot
-    plt.rcParams.update({'font.size': 16})
+    plt.rcParams.update({'font.size': 20})
     fig = plt.figure(figsize=figsize)
     for nn in range(ndata):
         ax1 = fig.add_subplot(1,ndata,nn+1)
@@ -608,7 +608,7 @@ def seasonalcycle_2d(data, figsize=None, x=np.arange(12)+1, y=None,
         ax1.set_ylim(ylimit)
         ax1.set_xticks(xticks)
         ax1.set_xlabel(xlabel)
-        ax1.set_title(title[nn], fontsize=18)
+        ax1.set_title(title[nn], fontsize=24)
         ax1.grid()
         if nn==0:
             ax=[ax1]
@@ -709,7 +709,7 @@ def jointhist(xdata, ydata, figsize=None, xedges=None, yedges=None, weight=None,
             # normalize by sample number in each ccn bin
             if normalize_x == True:
                 n_x, x2 = np.histogram(xdata[mm][~np.isnan(ydata[mm])], bins=xedges)
-                n_x = np.float16(n_x)
+                n_x = np.float64(n_x)
                 n_x[n_x==0] = np.nan
                 H_count = H_count.T/n_x
                 pdf_x.append(n_x)
@@ -727,7 +727,7 @@ def jointhist(xdata, ydata, figsize=None, xedges=None, yedges=None, weight=None,
         
     # plot joint histogram
     X, Y = np.meshgrid(xedges, yedges)
-    plt.rcParams.update({'font.size': 16})    
+    plt.rcParams.update({'font.size': 18})    
     # not normalize x
     if normalize_x == True:
         fig,ax = plt.subplots(2,ndata,figsize=figsize, 
@@ -771,7 +771,7 @@ def jointhist(xdata, ydata, figsize=None, xedges=None, yedges=None, weight=None,
             if ylimit is not None:
                 ax1.set_ylim(ylimit)
             ax1.grid()
-            ax1.set_title(title[mm], fontsize=18)
+            ax1.set_title(title[mm], fontsize=20)
             if type(xlabel) is list:
                 ax1.set_xlabel(xlabel[mm])
             else:
@@ -787,7 +787,7 @@ def jointhist(xdata, ydata, figsize=None, xedges=None, yedges=None, weight=None,
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def heatmap(xdata, ydata, zdata, figsize=None, xedges=None, yedges=None,vmin=None,vmax=None,
-              xlabel=None, ylabel=None, zlabel=None, title=None, **kwargs):
+              xlabel=None, ylabel=None, zlabel=None, title=None, min_sample=1, **kwargs):
     """
     plot heatmaps (*median* value of zdata in each x-y bin) 
     
@@ -832,10 +832,11 @@ def heatmap(xdata, ydata, zdata, figsize=None, xedges=None, yedges=None,vmin=Non
         for j in range(len(yedges)-1):
             for i in range(len(xedges)-1):
                 mask = np.logical_and(np.logical_and(xdata[mm]>xedges[i], xdata[mm]<xedges[i+1]), \
-                                      np.logical_and(ydata[mm]>yedges[j], ydata[mm]<yedges[j+1])).data
-                heatmap_tmp[i, j] = np.nanmedian(zdata[mm][mask])
-                # heatmap_tmp[i, j] = np.nanmean(zdata[mm][mask])
-                sample_tmp[i, j] = np.size(np.where(mask == True))
+                                      np.logical_and(ydata[mm]>yedges[j], ydata[mm]<yedges[j+1]))
+                sample_tmp[i, j] = sum(mask)
+                if sample_tmp[i,j]>=min_sample:
+                    heatmap_tmp[i, j] = np.nanmedian(zdata[mm][mask])
+                    # heatmap_tmp[i, j] = np.nanmean(zdata[mm][mask])
         heatmaps.append(heatmap_tmp)
         samplenum.append(sample_tmp)
         
@@ -1072,6 +1073,7 @@ def percentiles(*arg, figsize=None, xlimit=None, ylimit=None,
     ax.set_xlim(xlimit)
     ax.set_ylim(ylimit)
     ax.set_title(title)
+    ax.grid()
 
     return(fig, ax)    
 
