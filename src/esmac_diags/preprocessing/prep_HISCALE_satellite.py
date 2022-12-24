@@ -151,10 +151,10 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     lwp = lwp.data
     ctt = ctt_liq.data
     cod = cod_liq_linavg.data
-    H = calc_clouddepth_VISST(lwp, ctt, adiabaticity=0.8)
-    H_ad = calc_clouddepth_VISST(lwp, ctt, adiabaticity=1.0)
-    Nd = calc_cdnc_VISST(lwp, ctt, cod, adiabaticity=0.8)
-    Nd_ad = calc_cdnc_VISST(lwp, ctt, cod, adiabaticity=1.0)
+    H = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=0.8)
+    H_ad = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=1.0)
+    Nd = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=0.8)
+    Nd_ad = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=1.0)
     
     #filter out columns with ice and bad retrievals
     H_array = np.array(H)
@@ -175,10 +175,10 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     Nd_ad_array[ind] = np.nan
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(vissttime[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(vissttime[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    # startdate = np.datetime_as_string(np.datetime64(vissttime[0].data))[:10]
+    # enddate = np.datetime_as_string(np.datetime64(vissttime[-1].data))[:10]
+    # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
     Nd_new = avg_time_1d(vissttime, Nd_array, time_new)
     H_new = avg_time_1d(vissttime, H, time_new)
@@ -203,6 +203,8 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     cth_liq_new = avg_time_1d(vissttime, cth_liq, time_new)
     lw_new = avg_time_1d(vissttime, bb_lw_all, time_new)
     sw_new = avg_time_1d(vissttime, bb_sw_all, time_new)
+    albedo_new = avg_time_1d(vissttime, bb_sw_albedo_all, time_new)
+    solar_zenith_new = avg_time_1d(vissttime, solar_zenith, time_new)
         
     # #%%
     # import matplotlib.pyplot as plt
@@ -426,6 +428,36 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     
     ds.to_netcdf(outfile, mode='w')
 
+    outfile = predatapath + 'albedo_VISSTgrid_HISCALE.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'albedo': (['time'], np.float32(albedo_new)),
+                    },
+                     coords={'time': ('time', time_new)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['albedo'].attrs["long_name"] = 'broadband shortwave albedo at TOA'
+    ds['albedo'].attrs["units"] = '%'
+    ds.attrs["title"] = 'broadband_shortwave_albedo at TOA from VISST 0.5x0.5 data'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    ds.to_netcdf(outfile, mode='w')
+    
+    outfile = predatapath + 'solarzenith_VISSTgrid_HISCALE.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'solar_zenith_angle': (['time'], np.float32(solar_zenith_new)),
+                    },
+                     coords={'time': ('time', time_new)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['solar_zenith_angle'].attrs["long_name"] = solar_zenith.long_name
+    ds['solar_zenith_angle'].attrs["units"] = solar_zenith.units
+    ds.attrs["title"] = 'solar zenith angle from VISST 0.5x0.5 data'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    ds.to_netcdf(outfile, mode='w')
+    
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     """
@@ -517,10 +549,10 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     lwp = wp.data
     ctt = ctt.data
     cod = cod.data
-    H = calc_clouddepth_VISST(lwp, ctt, adiabaticity=0.8)
-    H_ad = calc_clouddepth_VISST(lwp, ctt, adiabaticity=1.0)
-    Nd = calc_cdnc_VISST(lwp, ctt, cod, adiabaticity=0.8)
-    Nd_ad = calc_cdnc_VISST(lwp, ctt, cod, adiabaticity=1.0)
+    H = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=0.8)
+    H_ad = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=1.0)
+    Nd = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=0.8)
+    Nd_ad = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=1.0)
     
     #filter out columns with ice and bad retrievals
     H_array = np.array(H)
@@ -562,10 +594,10 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     iwp[phase!=2] = np.nan
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(vissttime[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(vissttime[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    # startdate = np.datetime_as_string(np.datetime64(vissttime[0].data))[:10]
+    # enddate = np.datetime_as_string(np.datetime64(vissttime[-1].data))[:10]
+    # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
     Nd_new = avg_time_1d(vissttime, Nd_array, time_new)
     H_new = avg_time_1d(vissttime, H, time_new)
@@ -578,6 +610,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     cth_new = avg_time_1d(vissttime, cth, time_new)
     lw_new = avg_time_1d(vissttime, bb_lw, time_new)
     sw_new = avg_time_1d(vissttime, bb_sw, time_new)
+    albedo_new = avg_time_1d(vissttime, bb_sw_albedo, time_new)
     
     
     #%% output file
@@ -754,6 +787,20 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     
     ds.to_netcdf(outfile, mode='w')
     
-#%% main code    
-# prep_VISST_grid(visstgridpath, predatapath, dt=3600)    
-# prep_VISST_pixel(visstpixpath, predatapath)
+    outfile = predatapath + 'albedo_VISSTpix_HISCALE.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'albedo': (['time'], np.float32(albedo_new)),
+                    },
+                     coords={'time': ('time', time_new)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['albedo'].attrs["long_name"] = 'broadband_shortwave_albedo at TOA'
+    ds['albedo'].attrs["units"] = '%'
+    
+    ds.attrs["title"] = 'broadband_shortwave_albedo at TOA from VISST 4x4km data'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    
+    ds.to_netcdf(outfile, mode='w')
+    

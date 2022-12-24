@@ -76,7 +76,7 @@ def calc_cdnc_VISST(lwp, ctt, cod, adiabaticity=0.8):
     ws = epsilon*es/(pres_const - es)
     gamma_w = G*((1 + lv*ws/(Rd*ctt))/(Cp + lv**2*ws*epsilon/(Rd*ctt**2)))
     gamma_ad = (((epsilon + ws)*ws*lv*gamma_w)/(Rd*ctt**2) - (G*ws*pres_const/(Rd*ctt*(pres_const - es))))*rho_air
-    Nd = 1e-6*(cod**3/k)*((2*(1e-3*lwp))**(-2.5))*((0.6*np.pi*Q)**(-3))*((3./(4.*np.pi*rho_liq))**(-2))*((adiabaticity*gamma_ad)**0.5) 
+    Nd = 1e-6*(cod**3/k)*((2*lwp)**(-2.5))*((0.6*np.pi*Q)**(-3))*((3./(4.*np.pi*rho_liq))**(-2))*((adiabaticity*gamma_ad)**0.5) 
     return(Nd)
 
 #%% 
@@ -115,8 +115,47 @@ def calc_clouddepth_VISST(lwp, ctt, adiabaticity=0.8):
     ws = epsilon*es/(pres_const - es)
     gamma_w = G*((1 + lv*ws/(Rd*ctt))/(Cp + lv**2*ws*epsilon/(Rd*ctt**2)))
     gamma_ad = (((epsilon + ws)*ws*lv*gamma_w)/(Rd*ctt**2) - (G*ws*pres_const/(Rd*ctt*(pres_const - es))))*rho_air
-    H = (2.*1e-3*lwp/(adiabaticity*gamma_ad))**0.5
+    H = (2.*lwp/(adiabaticity*gamma_ad))**0.5
     return(H)
+
+#%% 
+def calc_cldfrac_from_highres(datain, timein, timeout, thres=0):
+    """
+    calculate cloud fraction from high resolution cloud data (such as LWP, cloud mask etc.)
+
+    Parameters
+    ----------
+    datain : 1d array
+        input high-res data
+    timein : 1d array
+        time of the input data
+    timeout : 1d array
+        time of calculated cloud fraction in final resolution
+    thres : float or int, optional
+        threshold of input data as cloudy or clearsky. The default is 0.
+
+    Returns
+    -------
+    cldfrac : 1d array
+        cloud fraction, in %
+
+    """
+    
+    cf_out = np.full((len(timeout)), np.nan)
+    dt = (timeout[1]-timeout[0])/2
+    if (2*dt/(timein[1]-timein[0])) < 10:
+        print('WARNING calculating cloud fraction: raw data resolution is lower than 0.1 * final resolution. '+ \
+              'calculated cloud fraction will have large errors')
+    for tt in range(len(timeout)):
+        idx = np.logical_and(timein >= timeout[tt]-dt, timein <= timeout[tt] + dt)
+        data_part = datain[idx]
+        n_valid = sum(~np.isnan(data_part))
+        if n_valid<5:
+            cf_out[tt] = np.nan
+        else:
+            cf_out[tt] = sum(data_part>thres) / n_valid * 100
+
+    return (cf_out)
 
 #%% 
 def calc_Reff_from_REL(rel, dz, cf_liq, icwnc):
@@ -150,7 +189,7 @@ def calc_Reff_from_REL(rel, dz, cf_liq, icwnc):
         cloud_tmp[idx, ii] = 0
     weight = cloud_tmp * dz
 
-    reff = np.sum(rel*weight,axis=1)/np.sum(weight,axis=1)
+    reff = np.nansum(rel*weight,axis=1)/np.sum(weight,axis=1)
     return(reff)
 
 #%% 
@@ -253,7 +292,7 @@ def lwc2cflag(lwc, lwcunit):
 
     """
     if lwcunit == 'kg/m3':
-        lwc = lwc*0.001
+        lwc = lwc*1000
         lwcunit = 'g/m3'
     elif lwcunit == 'g m-3':
         lwcunit = 'g/m3'

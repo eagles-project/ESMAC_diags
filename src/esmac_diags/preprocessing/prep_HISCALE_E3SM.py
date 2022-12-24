@@ -18,7 +18,8 @@ import esmac_diags
 from esmac_diags.subroutines.read_aircraft import read_iwg1
 from esmac_diags.subroutines.time_format_change import hhmmss2sec
 from esmac_diags.subroutines.time_resolution_change import median_time_1d, median_time_2d
-from esmac_diags.subroutines.specific_data_treatment import find_nearest, calc_Reff_from_REL
+from esmac_diags.subroutines.specific_data_treatment import find_nearest, calc_Reff_from_REL, \
+                            calc_cdnc_ARM, calc_cdnc_VISST
 from esmac_diags.subroutines.CN_mode_to_size import calc_CNsize_cutoff_0_3000nm
 from netCDF4 import Dataset
 
@@ -82,10 +83,10 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
     E3SMdomain_range = '260e_to_265e_34n_to_39n'    # domain range in E3SM regional output
     
     #%% find all data
-    lst = glob.glob(iwgpath + '*.a2.txt')
-    lst.sort()
+    lst0 = glob.glob(iwgpath + '*.a2.txt')
+    lst0.sort()
     
-    for filename in lst[:]:
+    for filename in lst0[:]:
         
         # get date
         fname = re.split('hiscale.|.a2', filename)
@@ -446,7 +447,11 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     
     #%% read in data
     
-    lst = glob.glob(input_path + input_filehead+'.*-00000.nc')
+    lst = glob.glob(input_path + input_filehead+'.*2016-04-2?-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2016-05-??-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2016-06-0?-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2016-08-2?-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2016-09-??-00000.nc') 
     lst.sort()
     # first data
     e3smdata = xr.open_dataset(lst[0])
@@ -592,7 +597,6 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
         LTS850 = np.hstack((LTS850,LTS850_2))
         
     #%% re-shape the data into pre-defined resolution
-    time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
     # treat variables with other dimensions (e.g., size distribution)    
     f = interp1d(np.int64(e3smtime), cloud_p, axis=0, bounds_error=False)
@@ -747,7 +751,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     
     if not os.path.exists(output_path):
         os.makedirs(output_path)
-        
+    
     #%% settings specific for each site
     # HISCALE
     lat0 = 36.6059
@@ -761,7 +765,11 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     variable_names = list()
     variables = list()
     
-    lst = glob.glob(input_path + input_filehead+'.*-00000.nc')
+    lst = glob.glob(input_path + input_filehead+'.*2016-04-2?-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2016-05-??-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2016-06-0?-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2016-08-2?-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2016-09-??-00000.nc') 
     lst.sort()
     # first data
     e3smdata = xr.open_dataset(lst[0])
@@ -850,28 +858,70 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         coords=dict(time=(["time"], e3smtime),size=(["size"], np.arange(1,3001))),
         attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
     
-    # mean cloud droplet number concentration
+    # variables to calculate Reff and Nd
     z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
     cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
-    cdnc_col = e3smdata['CDNUMC'+'_'+E3SMdomain_range].load()
     z3 = z3[:,:,x_idx]
     cloud = cloud[:,:,x_idx]
-    cdnc_col = cdnc_col[:,x_idx]
     dz = (z3[:,:-2].data - z3[:,2:].data)/2
     dz = np.append(dz, (z3[:,-2:-1].data+z3[:,-1:].data)/2, axis=1)
     dz = np.insert(dz,0,dz[:,0],axis=1)
     weight = cloud.data*dz
-    cdnc_mean = cdnc_col/np.sum(weight,axis=1)
-    cdnc_mean[cdnc_mean == np.inf] = np.nan
-    cdnc_mean = xr.DataArray(data=cdnc_mean,  dims=["time"],
+    # mid-level T, P, z
+    Tmid = 0.5*(T[:,0:-1,x_idx].data + T[:,1:,x_idx].data)
+    Pmid = 0.5*(Pres[:,0:-1,x_idx].data + Pres[:,1:,x_idx].data)
+    Zmid = 0.5*(z3[:,0:-1].data + z3[:,1:].data)
+    # cloud top
+    cf_sum_top = np.cumsum(cloud.data, axis=1)
+    cf_sum_top[cf_sum_top > 1] = 1
+    cf_sum_top_diff = cf_sum_top[:,1:] - cf_sum_top[:,0:-1]
+    z_cldtop = np.sum(Zmid[:,:]*cf_sum_top_diff[:,:], axis=1)
+    T_cldtop = np.sum(Tmid[:,:]*cf_sum_top_diff[:,:], axis=1)
+    # cloud base
+    cf_sum_base = np.cumsum(cloud[:, ::-1].data, axis=1)
+    cf_sum_base[cf_sum_base > 1] = 1
+    cf_sum_base_diff = cf_sum_base[:,1:] - cf_sum_base[:,0:-1]
+    z_cldbase = np.sum(Zmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
+    T_cldbase = np.sum(Tmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
+    # normalize cloud fraction when not 100%
+    z_cldtop = z_cldtop / cf_sum_top[:,-1]
+    T_cldtop = T_cldtop / cf_sum_top[:,-1]
+    z_cldbase = z_cldbase / cf_sum_base[:,-1]
+    T_cldbase = T_cldbase / cf_sum_base[:,-1]
+    e3sm_cloud_depth = z_cldtop - z_cldbase
+    # # alternatively, one can assume a minimum cloud depth in which the full mass levels are used instead of half levels
+    # e3sm_z2 = z3[:,:-1].data
+    # e3sm_z3 = z3[:,1:].data
+    # e3sm_t2 = T[:,:-1,x_idx].data
+    # e3sm_t3 = T[:,1:,x_idx].data
+    # #cloud base and top calculations for minimum cloud depth
+    # z_cldbase2 = np.sum(e3sm_z2[:,::-1]*cf_sum_base_diff[:,:], axis=1)
+    # T_cldbase2 = np.sum(e3sm_t2[:,::-1]*cf_sum_base_diff[:,:], axis=1)
+    # z_cldtop2 = np.sum(e3sm_z3[:,:]*cf_sum_top_diff[:,:], axis=1)
+    # T_cldtop2 = np.sum(e3sm_t3[:,:]*cf_sum_top_diff[:,:], axis=1)
+    # e3sm_cloud_depth2 = z_cldtop2 - z_cldbase2
+    cloud_depth = xr.DataArray(data=e3sm_cloud_depth,  dims=["time"],
         coords=dict(time=(["time"], e3smtime)),
-        attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
+        attrs=dict(long_name="cloud depth",units="m"),)
+    cbh = xr.DataArray(data=z_cldbase,  dims=["time"],
+        coords=dict(time=(["time"], e3smtime)),
+        attrs=dict(long_name="cloud base height",units="m"),)
+    cth = xr.DataArray(data=z_cldtop,  dims=["time"],
+        coords=dict(time=(["time"], e3smtime)),
+        attrs=dict(long_name="cloud top height",units="m"),)
+    cbt = xr.DataArray(data=T_cldbase,  dims=["time"],
+        coords=dict(time=(["time"], e3smtime)),
+        attrs=dict(long_name="cloud base temperature",units="K"),)
+    ctt = xr.DataArray(data=T_cldtop,  dims=["time"],
+        coords=dict(time=(["time"], e3smtime)),
+        attrs=dict(long_name="cloud top temperature",units="K"),)
     
     # cloud optical depth and effective radius
     rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
     freql = e3smdata['FREQL'+'_'+E3SMdomain_range].load()
     icwnc = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
     cod_a = e3smdata['TOT_CLD_VISTAU'+'_'+E3SMdomain_range].load()
+    cod_m = e3smdata['TAUWMODIS'+'_'+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
     solin = e3smdata['SOLIN'+'_'+E3SMdomain_range].load()
     rel = rel[:,:,x_idx]
     freql = freql[:,:,x_idx]
@@ -883,7 +933,9 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     reff[reff==0] = np.nan
     # calculate mean optical depth
     cod = np.sum(cod_a.data,axis=1)
-    cod[solin==0] = np.nan
+    # cod[solin==0] = np.nan
+    # cod from MODIS simulator
+    cod_m = cod_m[:,x_idx]
     reff_mean = xr.DataArray(data=reff,  dims=["time"],
         coords=dict(time=(["time"], e3smtime)),
         attrs=dict(long_name="mean cloud liquid effective radius",units="um"),)
@@ -891,10 +943,36 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         coords=dict(time=(["time"], e3smtime)),
         attrs=dict(long_name="column-total cloud optical depth",units="N/A"),)
     
+    # mean cloud droplet number concentration
+    cdnc_col = e3smdata['CDNUMC'+'_'+E3SMdomain_range].load()
+    cdnc_col = cdnc_col[:,x_idx]
+    cdnc_mean = cdnc_col/np.sum(weight,axis=1)
+    cdnc_mean[cdnc_mean >2e9] = np.nan
+    cdnc_mean = xr.DataArray(data=cdnc_mean,  dims=["time"],
+        coords=dict(time=(["time"], e3smtime)),
+        attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
+    
+    # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
+    lwp = e3smdata['TGCLDLWP'+'_'+E3SMdomain_range][:,x_idx].data
+    e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+    T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+    nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
+    nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m, adiabaticity=0.8)
+    cdnc_arm = xr.DataArray(data=nd_arm*1e6,  dims=["time"],
+        coords=dict(time=(["time"], e3smtime)),
+        attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                    description='Retrieved using ARM Ndrop algorithm'),)
+    cdnc_sat = xr.DataArray(data=nd_sat*1e6,  dims=["time"],
+        coords=dict(time=(["time"], e3smtime)),
+        attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                    description='Retrieved using Bennartz(2007) algorithm, also used for VISST data'),)
+    
     # all other 2D (surface and vertical integrated) variables
     variable2d_names = ['AODABS', 'AODALL', 'CDNUMC', 'CLDHGH', 'CLDMED', 'CLDLOW', 'CLDTOT', 
                         'FLDS', 'FLNS', 'FLNT', 'FLUT', 'FSDS', 'FSNS', 'FSNT', 'FSUTOA', 'SOLIN', 
                         'LHFLX', 'SHFLX', 'LWCF', 'SWCF', "TGCLDLWP", "TGCLDIWP", 
+                        'IWPMODIS', 'LWPMODIS', 'REFFCLWMODIS', 'TAUIMODIS', 'TAUTMODIS', 'TAUWMODIS', 
+                        #'MEANPTOP_ISCCP', 'MEANCLDALB_ISCCP', 'MEANTAU_ISCCP',
                         'PBLH', 'PRECT', 'PRECL', 'PRECC', 'PS', 'TREFHT', ]
     for varname in variable2d_names:
         var = e3smdata[varname + '_'+E3SMdomain_range].load()
@@ -991,30 +1069,66 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
             coords=dict(time=(["time"], e3smtime_i),size=(["size"], np.arange(1,3001))),
             attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
         NCNall = xr.concat([NCNall, NCN2], dim="time")
-        
-        # mean cloud droplet number concentration
+    
+        # variables to calculate Reff and Nd
         z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
         cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
-        cdnc_col = e3smdata['CDNUMC'+'_'+E3SMdomain_range].load()
         z3 = z3[:,:,x_idx]
         cloud = cloud[:,:,x_idx]
-        cdnc_col = cdnc_col[:,x_idx]
         dz = (z3[:,:-2].data - z3[:,2:].data)/2
         dz = np.append(dz, (z3[:,-2:-1].data+z3[:,-1:].data)/2, axis=1)
         dz = np.insert(dz,0,dz[:,0],axis=1)
         weight = cloud.data*dz
-        cdnc = cdnc_col/np.sum(weight,axis=1)
-        cdnc[cdnc == np.inf] = np.nan
-        cdnc = xr.DataArray(data=cdnc,  dims=["time"],
+        # mid-level T, P, z
+        Tmid = 0.5*(T[:,0:-1,x_idx].data + T[:,1:,x_idx].data)
+        Pmid = 0.5*(Pres[:,0:-1,x_idx].data + Pres[:,1:,x_idx].data)
+        Zmid = 0.5*(z3[:,0:-1].data + z3[:,1:].data)
+        # cloud top
+        cf_sum_top = np.cumsum(cloud.data, axis=1)
+        cf_sum_top[cf_sum_top > 1] = 1
+        cf_sum_top_diff = cf_sum_top[:,1:] - cf_sum_top[:,0:-1]
+        z_cldtop = np.sum(Zmid[:,:]*cf_sum_top_diff[:,:], axis=1)
+        T_cldtop = np.sum(Tmid[:,:]*cf_sum_top_diff[:,:], axis=1)
+        # cloud base
+        cf_sum_base = np.cumsum(cloud[:, ::-1].data, axis=1)
+        cf_sum_base[cf_sum_base > 1] = 1
+        cf_sum_base_diff = cf_sum_base[:,1:] - cf_sum_base[:,0:-1]
+        z_cldbase = np.sum(Zmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
+        T_cldbase = np.sum(Tmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
+        # normalize cloud fraction when not 100%
+        z_cldtop = z_cldtop / cf_sum_top[:,-1]
+        T_cldtop = T_cldtop / cf_sum_top[:,-1]
+        z_cldbase = z_cldbase / cf_sum_base[:,-1]
+        T_cldbase = T_cldbase / cf_sum_base[:,-1]
+        e3sm_cloud_depth = z_cldtop - z_cldbase
+        cloud_depth_2 = xr.DataArray(data=e3sm_cloud_depth,  dims=["time"],
             coords=dict(time=(["time"], e3smtime_i)),
-            attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
-        cdnc_mean = xr.concat([cdnc_mean, cdnc], dim="time")
+            attrs=dict(long_name="cloud depth",units="m"),)
+        cbh_2 = xr.DataArray(data=z_cldbase,  dims=["time"],
+            coords=dict(time=(["time"], e3smtime_i)),
+            attrs=dict(long_name="cloud base height",units="m"),)
+        cth_2 = xr.DataArray(data=z_cldtop,  dims=["time"],
+            coords=dict(time=(["time"], e3smtime_i)),
+            attrs=dict(long_name="cloud top height",units="m"),)
+        cbt_2 = xr.DataArray(data=T_cldbase,  dims=["time"],
+            coords=dict(time=(["time"], e3smtime_i)),
+            attrs=dict(long_name="cloud base temperature",units="K"),)
+        ctt_2 = xr.DataArray(data=T_cldtop,  dims=["time"],
+            coords=dict(time=(["time"], e3smtime_i)),
+            attrs=dict(long_name="cloud top temperature",units="K"),)
+        cbh = xr.concat([cbh, cbh_2], dim="time")
+        cth = xr.concat([cth, cth_2], dim="time")
+        cbt = xr.concat([cbt, cbt_2], dim="time")
+        ctt = xr.concat([ctt, ctt_2], dim="time")
+        cloud_depth = xr.concat([cloud_depth, cloud_depth_2], dim="time")
         
+    
         # cloud optical depth and effective radius
         rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
         freql = e3smdata['FREQL'+'_'+E3SMdomain_range].load()
         icwnc = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
         cod_a = e3smdata['TOT_CLD_VISTAU'+'_'+E3SMdomain_range].load()
+        cod_m = e3smdata['TAUWMODIS'+'_'+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
         solin = e3smdata['SOLIN'+'_'+E3SMdomain_range].load()
         rel = rel[:,:,x_idx]
         freql = freql[:,:,x_idx]
@@ -1026,7 +1140,10 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         reff[reff==0] = np.nan
         # calculate mean optical depth
         cod = np.sum(cod_a.data,axis=1)
-        cod[solin==0] = np.nan
+        # cod[solin==0] = np.nan
+        # cod from MODIS simulator
+        cod_m = cod_m[:,x_idx]
+        
         reff_2 = xr.DataArray(data=reff,  dims=["time"],
             coords=dict(time=(["time"], e3smtime_i)),
             attrs=dict(long_name="mean cloud liquid effective radius",units="um"),)
@@ -1035,6 +1152,34 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
             attrs=dict(long_name="column-total cloud optical depth",units="N/A"),)
         reff_mean = xr.concat([reff_mean, reff_2], dim="time")
         cod_mean = xr.concat([cod_mean, cod_2], dim="time")
+        
+        # mean cloud droplet number concentration
+        cdnc_col = e3smdata['CDNUMC'+'_'+E3SMdomain_range].load()
+        cdnc_col = cdnc_col[:,x_idx]
+        cdnc = cdnc_col/np.sum(weight,axis=1)
+        cdnc[cdnc >2e9] = np.nan
+        cdnc = xr.DataArray(data=cdnc,  dims=["time"],
+            coords=dict(time=(["time"], e3smtime_i)),
+            attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
+        cdnc_mean = xr.concat([cdnc_mean, cdnc], dim="time")
+        
+        # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
+        lwp = e3smdata['TGCLDLWP'+'_'+E3SMdomain_range][:,x_idx].data
+        e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+        T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+        nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
+        nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m, adiabaticity=0.8)
+        nd_arm = xr.DataArray(data=nd_arm*1e6,  dims=["time"],
+            coords=dict(time=(["time"], e3smtime_i)),
+            attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                        description='Retrieved using ARM Ndrop algorithm'),)
+        nd_sat = xr.DataArray(data=nd_sat*1e6,  dims=["time"],
+            coords=dict(time=(["time"], e3smtime_i)),
+            attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                        description='Retrieved using Bennartz(2007) algorithm, also used for VISST data'),)
+        cdnc_arm = xr.concat([cdnc_arm, nd_arm], dim="time")
+        cdnc_sat = xr.concat([cdnc_sat, nd_sat], dim="time")
+    
         
         # all other 2D (surface and vertical integrated) variables
         for varname in variable2d_names:
@@ -1051,7 +1196,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
             variables[vv] = xr.concat([variables[vv], var[:,-1,x_idx]],dim='time')
             
         e3smdata.close()
-           
+        
     # put all variables into the list
     # aerosol composition    
     variable_names = variable_names + ['bc','dst','mom','ncl','pom','so4','soa']
@@ -1069,11 +1214,14 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     variable_names = variable_names + [ 'NCN3', 'NCN10', 'NCN100']
     variables = variables + [NCN3, NCN10, NCN100]  # size distribution data will be added later
     # mean cloud droplet number concentration
-    variable_names = variable_names + ['Nd_mean']
-    variables = variables + [cdnc_mean]
+    variable_names = variable_names + ['Nd_mean', 'Nd_ARM', 'Nd_VISST']
+    variables = variables + [cdnc_mean, cdnc_arm, cdnc_sat]
     # mean cloud optical depth and effective radius
     variable_names = variable_names + ['reff','cod']
     variables = variables + [reff_mean, cod_mean]
+    # cloud depth
+    variable_names = variable_names + ['cbt','ctt','cbh','cth','clddepth']
+    variables = variables + [cbt, ctt, cbh, cth, cloud_depth]
     
     #%% change some units
     # composition
@@ -1086,20 +1234,19 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     # aerosol number
     NCNall.data = NCNall.data * 1e-6
     NCNall.attrs['units']='#/cm3'
-    for vv in ['NCN3', 'NCN10', 'NCN100', 'Nd_mean']:
+    for vv in ['NCN3', 'NCN10', 'NCN100', 'Nd_mean', 'Nd_ARM', 'Nd_VISST']:
         variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data * 1e-6
         variables[variable_names.index(vv)].attrs['units']='#/cm3'
     # LWC and IWC
     for vv in ['TGCLDIWP','TGCLDLWP']:
         variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *1000
-        variables[variable_names.index(vv)].attrs['units']='g/m3'
+        variables[variable_names.index(vv)].attrs['units']='g/m2'
     # cloud fraction
     for vv in ['CLDTOT','CLDLOW','CLDMED','CLDHGH']:
         variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *100
         variables[variable_names.index(vv)].attrs['units']='%'
     
     #%% re-shape the data into pre-defined resolution
-    time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     variables_new = list()
     #1d variable. only numpy.interp can keep some single-point values (see Nd_mean)
     for var in variables:
@@ -1120,7 +1267,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     outfile = output_path + output_filehead + '_sfc.nc'
     print('output file '+outfile)
     ds = xr.Dataset( varall_1d,
-                     coords={'time': ('time', time_new), 'size':('size', np.arange(1,3001))})
+                      coords={'time': ('time', time_new), 'size':('size', np.arange(1,3001))})
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
     ds['time'].attrs["standard_name"] = "time"

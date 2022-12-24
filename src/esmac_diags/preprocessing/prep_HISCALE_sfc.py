@@ -95,10 +95,7 @@ def prep_ACSM(acsmpath, predatapath, dt=3600):
     
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
     org_new = median_time_1d(time, org, time_new)
     no3_new = median_time_1d(time, no3, time_new)
@@ -470,10 +467,7 @@ def prep_CPC(cpcpath, cpcupath, predatapath, dt=3600):
     
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time10[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time10[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
     cpc10_new = median_time_1d(time10, cpc10, time_new)
     cpc3_new = median_time_1d(time3, cpc3, time_new)
@@ -551,10 +545,7 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=3600):
     uhsas100[uhsas100==0] = np.nan
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
     uhsas_new = median_time_2d(time, uhsas, time_new)
     uhsas100_new = median_time_1d(time, uhsas100, time_new)
@@ -663,10 +654,7 @@ def prep_CNsize_SMPS_IOP1(smpspath, nanosmpspath, predatapath, dt=3600):
     smps100[smps100==0] = np.nan
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time1[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time1[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2016-04-25', end='2016-05-22', freq=str(int(dt))+"s")  # HISCALE IOP1
     
     smps_new = median_time_2d(time1, smps, time_new)
     smps100_new = median_time_1d(time1, smps100, time_new)
@@ -744,10 +732,7 @@ def prep_CNsize_SMPS_IOP2(smps_pnnl_path, predatapath, dt=3600):
     smps100[smps100==0] = np.nan
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time1[0]))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time1[-1]))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2016-08-28', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE IOP2
     
     smps_new = median_time_2d(time1, smps, time_new)
     smps100_new = median_time_1d(time1, smps100, time_new)
@@ -831,10 +816,7 @@ def prep_mfrsr_cod(mfrsrpath,  predatapath, dt=3600):
     cod[cos_d<=0.2] = np.nan
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
     cod_new = avg_time_1d(time, cod, time_new)
     
@@ -908,10 +890,7 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=3600):
     
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
     reff_new = median_time_1d(time, reff, time_new)
     
@@ -1001,10 +980,7 @@ def prep_LWP(armbepath, mfrsrpath, predatapath, dt=3600):
     lwp2 = lwp2*1000. # change unit from kg/m2 (mm) to g/m2
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time2[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time2[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
     lwp_new = avg_time_1d(time1, lwp, time_new)
     lwp2_new = avg_time_1d(time2, lwp2, time_new)
@@ -1377,7 +1353,7 @@ def prep_Ndrop(ndroppath, predatapath, dt=3600):
     None.
 
     """
-    
+        
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
         
@@ -1388,16 +1364,21 @@ def prep_Ndrop(ndroppath, predatapath, dt=3600):
     time = obsdata['time'].load()
     nd = obsdata['drop_number_conc'].load()
     qc_nd = obsdata['qc_drop_number_conc'].load()
+    ctype = obsdata['cloud_base_type']
     obsdata.close()
     
     # quality control
     nd = qc_mask_qcflag(nd,qc_nd)
     nd = nd*1e-6   # m-3 to cm-3
     
+    # # exclude ice clouds or multi-layer clouds
+    # nd[ctype!=1] = np.nan
+    
+    # exclude small values
+    nd[nd<10] = np.nan
+    
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
     nd_new = median_time_1d(time, nd, time_new)
     # nd_new = avg_time_1d(time, nd, time_new)
@@ -1520,10 +1501,11 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclpath, predatapath, dt=3600):
     H_tmp = np.interp(np.int64(time), np.int64(arscltime), H)
     nd = calc_cdnc_ARM(lwp, cod, H_tmp)
     
+    # exclude small values
+    nd[nd<10] = np.nan
+    
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time[0]))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time[-1]))[:10]
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
     nd_new = median_time_1d(time, nd, time_new)
         

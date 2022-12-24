@@ -12,16 +12,128 @@ import time as ttt
 import esmac_diags
 from esmac_diags.subroutines.time_resolution_change import avg_time_1d, median_time_1d, median_time_2d
 from esmac_diags.subroutines.quality_control import  qc_remove_neg, qc_mask_qcflag
+from esmac_diags.subroutines.specific_data_treatment import calc_cldfrac_from_highres
 
-# shipmetpath = '../../../data/MARCUS/obs/ship/maraadmetX1.b1/'
-# mwrpath = '../../../data/MARCUS/obs/ship/marmwrret1liljclouM1.s2/'
-# cpcpath = '../../../data/MARCUS/obs/ship/maraoscpcf1mM1.b1/'
-# ccnpath = '../../../data/MARCUS/obs/ship/maraosccn1colavgM1.b1/'
-# uhsaspath = '../../../data/MARCUS/obs/ship/maraosuhsasM1.a1/'
-# exhaustfreepath = '../../../data/MARCUS/obs/ship/ship_exhaustfree/'
-# prep_data_path = 'C:/Users/tang357/Downloads/MARCUS/'
+# shipmetpath = '../../../../ESMAC_Diags_Tool/data/MARCUS/obs/ship/maraadmetX1.b1/'
+# mwrpath = '../../../../ESMAC_Diags_Tool/data/MARCUS/obs/ship/marmwrret1liljclouM1.s2/'
+# cpcpath = '../../../../ESMAC_Diags_Tool/data/MARCUS/obs/ship/maraoscpcf1mM1.b1/'
+# ccnpath = '../../../../ESMAC_Diags_Tool/data/MARCUS/obs/ship/maraosccn1colavgM1.b1/'
+# uhsaspath = '../../../../ESMAC_Diags_Tool/data/MARCUS/obs/ship/maraosuhsasM1.a1/'
+# exhaustfreepath = '../../../../ESMAC_Diags_Tool/data/MARCUS/obs/ship/ship_exhaustfree/'
+# prep_data_path = '../../../prep_data/MARCUS/ship/'
 
 # dt=3600
+
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
+    """
+    prepare surface aerosol size distribution
+    
+    Parameters
+    ----------
+    shipmetpath : str
+        input path for ship location data
+    ccnpath : str
+        input path of CCN data
+    prep_data_path : str
+        output path
+    dt : float
+        time resolution (unit: sec) of output
+
+    Returns
+    -------
+    None.
+    
+    """    
+    
+    if not os.path.exists(prep_data_path):
+        os.makedirs(prep_data_path)
+    
+    lst = glob.glob(shipmetpath+'maraadmetX1.b1.*')
+    if len(lst)==0:
+        raise ValueError('cannot find any data')
+    
+    shipdata = xr.open_mfdataset(lst, combine='by_coords')
+    time = shipdata['time'].load()
+    lon = shipdata['lon'].load()
+    qc_lon = shipdata['qc_lon'].load()
+    lat = shipdata['lat'].load()
+    qc_lat = shipdata['qc_lat'].load()
+    shipdata.close()
+    
+    lat = qc_mask_qcflag(lat, qc_lat)
+    lon = qc_mask_qcflag(lon, qc_lon)
+    
+    #%% read in data
+    lst2 = glob.glob(ccnpath+'maraosccn1colavgM1.b1.*')
+    obsdata = xr.open_mfdataset(lst2, combine='by_coords')
+    time2 = obsdata['time'].load()
+    ccn = obsdata['N_CCN'].load()
+    qc_ccn = obsdata['qc_N_CCN'].load()
+    SS = obsdata['supersaturation_calculated'].load()
+    obsdata.close()
+    ccn = qc_mask_qcflag(ccn, qc_ccn)
+    
+    ccn_1s = np.array(ccn)
+    ccn_2s = np.array(ccn)
+    ccn_3s = np.array(ccn)
+    ccn_5s = np.array(ccn)
+    ccn_6s = np.array(ccn)
+    ccn_1s[np.logical_or(SS<0.05, SS>0.15)] = np.nan
+    ccn_2s[np.logical_or(SS<0.15, SS>0.25)] = np.nan
+    ccn_3s[np.logical_or(SS<0.25, SS>0.35)] = np.nan
+    ccn_5s[np.logical_or(SS<0.45, SS>0.55)] = np.nan
+    ccn_6s[np.logical_or(SS<0.55, SS>0.65)] = np.nan
+    
+    #%% re-shape the data into coarser resolution
+    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
+    
+    lon1 = median_time_1d(time, lon, time_new)
+    lat1 = median_time_1d(time, lat, time_new)
+    ccn1 = median_time_1d(time2, ccn_1s, time_new)
+    ccn2 = median_time_1d(time2, ccn_2s, time_new)
+    ccn3 = median_time_1d(time2, ccn_3s, time_new)
+    ccn5 = median_time_1d(time2, ccn_5s, time_new)
+    ccn6 = median_time_1d(time2, ccn_6s, time_new)
+    
+    #%% output file
+    outfile = prep_data_path + 'CCN_MARCUS.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'lat': (['time'], lat1),
+                    'lon': (['time'], lon1),
+                    'CCN1': (['time'], ccn1),
+                    'CCN2': (['time'], ccn2),
+                    'CCN3': (['time'], ccn3),
+                    'CCN5': (['time'], ccn5),
+                    'CCN6': (['time'], ccn6),
+                    },
+                     coords={'time': ('time', time_new)})
+    
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lat'].attrs["long_name"] = "latitude"
+    ds['lat'].attrs["units"] = "degree_north"
+    ds['lon'].attrs["long_name"] = "longitude"
+    ds['lon'].attrs["units"] = "degree_east"
+    ds['CCN1'].attrs["long_name"] = 'CCN concentration for SS between 0.05% and 0.15%'
+    ds['CCN1'].attrs["units"] = "1/cm3"
+    ds['CCN2'].attrs["long_name"] = 'CCN concentration for SS between 0.15% and 0.25%'
+    ds['CCN2'].attrs["units"] = "1/cm3"
+    ds['CCN3'].attrs["long_name"] = 'CCN concentration for SS between 0.25% and 0.35%'
+    ds['CCN3'].attrs["units"] = "1/cm3"
+    ds['CCN5'].attrs["long_name"] = 'CCN concentration for SS between 0.45% and 0.55%'
+    ds['CCN5'].attrs["units"] = "1/cm3"
+    ds['CCN6'].attrs["long_name"] = 'CCN concentration for SS between 0.55% and 0.65%'
+    ds['CCN6'].attrs["units"] = "1/cm3"
+    
+    ds.attrs["input data_example"] = lst2[0].split('/')[-1]
+    ds.attrs["description"] = 'median value of '+str(int(dt))+'sec resolution'
+    ds.attrs["creation_date"] = ttt.ctime(ttt.time())
+    
+    ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_CCN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=3600):
@@ -77,10 +189,7 @@ exhaustfreepath : str
     ccn5s = qc_remove_neg(ccn5s)
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time2[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time2[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
     lon1 = median_time_1d(time, lon, time_new)
     lat1 = median_time_1d(time, lat, time_new)
@@ -149,120 +258,6 @@ exhaustfreepath : str
     ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
-    """
-    prepare surface aerosol size distribution
-    
-    Parameters
-    ----------
-    shipmetpath : str
-        input path for ship location data
-    ccnpath : str
-        input path of CCN data
-    prep_data_path : str
-        output path
-    dt : float
-        time resolution (unit: sec) of output
-
-    Returns
-    -------
-    None.
-    
-    """    
-    
-    if not os.path.exists(prep_data_path):
-        os.makedirs(prep_data_path)
-    
-    lst = glob.glob(shipmetpath+'maraadmetX1.b1.*')
-    if len(lst)==0:
-        raise ValueError('cannot find any data')
-    
-    shipdata = xr.open_mfdataset(lst, combine='by_coords')
-    time = shipdata['time'].load()
-    lon = shipdata['lon'].load()
-    qc_lon = shipdata['qc_lon'].load()
-    lat = shipdata['lat'].load()
-    qc_lat = shipdata['qc_lat'].load()
-    shipdata.close()
-    
-    lat = qc_mask_qcflag(lat, qc_lat)
-    lon = qc_mask_qcflag(lon, qc_lon)
-    
-    #%% read in data
-    lst2 = glob.glob(ccnpath+'maraosccn1colavgM1.b1.*')
-    obsdata = xr.open_mfdataset(lst2, combine='by_coords')
-    time2 = obsdata['time'].load()
-    ccn = obsdata['N_CCN'].load()
-    qc_ccn = obsdata['qc_N_CCN'].load()
-    SS = obsdata['supersaturation_calculated'].load()
-    obsdata.close()
-    ccn = qc_mask_qcflag(ccn, qc_ccn)
-    
-    ccn_1s = np.array(ccn)
-    ccn_2s = np.array(ccn)
-    ccn_3s = np.array(ccn)
-    ccn_5s = np.array(ccn)
-    ccn_6s = np.array(ccn)
-    ccn_1s[np.logical_or(SS<0.05, SS>0.15)] = np.nan
-    ccn_2s[np.logical_or(SS<0.15, SS>0.25)] = np.nan
-    ccn_3s[np.logical_or(SS<0.25, SS>0.35)] = np.nan
-    ccn_5s[np.logical_or(SS<0.45, SS>0.55)] = np.nan
-    ccn_6s[np.logical_or(SS<0.55, SS>0.65)] = np.nan
-    
-    #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time2[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time2[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
-    
-    lon1 = median_time_1d(time, lon, time_new)
-    lat1 = median_time_1d(time, lat, time_new)
-    ccn1 = median_time_1d(time2, ccn_1s, time_new)
-    ccn2 = median_time_1d(time2, ccn_2s, time_new)
-    ccn3 = median_time_1d(time2, ccn_3s, time_new)
-    ccn5 = median_time_1d(time2, ccn_5s, time_new)
-    ccn6 = median_time_1d(time2, ccn_6s, time_new)
-    
-    #%% output file
-    outfile = prep_data_path + 'CCN_MARCUS.nc'
-    print('output file '+outfile)
-    ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
-                    'CCN1': (['time'], ccn1),
-                    'CCN2': (['time'], ccn2),
-                    'CCN3': (['time'], ccn3),
-                    'CCN5': (['time'], ccn5),
-                    'CCN6': (['time'], ccn6),
-                    },
-                     coords={'time': ('time', time_new)})
-    
-    #assign attributes
-    ds['time'].attrs["long_name"] = "Time"
-    ds['time'].attrs["standard_name"] = "time"
-    ds['lat'].attrs["long_name"] = "latitude"
-    ds['lat'].attrs["units"] = "degree_north"
-    ds['lon'].attrs["long_name"] = "longitude"
-    ds['lon'].attrs["units"] = "degree_east"
-    ds['CCN1'].attrs["long_name"] = 'CCN concentration for SS between 0.05% and 0.15%'
-    ds['CCN1'].attrs["units"] = "1/cm3"
-    ds['CCN2'].attrs["long_name"] = 'CCN concentration for SS between 0.15% and 0.25%'
-    ds['CCN2'].attrs["units"] = "1/cm3"
-    ds['CCN3'].attrs["long_name"] = 'CCN concentration for SS between 0.25% and 0.35%'
-    ds['CCN3'].attrs["units"] = "1/cm3"
-    ds['CCN5'].attrs["long_name"] = 'CCN concentration for SS between 0.45% and 0.55%'
-    ds['CCN5'].attrs["units"] = "1/cm3"
-    ds['CCN6'].attrs["long_name"] = 'CCN concentration for SS between 0.55% and 0.65%'
-    ds['CCN6'].attrs["units"] = "1/cm3"
-    
-    ds.attrs["input data_example"] = lst2[0].split('/')[-1]
-    ds.attrs["description"] = 'median value of '+str(int(dt))+'sec resolution'
-    ds.attrs["creation_date"] = ttt.ctime(ttt.time())
-    
-    ds.to_netcdf(outfile, mode='w')
-
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     """
     prepare surface aerosol size distribution
@@ -326,10 +321,7 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     uhsas100 = qc_remove_neg(uhsas100, remove_zero='True')
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time2[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time2[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
     lon1 = median_time_1d(time, lon, time_new)
     lat1 = median_time_1d(time, lat, time_new)
@@ -417,10 +409,7 @@ def prep_CN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=3600):
     uhsas = qc_remove_neg(uhsas.data)
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time2[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time2[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
     lon1 = median_time_1d(time, lon, time_new)
     lat1 = median_time_1d(time, lat, time_new)
@@ -509,10 +498,7 @@ def prep_CNsize_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=360
     uhsas = qc_remove_neg(uhsas.data)
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time2[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time2[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
     lon1 = median_time_1d(time, lon, time_new)
     lat1 = median_time_1d(time, lat, time_new)
@@ -606,10 +592,7 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
     size = (dmin+dmax)/2
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time2[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time2[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
     lon1 = median_time_1d(time, lon, time_new)
     lat1 = median_time_1d(time, lat, time_new)
@@ -651,6 +634,97 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
     ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def prep_MET(shipmetpath, prep_data_path, dt=3600):
+    """
+    prepare basic meteorological fields
+    
+    Parameters
+    ----------
+    shipmetpath : str
+        input path for ship location data
+    prep_data_path : str
+        output path
+    dt : float
+        time resolution (unit: sec) of output
+
+    Returns
+    -------
+    None.
+    
+    """    
+    if not os.path.exists(prep_data_path):
+        os.makedirs(prep_data_path)
+
+    lst = glob.glob(shipmetpath+'maraadmetX1.b1.*')
+    if len(lst)==0:
+        raise ValueError('cannot find any data')
+    
+    shipdata = xr.open_mfdataset(lst, combine='by_coords')
+    time = shipdata['time'].load()
+    lon = shipdata['lon'].load()
+    qc_lon = shipdata['qc_lon'].load()
+    lat = shipdata['lat'].load()
+    qc_lat = shipdata['qc_lat'].load()
+    # T1 = shipdata['air_temperature_starboard'].load()
+    # qc_T1 = shipdata['qc_air_temperature_starboard'].load()
+    # RH1 = shipdata['relative_humidity_starboard'].load()
+    # qc_RH1 = shipdata['qc_relative_humidity_starboard'].load()
+    T = shipdata['air_temperature_port'].load()
+    qc_T = shipdata['qc_air_temperature_port'].load()
+    RH = shipdata['relative_humidity_port'].load()
+    qc_RH = shipdata['qc_relative_humidity_port'].load()
+    ps = shipdata['atmospheric_pressure'].load()
+    qc_ps = shipdata['qc_atmospheric_pressure'].load()
+    shipdata.close()
+    
+    lat = qc_mask_qcflag(lat, qc_lat)
+    lon = qc_mask_qcflag(lon, qc_lon)
+    T = qc_mask_qcflag(T, qc_T)
+    RH = qc_mask_qcflag(RH, qc_RH)
+    ps = qc_mask_qcflag(ps, qc_ps)
+    
+    #%% re-shape the data into coarser resolution
+    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
+    
+    lon1 = median_time_1d(time, lon, time_new)
+    lat1 = median_time_1d(time, lat, time_new)
+    T1 = median_time_1d(time, T, time_new)
+    RH1 = median_time_1d(time, RH, time_new)
+    ps1 = median_time_1d(time, ps, time_new)
+    
+    #%% output file
+    outfile = prep_data_path + 'T_RH_Ps_MARCUS.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'lat': (['time'], lat1),
+                    'lon': (['time'], lon1),
+                    'T': (['time'], T1),
+                    'RH': (['time'], RH1),
+                    'Ps': (['time'], ps1),
+                    },
+                      coords={'time': ('time', time_new), })
+    
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lat'].attrs["long_name"] = "latitude"
+    ds['lat'].attrs["units"] = "degree_north"
+    ds['lon'].attrs["long_name"] = "longitude"
+    ds['lon'].attrs["units"] = "degree_east"
+    ds['T'].attrs["long_name"] = T.long_name
+    ds['T'].attrs["units"] = T.units
+    ds['RH'].attrs["long_name"] = RH.long_name
+    ds['RH'].attrs["units"] = RH.units
+    ds['Ps'].attrs["long_name"] = ps.long_name
+    ds['Ps'].attrs["units"] = ps.units
+    
+    ds.attrs["input data_example"] = lst[0].split('/')[-1]
+    ds.attrs["description"] = 'median value of '+str(int(dt))+'sec resolution'
+    ds.attrs["creation_date"] = ttt.ctime(ttt.time())
+    
+    ds.to_netcdf(outfile, mode='w')
+    
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     """
     prepare LWP retrieved from MWR
@@ -674,7 +748,7 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
 
     if not os.path.exists(prep_data_path):
         os.makedirs(prep_data_path)
-    
+
     lst = glob.glob(shipmetpath+'maraadmetX1.b1.*')
     if len(lst)==0:
         raise ValueError('cannot find any data')
@@ -727,16 +801,22 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     lwp = qc_mask_qcflag(lwp, qc_lwp)
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time2[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time2[-1].data))[:10]
+    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
-
     lon1 = avg_time_1d(time, lon, time_new)
     lat1 = avg_time_1d(time, lat, time_new)
     lwp1 = avg_time_1d(time2, lwp, time_new)
     lwp1 = qc_remove_neg(lwp1)
     
+    #%% calculate cloud fraction from LWP
+    # from MWR handbook: a value of LWP that is +/- 0.03 mm of zero could be clear sky
+    lwp_thres = 30
+    cf_out = calc_cldfrac_from_highres(lwp, time2, time_new, thres=lwp_thres)
+    
+    cf_5 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=5)
+    cf_10 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=10)
+    cf_20 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=20)
+    cf_30 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=30)
     #%% output file
     outfile = prep_data_path + 'LWP_MARCUS.nc'
     print('output file '+outfile)
@@ -762,6 +842,58 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     ds.attrs["creation_date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
+    
+    outfile = prep_data_path + 'totcld_MARCUS.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'lat': (['time'], lat1),
+                    'lon': (['time'], lon1),
+                    'cldfrac': (['time'], cf_out),
+                    },
+                     coords={'time': ('time', time_new)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lat'].attrs["long_name"] = "latitude"
+    ds['lat'].attrs["units"] = "degree_north"
+    ds['lon'].attrs["long_name"] = "longitude"
+    ds['lon'].attrs["units"] = "degree_east"
+    ds['cldfrac'].attrs["long_name"] = 'total cloud fraction'
+    ds['cldfrac'].attrs["units"] = '%'
+    ds.attrs["input data_example"] = lst2[0].split('/')[-1]
+    ds.attrs["description"] = 'calculated from LWP with threshold of '+str(lwp_thres)+' g/m2'
+    ds.attrs["creation_date"] = ttt.ctime(ttt.time())
+    ds.to_netcdf(outfile, mode='w')
 
+    outfile = prep_data_path + 'totcld_sensitivity_MARCUS.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'lat': (['time'], lat1),
+                    'lon': (['time'], lon1),
+                    'cldfrac_5': (['time'], cf_5),
+                    'cldfrac_10': (['time'], cf_10),
+                    'cldfrac_20': (['time'], cf_20),
+                    'cldfrac_30': (['time'], cf_30),
+                    },
+                     coords={'time': ('time', time_new)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['lat'].attrs["long_name"] = "latitude"
+    ds['lat'].attrs["units"] = "degree_north"
+    ds['lon'].attrs["long_name"] = "longitude"
+    ds['lon'].attrs["units"] = "degree_east"
+    ds['cldfrac_5'].attrs["long_name"] = 'total cloud fraction'
+    ds['cldfrac_5'].attrs["units"] = '%'
+    ds['cldfrac_10'].attrs["long_name"] = 'total cloud fraction'
+    ds['cldfrac_10'].attrs["units"] = '%'
+    ds['cldfrac_20'].attrs["long_name"] = 'total cloud fraction'
+    ds['cldfrac_20'].attrs["units"] = '%'
+    ds['cldfrac_30'].attrs["long_name"] = 'total cloud fraction'
+    ds['cldfrac_30'].attrs["units"] = '%'
+    ds.attrs["input data_example"] = lst2[0].split('/')[-1]
+    ds.attrs["description"] = 'calculated from LWP with different LWP threshold (5/10/20/30 g/m2)'
+    ds.attrs["creation_date"] = ttt.ctime(ttt.time())
+    ds.to_netcdf(outfile, mode='w')
 
         

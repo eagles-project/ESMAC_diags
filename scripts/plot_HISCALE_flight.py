@@ -259,6 +259,24 @@ fig,ax = plot.bar(dataall, datalabel=['Obs','E3SMv1','E3SMv2',], xlabel=None, yl
                   title='Aerosol Composition  '+site+' '+IOP, varlabel= labelall, colorall=colorall)
 fig.savefig(figpath+'bar_composition_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
+#%% mean size distribution
+fig,ax = plot.mean_size([size_beasd, np.arange(1,3001), np.arange(1,3001)], 
+                        [np.nanmean(beasd,axis=0), np.nanmean(ncn_m,axis=0), np.nanmean(ncn_m2,axis=0)], 
+                  legend = ['BEASD','E3SMv1', 'E3SMv2'],color=['k','r','b'],
+                  marker=['.',None,None], linestyles=['none','-','-'],
+                  xlimit=(10, 1e4), ylimit=(1e-2,1e4), xlabel='Diameter (nm)', ylabel='dN/dlogDp (cm$^{-3}$)', 
+                    title = 'Mean Aerosol Size Distribution '+site+' '+IOP)
+fig.savefig(figpath+'mean_aerosol_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+fig,ax = plot.mean_size([size_nd, np.arange(1,1000), np.arange(1,1000)], 
+                        [np.nanmean(nd_size,axis=0),np.nanmean(nd_bin_m,axis=0),np.nanmean(nd_bin_m2,axis=0)], 
+                        marker=['.',None,None], linestyles=['none','-','-'],
+                        # marker=['.','.','.'], linestyles=['none','none','none'],
+                  legend = ['MergedSD','E3SMv1', 'E3SMv2'],color=['k','r','b'], xlimit=(1, 1e3), ylimit=(1e-5,1e2), 
+                  xlabel='Diameter ($\mu$m)', ylabel='dN/dlogDp (cm$^{-3}$)', 
+                    title = 'Mean Cloud Droplet Size Distribution '+site+' '+IOP)
+fig.savefig(figpath+'mean_cloud_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 #%% 1d histogram
 w0 = np.ones_like(org)/sum(~np.isnan(org.data))
 w1 = np.ones_like(org_m)/sum(~np.isnan(org_m.data))
@@ -374,29 +392,11 @@ fig,ax = plot.percentile_z([nd, nd_m, nd_m2], [height,height,height],
                       height_bin, figsize=(3,8), title='Nd',
                       xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
 fig.savefig(figpath+'percentile_z_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
+#%%
 fig,ax = plot.percentile_z([reff, reff_m, reff_m2], [height,height,height], 
                       height_bin, figsize=(3,8), title='Reff',
                       xlabel='$\mu$m', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
 fig.savefig(figpath+'percentile_z_Reff_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-#%% mean size distribution
-fig,ax = plot.mean_size([size_beasd, np.arange(1,3001), np.arange(1,3001)], 
-                        [np.nanmean(beasd,axis=0), np.nanmean(ncn_m,axis=0), np.nanmean(ncn_m2,axis=0)], 
-                  legend = ['BEASD','E3SMv1', 'E3SMv2'],color=['k','r','b'],
-                  marker=['.',None,None], linestyles=['none','-','-'],
-                  xlimit=(10, 1e4), ylimit=(1e-2,1e4), xlabel='Diameter (nm)', ylabel='dN/dlogDp (cm$^{-3}$)', 
-                    title = 'Mean Aerosol Size Distribution '+site+' '+IOP)
-fig.savefig(figpath+'mean_aerosol_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-fig,ax = plot.mean_size([size_nd, np.arange(1,1000), np.arange(1,1000)], 
-                        [np.nanmean(nd_size,axis=0),np.nanmean(nd_bin_m,axis=0),np.nanmean(nd_bin_m2,axis=0)], 
-                        marker=['.',None,None], linestyles=['none','-','-'],
-                        # marker=['.','.','.'], linestyles=['none','none','none'],
-                  legend = ['MergedSD','E3SMv1', 'E3SMv2'],color=['k','r','b'], xlimit=(1, 1e3), ylimit=(1e-5,1e2), 
-                  xlabel='Diameter ($\mu$m)', ylabel='dN/dlogDp (cm$^{-3}$)', 
-                    title = 'Mean Cloud Droplet Size Distribution '+site+' '+IOP)
-fig.savefig(figpath+'mean_cloud_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 #%% scatter
 fig,ax = plot.scatter([nd.data, nd_m.data, nd_m2.data], [lwc.data*1000, lwc_m.data*1000, lwc_m2.data*1000], 

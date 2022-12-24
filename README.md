@@ -1,9 +1,9 @@
 
 # Earth System Model Aerosol-Cloud Diagnostics Package
 
-This document describes the version 2.0.0 of Earth System Model (ESM) aerosol-cloud diagnostics package (ESMAC Diags) that facilitate routine evaluation of aerosols, clouds and aerosol-cloud interactions simulated by the Department of Energy’s (DOE) Energy Exascale Earth System Model (E3SM). This package focuses on comparing simulated aerosols, clouds and aerosol-cloud interactions with in-situ and remote-sensing measurements from surface, aircraft, ship and satellite platforms. Various types of diagnostics and metrics are performed to assess how well E3SM represents observed aerosol properties and aerosol-cloud interactions across spatial scales. 
+This document describes the version 2.1 of Earth System Model (ESM) aerosol-cloud diagnostics package (ESMAC Diags) that facilitate routine evaluation of aerosols, clouds and aerosol-cloud interactions simulated by the Department of Energy (DOE) Energy Exascale Earth System Model (E3SM). This package focuses on comparing simulated aerosols, clouds and aerosol-cloud interactions with in-situ and remote-sensing measurements from surface, aircraft, ship and satellite platforms. Various types of diagnostics and metrics are performed to assess how well E3SM represents observed aerosol properties and aerosol-cloud interactions across spatial scales. 
 
-More information can be found in README_ESMAC_Diags_v2.0.0.pdf
+More information can be found in README_ESMAC_Diags_v2.1.pdf
 
 
 ## To install

@@ -104,10 +104,7 @@ def prep_ACSM(acsmpath, predatapath, dt=3600):
     
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     org_new = median_time_1d(time, org, time_new)
     no3_new = median_time_1d(time, no3, time_new)
@@ -205,11 +202,7 @@ def prep_ccn(ccnpath, predatapath, dt=3600):
     ss6 = ss[idx]
           
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
-    
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     ccn1_new = median_time_1d(time1, ccn1, time_new)
     ss1_i = median_time_1d(time1, ss1, time_new)
     ccn2_new = median_time_1d(time2, ccn2, time_new)
@@ -270,157 +263,6 @@ def prep_ccn(ccnpath, predatapath, dt=3600):
     
     ds.to_netcdf(outfile, mode='w')
         
-    
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_CPC(cpcpath,  predatapath, dt=3600):
-    """
-    prepare CPC data
-
-    Parameters
-    ----------
-    cpcpath : str
-        input datapath for CPC (10nm)
-    predatapath : str
-        output datapath
-    dt : float
-        time resolution (unit: sec) of output
-
-    Returns
-    -------
-    None.
-
-    """
-                       
-    if not os.path.exists(predatapath):
-        os.makedirs(predatapath)
-        
-    #%% read in data
-    lst1 = glob.glob(os.path.join(cpcpath, '*.nc'))
-    lst1.sort()
-    obsdata = xr.open_mfdataset(lst1, combine='by_coords')
-    time10 = obsdata['time']
-    cpc10 = obsdata['concentration'].load()
-    qc_cpc10 = obsdata['qc_concentration'].load()
-    obsdata.close()
-    
-    # quality controls
-    cpc10 = qc_mask_qcflag_cpc(cpc10, qc_cpc10.astype(int).data)
-    
-    
-    #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time10[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time10[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
-    
-    cpc10_new = median_time_1d(time10, cpc10, time_new)
-    
-    #%% output file
-    outfile = predatapath + 'sfc_CPC_ACEENA.nc'
-    print('output file '+outfile)
-    ds = xr.Dataset({
-                    'cpc10': (['time'], np.float32(cpc10_new)),
-                    },
-                     coords={'time': ('time', time_new)})
-    
-    #assign attributes
-    ds['time'].attrs["long_name"] = "Time"
-    ds['time'].attrs["standard_name"] = "time"
-    ds['cpc10'].attrs["long_name"] = 'CPC aerosol number concentration (>10nm)'
-    ds['cpc10'].attrs["units"] = '1/cm3'
-    
-    ds.attrs["title"] = 'Aerosol number concentration from surface CPC'
-    ds.attrs["inputfile_sample"] = lst1[0].split('/')[-1]
-    ds.attrs["description"] = 'median value of each time window'
-    ds.attrs["date"] = ttt.ctime(ttt.time())
-    
-    ds.to_netcdf(outfile, mode='w')
-    
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=3600):
-    """
-    prepare UHSAS data
-
-    Parameters
-    ----------
-    uhsaspath : str
-        input datapath for UHSAS
-    predatapath : str
-        output datapath
-    dt : float
-        time resolution (unit: sec) of output
-
-    Returns
-    -------
-    None.
-
-    """
-                       
-    if not os.path.exists(predatapath):
-        os.makedirs(predatapath)
-        
-    #%% read in data
-    lst = glob.glob(os.path.join(uhsaspath, '*.nc'))
-    lst.sort()
-    
-    # UHSAS@ACEENA changes NETCDF filehead in 2017-06-20. 
-    (time1, dmin, dmax, uhsas, timeunit, dataunit, long_name) = read_uhsas(lst[0])
-    time = np.array([np.datetime64(timeunit[14:24]) + np.timedelta64(int(x),'s') for x in time1])
-    for filename in lst[1:]:
-        (time1, dmin2, dmax2, uhsas2, timeunit, dataunit, long_name) = read_uhsas(filename)
-        time2 = np.array([np.datetime64(timeunit[14:24]) + np.timedelta64(int(x),'s') for x in time1])
-        time = np.hstack((time, time2))
-        uhsas = np.vstack((uhsas, uhsas2))
-    # quality controls
-    uhsas = qc_remove_neg(uhsas)
-    
-    size = (dmin+dmax)/2
-    idx100 = dmin>=100
-    uhsas100 = np.nansum(uhsas[:,idx100], 1)
-    uhsas100[uhsas100==0] = np.nan
-    
-    #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time[0]))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time[-1]))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
-    
-    uhsas_new = median_time_2d(time, uhsas, time_new)
-    uhsas100_new = median_time_1d(time, uhsas100, time_new)
-        
-    
-    #%% output file
-    outfile = predatapath + 'sfc_UHSAS_ACEENA.nc'
-    print('output file '+outfile)
-    ds = xr.Dataset({
-                    'size_low': (['size'], dmin),
-                    'size_high': (['size'], dmax),
-                    'uhsas_all': (['time', 'size'], uhsas_new),
-                    'uhsas100': (['time'], uhsas100_new),
-                    },
-                      coords={'time': ('time', time_new), 'size': ('size', size)})
-    
-    #assign attributes
-    ds['time'].attrs["long_name"] = "Time"
-    ds['time'].attrs["standard_name"] = "time"
-    ds['size_low'].attrs["long_name"] = "lower bound of size bin"
-    ds['size_low'].attrs["units"] = "nm"
-    ds['size_high'].attrs["long_name"] = "upper bound of size bin"
-    ds['size_high'].attrs["units"] = "nm"
-    ds['size'].attrs["long_name"] = "aerosol size"
-    ds['size'].attrs["units"] = "nm"
-    ds['uhsas_all'].attrs["long_name"] = 'aerosol number size distribution'
-    ds['uhsas_all'].attrs["units"] = '1/cm3'
-    ds['uhsas100'].attrs["long_name"] = 'aerosol number concentration for size >100nm'
-    ds['uhsas100'].attrs["units"] = '1/cm3'
-    
-    ds.attrs["title"] = 'Aerosol number concentration and size distribution from UHSAS'
-    ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'median value of each time window'
-    ds.attrs["date"] = ttt.ctime(ttt.time())
-    
-    ds.to_netcdf(outfile, mode='w')
-
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_cloud_2d(armbepath, predatapath, height_out, dt=3600):
     """
@@ -456,10 +298,7 @@ def prep_cloud_2d(armbepath, predatapath, height_out, dt=3600):
     obsdata.close()    
     
     #%% re-shape the data into coarser resolution
-    # startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
-    # enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
-    # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
-    time_new = pd.date_range(start='2017-06-01', end='2018-03-01', freq=str(int(dt))+"s")  # ACEENA time period
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     cloud_i = np.full((len(time_new),len(height)), np.nan)
     for kk in range(len(height)):
@@ -537,7 +376,7 @@ def prep_cloudheight_ARSCL(arsclpath, predatapath, dt=3600):
     cth = np.nanmax(cths,axis=1)  # cloud top height for all clouds
         
     #%% re-shape the data into coarser resolution
-    time_new = pd.date_range(start='2017-06-01', end='2018-03-01', freq=str(int(dt))+"s")  # ACEENA time period
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     cbh_new = avg_time_1d(arscltime, cbh, time_new)
     cth_new = avg_time_1d(arscltime, cth, time_new)
@@ -576,6 +415,266 @@ def prep_cloudheight_ARSCL(arsclpath, predatapath, dt=3600):
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
+    
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def prep_CPC(cpcpath,  predatapath, dt=3600):
+    """
+    prepare CPC data
+
+    Parameters
+    ----------
+    cpcpath : str
+        input datapath for CPC (10nm)
+    predatapath : str
+        output datapath
+    dt : float
+        time resolution (unit: sec) of output
+
+    Returns
+    -------
+    None.
+
+    """
+                       
+    if not os.path.exists(predatapath):
+        os.makedirs(predatapath)
+        
+    #%% read in data
+    lst1 = glob.glob(os.path.join(cpcpath, '*.nc'))
+    lst1.sort()
+    obsdata = xr.open_mfdataset(lst1, combine='by_coords')
+    time10 = obsdata['time']
+    cpc10 = obsdata['concentration'].load()
+    qc_cpc10 = obsdata['qc_concentration'].load()
+    obsdata.close()
+    
+    # quality controls
+    cpc10 = qc_mask_qcflag_cpc(cpc10, qc_cpc10.astype(int).data)
+    
+    
+    #%% re-shape the data into coarser resolution
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
+    
+    cpc10_new = median_time_1d(time10, cpc10, time_new)
+    
+    #%% output file
+    outfile = predatapath + 'sfc_CPC_ACEENA.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'cpc10': (['time'], np.float32(cpc10_new)),
+                    },
+                     coords={'time': ('time', time_new)})
+    
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['cpc10'].attrs["long_name"] = 'CPC aerosol number concentration (>10nm)'
+    ds['cpc10'].attrs["units"] = '1/cm3'
+    
+    ds.attrs["title"] = 'Aerosol number concentration from surface CPC'
+    ds.attrs["inputfile_sample"] = lst1[0].split('/')[-1]
+    ds.attrs["description"] = 'median value of each time window'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    
+    ds.to_netcdf(outfile, mode='w')
+    
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def prep_CPC_withENAmask(aerosolmaskpath, predatapath, dt=3600):
+    """
+    prepare aerosol number concentration data (>10nm) from CPC
+    apply aerosol mask data specifically for ENA site
+    aerosol mask data provided by Francesca Gallo and Allison Aiken 
+    reference: Gallo et al., 2020 ACP. https://doi.org/10.5194/acp-20-7553-2020
+
+    Parameters
+    ----------
+    aerosolmaskpath : char
+        input datapath of aerosol number concentration with mask
+    predatapath : char
+        output datapath
+    dt : float
+        time resolution (unit: sec) of output
+
+    Returns
+    -------
+    None.
+
+    """
+        
+    #%% settings
+    
+    if not os.path.exists(predatapath):
+        os.makedirs(predatapath)
+        
+    #%% read in data with mask
+    # data from Francesca Gallo <effegal@gmail.com>. 
+    # reference: https://acp.copernicus.org/articles/20/7553/2020/
+    lst = glob.glob(os.path.join(aerosolmaskpath, 'CPC_ENA_AM_*.txt'))
+    lst.sort()
+    dateall = []
+    timeall = []
+    cpcvalue = []
+    maskflag = []
+    for ll in range(len(lst)):
+        filename=lst[ll]
+        f = open(filename, 'r')
+        for i in range(13):
+            h = f.readline()
+        h = f.readline()
+        varname = h.strip()
+        h = f.readline()
+        varunit = h.strip()
+        print(filename)
+        print(varname)
+        print(varunit)
+        f.readline()
+        for line in f:
+            line = line.strip()  # remove \n
+            columns = line.split()
+            dateall.append(columns[0])
+            timeall.append(columns[1])
+            if columns[2][0] == 'n':
+                cpcvalue.append(-9999.0)
+            else:
+                cpcvalue.append(float(columns[2]))
+            maskflag.append(int(columns[3]))
+        f.close()
+    
+    cpcvalue = np.array(cpcvalue)
+    maskflag = np.array(maskflag,dtype='float')
+    cpcvalue[cpcvalue<0] = np.nan
+    maskflag[maskflag<-999] = np.nan
+    
+    mask_starttime = dateall[0] + ' ' + timeall[0]
+    mask_endtime = dateall[-1] + ' ' + timeall[-1]
+    mask_time = pd.date_range(start=mask_starttime,end=mask_endtime,freq="min")    
+    
+    #%% re-shape the data into coarser resolution
+    
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
+    
+    cpcvalue_masked = np.array(cpcvalue)
+    cpcvalue_masked[maskflag!=0] = np.nan
+    maskcount = np.zeros(len(cpcvalue))
+    maskcount[maskflag==0] = 1.
+    
+    cpc_1hr_nomask = median_time_1d(mask_time, cpcvalue, time_new)
+    cpc_1hr_masked = median_time_1d(mask_time, cpcvalue_masked, time_new)
+    valid_fraction = avg_time_1d(mask_time, maskcount, time_new)
+    
+    #%% output file
+    outfile = predatapath + 'sfc_CPC_ACEENA_withmask.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'cpc_origin': (['time'], np.float32(cpc_1hr_nomask)), 
+                    'cpc_masked': (['time'], np.float32(cpc_1hr_masked)), 
+                    'f_valid': (['time'], np.float32(valid_fraction)),              
+                    },
+                     coords={'time': ('time', time_new)})
+    
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['f_valid'].attrs["long_name"] = 'fraction of valid data'
+    ds['f_valid'].attrs["units"] = '1'
+    ds['f_valid'].attrs["description"] = "number of valid data points divided by total points within the hour"
+    ds['cpc_origin'].attrs["long_name"] = 'CPC aerosol number concentration (>10nm)'
+    ds['cpc_origin'].attrs["units"] = '1/cm3'
+    ds['cpc_origin'].attrs["description"] = "average into hourly without applying mask"
+    ds['cpc_masked'].attrs["long_name"] = 'CPC aerosol number concentration (>10nm)'
+    ds['cpc_masked'].attrs["units"] = '1/cm3'
+    ds['cpc_masked'].attrs["description"] = "average into hourly, applying 1-min aerosol mask"
+    
+    ds.attrs["title"] = 'Aerosol number concentration from surface CPC with contamination mask from Gallo et al., 2020'
+    ds.attrs["reference"] = 'https://doi.org/10.5194/acp-20-7553-2020'
+    ds.attrs["description"] = 'median value of each time window'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    
+    ds.to_netcdf(outfile, mode='w')
+    
+    
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=3600):
+    """
+    prepare UHSAS data
+
+    Parameters
+    ----------
+    uhsaspath : str
+        input datapath for UHSAS
+    predatapath : str
+        output datapath
+    dt : float
+        time resolution (unit: sec) of output
+
+    Returns
+    -------
+    None.
+
+    """
+                       
+    if not os.path.exists(predatapath):
+        os.makedirs(predatapath)
+        
+    #%% read in data
+    lst = glob.glob(os.path.join(uhsaspath, '*.nc'))
+    lst.sort()
+    
+    # UHSAS@ACEENA changes NETCDF filehead in 2017-06-20. 
+    (time1, dmin, dmax, uhsas, timeunit, dataunit, long_name) = read_uhsas(lst[0])
+    time = np.array([np.datetime64(timeunit[14:24]) + np.timedelta64(int(x),'s') for x in time1])
+    for filename in lst[1:]:
+        (time1, dmin2, dmax2, uhsas2, timeunit, dataunit, long_name) = read_uhsas(filename)
+        time2 = np.array([np.datetime64(timeunit[14:24]) + np.timedelta64(int(x),'s') for x in time1])
+        time = np.hstack((time, time2))
+        uhsas = np.vstack((uhsas, uhsas2))
+    # quality controls
+    uhsas = qc_remove_neg(uhsas)
+    
+    size = (dmin+dmax)/2
+    idx100 = dmin>=100
+    uhsas100 = np.nansum(uhsas[:,idx100], 1)
+    uhsas100[uhsas100==0] = np.nan
+    
+    #%% re-shape the data into coarser resolution
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
+    
+    uhsas_new = median_time_2d(time, uhsas, time_new)
+    uhsas100_new = median_time_1d(time, uhsas100, time_new)
+        
+    
+    #%% output file
+    outfile = predatapath + 'sfc_UHSAS_ACEENA.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'size_low': (['size'], dmin),
+                    'size_high': (['size'], dmax),
+                    'uhsas_all': (['time', 'size'], uhsas_new),
+                    'uhsas100': (['time'], uhsas100_new),
+                    },
+                      coords={'time': ('time', time_new), 'size': ('size', size)})
+    
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['size_low'].attrs["long_name"] = "lower bound of size bin"
+    ds['size_low'].attrs["units"] = "nm"
+    ds['size_high'].attrs["long_name"] = "upper bound of size bin"
+    ds['size_high'].attrs["units"] = "nm"
+    ds['size'].attrs["long_name"] = "aerosol size"
+    ds['size'].attrs["units"] = "nm"
+    ds['uhsas_all'].attrs["long_name"] = 'aerosol number size distribution'
+    ds['uhsas_all'].attrs["units"] = '1/cm3'
+    ds['uhsas100'].attrs["long_name"] = 'aerosol number concentration for size >100nm'
+    ds['uhsas100'].attrs["units"] = '1/cm3'
+    
+    ds.attrs["title"] = 'Aerosol number concentration and size distribution from UHSAS'
+    ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
+    ds.attrs["description"] = 'median value of each time window'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    
+    ds.to_netcdf(outfile, mode='w')
+
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_LWP(armbepath, mfrsrpath, predatapath, dt=3600):
@@ -642,10 +741,7 @@ def prep_LWP(armbepath, mfrsrpath, predatapath, dt=3600):
     lwp2 = lwp2*1000. # change unit from kg/m2 (mm) to g/m2
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time2[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time2[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     lwp_new = avg_time_1d(time1, lwp, time_new)
     lwp2_new = avg_time_1d(time2, lwp2, time_new)
@@ -740,10 +836,7 @@ def prep_LTS(armbepath, predatapath, dt=3600):
             LTS850_valid = np.append(LTS850_valid, theta_850-theta_s )
         
     #%% re-shape the data into coarser resolution
-    # startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
-    # enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
-    # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
-    time_new = pd.date_range(start='2017-06-01', end='2018-03-01', freq=str(int(dt))+"s")  # ACEENA time period
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     LTS700_new = avg_time_1d(time700_valid, LTS700_valid, time_new)
     LTS850_new = avg_time_1d(time850_valid, LTS850_valid, time_new)
@@ -822,10 +915,7 @@ def prep_mfrsr_cod(mfrsrpath,  predatapath, dt=3600):
     
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     cod_new = avg_time_1d(time, cod, time_new)
     
@@ -896,10 +986,7 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=3600):
     
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
-    
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     reff_new = median_time_1d(time, reff, time_new)
     
@@ -955,10 +1042,7 @@ def prep_precip(armbepath, predatapath, dt=3600):
     obsdata.close()    
                 
     #%% re-shape the data into coarser resolution
-    # startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
-    # enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
-    # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
-    time_new = pd.date_range(start='2017-06-01', end='2018-03-01', freq=str(int(dt))+"s")  # ACEENA time period
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     precip_new = avg_time_1d(time, precip, time_new)
         
@@ -1017,10 +1101,7 @@ def prep_radiation(armbepath, predatapath, dt=3600):
     obsdata.close()    
                 
     #%% re-shape the data into coarser resolution
-    # startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
-    # enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
-    # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
-    time_new = pd.date_range(start='2017-06-01', end='2018-03-01', freq=str(int(dt))+"s")  # ACEENA time period
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     lwdn_new = avg_time_1d(time, lwdn, time_new)
     swdn_new = avg_time_1d(time, swdn, time_new)
@@ -1106,10 +1187,7 @@ def prep_totcld(armbepath, predatapath, dt=3600):
     cf_tsi = cf_tsi*100
                 
     #%% re-shape the data into coarser resolution
-    # startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
-    # enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
-    # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
-    time_new = pd.date_range(start='2017-06-01', end='2018-03-01', freq=str(int(dt))+"s")  # ACEENA time period
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     cf_arscl_new = avg_time_1d(time, cf_arscl, time_new)
     cf_tsi_new = avg_time_1d(time, cf_tsi, time_new)
@@ -1175,16 +1253,21 @@ def prep_Ndrop(ndroppath, predatapath, dt=3600):
     time = obsdata['time'].load()
     nd = obsdata['drop_number_conc'].load()
     qc_nd = obsdata['qc_drop_number_conc'].load()
+    ctype = obsdata['cloud_base_type']
     obsdata.close()
     
     # quality control
     nd = qc_mask_qcflag(nd,qc_nd)
     nd = nd*1e-6   # m-3 to cm-3
     
+    # # exclude ice clouds or multi-layer clouds
+    # nd[ctype!=1] = np.nan
+    
+    # exclude small values
+    nd[nd<10] = np.nan
+    
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     nd_new = median_time_1d(time, nd, time_new)
     # nd_new = avg_time_1d(time, nd, time_new)
@@ -1301,10 +1384,11 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclpath, predatapath, dt=3600):
     H_tmp = np.interp(np.int64(time), np.int64(arscltime), H)
     nd = calc_cdnc_ARM(lwp, cod, H_tmp)
     
+    # exclude small values
+    nd[nd<10] = np.nan
+    
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time[0]))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time[-1]))[:10]
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     nd_new = median_time_1d(time, nd, time_new)
         
@@ -1335,8 +1419,8 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclpath, predatapath, dt=3600):
 def prep_Nd_WU(Nd_WUpath, predatapath, dt=3600):
     """
     prepare cloud deoplet number concentration (Nd) and effective radius data for ACEENA
-    retrieval algorithm developed by Peng Wu, Xiquan Dong and Baike Xi
-    reference: https://doi.org/10.1175/jcli-d-20-0272.1
+    retrieval algorithm developed by Peng Wu, et al., 2020
+    reference: https://doi.org/10.1029/2019JD032205
     
     Parameters
     ----------
@@ -1377,9 +1461,7 @@ def prep_Nd_WU(Nd_WUpath, predatapath, dt=3600):
         reall = np.hstack((reall, re))
     
     #%% re-shape the data into coarser resolution
-    startdate = np.datetime_as_string(np.datetime64(time[0]))[:10]
-    enddate = np.datetime_as_string(np.datetime64(time[-1]))[:10]
-    time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
+    time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     nd_new = median_time_1d(time, ndall, time_new)
     re_new = median_time_1d(time, reall, time_new)
@@ -1404,8 +1486,9 @@ def prep_Nd_WU(Nd_WUpath, predatapath, dt=3600):
     
     ds.attrs["title"] = "cloud droplet number concentration timeseries from Peng Wu et al's retrieval"
     ds.attrs["description"] = 'median value of each time window'
-    ds.attrs["reference"] = 'https://doi.org/10.1175/jcli-d-20-0272.1'
+    ds.attrs["reference"] = 'https://doi.org/10.1029/2019JD032205'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
+

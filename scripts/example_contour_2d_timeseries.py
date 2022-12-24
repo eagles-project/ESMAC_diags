@@ -1,5 +1,5 @@
 """
-example to generate timeseries of size distribution
+example to generate timeseries of 2d variable (cloud)
 
 """
 import os

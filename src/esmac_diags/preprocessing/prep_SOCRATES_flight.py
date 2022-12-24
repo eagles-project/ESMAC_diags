@@ -19,7 +19,7 @@ from esmac_diags.subroutines.specific_data_treatment import lwc2cflag
 
 # RFpath = '../../../data/SOCRATES/obs/aircraft/aircraft_lowrate/'
 # ccnpath = '../../../data/SOCRATES/obs/aircraft/CCN/'
-# prep_data_path = 'C:/Users/tang357/Downloads/SOCRATES/'
+# prep_data_path = 'C:/Users/tang357/Downloads/prep_data/SOCRATES/flight/'
 
 # dt=60
 
@@ -283,8 +283,8 @@ def prep_CNsize(RFpath, prep_data_path, dt=60):
         lat1 = median_time_1d(time, lat, time_new)
         height1 = median_time_1d(time, height, time_new)
         
-        # uhsas1 = avg_time_2d(time, uhsas, time_new)
-        uhsas1 = median_time_2d(time, uhsas, time_new)
+        uhsas1 = avg_time_2d(time, uhsas, time_new)
+        # uhsas1 = median_time_2d(time, uhsas, time_new)
         # uhsas1 = median_time_forflight_2d(time, uhsas, time_new, height)
         
 #     #%% 
@@ -361,7 +361,7 @@ def prep_CNsize(RFpath, prep_data_path, dt=60):
     
         # global attributes
         f.title = "Aerosol size distribution from UHSAS"
-        f.description = 'median value of each time window'
+        f.description = 'mean value of each time window'
         f.input_file = filename.split('/')[-1]
         f.create_time = ttt.ctime(ttt.time())
         
@@ -625,7 +625,6 @@ def prep_Nd(RFpath, prep_data_path, dt=60):
         (time,c2dc,timeunit,c2dcunit,c2dclongname,c2dcsize,cellunit)=read_RF_NCAR(filename,'C2DCA_RWOI')
         (time,cpip,timeunit,cpipunit,cpiplongname,cpipsize,cellunit)=read_RF_NCAR(filename,'CPIP_RWII')
         # 2-DS include C2DSA_2H and C2DSA_2V with all-particle and round-particle. 
-        # C2DSA_2V looks off the other instruments in size distribution. use C2DSA_2H
         (time,c2ds2h,timeunit,c2ds2hunit,c2ds2hlongname,c2ds2hsize,cellunit)=read_RF_NCAR(filename,'C2DSA_2H')
         (time,c2ds2v,timeunit,c2ds2vunit,c2ds2vlongname,c2ds2vsize,cellunit)=read_RF_NCAR(filename,'C2DSA_2V')
     
@@ -647,20 +646,31 @@ def prep_Nd(RFpath, prep_data_path, dt=60):
         # change all units to #/L
         cdp = cdp * 1000        #cdp unit is #/cm3
     
+        # total number
+        ndall_cdp = np.sum(cdp,axis=1)
+        
+        # remove small Nd samples, 10 cm-3 (10000 L-1) for SOCRATES
+        idx = ndall_cdp<10000   
+        ndall_cdp[idx] = np.nan
+        cdp[idx,:] = np.nan
+        c2ds2h[idx,:] = np.nan
+    
         #%% re-shape the data into coarser resolution
         
         time_new = np.arange(np.round(time[0]/dt), np.round(time[-1]/dt)) *dt
         
+        # According to NCAR data manager Taylor Thomas (taylort@ucar.edu), 
+        # PIP, 2dc and 2ds-v data have some quality issues. Only suggest use cdp and 2ds-h
         lon1 = median_time_1d(time, lon, time_new)
         lat1 = median_time_1d(time, lat, time_new)
         height1 = median_time_1d(time, height, time_new)
-        nd_1dc = avg_time_2d(time, c1dc, time_new)
+        # nd_1dc = median_time_2d(time, c1dc, time_new)
         nd_cdp = avg_time_2d(time, cdp, time_new)
-        nd_2dc = avg_time_2d(time, c2dc, time_new)
-        nd_pip = avg_time_2d(time, cpip, time_new)
+        # nd_2dc = avg_time_2d(time, c2dc, time_new)
+        # nd_pip = avg_time_2d(time, cpip, time_new)
         nd_2ds_h = avg_time_2d(time, c2ds2h, time_new)
-        nd_2ds_v = avg_time_2d(time, c2ds2v, time_new)
-    
+        # nd_2ds_v = avg_time_2d(time, c2ds2v, time_new)
+        ndall = avg_time_1d(time, ndall_cdp, time_new)
             
         #%% 
         # import matplotlib.pyplot as plt
@@ -753,45 +763,47 @@ def prep_Nd(RFpath, prep_data_path, dt=60):
         
         # define dimensions
         f.createDimension('time', len(time_new))  
-        f.createDimension('size_1dc', len(c1dcsize)) 
-        f.createDimension('size_2dc', len(c2dcsize)) 
+        # f.createDimension('size_1dc', len(c1dcsize)) 
+        # f.createDimension('size_2dc', len(c2dcsize)) 
         f.createDimension('size_2ds', len(c2ds2hsize)) 
         f.createDimension('size_cdp', len(cdpsize)) 
         
         # create variable list
         time_o = f.createVariable("time", "f8", ("time", ))
-        size1_o = f.createVariable("size_1dc", "f8", ("size_1dc", ))
-        size2_o = f.createVariable("size_2dc", "f8", ("size_2dc", ))
+        # size1_o = f.createVariable("size_1dc", "f8", ("size_1dc", ))
+        # size2_o = f.createVariable("size_2dc", "f8", ("size_2dc", ))
         size2h_o = f.createVariable("size_2ds", "f8", ("size_2ds", ))
         sizec_o = f.createVariable("size_cdp", "f8", ("size_cdp", ))
         lon_o = f.createVariable("lon", 'f8', ("time", ))
         lat_o = f.createVariable("lat", 'f8', ("time", ))
         height_o = f.createVariable("height", 'f8', ("time", ))
-        nd1_o = f.createVariable('Nd_1dc', 'f8', ("time", "size_1dc"))
-        nd2_o = f.createVariable('Nd_2dc', 'f8', ("time", "size_2dc"))
+        # nd1_o = f.createVariable('Nd_1dc', 'f8', ("time", "size_1dc"))
+        # nd2_o = f.createVariable('Nd_2dc', 'f8', ("time", "size_2dc"))
         nd2h_o = f.createVariable('Nd_2ds', 'f8', ("time", "size_2ds"))
         ndc_o = f.createVariable('Nd_cdp', 'f8', ("time", "size_cdp"))
+        ndall_o = f.createVariable('Nd', 'f8', ("time", ))
         
         # write data
         time_o[:] = time_new
-        size1_o[:] = c1dcsize
-        size2_o[:] = c2dcsize
+        # size1_o[:] = c1dcsize
+        # size2_o[:] = c2dcsize
         size2h_o[:] = c2ds2hsize
         sizec_o[:] = cdpsize
         lon_o[:] = lon1
         lat_o[:] = lat1  
         height_o[:] = height1
-        nd1_o[:, :] = nd_1dc
-        nd2_o[:, :] = nd_2dc
+        # nd1_o[:, :] = nd_1dc
+        # nd2_o[:, :] = nd_2dc
         nd2h_o[:, :] = nd_2ds_h
         ndc_o[:, :] = nd_cdp
+        ndall_o[:] = ndall
         
         # attributes
         time_o.units = "seconds since " + date[0:4] + '-' + date[4:6] + '-' + date[6:8] + " 00:00:00"
-        size1_o.units = 'um'
-        size1_o.long_name = 'upper bound of size bin for 1DC'
-        size2_o.units = 'um'
-        size2_o.long_name = 'upper bound of size bin for 2DC'
+        # size1_o.units = 'um'
+        # size1_o.long_name = 'upper bound of size bin for 1DC'
+        # size2_o.units = 'um'
+        # size2_o.long_name = 'upper bound of size bin for 2DC'
         size2h_o.units = 'um'
         size2h_o.long_name = 'upper bound of size bin for 2DS'
         sizec_o.units = 'um'
@@ -802,19 +814,23 @@ def prep_Nd(RFpath, prep_data_path, dt=60):
         lat_o.long_name = 'Latitude'
         height_o.units = 'm MSL'
         height_o.long_name = 'height'
-        nd1_o.units = '#/L'
-        nd1_o.long_name = 'cloud droplet number concentration in each bin from 1DC'
-        nd2_o.units = '#/L'
-        nd2_o.long_name = 'cloud droplet number concentration in each bin from 2DC'
+        # nd1_o.units = '#/L'
+        # nd1_o.long_name = 'cloud droplet number concentration in each bin from 1DC'
+        # nd2_o.units = '#/L'
+        # nd2_o.long_name = 'cloud droplet number concentration in each bin from 2DC'
         nd2h_o.units = '#/L'
-        nd2h_o.long_name = 'cloud droplet number concentration in each bin from 2DS'
+        nd2h_o.long_name = 'cloud droplet number concentration in each bin from 2DS H channel'
         ndc_o.units = '#/L'
         ndc_o.long_name = 'cloud droplet number concentration in each bin from CDP'
+        ndall_o.units = '#/L'
+        ndall_o.long_name = 'total cloud droplet number concentration sum from CDP bins'
     
         
         # global attributes
-        f.title = "cloud droplet size distribution from CDP, 2-DS, 2-DC or 1-DC, in ambient condition"
-        f.description = 'average of each time window'
+        f.title = "cloud droplet size distribution from CDP or 2-DS, in ambient condition"
+        f.description = 'mean value of each time window'
         f.create_time = ttt.ctime(ttt.time())
         
         f.close()
+# prep_Nd(RFpath, prep_data_path, dt=60)        
+# prep_CNsize(RFpath, prep_data_path, dt=60)
