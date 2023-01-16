@@ -931,10 +931,13 @@ def scatter(xdata, ydata, figsize=None, xlimit=None, ylimit=None,
         
         if linear_fit==True:
             idx = np.logical_and(~np.isnan(xdata[mm]), ~np.isnan(ydata[mm]))
+            if any(idx)==False:
+                continue
             if intercept==True:   # y=ax+b
                 coef = np.polyfit(xdata[mm][idx],ydata[mm][idx],1)
                 poly1d_fn = np.poly1d(coef)
-                ax1.plot([minval, maxval],poly1d_fn([minval, maxval]),color='k')
+                x_min_max = [np.nanmin(xdata[mm][idx]), np.nanmax(xdata[mm][idx])]
+                ax1.plot(x_min_max,poly1d_fn(x_min_max),color='k')
                 if coef[1]>=0:
                     fit_line = 'y = '+format(coef[0],'2.2f')+'x + '+format(coef[1],'2.2f')
                 else:
@@ -1012,6 +1015,55 @@ def bar(dataall, figsize=None, datalabel=None, varlabel=None, xlabel=None, ylabe
     ax.set_ylabel(ylabel)
     ax.set_title(title)
     ax.legend(loc='right', shadow=False, bbox_to_anchor=(1.02+0.6/ndata, 0.5))
+
+    return(fig, ax)
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def pie(dataall, figsize=None, datalabel=None, varlabel=None, xlabel=None, ylabel=None, 
+                 ylimit=None,title=None, 
+                 colorall=['k','b','g','c','r','limegreen','lightblue','orange','silver']):
+    """
+    plot pie plot for aerosol compositions
+
+    Parameters
+    ----------
+    dataall : list of 1-d arrays
+        input data for all data source [datagroup1, datagroup2, datagroup3, ...]
+        each data group includes several variables, missing variable are placehold with []:
+            datagroup1 = [var1, var2, var3, ...]
+            datagroup2 = [var1, [], var3, ...]
+    
+    Returns
+    -------
+    fig : Figure
+    ax : Axes
+
+    """
+    
+    ndata = len(dataall)
+    nvars = len(dataall[0])
+    if datalabel is None:
+        datalabel = ['data'+format(nn) for nn in range(ndata)]
+    # if varlabel is None:
+    #     varlabel = ['var'+format(nn) for nn in range(nvars)]
+    if figsize is None:
+        figsize = (ndata*4,4)
+    colorall = np.array(colorall)
+    
+            
+    plt.rcParams.update({'font.size': 16})
+    fig,ax = plt.subplots(1,ndata,figsize=figsize)   # figsize in inches
+    
+    for nn in range(ndata):
+        if len(dataall[nn]) != nvars:
+            raise ValueError('each data group should have same number of elements with label')
+        piesize = np.array([np.nanmean(vv) for vv in dataall[nn]])
+        if varlabel is None:
+            ax[nn].pie(piesize[~np.isnan(piesize)],labels=None,colors=colorall[~np.isnan(piesize)])  # autopct='%1.1f%%'
+        else:
+            varlabel = np.array(varlabel)
+            ax[nn].pie(piesize[~np.isnan(piesize)],labels=varlabel[~np.isnan(piesize)],colors=colorall[~np.isnan(piesize)])  # autopct='%1.1f%%'
+        ax[nn].set_title(datalabel[nn])
 
     return(fig, ax)
 
@@ -1203,7 +1255,9 @@ def percentile_z(data, height, height_bin, figsize=(3,8), xlimit=None, ylimit=No
                 boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
                 medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
                 vert=False, patch_artist=True)    # need patch_artist to fill color in box
-        ax.plot([],c=c, label=legend[mm])
+        # ax.plot([],c=c, label=legend[mm])
+        ax.plot([np.nanmean(data_z[mm][i]) for i in range(zlen)],np.arange(zlen)+p_shift[mm],c=c, label=legend[mm])
+        
     ax.legend(loc='upper right', fontsize='medium')
     ax.set_ylim(-1,zlen)
     ax.set_yticks(range(zlen))
@@ -1213,6 +1267,7 @@ def percentile_z(data, height, height_bin, figsize=(3,8), xlimit=None, ylimit=No
     ax.set_xlim(xlimit)
     ax.set_ylim(ylimit)
     ax.set_title(title)
+    ax.grid('on')
 
     return(fig, ax)    
 
