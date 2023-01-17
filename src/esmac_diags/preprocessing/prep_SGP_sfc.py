@@ -18,14 +18,15 @@ from esmac_diags.subroutines.quality_control import qc_remove_neg, qc_mask_qcfla
                 qc_mask_qcflag_cpc, qc_correction_nanosmps
 from esmac_diags.subroutines.specific_data_treatment import calc_cdnc_ARM
 
-# acsmpath = '../../../../ESMAC_Diags_Tool/test_raw_data/obs/SGP/sgpaosacsm/'
-# ccnpath = '../../../../ESMAC_Diags_Tool/test_raw_data/obs/SGP/sgpccn/'
-# cpcpath = '../../../../ESMAC_Diags_Tool/test_raw_data/obs/SGP/sgpcpc/'
-# tdmapath = '../../../../ESMAC_Diags_Tool/test_raw_data/obs/SGP/sgptdmasizeC1.b1/'
-# uhsaspath = '../../../../ESMAC_Diags_Tool/test_raw_data/obs/SGP/sgpaosuhsasE13.b1/'
-# smpspath = '../../../../ESMAC_Diags_Tool/test_raw_data/obs/SGP/sgpaossmpsE13.b1/'
-# nanosmpspath = '../../../../ESMAC_Diags_Tool/test_raw_data/obs/SGP/sgpaosnanosmpsE13.b1/'
-# predatapath = 'C:/Users/tang357/Downloads/SGP/'
+# acsmpath = '../../../raw_data/obs/SGP/sgpaosacsm/'
+# ccnpath = '../../../raw_data/obs/SGP/sgpccn/'
+# cpcpath = '../../../raw_data/obs/SGP/sgpcpc/'
+# tdmapath = '../../../raw_data/obs/SGP/sgptdmasizeC1.b1/'
+# uhsaspath = '../../../raw_data/obs/SGP/sgpaosuhsasE13.b1/'
+# smpspath = '../../../raw_data/obs/SGP/sgpaossmpsE13.b1/'
+# nanosmpspath = '../../../raw_data/obs/SGP/sgpaosnanosmpsE13.b1/'
+# predatapath = '../../../prep_data/SGP/'
+# year=2020
 # dt=3600
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -641,10 +642,13 @@ def prep_CNsize_SMPS(smpspath, nanosmpspath, predatapath, year, dt=3600):
     
     dmin2 = bounds[0,:,0]
     dmax2 = bounds[0,:,1]
-    dlogDp = np.log10(dmax/dmin)
+    dlogDp2 = np.log10(dmax2/dmin2)
+    if any(dlogDp!=dlogDp2):
+        print (dmin, dmin2)
+        raise ValueError(' ')
     nanosmps = qc_mask_qcflag(nanosmps,qc_nanosmps)
     nanosmps = nanosmps*np.tile(dlogDp,[len(time2),1])
-    # nanosmps = qc_correction_nanosmps(nanosmps)
+    nanosmps = qc_correction_nanosmps(nanosmps)
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
@@ -661,6 +665,7 @@ def prep_CNsize_SMPS(smpspath, nanosmpspath, predatapath, year, dt=3600):
     idx100 = dmin[:]>=100
     smps100_new = np.nansum(smps_new[:,idx100], 1)
     smps100_new[smps100_new==0] = np.nan
+    
     
     #%% output file
     outfile = predatapath + 'sfc_SMPS_SGP_'+year+'.nc'

@@ -49,10 +49,10 @@ lst = sorted(glob.glob(prep_obs_path + 'CCN_ACEENA_*.nc'))
 obsdata = xr.open_mfdataset(lst)
 time_ccn = obsdata['time'].load()
 ccn1 = obsdata['CCN1'].load()
-ccn5 = obsdata['CCN3'].load()
+ccn3 = obsdata['CCN3'].load()
 obsdata.close()
 ccn1 = ccn1.where(np.logical_and(obsdata.time>time1, obsdata.time<time2), drop=True)
-ccn5 = ccn5.where(np.logical_and(obsdata.time>time1, obsdata.time<time2), drop=True)
+ccn3 = ccn3.where(np.logical_and(obsdata.time>time1, obsdata.time<time2), drop=True)
 
 lst = sorted(glob.glob(prep_obs_path + 'AMS_ACEENA_*.nc'))
 obsdata = xr.open_mfdataset(lst)
@@ -198,63 +198,63 @@ nd_bin_m2 = nd_bin_m2.T/dlogDp_nd_e3sm
 
 # # change time to standard time
 ccn1 = xr.DataArray(data=np.interp(nd.time,ccn1.time, ccn1), coords=dict(time=nd.time))
-ccn5 = xr.DataArray(data=np.interp(nd.time,ccn5.time, ccn5), coords=dict(time=nd.time))
+ccn3 = xr.DataArray(data=np.interp(nd.time,ccn3.time, ccn3), coords=dict(time=nd.time))
 pcasp100 = xr.DataArray(data=np.interp(nd.time, pcasp100.time, pcasp100), coords=dict(time=nd.time))
 lwc = xr.DataArray(data=np.interp(nd.time,lwc.time, lwc), coords=dict(time=nd.time))
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# # %% bar plot
-# datagroup0 = [org,so4,nh4,no3,chl, [], []]
-# datagroup1 = [org_m, so4_m, [], [], [], bc_m, dst_m]
-# datagroup2 = [org_m2, so4_m2, [], [], [], bc_m2, dst_m2]
-# dataall=[datagroup0, datagroup1, datagroup2,]
-# labelall = ['Organic', 'SO$_4$', 'NH$_4$', 'NO$_3$', 'Chl', 'BC', 'Dust']
-# colorall = ['limegreen', 'red', 'lightblue', 'orange', 'cyan', 'k', 'silver']
-# fig,ax = plot.bar(dataall, datalabel=['Obs','E3SMv1','E3SMv2',], xlabel=None, ylabel='unit: $\mu$g/m$^3$', 
-#                   title='Aerosol Composition  '+site+' '+IOP, varlabel= labelall, colorall=colorall)
-# fig.savefig(figpath+'bar_composition_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# %% bar plot
+datagroup0 = [org,so4,nh4,no3,chl, [], []]
+datagroup1 = [org_m, so4_m, [], [], [], bc_m, dst_m]
+datagroup2 = [org_m2, so4_m2, [], [], [], bc_m2, dst_m2]
+dataall=[datagroup0, datagroup1, datagroup2,]
+labelall = ['Organic', 'SO$_4$', 'NH$_4$', 'NO$_3$', 'Chl', 'BC', 'Dust']
+colorall = ['limegreen', 'red', 'lightblue', 'orange', 'cyan', 'k', 'silver']
+fig,ax = plot.bar(dataall, datalabel=['Obs','E3SMv1','E3SMv2',], xlabel=None, ylabel='unit: $\mu$g/m$^3$', 
+                  title='Aerosol Composition  '+site+' '+IOP, varlabel= labelall, colorall=colorall)
+fig.savefig(figpath+'bar_composition_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# #%% mean size distribution
-# fig,ax = plot.mean_size_witherror([size_beasd, np.arange(1,3001), np.arange(1,3001)], 
-#                         [beasd,ncn_m,ncn_m2], 
-#                   legend = ['BEASD','E3SMv1', 'E3SMv2'],color=['k','r','b'],
-#                   marker=['.',None,None], linestyles=['none','-','-'],
-#                   xlimit=(10, 1e4), ylimit=(1e-2,1e4), xlabel='Diameter (nm)', ylabel='dN/dlogDp (cm$^{-3}$)', 
-#                     title = 'Mean Aerosol Size Distribution '+site+' '+IOP)
-# fig.savefig(figpath+'mean_aerosol_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+#%% mean size distribution
+fig,ax = plot.mean_size_witherror([size_beasd, np.arange(1,3001), np.arange(1,3001)], 
+                        [beasd,ncn_m,ncn_m2], 
+                  legend = ['BEASD','E3SMv1', 'E3SMv2'],color=['k','r','b'],
+                  marker=['.',None,None], linestyles=['none','-','-'],
+                  xlimit=(10, 1e4), ylimit=(1e-2,1e4), xlabel='Diameter (nm)', ylabel='dN/dlogDp (cm$^{-3}$)', 
+                    title = 'Mean Aerosol Size Distribution '+site+' '+IOP)
+fig.savefig(figpath+'mean_aerosol_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.mean_size_witherror([size_nd, np.arange(1,1000), np.arange(1,1000)], 
-#                         [nd_size,nd_bin_m,nd_bin_m2], 
-#                         marker=['.',None,None], linestyles=['none','-','-'],
-#                         # marker=['.','.','.'], linestyles=['none','none','none'],
-#                   legend = ['MergedSD','E3SMv1', 'E3SMv2'],color=['k','r','b'], xlimit=(1, 1e3), ylimit=(1e-5,1e3), 
-#                   xlabel='Diameter ($\mu$m)', ylabel='dN/dlogDp (cm$^{-3}$)', 
-#                     title = 'Mean Cloud Droplet Size Distribution '+site+' '+IOP)
-# fig.savefig(figpath+'mean_cloud_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig,ax = plot.mean_size_witherror([size_nd, np.arange(1,1000), np.arange(1,1000)], 
+                        [nd_size,nd_bin_m,nd_bin_m2], 
+                        marker=['.',None,None], linestyles=['none','-','-'],
+                        # marker=['.','.','.'], linestyles=['none','none','none'],
+                  legend = ['MergedSD','E3SMv1', 'E3SMv2'],color=['k','r','b'], xlimit=(1, 1e3), ylimit=(1e-5,1e3), 
+                  xlabel='Diameter ($\mu$m)', ylabel='dN/dlogDp (cm$^{-3}$)', 
+                    title = 'Mean Cloud Droplet Size Distribution '+site+' '+IOP)
+fig.savefig(figpath+'mean_cloud_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# #%% 1d histogram
-# w0 = np.ones_like(org)/sum(~np.isnan(org.data))
-# w1 = np.ones_like(org_m)/sum(~np.isnan(org_m.data))
-# w2 = np.ones_like(org_m2)/sum(~np.isnan(org_m2.data))
-# fig,ax = plot.hist([org,org_m,org_m2], weights=[w0,w1,w2], bins=np.arange(0,2.6,0.1),color=['k','r','b'],
-#                           legend = ['Obs','E3SMv1','E3SMv2'], title='Total Organic '+site+' '+IOP, 
-#                           ylabel='Fraction', xlabel='${\mu}$g/m$^{3}$')
-# fig.savefig(figpath+'hist_org_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# w0 = np.ones_like(so4)/sum(~np.isnan(so4.data))
-# w1 = np.ones_like(so4_m)/sum(~np.isnan(so4_m.data))
-# w2 = np.ones_like(so4_m2)/sum(~np.isnan(so4_m2.data))
-# fig,ax = plot.hist([so4,so4_m,so4_m2], weights=[w0,w1,w2], bins=np.arange(0,2.6,0.1),color=['k','r','b'],
-#                           legend = ['Obs','E3SMv1','E3SMv2'],title='Sulfate '+site+' '+IOP, 
-#                           ylabel='Fraction', xlabel='${\mu}$g/m$^{3}$')
-# fig.savefig(figpath+'hist_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+#%% 1d histogram
+w0 = np.ones_like(org)/sum(~np.isnan(org.data))
+w1 = np.ones_like(org_m)/sum(~np.isnan(org_m.data))
+w2 = np.ones_like(org_m2)/sum(~np.isnan(org_m2.data))
+fig,ax = plot.hist([org,org_m,org_m2], weights=[w0,w1,w2], bins=np.arange(0,2.6,0.1),color=['k','r','b'],
+                          legend = ['Obs','E3SMv1','E3SMv2'], title='Total Organic '+site+' '+IOP, 
+                          ylabel='Fraction', xlabel='${\mu}$g/m$^{3}$')
+fig.savefig(figpath+'hist_org_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w0 = np.ones_like(so4)/sum(~np.isnan(so4.data))
+w1 = np.ones_like(so4_m)/sum(~np.isnan(so4_m.data))
+w2 = np.ones_like(so4_m2)/sum(~np.isnan(so4_m2.data))
+fig,ax = plot.hist([so4,so4_m,so4_m2], weights=[w0,w1,w2], bins=np.arange(0,2.6,0.1),color=['k','r','b'],
+                          legend = ['Obs','E3SMv1','E3SMv2'],title='Sulfate '+site+' '+IOP, 
+                          ylabel='Fraction', xlabel='${\mu}$g/m$^{3}$')
+fig.savefig(figpath+'hist_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w0 = np.ones_like(ccn1)/sum(~np.isnan(ccn1.data))
-# w1 = np.ones_like(ccn1_m)/sum(~np.isnan(ccn1_m.data))
-# w2 = np.ones_like(ccn1_m2)/sum(~np.isnan(ccn1_m2.data))
-# fig,ax = plot.hist([ccn1,ccn1_m,ccn1_m2], weights=[w0,w1,w2], legend = ['Obs','E3SMv1','E3SMv2'], 
-#                     color=['k','r','b'], title='CCN (SS=0.1%) '+site+' '+IOP, 
-#                     bins=np.arange(0,300,15), ylabel='Fraction', xlabel='cm$^{-3}$')
-# fig.savefig(figpath+'hist_ccn1_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w0 = np.ones_like(ccn1)/sum(~np.isnan(ccn1.data))
+w1 = np.ones_like(ccn1_m)/sum(~np.isnan(ccn1_m.data))
+w2 = np.ones_like(ccn1_m2)/sum(~np.isnan(ccn1_m2.data))
+fig,ax = plot.hist([ccn1,ccn1_m,ccn1_m2], weights=[w0,w1,w2], legend = ['Obs','E3SMv1','E3SMv2'], 
+                    color=['k','r','b'], title='CCN (SS=0.1%) '+site+' '+IOP, 
+                    bins=np.arange(0,300,15), ylabel='Fraction', xlabel='cm$^{-3}$')
+fig.savefig(figpath+'hist_ccn1_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 # w0 = np.ones_like(ccn5)/sum(~np.isnan(ccn5.data))
 # w1 = np.ones_like(ccn5_m)/sum(~np.isnan(ccn5_m.data))
 # w2 = np.ones_like(ccn5_m2)/sum(~np.isnan(ccn5_m2.data))
@@ -262,98 +262,98 @@ lwc = xr.DataArray(data=np.interp(nd.time,lwc.time, lwc), coords=dict(time=nd.ti
 #                     color=['k','r','b'], bins=np.arange(0,600,30), ylabel='Fraction', xlabel='cm$^{-3}$')
 # fig.savefig(figpath+'hist_ccn5_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w0 = np.ones_like(cpc3)/sum(~np.isnan(cpc3.data))
-# w1 = np.ones_like(ncn3_m)/sum(~np.isnan(ncn3_m.data))
-# w2 = np.ones_like(ncn3_m2)/sum(~np.isnan(ncn3_m2.data))
-# fig,ax = plot.hist([cpc3,ncn3_m,ncn3_m2], weights=[w0,w1,w2], bins=np.arange(0,4000,200), legend = ['Obs','E3SMv1','E3SMv2'], 
-#                         color=['k','r','b'],title='Aerosol number (>3nm) '+site+' '+IOP, ylabel='Fraction', xlabel='cm$^{-3}$')
-# fig.savefig(figpath+'hist_CPC3_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# w0 = np.ones_like(cpc10)/sum(~np.isnan(cpc10.data))
-# w1 = np.ones_like(ncn10_m)/sum(~np.isnan(ncn10_m.data))
-# w2 = np.ones_like(ncn10_m2)/sum(~np.isnan(ncn10_m2.data))
-# fig,ax = plot.hist([cpc10,ncn10_m,ncn10_m2], weights=[w0,w1,w2], bins=np.arange(0,3200,100), legend = ['Obs','E3SMv1','E3SMv2'], 
-#                         color=['k','r','b'], title='Aerosol number (>10nm) '+site+' '+IOP,ylabel='Fraction', xlabel='cm$^{-3}$')
-# fig.savefig(figpath+'hist_CPC10_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# w0 = np.ones_like(pcasp100)/sum(~np.isnan(pcasp100.data))
-# w1 = np.ones_like(ncn100_m)/sum(~np.isnan(ncn100_m.data))
-# w2 = np.ones_like(ncn100_m2)/sum(~np.isnan(ncn100_m2.data))
-# fig,ax = plot.hist([pcasp100, ncn100_m, ncn100_m2], weights=[w0,w1,w2], bins=np.arange(0,600,30), legend = ['Obs','E3SMv1','E3SMv2'], 
-#                         color=['k','r','b'],title='Aerosol number (>100nm) '+site+' '+IOP, ylabel='Fraction', xlabel='cm$^{-3}$')
-# fig.savefig(figpath+'hist_CN100_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w0 = np.ones_like(cpc3)/sum(~np.isnan(cpc3.data))
+w1 = np.ones_like(ncn3_m)/sum(~np.isnan(ncn3_m.data))
+w2 = np.ones_like(ncn3_m2)/sum(~np.isnan(ncn3_m2.data))
+fig,ax = plot.hist([cpc3,ncn3_m,ncn3_m2], weights=[w0,w1,w2], bins=np.arange(0,4000,200), legend = ['Obs','E3SMv1','E3SMv2'], 
+                        color=['k','r','b'],title='Aerosol number (>3nm) '+site+' '+IOP, ylabel='Fraction', xlabel='cm$^{-3}$')
+fig.savefig(figpath+'hist_CPC3_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w0 = np.ones_like(cpc10)/sum(~np.isnan(cpc10.data))
+w1 = np.ones_like(ncn10_m)/sum(~np.isnan(ncn10_m.data))
+w2 = np.ones_like(ncn10_m2)/sum(~np.isnan(ncn10_m2.data))
+fig,ax = plot.hist([cpc10,ncn10_m,ncn10_m2], weights=[w0,w1,w2], bins=np.arange(0,3200,100), legend = ['Obs','E3SMv1','E3SMv2'], 
+                        color=['k','r','b'], title='Aerosol number (>10nm) '+site+' '+IOP,ylabel='Fraction', xlabel='cm$^{-3}$')
+fig.savefig(figpath+'hist_CPC10_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w0 = np.ones_like(pcasp100)/sum(~np.isnan(pcasp100.data))
+w1 = np.ones_like(ncn100_m)/sum(~np.isnan(ncn100_m.data))
+w2 = np.ones_like(ncn100_m2)/sum(~np.isnan(ncn100_m2.data))
+fig,ax = plot.hist([pcasp100, ncn100_m, ncn100_m2], weights=[w0,w1,w2], bins=np.arange(0,600,30), legend = ['Obs','E3SMv1','E3SMv2'], 
+                        color=['k','r','b'],title='Aerosol number (>100nm) '+site+' '+IOP, ylabel='Fraction', xlabel='cm$^{-3}$')
+fig.savefig(figpath+'hist_CN100_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w0 = np.ones_like(lwc)/sum(~np.isnan(lwc.data))
-# w1 = np.ones_like(lwc_m)/sum(~np.isnan(lwc_m.data))
-# w2 = np.ones_like(lwc_m2)/sum(~np.isnan(lwc_m2.data))
-# fig,ax = plot.hist([lwc, lwc_m, lwc_m2], weights=[w0,w1,w2], bins=np.arange(0.01,0.5,0.02), legend = ['Obs','E3SMv1','E3SMv2'], 
-#                         color=['k','r','b'], title='lwc '+site+' '+IOP, ylabel='Fraction', xlabel='g/m$^3$')
-# # ax.set_yscale('log')
-# # ax.set_ylim(1e-4,1)
-# fig.savefig(figpath+'hist_lwc_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w0 = np.ones_like(lwc)/sum(~np.isnan(lwc.data))
+w1 = np.ones_like(lwc_m)/sum(~np.isnan(lwc_m.data))
+w2 = np.ones_like(lwc_m2)/sum(~np.isnan(lwc_m2.data))
+fig,ax = plot.hist([lwc, lwc_m, lwc_m2], weights=[w0,w1,w2], bins=np.arange(0.01,0.5,0.02), legend = ['Obs','E3SMv1','E3SMv2'], 
+                        color=['k','r','b'], title='lwc '+site+' '+IOP, ylabel='Fraction', xlabel='g/m$^3$')
+# ax.set_yscale('log')
+# ax.set_ylim(1e-4,1)
+fig.savefig(figpath+'hist_lwc_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
     
-# w0 = np.ones_like(nd)/sum(~np.isnan(nd.data))
-# w1 = np.ones_like(nd_m)/sum(~np.isnan(nd_m.data))
-# w2 = np.ones_like(nd_m2)/sum(~np.isnan(nd_m2.data))
-# fig,ax = plot.hist([nd, nd_m, nd_m2], weights=[w0, w1, w2], bins=np.arange(1,310,15), legend = ['Obs','E3SMv1','E3SMv2'], 
-#                         color=['k','r','b'], title='Nd '+site+' '+IOP, ylabel='Fraction', xlabel='cm$^{-3}$')
-# # ax.set_yscale('log')
-# # ax.set_ylim(1e-4,.1)
-# fig.savefig(figpath+'hist_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w0 = np.ones_like(nd)/sum(~np.isnan(nd.data))
+w1 = np.ones_like(nd_m)/sum(~np.isnan(nd_m.data))
+w2 = np.ones_like(nd_m2)/sum(~np.isnan(nd_m2.data))
+fig,ax = plot.hist([nd, nd_m, nd_m2], weights=[w0, w1, w2], bins=np.arange(1,310,15), legend = ['Obs','E3SMv1','E3SMv2'], 
+                        color=['k','r','b'], title='Nd '+site+' '+IOP, ylabel='Fraction', xlabel='cm$^{-3}$')
+# ax.set_yscale('log')
+# ax.set_ylim(1e-4,.1)
+fig.savefig(figpath+'hist_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w0 = np.ones_like(reff)/sum(~np.isnan(reff.data))
-# w1 = np.ones_like(reff_m)/sum(~np.isnan(reff_m.data))
-# w2 = np.ones_like(reff_m2)/sum(~np.isnan(reff_m2.data))
-# fig,ax = plot.hist([reff, reff_m, reff_m2], weights=[w0, w1, w2], bins=np.arange(0,50,2), legend = ['Obs','E3SMv1','E3SMv2'], 
-#                         color=['k','r','b'], title='Cloud Effective Radius '+site+' '+IOP, ylabel='Fraction', xlabel='$\mu$m')
-# fig.savefig(figpath+'hist_Reff_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w0 = np.ones_like(reff)/sum(~np.isnan(reff.data))
+w1 = np.ones_like(reff_m)/sum(~np.isnan(reff_m.data))
+w2 = np.ones_like(reff_m2)/sum(~np.isnan(reff_m2.data))
+fig,ax = plot.hist([reff, reff_m, reff_m2], weights=[w0, w1, w2], bins=np.arange(0,50,2), legend = ['Obs','E3SMv1','E3SMv2'], 
+                        color=['k','r','b'], title='Cloud Effective Radius '+site+' '+IOP, ylabel='Fraction', xlabel='$\mu$m')
+fig.savefig(figpath+'hist_Reff_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# #%% percentiles with height
-# fig,ax = plot.percentile_z([org,org_m,org_m2], [height,height,height], 
-#                       height_bin, figsize=(3,8), title='Organic',color=['k','r','b'],
-#                       xlabel='$\mu$g/m$^3$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
-# fig.savefig(figpath+'percentile_z_org_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.percentile_z([so4, so4_m, so4_m2], [height,height,height,], 
-#                       height_bin, figsize=(3,8), title='Sulfate', color=['k','r','b'],
-#                       xlabel='$\mu$g/m$^3$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
-# fig.savefig(figpath+'percentile_z_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+#%% percentiles with height
+fig,ax = plot.percentile_z([org,org_m,org_m2], [height,height,height], 
+                      height_bin, figsize=(3,8), title='Organic',color=['k','r','b'],
+                      xlabel='$\mu$g/m$^3$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
+fig.savefig(figpath+'percentile_z_org_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig,ax = plot.percentile_z([so4, so4_m, so4_m2], [height,height,height,], 
+                      height_bin, figsize=(3,8), title='Sulfate', color=['k','r','b'],
+                      xlabel='$\mu$g/m$^3$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
+fig.savefig(figpath+'percentile_z_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.percentile_z([ccn1,ccn1_m,ccn1_m2], [height,height,height], 
-#                       height_bin, figsize=(3,8), title='CCN (0.1%)',color=['k','r','b'],
-#                       xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
-# fig.savefig(figpath+'percentile_z_ccn1_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig,ax = plot.percentile_z([ccn1,ccn1_m,ccn1_m2], [height,height,height], 
+                      height_bin, figsize=(3,8), title='CCN (0.1%)',color=['k','r','b'],
+                      xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
+fig.savefig(figpath+'percentile_z_ccn1_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 # fig,ax = plot.percentile_z([ccn5,ccn5_m,ccn5_m2], [height,height,height], 
 #                       height_bin, figsize=(3,8), title='CCN (0.5%)',color=['k','r','b'],
 #                       xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
 # fig.savefig(figpath+'percentile_z_ccn5_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.percentile_z([cpc3,ncn3_m,ncn3_m2], [height,height,height], 
-#                       height_bin, figsize=(3,8), title='CN (>3nm)',color=['k','r','b'], xlimit=(-200,4000),
-#                       xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
-# fig.savefig(figpath+'percentile_z_CN3_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.percentile_z([cpc10,ncn10_m,ncn10_m2], [height,height,height], 
-#                       height_bin, figsize=(3,8), title='CN (>10nm)',color=['k','r','b'], xlimit=(-200,4000),
-#                       xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
-# fig.savefig(figpath+'percentile_z_CN10_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-# fig,ax = plot.percentile_z([pcasp100, ncn100_m, ncn100_m2], [height,height,height], 
-#                       height_bin, figsize=(3,8), title='CN (>100nm)',color=['k','r','b'],
-#                       xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
-# fig.savefig(figpath+'percentile_z_CN100_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig,ax = plot.percentile_z([cpc3,ncn3_m,ncn3_m2], [height,height,height], 
+                      height_bin, figsize=(3,8), title='CN (>3nm)',color=['k','r','b'], xlimit=(-200,4000),
+                      xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
+fig.savefig(figpath+'percentile_z_CN3_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig,ax = plot.percentile_z([cpc10,ncn10_m,ncn10_m2], [height,height,height], 
+                      height_bin, figsize=(3,8), title='CN (>10nm)',color=['k','r','b'], xlimit=(-200,4000),
+                      xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
+fig.savefig(figpath+'percentile_z_CN10_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig,ax = plot.percentile_z([pcasp100, ncn100_m, ncn100_m2], [height,height,height], 
+                      height_bin, figsize=(3,8), title='CN (>100nm)',color=['k','r','b'],
+                      xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
+fig.savefig(figpath+'percentile_z_CN100_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.percentile_z([lwc, lwc_m, lwc_m2], [height,height,height], 
-#                       height_bin, figsize=(3,8), title='LWC',color=['k','r','b'],
-#                       xlabel='g/m$^{3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
-# fig.savefig(figpath+'percentile_z_lwc_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig,ax = plot.percentile_z([lwc, lwc_m, lwc_m2], [height,height,height], 
+                      height_bin, figsize=(3,8), title='LWC',color=['k','r','b'],
+                      xlabel='g/m$^{3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
+fig.savefig(figpath+'percentile_z_lwc_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.percentile_z([nd, nd_m, nd_m2], [height,height,height], 
-#                       height_bin, figsize=(3,8), title='Nd',color=['k','r','b'], xlimit=(-20,400),
-#                       xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
-# fig.savefig(figpath+'percentile_z_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig,ax = plot.percentile_z([nd, nd_m, nd_m2], [height,height,height], 
+                      height_bin, figsize=(3,8), title='Nd',color=['k','r','b'], xlimit=(-20,400),
+                      xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
+fig.savefig(figpath+'percentile_z_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.percentile_z([reff, reff_m, reff_m2], [height,height,height], 
-#                       height_bin, figsize=(3,8), title='Reff',color=['k','r','b'],
-#                       xlabel='$\mu$m', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
-# fig.savefig(figpath+'percentile_z_Reff_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig,ax = plot.percentile_z([reff, reff_m, reff_m2], [height,height,height], 
+                      height_bin, figsize=(3,8), title='Reff',color=['k','r','b'],
+                      xlabel='$\mu$m', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
+fig.savefig(figpath+'percentile_z_Reff_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# #%% calculate statistics
+#%% calculate statistics
 # calc.mean_std_percentiles([org,org_m,org_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_ORG_'+site+'_'+IOP+'.txt')
 # calc.mean_std_percentiles([so4, so4_m, so4_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_SO4_'+site+'_'+IOP+'.txt')
 # calc.mean_std_percentiles([ccn1,ccn1_m,ccn1_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_ccn1_'+site+'_'+IOP+'.txt')
@@ -415,25 +415,46 @@ lwc = xr.DataArray(data=np.interp(nd.time,lwc.time, lwc), coords=dict(time=nd.ti
 # calc.bias_corrcoef_RMSE(reff, reff_m2,label1='Obs',label2='E3SMv2', 
 #                         outfile=figpath+'statistics_Reff_E3SMv2vsOBS_'+site+'_'+IOP+'.txt')
 
-# #%% joint histogram
-# fig,ax = plot.jointhist([ccn1.data, ccn1_m.data, ccn1_m2.data], [nd.data, nd_m.data, nd_m2.data],
-#                     xedges=np.arange(0,200,10), yedges=np.arange(0,300,20), 
-#                     normalize_x=True, #xlimit=(0,1000), ylimit=(0,1000),
-#                     xlabel=['0.1%CCN (cm$^{-3}$)','0.1%CCN (cm$^{-3}$)','0.1%CCN (cm$^{-3}$)'], 
-#                     ylabel='Nd (cm$^{-3}$)', title=['Obs','E3SMv1','E3SMv2'], )
-# fig.savefig(figpath+'jointhist_Nd_CCN_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+#%% joint histogram
+
+fig,ax = plot.jointhist([ccn1.data, ccn1_m.data, ccn1_m2.data], [nd.data, nd_m.data, nd_m2.data],
+                    xedges=np.arange(0,150,10), yedges=np.arange(0,150,10), vmax=0.3,
+                    normalize_x=True, #xlimit=(0,1000), ylimit=(0,1000),
+                    xlabel=['0.1%CCN (cm$^{-3}$)','0.1%CCN (cm$^{-3}$)','0.1%CCN (cm$^{-3}$)'], 
+                    ylabel='Nd (cm$^{-3}$)', title=['Obs','E3SMv1','E3SMv2'], )
+fig.savefig(figpath+'jointhist_Nd_CCN1_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+fig,ax = plot.jointhist([pcasp100, ncn100_m, ncn100_m2],[ccn1.data, ccn1_m.data, ccn1_m2.data],
+                    xedges=np.arange(0,150,10), yedges=np.arange(0,150,10), vmax=0.3,
+                    normalize_x=True, #xlimit=(0,1000), ylimit=(0,1000),
+                    xlabel=['CN (>100nm) (cm$^{-3}$)','CN (>100nm) (cm$^{-3}$)','CN (>100nm) (cm$^{-3}$)'], 
+                    ylabel='0.1%CCN (cm$^{-3}$)', title=['Obs','E3SMv1','E3SMv2'], )
+fig.savefig(figpath+'jointhist_CN_CCN1_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+fig,ax = plot.jointhist([nd.data, nd_m.data, nd_m2.data],[reff, reff_m, reff_m2],
+                    xedges=np.arange(0,150,10), yedges=np.arange(0,30,2), vmax=0.3,
+                    normalize_x=True, #xlimit=(0,1000), ylimit=(0,1000),
+                    xlabel=['Nd (cm$^{-3}$)','Nd (cm$^{-3}$)','Nd (cm$^{-3}$)'], 
+                    ylabel='Reff ($\mu$m)', title=['Obs','E3SMv1','E3SMv2'], )
+fig.savefig(figpath+'jointhist_Reff_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+fig,ax = plot.jointhist([reff, reff_m, reff_m2],[lwc, lwc_m, lwc_m2],
+                    xedges=np.arange(0,30,2), yedges=np.arange(0,0.6,0.05), vmax=0.3,
+                    normalize_x=True, #xlimit=(0,1000), ylimit=(0,1000),
+                    xlabel=['Reff ($\mu$m)','Reff ($\mu$m)','Reff ($\mu$m)'], 
+                    ylabel='LWC (g/m3)', title=['Obs','E3SMv1','E3SMv2'], )
+fig.savefig(figpath+'jointhist_LWC_Reff_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+#%% scatter
+fig,ax = plot.scatter([ccn1.data, ccn1_m.data, ccn1_m2.data], [nd.data, nd_m.data, nd_m2.data],
+                      title=['Obs','E3SMv1','E3SMv2'], xlimit=(0,200), ylimit=(0,200),
+                    xlabel='0.1%CCN (cm$^{-3}$)', ylabel='Nd (cm$^{-3}$)', 
+                    linear_fit=True, intercept=True)
+fig.savefig(figpath+'scatter_CCN1_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 
-# #%% scatter
-# fig,ax = plot.scatter([ccn1.data, ccn1_m.data, ccn1_m2.data], [nd.data, nd_m.data, nd_m2.data],
-#                       title=['Obs','E3SMv1','E3SMv2'], xlimit=(0,300), ylimit=(0,300),
-#                     xlabel='0.1%CCN (cm$^{-3}$)', ylabel='Nd (cm$^{-3}$)', 
-#                     linear_fit=True, intercept=True)
-# fig.savefig(figpath+'scatter_CCN_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-
-# fig,ax = plot.scatter([nd.data, nd_m.data, nd_m2.data], [reff.data, reff_m.data, reff_m2.data], 
-#                       title=['Obs','E3SMv1','E3SMv2'], xlimit=(0,300), ylimit=(0,50),
-#                     xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m)', 
-#                     linear_fit=False, intercept=True)
-# fig.savefig(figpath+'scatter_Reff_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig,ax = plot.scatter([nd.data, nd_m.data, nd_m2.data], [reff.data, reff_m.data, reff_m2.data], 
+                      title=['Obs','E3SMv1','E3SMv2'], xlimit=(0,200), ylimit=(0,50),
+                    xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m)', 
+                    linear_fit=False, intercept=True)
+fig.savefig(figpath+'scatter_Reff_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
