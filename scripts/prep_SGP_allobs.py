@@ -46,19 +46,19 @@ for year in range(2011,2021):
     # sfc.prep_ccn(ccnsfcpath, prep_data_path+'surface/',year, dt=3600)              # CCN number concentration
     # sfc.prep_CPC(cpcpath, prep_data_path+'surface/',year, dt=3600)    # aerosol number concentration (>3 or 10nm)
     # sfc.prep_CNsize_UHSAS(uhsaspath, prep_data_path+'surface/',year, dt=3600)   # aerosol size distribution from UHSAS
-    # sfc.prep_CNsize_SMPS(smpspath, nanosmpspath, prep_data_path+'surface/',year, dt=3600)# aerosol size distribution from SMPS
+    sfc.prep_CNsize_SMPS(smpspath, nanosmpspath, prep_data_path+'surface/',year, dt=3600)# aerosol size distribution from SMPS
     # sfc.prep_CNsize_TDMA(tdmapath, prep_data_path+'surface/',year, dt=3600)# aerosol size distribution from TDMA
     # sfc.prep_cloud_2d(armbepath, prep_data_path+'surface/', height_out,year, dt=3600)   # 2D cloud fraction
     # sfc.prep_cloudheight_ARSCL(arsclpath, prep_data_path+'surface/',year, dt=3600)   # cloud height 
     # sfc.prep_mfrsr_cod(mfrsrpath,  prep_data_path+'surface/',year, dt=3600)     # cloud optical depth from MFRSR
     # sfc.prep_mfrsr_Reff(mfrsrpath,  prep_data_path+'surface/',year, dt=3600)    # cloud effective radius from MFRSR
     # sfc.prep_LWP(armbepath, mfrsrpath, prep_data_path+'surface/',year, dt=3600) # cloud liquid water path
-    sfc.prep_LTS(armbepath, arsclpath, prep_data_path+'surface/',year, dt=3600)            # lower tropospheric stability
+    # sfc.prep_LTS(armbepath, arsclpath, prep_data_path+'surface/',year, dt=3600)            # lower tropospheric stability
     # sfc.prep_precip(armbepath, prep_data_path+'surface/',year, dt=3600)         # surface precipitation
     # sfc.prep_Ndrop(ndroppath, prep_data_path+'surface/',year, dt=3600)          # cloud droplet number retrieval from ARM Ndrop VAP
     # sfc.prep_radiation(armbepath, prep_data_path+'surface/',year, dt=3600)      # surface radiation
     # sfc.prep_totcld(armbepath, prep_data_path+'surface/',year, dt=3600)         # cloud fraction. from ARSCL, TSI and satellite sources
     # # prepare satellite data. output time in 1hr (dt=3600s) resolution
-    print('prepare satellite data:')
+    # print('prepare satellite data:')
     # sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/',year, dt=3600)     # VISST 0.5x0.5 degree gridded data
     # sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/',year, dt=3600)     # VISST 4km pixel-level data

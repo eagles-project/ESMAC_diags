@@ -236,42 +236,56 @@ fig,ax = plot.percentile_z([reff, reff_m, reff_m2], [height,height,height],
 fig.savefig(figpath+'percentile_z_Reff_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 #%% calculate statisticscalc.mean_std_percentiles([ccn5,ccn5_m,ccn5_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_ccn5_'+site+'.txt')
-calc.mean_std_percentiles([cpc10,ncn10_m,ncn10_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_CPC10_'+site+'.txt')
-calc.mean_std_percentiles([uhsas100, ncn100_m, ncn100_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_CN100_'+site+'.txt')
-calc.mean_std_percentiles([lwc, lwc_m, lwc_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_lwc_'+site+'.txt')
-calc.mean_std_percentiles([nd_all, nd_m, nd_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_Nd_'+site+'.txt')
-calc.mean_std_percentiles([reff, reff_m, reff_m2], legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_Reff_'+site+'.txt')
+# calc.mean_std_percentiles([cpc10,ncn10_m,ncn10_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_CPC10_'+site+'.txt')
+# calc.mean_std_percentiles([uhsas100, ncn100_m, ncn100_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_CN100_'+site+'.txt')
+# calc.mean_std_percentiles([lwc, lwc_m, lwc_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_lwc_'+site+'.txt')
+# calc.mean_std_percentiles([nd_all, nd_m, nd_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_Nd_'+site+'.txt')
+# calc.mean_std_percentiles([reff, reff_m, reff_m2], legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_Reff_'+site+'.txt')
 
-calc.bias_corrcoef_RMSE(cpc10,ncn10_m,label1='Obs',label2='E3SMv1', 
-                        outfile=figpath+'statistics_CN10nm_E3SMv1vsOBS_'+site+'.txt')
-calc.bias_corrcoef_RMSE(cpc10,ncn10_m2,label1='Obs',label2='E3SMv2', 
-                        outfile=figpath+'statistics_CN10nm_E3SMv2vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(cpc10,ncn10_m,label1='Obs',label2='E3SMv1', 
+#                         outfile=figpath+'statistics_CN10nm_E3SMv1vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(cpc10,ncn10_m2,label1='Obs',label2='E3SMv2', 
+#                         outfile=figpath+'statistics_CN10nm_E3SMv2vsOBS_'+site+'.txt')
 
-calc.bias_corrcoef_RMSE(uhsas100, ncn100_m,label1='Obs',label2='E3SMv1', 
-                        outfile=figpath+'statistics_CN100_E3SMv1vsOBS_'+site+'.txt')
-calc.bias_corrcoef_RMSE(uhsas100, ncn100_m2,label1='Obs',label2='E3SMv2', 
-                        outfile=figpath+'statistics_CN100_E3SMv2vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(uhsas100, ncn100_m,label1='Obs',label2='E3SMv1', 
+#                         outfile=figpath+'statistics_CN100_E3SMv1vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(uhsas100, ncn100_m2,label1='Obs',label2='E3SMv2', 
+#                         outfile=figpath+'statistics_CN100_E3SMv2vsOBS_'+site+'.txt')
 
-calc.bias_corrcoef_RMSE(lwc, lwc_m,label1='Obs',label2='E3SMv1', 
-                        outfile=figpath+'statistics_LWC_E3SMv1vsOBS_'+site+'.txt')
-calc.bias_corrcoef_RMSE(lwc, lwc_m2,label1='Obs',label2='E3SMv2', 
-                        outfile=figpath+'statistics_LWC_E3SMv2vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(lwc, lwc_m,label1='Obs',label2='E3SMv1', 
+#                         outfile=figpath+'statistics_LWC_E3SMv1vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(lwc, lwc_m2,label1='Obs',label2='E3SMv2', 
+#                         outfile=figpath+'statistics_LWC_E3SMv2vsOBS_'+site+'.txt')
 
-calc.bias_corrcoef_RMSE(nd_all, nd_m,label1='Obs',label2='E3SMv1', 
-                        outfile=figpath+'statistics_Nd_E3SMv1vsOBS_'+site+'.txt')
-calc.bias_corrcoef_RMSE(nd_all, nd_m2,label1='Obs',label2='E3SMv2', 
-                        outfile=figpath+'statistics_Nd_E3SMv2vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(nd_all, nd_m,label1='Obs',label2='E3SMv1', 
+#                         outfile=figpath+'statistics_Nd_E3SMv1vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(nd_all, nd_m2,label1='Obs',label2='E3SMv2', 
+#                         outfile=figpath+'statistics_Nd_E3SMv2vsOBS_'+site+'.txt')
 
-calc.bias_corrcoef_RMSE(reff, reff_m,label1='Obs',label2='E3SMv1', 
-                        outfile=figpath+'statistics_Reff_E3SMv1vsOBS_'+site+'.txt')
-calc.bias_corrcoef_RMSE(reff, reff_m2,label1='Obs',label2='E3SMv2', 
-                        outfile=figpath+'statistics_Reff_E3SMv2vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(reff, reff_m,label1='Obs',label2='E3SMv1', 
+#                         outfile=figpath+'statistics_Reff_E3SMv1vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(reff, reff_m2,label1='Obs',label2='E3SMv2', 
+#                         outfile=figpath+'statistics_Reff_E3SMv2vsOBS_'+site+'.txt')
 
 #%% joint histogram
+
+fig,ax = plot.jointhist([uhsas100, ncn100_m, ncn100_m2], [nd_all, nd_m, nd_m2], 
+                    xedges=np.arange(0,400,30), yedges=np.arange(0,400,30), 
+                    normalize_x=True, #xlimit=(0,1000), ylimit=(0,1000),
+                    xlabel=['CN (>100nm) (cm$^{-3}$)','CN (>100nm) (cm$^{-3}$)','CN (>100nm) (cm$^{-3}$)'], 
+                    ylabel='Nd (cm$^{-3}$)', title=['Obs','E3SMv1','E3SMv2'], )
+fig.savefig(figpath+'jointhist_CN_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+fig,ax = plot.jointhist([reff, reff_m, reff_m2],[lwc, lwc_m, lwc_m2],
+                    xedges=np.arange(0,36,3), yedges=np.arange(0,0.9,0.1), vmax=0.3,
+                    normalize_x=True, #xlimit=(0,1000), ylimit=(0,1000),
+                    xlabel=['Reff ($\mu$m)','Reff ($\mu$m)','Reff ($\mu$m)'], 
+                    ylabel='LWC (g/m3)', title=['Obs','E3SMv1','E3SMv2'], )
+fig.savefig(figpath+'jointhist_LWC_Reff_'+site+'_'+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 #%% scatter
 fig,ax = plot.scatter([nd_all.data, nd_m.data, nd_m2.data], [reff.data, reff_m.data, reff_m2.data], 
                       title=['Obs','E3SMv1','E3SMv2'], xlimit=(0,300), ylimit=(0,50),
                     xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m)', 
-                    linear_fit=False, intercept=True)
+                    linear_fit=True, intercept=True)
 fig.savefig(figpath+'scatter_Reff_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)

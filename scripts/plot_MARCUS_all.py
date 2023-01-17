@@ -272,332 +272,338 @@ pdf_m2 = np.nanmean(dN_dlogDp_m2,axis=0)
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-# #%% timeseries
-# if site=='MAGIC':
-#     legnum = np.arange(2,20)
-#     startdate = [np.datetime64('2012-09-22'), np.datetime64('2012-10-06'), np.datetime64('2012-10-20'), np.datetime64('2012-11-03'), 
-#                   np.datetime64('2012-11-17'), np.datetime64('2012-12-01'), np.datetime64('2012-12-15'), np.datetime64('2012-12-29'), 
-#                   np.datetime64('2013-05-11'), np.datetime64('2013-05-25'), np.datetime64('2013-06-08'), np.datetime64('2013-06-22'), 
-#                   np.datetime64('2013-07-07'), np.datetime64('2013-07-20'), np.datetime64('2013-08-03'), np.datetime64('2013-08-17'), 
-#                   np.datetime64('2013-08-31'), np.datetime64('2013-09-14'), ]
-#     enddate = [np.datetime64('2012-10-04'), np.datetime64('2012-10-18'), np.datetime64('2012-11-01'), np.datetime64('2012-11-15'), 
-#                 np.datetime64('2012-11-30'), np.datetime64('2012-12-13'), np.datetime64('2012-12-27'), np.datetime64('2013-01-06'), 
-#                 np.datetime64('2013-05-23'), np.datetime64('2013-06-06'), np.datetime64('2013-06-20'), np.datetime64('2013-07-03'), 
-#                 np.datetime64('2013-07-18'), np.datetime64('2013-08-01'), np.datetime64('2013-08-15'), np.datetime64('2013-08-29'), 
-#                 np.datetime64('2013-09-12'), np.datetime64('2013-09-26'), ]
-# elif site=='MARCUS':
-#     legnum = np.arange(1,5)
-#     startdate = [np.datetime64('2017-10-30'), np.datetime64('2017-12-13'), np.datetime64('2018-01-16'), np.datetime64('2018-03-09')]
-#     enddate = [np.datetime64('2017-12-02'), np.datetime64('2018-01-11'), np.datetime64('2018-03-04'), np.datetime64('2018-03-22')]
+#%% timeseries
+if site=='MAGIC':
+    legnum = np.arange(2,20)
+    startdate = [np.datetime64('2012-09-22'), np.datetime64('2012-10-06'), np.datetime64('2012-10-20'), np.datetime64('2012-11-03'), 
+                  np.datetime64('2012-11-17'), np.datetime64('2012-12-01'), np.datetime64('2012-12-15'), np.datetime64('2012-12-29'), 
+                  np.datetime64('2013-05-11'), np.datetime64('2013-05-25'), np.datetime64('2013-06-08'), np.datetime64('2013-06-22'), 
+                  np.datetime64('2013-07-07'), np.datetime64('2013-07-20'), np.datetime64('2013-08-03'), np.datetime64('2013-08-17'), 
+                  np.datetime64('2013-08-31'), np.datetime64('2013-09-14'), ]
+    enddate = [np.datetime64('2012-10-04'), np.datetime64('2012-10-18'), np.datetime64('2012-11-01'), np.datetime64('2012-11-15'), 
+                np.datetime64('2012-11-30'), np.datetime64('2012-12-13'), np.datetime64('2012-12-27'), np.datetime64('2013-01-06'), 
+                np.datetime64('2013-05-23'), np.datetime64('2013-06-06'), np.datetime64('2013-06-20'), np.datetime64('2013-07-03'), 
+                np.datetime64('2013-07-18'), np.datetime64('2013-08-01'), np.datetime64('2013-08-15'), np.datetime64('2013-08-29'), 
+                np.datetime64('2013-09-12'), np.datetime64('2013-09-26'), ]
+elif site=='MARCUS':
+    legnum = np.arange(1,5)
+    startdate = [np.datetime64('2017-10-30'), np.datetime64('2017-12-13'), np.datetime64('2018-01-16'), np.datetime64('2018-03-09')]
+    enddate = [np.datetime64('2017-12-02'), np.datetime64('2018-01-11'), np.datetime64('2018-03-04'), np.datetime64('2018-03-22')]
         
-# fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[T_marcus, T_m_marcus, T_m2_marcus], figsize=(10,3),
-#                   xlabel='Time', ylabel=None, title='Temperature (C) '+site, legend=['Ship','E3SMv1','E3SMv2'], 
-#                   color=['k','r','b'])
-# for ll in range(len(legnum)):
-#     ax.set_xlim(startdate[ll],enddate[ll])
-#     txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
-#     figname = figpath + 'timeseries_T_'+site+'_leg'+format(legnum[ll])+'.png'
-#     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     txt.remove()
-# ax.set_xlim(time_marcus[0],time_marcus[-1])
+fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[T_marcus, T_m_marcus, T_m2_marcus], figsize=(10,3),
+                  xlabel='Time', ylabel=None, title='Temperature (C) '+site, legend=['Ship','E3SMv1','E3SMv2'], 
+                  color=['k','r','b'])
+for ll in range(len(legnum)):
+    ax.set_xlim(startdate[ll],enddate[ll])
+    txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
+    figname = figpath + 'timeseries_T_'+site+'_leg'+format(legnum[ll])+'.png'
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    txt.remove()
+ax.set_xlim(time_marcus[0],time_marcus[-1])
 
-# fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[RH_marcus, RH_m_marcus, RH_m2_marcus], figsize=(10,3),
-#                   xlabel='Time', ylabel=None, title='RH (%) '+site, legend=['Ship','E3SMv1','E3SMv2'], 
-#                   color=['k','r','b'])
-# for ll in range(len(legnum)):
-#     ax.set_xlim(startdate[ll],enddate[ll])
-#     txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
-#     figname = figpath + 'timeseries_RH_'+site+'_leg'+format(legnum[ll])+'.png'
-#     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     txt.remove()
-# ax.set_xlim(time_marcus[0],time_marcus[-1])
+fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[RH_marcus, RH_m_marcus, RH_m2_marcus], figsize=(10,3),
+                  xlabel='Time', ylabel=None, title='RH (%) '+site, legend=['Ship','E3SMv1','E3SMv2'], 
+                  color=['k','r','b'])
+for ll in range(len(legnum)):
+    ax.set_xlim(startdate[ll],enddate[ll])
+    txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
+    figname = figpath + 'timeseries_RH_'+site+'_leg'+format(legnum[ll])+'.png'
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    txt.remove()
+ax.set_xlim(time_marcus[0],time_marcus[-1])
 
-# fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[Ps_marcus, Ps_m_marcus, Ps_m2_marcus], figsize=(10,3),
-#                   xlabel='Time', ylabel=None, title='Ps (hPa) '+site, legend=['Ship','E3SMv1','E3SMv2'], 
-#                   color=['k','r','b'])
-# for ll in range(len(legnum)):
-#     ax.set_xlim(startdate[ll],enddate[ll])
-#     txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
-#     figname = figpath + 'timeseries_Ps_'+site+'_leg'+format(legnum[ll])+'.png'
-#     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     txt.remove()
-# ax.set_xlim(time_marcus[0],time_marcus[-1])
+fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[Ps_marcus, Ps_m_marcus, Ps_m2_marcus], figsize=(10,3),
+                  xlabel='Time', ylabel=None, title='Ps (hPa) '+site, legend=['Ship','E3SMv1','E3SMv2'], 
+                  color=['k','r','b'])
+for ll in range(len(legnum)):
+    ax.set_xlim(startdate[ll],enddate[ll])
+    txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
+    figname = figpath + 'timeseries_Ps_'+site+'_leg'+format(legnum[ll])+'.png'
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    txt.remove()
+ax.set_xlim(time_marcus[0],time_marcus[-1])
 
-# fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[cpc10_marcus, ncn10_m_marcus, ncn10_m2_marcus], figsize=(10,3),
-#                   xlabel='Time', ylabel=None, title='CN (>10nm) (cm$^{-3}$) '+site, legend=['Ship','E3SMv1','E3SMv2'], 
-#                   color=['k','r','b'])
-# for ll in range(len(legnum)):
-#     ax.set_xlim(startdate[ll],enddate[ll])
-#     txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
-#     figname = figpath + 'timeseries_CN10_'+site+'_leg'+format(legnum[ll])+'.png'
-#     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     txt.remove()
-# ax.set_xlim(time_marcus[0],time_marcus[-1])
+fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[cpc10_marcus, ncn10_m_marcus, ncn10_m2_marcus], figsize=(10,3),
+                  xlabel='Time', ylabel=None, title='CN (>10nm) (cm$^{-3}$) '+site, legend=['Ship','E3SMv1','E3SMv2'], 
+                  color=['k','r','b'])
+for ll in range(len(legnum)):
+    ax.set_xlim(startdate[ll],enddate[ll])
+    txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
+    figname = figpath + 'timeseries_CN10_'+site+'_leg'+format(legnum[ll])+'.png'
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    txt.remove()
+ax.set_xlim(time_marcus[0],time_marcus[-1])
 
-# fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[uhsas100_marcus,ncn100_m_marcus,ncn100_m2_marcus], figsize=(10,3),
-#                   xlabel='Time', ylabel=None, title='CN (>100nm) (cm$^{-3}$) '+site, legend=['Ship','E3SMv1','E3SMv2'], 
-#                   color=['k','r','b'])
-# for ll in range(len(legnum)):
-#     ax.set_xlim(startdate[ll],enddate[ll])
-#     txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
-#     figname = figpath + 'timeseries_CN100_'+site+'_leg'+format(legnum[ll])+'.png'
-#     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     txt.remove()
-# ax.set_xlim(time_marcus[0],time_marcus[-1])
+fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[uhsas100_marcus,ncn100_m_marcus,ncn100_m2_marcus], figsize=(10,3),
+                  xlabel='Time', ylabel=None, title='CN (>100nm) (cm$^{-3}$) '+site, legend=['Ship','E3SMv1','E3SMv2'], 
+                  color=['k','r','b'])
+for ll in range(len(legnum)):
+    ax.set_xlim(startdate[ll],enddate[ll])
+    txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
+    figname = figpath + 'timeseries_CN100_'+site+'_leg'+format(legnum[ll])+'.png'
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    txt.remove()
+ax.set_xlim(time_marcus[0],time_marcus[-1])
 
-# fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[ccn2_marcus,ccn2_m_marcus,ccn2_m2_marcus], figsize=(10,3),
-#                   xlabel='Time', ylabel=None, title='CCN (SS=0.2%) (cm$^{-3}$) '+site, legend=['Ship','E3SMv1','E3SMv2'], 
-#                   color=['k','r','b'])
-# for ll in range(len(legnum)):
-#     ax.set_xlim(startdate[ll],enddate[ll])
-#     txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
-#     figname = figpath + 'timeseries_CCN2_'+site+'_leg'+format(legnum[ll])+'.png'
-#     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     txt.remove()
-# ax.set_xlim(time_marcus[0],time_marcus[-1])
+fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[ccn2_marcus,ccn2_m_marcus,ccn2_m2_marcus], figsize=(10,3),
+                  xlabel='Time', ylabel=None, title='CCN (SS=0.2%) (cm$^{-3}$) '+site, legend=['Ship','E3SMv1','E3SMv2'], 
+                  color=['k','r','b'])
+for ll in range(len(legnum)):
+    ax.set_xlim(startdate[ll],enddate[ll])
+    txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
+    figname = figpath + 'timeseries_CCN2_'+site+'_leg'+format(legnum[ll])+'.png'
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    txt.remove()
+ax.set_xlim(time_marcus[0],time_marcus[-1])
 
-# fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus, time_marcus],[lwp_marcus,lwp_sat_marcus,lwp_m_marcus,lwp_m2_marcus], figsize=(10,3),
-#                   xlabel='Time', ylabel=None, title='LWP (g/m$^2$) '+site, legend=['Ship','Satellite','E3SMv1','E3SMv2'], 
-#                   color=['k','gray','r','b'])
-# for ll in range(len(legnum)):
-#     ax.set_xlim(startdate[ll],enddate[ll])
-#     txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
-#     figname = figpath + 'timeseries_LWP_'+site+'_leg'+format(legnum[ll])+'.png'
-#     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     txt.remove()
-# ax.set_xlim(time_marcus[0],time_marcus[-1])
+fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus, time_marcus],[lwp_marcus,lwp_sat_marcus,lwp_m_marcus,lwp_m2_marcus], figsize=(10,3),
+                  xlabel='Time', ylabel=None, title='LWP (g/m$^2$) '+site, legend=['Ship','Satellite','E3SMv1','E3SMv2'], 
+                  color=['k','gray','r','b'])
+for ll in range(len(legnum)):
+    ax.set_xlim(startdate[ll],enddate[ll])
+    txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
+    figname = figpath + 'timeseries_LWP_'+site+'_leg'+format(legnum[ll])+'.png'
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    txt.remove()
+ax.set_xlim(time_marcus[0],time_marcus[-1])
 
-# fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus, time_marcus],[cld_marcus,cld_sat_marcus, cld_m_marcus,cld_m2_marcus], figsize=(10,3),
-#                   xlabel='Time', ylabel=None, title='Cloud Fraction (%) '+site, legend=['Ship','Satellite','E3SMv1','E3SMv2'], 
-#                   color=['k','gray','r','b'])
-# for ll in range(len(legnum)):
-#     ax.set_xlim(startdate[ll],enddate[ll])
-#     txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
-#     figname = figpath + 'timeseries_CF_'+site+'_leg'+format(legnum[ll])+'.png'
-#     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     txt.remove()
-# ax.set_xlim(time_marcus[0],time_marcus[-1])
+fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus, time_marcus],[cld_marcus,cld_sat_marcus, cld_m_marcus,cld_m2_marcus], figsize=(10,3),
+                  xlabel='Time', ylabel=None, title='Cloud Fraction (%) '+site, legend=['Ship','Satellite','E3SMv1','E3SMv2'], 
+                  color=['k','gray','r','b'])
+for ll in range(len(legnum)):
+    ax.set_xlim(startdate[ll],enddate[ll])
+    txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
+    figname = figpath + 'timeseries_CF_'+site+'_leg'+format(legnum[ll])+'.png'
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    txt.remove()
+ax.set_xlim(time_marcus[0],time_marcus[-1])
 
-# fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[nd_sat_marcus, nd_m_marcus,nd_m2_marcus], figsize=(10,3),
-#                   xlabel='Time', ylabel=None, title='Nd (cm$^{-3}$) '+site, legend=['Satellite','E3SMv1','E3SMv2'], 
-#                   color=['gray','r','b'])
-# for ll in range(len(legnum)):
-#     ax.set_xlim(startdate[ll],enddate[ll])
-#     txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
-#     figname = figpath + 'timeseries_Nd_'+site+'_leg'+format(legnum[ll])+'.png'
-#     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     txt.remove()
-# ax.set_xlim(time_marcus[0],time_marcus[-1])
+fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[nd_sat_marcus, nd_m_marcus,nd_m2_marcus], figsize=(10,3),
+                  xlabel='Time', ylabel=None, title='Nd (cm$^{-3}$) '+site, legend=['Satellite','E3SMv1','E3SMv2'], 
+                  color=['gray','r','b'])
+for ll in range(len(legnum)):
+    ax.set_xlim(startdate[ll],enddate[ll])
+    txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
+    figname = figpath + 'timeseries_Nd_'+site+'_leg'+format(legnum[ll])+'.png'
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    txt.remove()
+ax.set_xlim(time_marcus[0],time_marcus[-1])
 
-# fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[reff_sat_marcus,reff_m_marcus,reff_m2_marcus], figsize=(10,3),
-#                   xlabel='Time', ylabel=None, title='Reff ($\mu$m) '+site, legend=['Satellite','E3SMv1','E3SMv2'], 
-#                   color=['gray','r','b'])
-# for ll in range(len(legnum)):
-#     ax.set_xlim(startdate[ll],enddate[ll])
-#     txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
-#     figname = figpath + 'timeseries_Reff_'+site+'_leg'+format(legnum[ll])+'.png'
-#     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     txt.remove()
-# ax.set_xlim(time_marcus[0],time_marcus[-1])
+fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[reff_sat_marcus,reff_m_marcus,reff_m2_marcus], figsize=(10,3),
+                  xlabel='Time', ylabel=None, title='Reff ($\mu$m) '+site, legend=['Satellite','E3SMv1','E3SMv2'], 
+                  color=['gray','r','b'])
+for ll in range(len(legnum)):
+    ax.set_xlim(startdate[ll],enddate[ll])
+    txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
+    figname = figpath + 'timeseries_Reff_'+site+'_leg'+format(legnum[ll])+'.png'
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    txt.remove()
+ax.set_xlim(time_marcus[0],time_marcus[-1])
 
-# fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[cod_sat_marcus,cod_m_marcus,cod_m2_marcus], figsize=(10,3),
-#                   xlabel='Time', ylabel=None, title='Cloud Optical Depth (N/A) '+site, legend=['Satellite','E3SMv1','E3SMv2'], 
-#                   color=['gray','r','b'])
-# for ll in range(len(legnum)):
-#     ax.set_xlim(startdate[ll],enddate[ll])
-#     txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
-#     figname = figpath + 'timeseries_COD_'+site+'_leg'+format(legnum[ll])+'.png'
-#     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     txt.remove()
-# ax.set_xlim(time_marcus[0],time_marcus[-1])
+fig,ax = plot.timeseries([time_marcus, time_marcus, time_marcus],[cod_sat_marcus,cod_m_marcus,cod_m2_marcus], figsize=(10,3),
+                  xlabel='Time', ylabel=None, title='Cloud Optical Depth (N/A) '+site, legend=['Satellite','E3SMv1','E3SMv2'], 
+                  color=['gray','r','b'])
+for ll in range(len(legnum)):
+    ax.set_xlim(startdate[ll],enddate[ll])
+    txt = fig.text(0.1, 0.86, 'trip # '+format(legnum[ll]))
+    figname = figpath + 'timeseries_COD_'+site+'_leg'+format(legnum[ll])+'.png'
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    txt.remove()
+ax.set_xlim(time_marcus[0],time_marcus[-1])
 
-# #%% aerosol size distribution, timeseries and mean
-# fig,ax = plot.timeseries_size([time_marcus, time_marcus, time_marcus],[dmean_marcus, np.arange(1,3001), np.arange(1,3001)], 
-#                           [dN_dlogDp_o.T,dN_dlogDp_m.T,dN_dlogDp_m2.T], figsize=(10,6),
-#                   xlabel='Time', ylabel=None, title='dN/dlog10Dp (cm$^{-3}$) '+site, legend=['Ship','E3SMv1','E3SMv2'])
-# for ll in range(len(legnum)):
-#     for ii in range(len(ax)):
-#         ax[ii].set_xlim(startdate[ll],enddate[ll])
-#     txt = fig.text(0.1, 0.9, 'trip # '+format(legnum[ll]))
-#     figname = figpath + 'timeseries_CNsize_'+site+'_leg'+format(legnum[ll])+'.png'
-#     fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-#     txt.remove()
-# for ii in range(len(ax)):
-#     ax[ii].set_xlim(time_marcus[0],time_marcus[-1])
+#%% aerosol size distribution, timeseries and mean
+fig,ax = plot.timeseries_size([time_marcus, time_marcus, time_marcus],[dmean_marcus, np.arange(1,3001), np.arange(1,3001)], 
+                          [dN_dlogDp_o.T,dN_dlogDp_m.T,dN_dlogDp_m2.T], figsize=(10,6),
+                  xlabel='Time', ylabel=None, title='dN/dlog10Dp (cm$^{-3}$) '+site, legend=['Ship','E3SMv1','E3SMv2'])
+for ll in range(len(legnum)):
+    for ii in range(len(ax)):
+        ax[ii].set_xlim(startdate[ll],enddate[ll])
+    txt = fig.text(0.1, 0.9, 'trip # '+format(legnum[ll]))
+    figname = figpath + 'timeseries_CNsize_'+site+'_leg'+format(legnum[ll])+'.png'
+    fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+    txt.remove()
+for ii in range(len(ax)):
+    ax[ii].set_xlim(time_marcus[0],time_marcus[-1])
 
 # fig,ax = plot.mean_size([dmean_marcus, np.arange(1,3001), np.arange(1,3001)], [pdf_obs, pdf_m, pdf_m2],
 #                         figsize=(7,5), xlimit=None, ylimit=None, xscale='log',yscale='log',
 #                   xlabel='Size (nm)', ylabel=None, title='dN/dlog10Dp (cm$^{-3}$) '+site, legend=['Ship','E3SMv1','E3SMv2'], 
 #                   linestyles=['none','-','-'], marker=['.',None,None], color=['k','r','b'])
-# figname = figpath + 'CNsize_mean_'+site+'.png'
-# fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig,ax = plot.mean_size_witherror([dmean_marcus, np.arange(1,3001), np.arange(1,3001)], 
+                                  [dN_dlogDp_o,dN_dlogDp_m,dN_dlogDp_m2],
+                        figsize=(7,5), xlimit=(10, 3e3), ylimit=(1e-2,1e4),
+                  xlabel='Size (nm)', ylabel=None, title='dN/dlog10Dp (cm$^{-3}$) '+site, 
+                  legend=['Ship','E3SMv1','E3SMv2'], 
+                  linestyles=['none','-','-'], marker=['o',None,None], color=['k','r','b'])
+figname = figpath + 'CNsize_mean_'+site+'.png'
+fig.savefig(figname,dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# #%% histogram
-# w0 = np.ones_like(ccn2_marcus)/sum(~np.isnan(ccn2_marcus.data))
-# w1 = np.ones_like(ccn2_m_marcus)/sum(~np.isnan(ccn2_m_marcus.data))
-# w2 = np.ones_like(ccn2_m2_marcus)/sum(~np.isnan(ccn2_m2_marcus.data))
-# fig,ax = plot.hist([ccn2_marcus,ccn2_m_marcus,ccn2_m2_marcus],  weights=[w0,w1,w2], 
-#                     legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,410,20), 
-#                     title = 'CCN (SS=0.2%) '+site, ylabel='Fraction', xlabel='cm$^{-3}$')
-# fig.savefig(figpath + 'histogram_CCN2_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+#%% histogram
+w0 = np.ones_like(ccn2_marcus)/sum(~np.isnan(ccn2_marcus.data))
+w1 = np.ones_like(ccn2_m_marcus)/sum(~np.isnan(ccn2_m_marcus.data))
+w2 = np.ones_like(ccn2_m2_marcus)/sum(~np.isnan(ccn2_m2_marcus.data))
+fig,ax = plot.hist([ccn2_marcus,ccn2_m_marcus,ccn2_m2_marcus],  weights=[w0,w1,w2], 
+                    legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,410,20), 
+                    title = 'CCN (SS=0.2%) '+site, ylabel='Fraction', xlabel='cm$^{-3}$')
+fig.savefig(figpath + 'histogram_CCN2_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w0 = np.ones_like(cpc10_marcus)/sum(~np.isnan(cpc10_marcus.data))
-# w1 = np.ones_like(ncn10_m_marcus)/sum(~np.isnan(ncn10_m_marcus.data))
-# w2 = np.ones_like(ncn10_m2_marcus)/sum(~np.isnan(ncn10_m2_marcus.data))
-# fig,ax = plot.hist([cpc10_marcus,ncn10_m_marcus,ncn10_m2_marcus],  weights=[w0,w1,w2], 
-#                     legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,1500,50), 
-#                     title = 'CN (>10nm) '+site, ylabel='Fraction', xlabel='cm$^{-3}$')
-# fig.savefig(figpath + 'histogram_CN10_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w0 = np.ones_like(cpc10_marcus)/sum(~np.isnan(cpc10_marcus.data))
+w1 = np.ones_like(ncn10_m_marcus)/sum(~np.isnan(ncn10_m_marcus.data))
+w2 = np.ones_like(ncn10_m2_marcus)/sum(~np.isnan(ncn10_m2_marcus.data))
+fig,ax = plot.hist([cpc10_marcus,ncn10_m_marcus,ncn10_m2_marcus],  weights=[w0,w1,w2], 
+                    legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,1500,50), 
+                    title = 'CN (>10nm) '+site, ylabel='Fraction', xlabel='cm$^{-3}$')
+fig.savefig(figpath + 'histogram_CN10_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w0 = np.ones_like(uhsas100_marcus)/sum(~np.isnan(uhsas100_marcus.data))
-# w1 = np.ones_like(ncn100_m_marcus)/sum(~np.isnan(ncn100_m_marcus.data))
-# w2 = np.ones_like(ncn100_m2_marcus)/sum(~np.isnan(ncn100_m2_marcus.data))
-# fig,ax = plot.hist([uhsas100_marcus,ncn100_m_marcus,ncn100_m2_marcus],  weights=[w0,w1,w2], 
-#                     legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,410,20), 
-#                     title = 'CN (>100nm) '+site, ylabel='Fraction', xlabel='cm$^{-3}$')
-# fig.savefig(figpath + 'histogram_CN100_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w0 = np.ones_like(uhsas100_marcus)/sum(~np.isnan(uhsas100_marcus.data))
+w1 = np.ones_like(ncn100_m_marcus)/sum(~np.isnan(ncn100_m_marcus.data))
+w2 = np.ones_like(ncn100_m2_marcus)/sum(~np.isnan(ncn100_m2_marcus.data))
+fig,ax = plot.hist([uhsas100_marcus,ncn100_m_marcus,ncn100_m2_marcus],  weights=[w0,w1,w2], 
+                    legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,410,20), 
+                    title = 'CN (>100nm) '+site, ylabel='Fraction', xlabel='cm$^{-3}$')
+fig.savefig(figpath + 'histogram_CN100_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w0 = np.ones_like(lwp_marcus)/sum(~np.isnan(lwp_marcus.data))
-# w00 = np.ones_like(lwp_sat_marcus)/sum(~np.isnan(lwp_sat_marcus.data))
-# w1 = np.ones_like(lwp_m_marcus)/sum(~np.isnan(lwp_m_marcus.data))
-# w2 = np.ones_like(lwp_m2_marcus)/sum(~np.isnan(lwp_m2_marcus.data))
-# fig,ax = plot.hist([lwp_marcus,lwp_sat_marcus,lwp_m_marcus,lwp_m2_marcus],  weights=[w0,w00,w1,w2], 
-#                     legend = ['Ship','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'], bins=np.arange(10,510,25), 
-#                     title = 'LWP '+site, ylabel='Fraction', xlabel='g/m$^2$')
-# fig.savefig(figpath + 'histogram_LWP_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w0 = np.ones_like(lwp_marcus)/sum(~np.isnan(lwp_marcus.data))
+w00 = np.ones_like(lwp_sat_marcus)/sum(~np.isnan(lwp_sat_marcus.data))
+w1 = np.ones_like(lwp_m_marcus)/sum(~np.isnan(lwp_m_marcus.data))
+w2 = np.ones_like(lwp_m2_marcus)/sum(~np.isnan(lwp_m2_marcus.data))
+fig,ax = plot.hist([lwp_marcus,lwp_sat_marcus,lwp_m_marcus,lwp_m2_marcus],  weights=[w0,w00,w1,w2], 
+                    legend = ['Ship','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'], bins=np.arange(10,510,25), 
+                    title = 'LWP '+site, ylabel='Fraction', xlabel='g/m$^2$')
+fig.savefig(figpath + 'histogram_LWP_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w0 = np.ones_like(cld_marcus)/sum(~np.isnan(cld_marcus.data))
-# w00 = np.ones_like(cld_sat_marcus)/sum(~np.isnan(cld_sat_marcus.data))
-# w1 = np.ones_like(cld_m_marcus)/sum(~np.isnan(cld_m_marcus.data))
-# w2 = np.ones_like(cld_m2_marcus)/sum(~np.isnan(cld_m2_marcus.data))
-# fig,ax = plot.hist([cld_marcus,cld_sat_marcus, cld_m_marcus,cld_m2_marcus],  weights=[w0,w00,w1,w2], 
-#                     legend = ['Ship','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],  bins=np.arange(0,101,5), 
-#                     title = 'Cloud Fraction '+site, ylabel='Fraction', xlabel='%')
-# fig.savefig(figpath + 'histogram_CF_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w0 = np.ones_like(cld_marcus)/sum(~np.isnan(cld_marcus.data))
+w00 = np.ones_like(cld_sat_marcus)/sum(~np.isnan(cld_sat_marcus.data))
+w1 = np.ones_like(cld_m_marcus)/sum(~np.isnan(cld_m_marcus.data))
+w2 = np.ones_like(cld_m2_marcus)/sum(~np.isnan(cld_m2_marcus.data))
+fig,ax = plot.hist([cld_marcus,cld_sat_marcus, cld_m_marcus,cld_m2_marcus],  weights=[w0,w00,w1,w2], 
+                    legend = ['Ship','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],  bins=np.arange(0,101,5), 
+                    title = 'Cloud Fraction '+site, ylabel='Fraction', xlabel='%')
+fig.savefig(figpath + 'histogram_CF_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w00 = np.ones_like(nd_sat_marcus)/sum(~np.isnan(nd_sat_marcus.data))
-# w1 = np.ones_like(nd_m_marcus)/sum(~np.isnan(nd_m_marcus.data))
-# w2 = np.ones_like(nd_m2_marcus)/sum(~np.isnan(nd_m2_marcus.data))
-# fig,ax = plot.hist([ nd_sat_marcus, nd_m_marcus,nd_m2_marcus],  weights=[w00,w1,w2], 
-#                     legend = ['Satellite','E3SMv1','E3SMv2'], color=['gray','r','b'], bins=np.arange(10,160,5), 
-#                     title = 'Nd '+site, ylabel='Fraction', xlabel='cm$^{-3}$')
-# fig.savefig(figpath + 'histogram_Nd_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w00 = np.ones_like(nd_sat_marcus)/sum(~np.isnan(nd_sat_marcus.data))
+w1 = np.ones_like(nd_m_marcus)/sum(~np.isnan(nd_m_marcus.data))
+w2 = np.ones_like(nd_m2_marcus)/sum(~np.isnan(nd_m2_marcus.data))
+fig,ax = plot.hist([ nd_sat_marcus, nd_m_marcus,nd_m2_marcus],  weights=[w00,w1,w2], 
+                    legend = ['Satellite','E3SMv1','E3SMv2'], color=['gray','r','b'], bins=np.arange(10,160,5), 
+                    title = 'Nd '+site, ylabel='Fraction', xlabel='cm$^{-3}$')
+fig.savefig(figpath + 'histogram_Nd_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w00 = np.ones_like(reff_sat_marcus)/sum(~np.isnan(reff_sat_marcus.data))
-# w1 = np.ones_like(reff_m_marcus)/sum(~np.isnan(reff_m_marcus.data))
-# w2 = np.ones_like(reff_m2_marcus)/sum(~np.isnan(reff_m2_marcus.data))
-# fig,ax = plot.hist([ reff_sat_marcus,reff_m_marcus,reff_m2_marcus], weights=[w00,w1,w2], 
-#                     legend = ['Satellite','E3SMv1','E3SMv2'], color=['gray','r','b'], bins=np.arange(4,31,1), 
-#                     title = 'Reff '+site, ylabel='Fraction', xlabel='$\mu$m')
-# fig.savefig(figpath + 'histogram_Reff_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w00 = np.ones_like(reff_sat_marcus)/sum(~np.isnan(reff_sat_marcus.data))
+w1 = np.ones_like(reff_m_marcus)/sum(~np.isnan(reff_m_marcus.data))
+w2 = np.ones_like(reff_m2_marcus)/sum(~np.isnan(reff_m2_marcus.data))
+fig,ax = plot.hist([ reff_sat_marcus,reff_m_marcus,reff_m2_marcus], weights=[w00,w1,w2], 
+                    legend = ['Satellite','E3SMv1','E3SMv2'], color=['gray','r','b'], bins=np.arange(4,31,1), 
+                    title = 'Reff '+site, ylabel='Fraction', xlabel='$\mu$m')
+fig.savefig(figpath + 'histogram_Reff_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# w0 = np.ones_like(cod_sat_marcus)/sum(~np.isnan(cod_sat_marcus.data))
-# w1 = np.ones_like(cod_m_marcus)/sum(~np.isnan(cod_m_marcus.data))
-# w2 = np.ones_like(cod_m2_marcus)/sum(~np.isnan(cod_m2_marcus.data))
-# fig,ax = plot.hist([cod_sat_marcus,cod_m_marcus,cod_m2_marcus],  weights=[w0,w1,w2], 
-#                     legend = ['Satellite','E3SMv1','E3SMv2'], color=['gray','r','b'], bins=np.arange(0,61,3), 
-#                     title = 'Cloud Optical Depth '+site, ylabel='Fraction', xlabel='N/A')
-# fig.savefig(figpath + 'histogram_COD_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+w0 = np.ones_like(cod_sat_marcus)/sum(~np.isnan(cod_sat_marcus.data))
+w1 = np.ones_like(cod_m_marcus)/sum(~np.isnan(cod_m_marcus.data))
+w2 = np.ones_like(cod_m2_marcus)/sum(~np.isnan(cod_m2_marcus.data))
+fig,ax = plot.hist([cod_sat_marcus,cod_m_marcus,cod_m2_marcus],  weights=[w0,w1,w2], 
+                    legend = ['Satellite','E3SMv1','E3SMv2'], color=['gray','r','b'], bins=np.arange(0,61,3), 
+                    title = 'Cloud Optical Depth '+site, ylabel='Fraction', xlabel='N/A')
+fig.savefig(figpath + 'histogram_COD_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# #%% sensitivity to different LWP threshold
-# w0 = np.ones_like(cld_5)/sum(~np.isnan(cld_5.data))
-# w1 = np.ones_like(cld_m_marcus)/sum(~np.isnan(cld_m_marcus.data))
-# w2 = np.ones_like(cld_m2_marcus)/sum(~np.isnan(cld_m2_marcus.data))
-# fig,ax = plot.hist([cld_5,cld_m_marcus,cld_m2_marcus],  weights=[w0,w1,w2], 
-#                     legend = ['Ship (thres_lwp=5)','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,101,5), 
-#                     title = 'Cloud Fraction '+site, ylabel='Fraction', xlabel='%')
+#%% sensitivity to different LWP threshold
+w0 = np.ones_like(cld_5)/sum(~np.isnan(cld_5.data))
+w1 = np.ones_like(cld_m_marcus)/sum(~np.isnan(cld_m_marcus.data))
+w2 = np.ones_like(cld_m2_marcus)/sum(~np.isnan(cld_m2_marcus.data))
+fig,ax = plot.hist([cld_5,cld_m_marcus,cld_m2_marcus],  weights=[w0,w1,w2], 
+                    legend = ['Ship (thres_lwp=5)','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,101,5), 
+                    title = 'Cloud Fraction '+site, ylabel='Fraction', xlabel='%')
 
-# w0 = np.ones_like(cld_10)/sum(~np.isnan(cld_10.data))
-# w1 = np.ones_like(cld_m_marcus)/sum(~np.isnan(cld_m_marcus.data))
-# w2 = np.ones_like(cld_m2_marcus)/sum(~np.isnan(cld_m2_marcus.data))
-# fig,ax = plot.hist([cld_10,cld_m_marcus,cld_m2_marcus],  weights=[w0,w1,w2], 
-#                     legend = ['Ship (thres_lwp=10)','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,101,5), 
-#                     title = 'Cloud Fraction '+site, ylabel='Fraction', xlabel='%')
+w0 = np.ones_like(cld_10)/sum(~np.isnan(cld_10.data))
+w1 = np.ones_like(cld_m_marcus)/sum(~np.isnan(cld_m_marcus.data))
+w2 = np.ones_like(cld_m2_marcus)/sum(~np.isnan(cld_m2_marcus.data))
+fig,ax = plot.hist([cld_10,cld_m_marcus,cld_m2_marcus],  weights=[w0,w1,w2], 
+                    legend = ['Ship (thres_lwp=10)','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,101,5), 
+                    title = 'Cloud Fraction '+site, ylabel='Fraction', xlabel='%')
 
-# w0 = np.ones_like(cld_20)/sum(~np.isnan(cld_20.data))
-# w1 = np.ones_like(cld_m_marcus)/sum(~np.isnan(cld_m_marcus.data))
-# w2 = np.ones_like(cld_m2_marcus)/sum(~np.isnan(cld_m2_marcus.data))
-# fig,ax = plot.hist([cld_20,cld_m_marcus,cld_m2_marcus],  weights=[w0,w1,w2], 
-#                     legend = ['Ship (thres_lwp=20)','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,101,5), 
-#                     title = 'Cloud Fraction '+site, ylabel='Fraction', xlabel='%')
+w0 = np.ones_like(cld_20)/sum(~np.isnan(cld_20.data))
+w1 = np.ones_like(cld_m_marcus)/sum(~np.isnan(cld_m_marcus.data))
+w2 = np.ones_like(cld_m2_marcus)/sum(~np.isnan(cld_m2_marcus.data))
+fig,ax = plot.hist([cld_20,cld_m_marcus,cld_m2_marcus],  weights=[w0,w1,w2], 
+                    legend = ['Ship (thres_lwp=20)','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,101,5), 
+                    title = 'Cloud Fraction '+site, ylabel='Fraction', xlabel='%')
 
-# w0 = np.ones_like(cld_30)/sum(~np.isnan(cld_30.data))
-# w1 = np.ones_like(cld_m_marcus)/sum(~np.isnan(cld_m_marcus.data))
-# w2 = np.ones_like(cld_m2_marcus)/sum(~np.isnan(cld_m2_marcus.data))
-# fig,ax = plot.hist([cld_30,cld_m_marcus,cld_m2_marcus],  weights=[w0,w1,w2], 
-#                     legend = ['Ship (thres_lwp=30)','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,101,5), 
-#                     title = 'Cloud Fraction '+site, ylabel='Fraction', xlabel='%')
+w0 = np.ones_like(cld_30)/sum(~np.isnan(cld_30.data))
+w1 = np.ones_like(cld_m_marcus)/sum(~np.isnan(cld_m_marcus.data))
+w2 = np.ones_like(cld_m2_marcus)/sum(~np.isnan(cld_m2_marcus.data))
+fig,ax = plot.hist([cld_30,cld_m_marcus,cld_m2_marcus],  weights=[w0,w1,w2], 
+                    legend = ['Ship (thres_lwp=30)','E3SMv1','E3SMv2'], color=['k','r','b'], bins=np.arange(0,101,5), 
+                    title = 'Cloud Fraction '+site, ylabel='Fraction', xlabel='%')
 
-# #%% precentile with latitude
-# latbin = np.arange(-65.5,-42,1)
+#%% precentile with latitude
+latbin = np.arange(-65.5,-42,1)
 
-# plot.percentile_lat([T_marcus,T_m_marcus,T_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
-#                     figsize=(8,2), xlimit=None, #ylimit=(0,3000), 
-#                   xlabel='Latitude', ylabel=None, title = 'Temperature (C) '+site,
-#                   legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'])
-# fig.savefig(figpath + 'percentile_lat_T_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+plot.percentile_lat([T_marcus,T_m_marcus,T_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
+                    figsize=(10,3), xlimit=None, #ylimit=(0,3000), 
+                  xlabel='Latitude', ylabel=None, title = 'Temperature (C) '+site,
+                  legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'])
+fig.savefig(figpath + 'percentile_lat_T_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# plot.percentile_lat([RH_marcus,RH_m_marcus,RH_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
-#                     figsize=(8,2), xlimit=None, #ylimit=(0,3000), 
-#                   xlabel='Latitude', ylabel=None, title = 'RH (%) '+site,
-#                   legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'])
-# fig.savefig(figpath + 'percentile_lat_RH_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+plot.percentile_lat([RH_marcus,RH_m_marcus,RH_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
+                    figsize=(10,3), xlimit=None, #ylimit=(0,3000), 
+                  xlabel='Latitude', ylabel=None, title = 'RH (%) '+site,
+                  legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'])
+fig.savefig(figpath + 'percentile_lat_RH_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# plot.percentile_lat([Ps_marcus,Ps_m_marcus,Ps_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
-#                     figsize=(8,2), xlimit=None, #ylimit=(900,1030), 
-#                   xlabel='Latitude', ylabel=None, title = 'Ps (hPa) '+site,
-#                   legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'])
-# fig.savefig(figpath + 'percentile_lat_Ps_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+plot.percentile_lat([Ps_marcus,Ps_m_marcus,Ps_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
+                    figsize=(10,3), xlimit=None, #ylimit=(900,1030), 
+                  xlabel='Latitude', ylabel=None, title = 'Ps (hPa) '+site,
+                  legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'])
+fig.savefig(figpath + 'percentile_lat_Ps_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# plot.percentile_lat([cpc10_marcus,ncn10_m_marcus,ncn10_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
-#                     figsize=(8,2), xlimit=None, ylimit=(0,2000), 
-#                   xlabel='Latitude', ylabel=None, title = 'CN (>10nm) (cm$^{-3}$) '+site,
-#                   legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'])
-# fig.savefig(figpath + 'percentile_lat_CN10_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+plot.percentile_lat([cpc10_marcus,ncn10_m_marcus,ncn10_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
+                    figsize=(10,3), xlimit=None, ylimit=(0,2000), 
+                  xlabel='Latitude', ylabel=None, title = 'CN (>10nm) (cm$^{-3}$) '+site,
+                  legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'])
+fig.savefig(figpath + 'percentile_lat_CN10_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# plot.percentile_lat([ccn2_marcus,ccn2_m_marcus,ccn2_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
-#                     figsize=(8,2), xlimit=None, ylimit=(0,400), 
-#                   xlabel='Latitude', ylabel=None, title = 'CCN (SS=0.2%) (cm$^{-3}$) '+site,
-#                   legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'])
-# fig.savefig(figpath + 'percentile_lat_CCN2_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+plot.percentile_lat([ccn2_marcus,ccn2_m_marcus,ccn2_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
+                    figsize=(10,3), xlimit=None, ylimit=(0,400), 
+                  xlabel='Latitude', ylabel=None, title = 'CCN (SS=0.2%) (cm$^{-3}$) '+site,
+                  legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'])
+fig.savefig(figpath + 'percentile_lat_CCN2_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# plot.percentile_lat([uhsas100_marcus,ncn100_m_marcus,ncn100_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
-#                     figsize=(8,2), xlimit=None, ylimit=None, 
-#                   xlabel='Latitude', ylabel=None, title = 'CN (>100nm) (cm$^{-3}$) '+site,
-#                   legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'])
-# fig.savefig(figpath + 'percentile_lat_CN100_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+plot.percentile_lat([uhsas100_marcus,ncn100_m_marcus,ncn100_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
+                    figsize=(10,3), xlimit=None, ylimit=None, 
+                  xlabel='Latitude', ylabel=None, title = 'CN (>100nm) (cm$^{-3}$) '+site,
+                  legend = ['Ship','E3SMv1','E3SMv2'], color=['k','r','b'])
+fig.savefig(figpath + 'percentile_lat_CN100_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# plot.percentile_lat([lwp_marcus,lwp_sat_marcus,lwp_m_marcus,lwp_m2_marcus], [lat_marcus,lat_marcus,lat_marcus,lat_marcus], latbin, 
-#                     figsize=(8,2), xlimit=None, ylimit=None, 
-#                   xlabel='Latitude', ylabel=None, title = 'LWP (g/m$^2$) '+site,
-#                   legend = ['Ship','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'])
-# fig.savefig(figpath + 'percentile_lat_LWP_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+plot.percentile_lat([lwp_marcus,lwp_sat_marcus,lwp_m_marcus,lwp_m2_marcus], [lat_marcus,lat_marcus,lat_marcus,lat_marcus], latbin, 
+                    figsize=(10,3), xlimit=None, ylimit=None, 
+                  xlabel='Latitude', ylabel=None, title = 'LWP (g/m$^2$) '+site,
+                  legend = ['Ship','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'])
+fig.savefig(figpath + 'percentile_lat_LWP_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# plot.percentile_lat([cld_marcus,cld_sat_marcus,cld_m_marcus,cld_m2_marcus], [lat_marcus,lat_marcus,lat_marcus,lat_marcus], latbin, 
-#                     figsize=(8,2), xlimit=None, ylimit=None, 
-#                   xlabel='Latitude', ylabel=None, title = 'Cloud Fraction (%) '+site,
-#                   legend = ['Ship','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'])
-# fig.savefig(figpath + 'percentile_lat_CF_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+plot.percentile_lat([cld_marcus,cld_sat_marcus,cld_m_marcus,cld_m2_marcus], [lat_marcus,lat_marcus,lat_marcus,lat_marcus], latbin, 
+                    figsize=(10,3), xlimit=None, ylimit=None, 
+                  xlabel='Latitude', ylabel=None, title = 'Cloud Fraction (%) '+site,
+                  legend = ['Ship','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'])
+fig.savefig(figpath + 'percentile_lat_CF_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# plot.percentile_lat([nd_sat_marcus,nd_m_marcus,nd_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
-#                     figsize=(8,2), xlimit=None, ylimit=(0,200), 
-#                   xlabel='Latitude', ylabel=None, title = 'Nd (cm$^{-3}$) '+site,
-#                   legend = ['Satellite','E3SMv1','E3SMv2'], color=['gray','r','b'])
-# fig.savefig(figpath + 'percentile_lat_Nd_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+plot.percentile_lat([nd_sat_marcus,nd_m_marcus,nd_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
+                    figsize=(10,3), xlimit=None, ylimit=(0,200), 
+                  xlabel='Latitude', ylabel=None, title = 'Nd (cm$^{-3}$) '+site,
+                  legend = ['Satellite','E3SMv1','E3SMv2'], color=['gray','r','b'])
+fig.savefig(figpath + 'percentile_lat_Nd_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# plot.percentile_lat([reff_sat_marcus,reff_m_marcus,reff_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
-#                     figsize=(8,2), xlimit=None, ylimit=None, 
-#                   xlabel='Latitude', ylabel=None, title = 'Cloud Effective Radius ($\mu$m) '+site,
-#                   legend = ['Satellite','E3SMv1','E3SMv2'], color=['gray','r','b'])
-# fig.savefig(figpath + 'percentile_lat_Reff_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+plot.percentile_lat([reff_sat_marcus,reff_m_marcus,reff_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
+                    figsize=(10,3), xlimit=None, ylimit=None, 
+                  xlabel='Latitude', ylabel=None, title = 'Cloud Effective Radius ($\mu$m) '+site,
+                  legend = ['Satellite','E3SMv1','E3SMv2'], color=['gray','r','b'])
+fig.savefig(figpath + 'percentile_lat_Reff_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# plot.percentile_lat([cod_sat_marcus,cod_m_marcus,cod_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
-#                     figsize=(8,2), xlimit=None, ylimit=None, 
-#                   xlabel='Latitude', ylabel=None, title = 'Cloud Optical Depth (N/A) '+site,
-#                   legend = ['Satellite','E3SMv1','E3SMv2'], color=['gray','r','b'])
-# fig.savefig(figpath + 'percentile_lat_COD_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+plot.percentile_lat([cod_sat_marcus,cod_m_marcus,cod_m2_marcus], [lat_marcus,lat_marcus,lat_marcus], latbin, 
+                    figsize=(10,3), xlimit=None, ylimit=None, 
+                  xlabel='Latitude', ylabel=None, title = 'Cloud Optical Depth (N/A) '+site,
+                  legend = ['Satellite','E3SMv1','E3SMv2'], color=['gray','r','b'])
+fig.savefig(figpath + 'percentile_lat_COD_'+site+'.png', dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# #%% mean statistics
+#%% mean statistics
 
 # calc.bias_corrcoef_RMSE(T_m_marcus, T_marcus, label1='E3SMv1', label2='Ship',
 #                         outfile=figpath+'statistics_T_E3SMv1vsShip_'+site+'.txt')
@@ -715,25 +721,25 @@ fig,ax = plot.scatter([nd_sat_marcus.data,nd_m_marcus.data,nd_m2_marcus.data],
                       xlimit=(0,300), ylimit=(0,350),
                     xlabel='Nd (cm$^{-3}$)', ylabel='Surface CCN (SS=0.2%) (cm$^{-3}$)', title=['Satellite','E3SMv1','E3SMv2'],
                 linear_fit=True, intercept=True)
-# fig.savefig(figpath+'scatter_Nd_CCN2_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig.savefig(figpath+'scatter_Nd_CCN2_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 fig,ax = plot.scatter([uhsas100_marcus.data,ncn100_m_marcus.data,ncn100_m2_marcus.data], 
                       [ccn2_marcus.data,ccn2_m_marcus.data,ccn2_m2_marcus.data],
                       xlimit=(0,500), ylimit=(0,500),
                     xlabel='Surface CN (>100nm) (cm$^{-3}$)', ylabel='Surface CCN (SS=0.2%) (cm$^{-3}$)', title=['Ship','E3SMv1','E3SMv2'],
                 linear_fit=True, intercept=True)
-# fig.savefig(figpath+'scatter_CN100_CCN2_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig.savefig(figpath+'scatter_CN100_CCN2_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 #%% heatmaps
 
 # xedges=np.exp(np.arange(np.log(10),6.5,0.5))
 # yedges=np.exp(np.arange(np.log(10),6.5,0.5))
 fig,ax = plot.heatmap([nd_sat_marcus.data,nd_m_marcus.data,nd_m2_marcus.data],
-                      [lwp_sat_marcus,lwp_m_marcus,lwp_m2_marcus],
-                      [albedo_marcus,albedo_m_marcus,albedo_m2_marcus],vmax=60,
-                    xedges=np.arange(0,300,20), yedges=np.arange(10,300,20),
+                      [lwp_sat_marcus.data,lwp_m_marcus.data,lwp_m2_marcus.data],
+                      [albedo_marcus.data,albedo_m_marcus.data,albedo_m2_marcus.data],vmax=60,
+                    xedges=np.arange(0,200,20), yedges=np.arange(10,400,40),
                     # xedges=xedges, yedges=yedges, 
                     xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', zlabel='TOA Albedo (%)',
                     title=['Satellite','E3SMv1','E3SMv2'])
-# fig.savefig(figpath+'heatmap_CCN2_LWP_Nd_sfc_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig.savefig(figpath+'heatmap_CCN2_LWP_Nd_sfc_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 

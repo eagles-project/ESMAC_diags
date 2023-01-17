@@ -102,8 +102,8 @@ fig,ax = plot.percentiles([reff_sfc, reff_sat, reff_m2],
                     xlabel=['Reff ($\mu$m)', 'LWP (x10 g/m$^2$)', 'COD (NA)', 'Nd (x10 cm$^{-3}$)'], 
                     color=['k','b','r'], legend=['SFC','VISST','E3SMv1'])
 
-fig.savefig(figpath+'percentiles_Reff_LWP_COD_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# fig.savefig(figpath+'percentiles_Reff_LWP_COD_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# show figures in interactive commandline screen
-import matplotlib.pyplot as plt
-plt.show()   
+# # show figures in interactive commandline screen
+# import matplotlib.pyplot as plt
+# plt.show()   

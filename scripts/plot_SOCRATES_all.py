@@ -249,7 +249,7 @@ fig,ax = plot.percentile_z([reff, reff_m, reff_m2], [height,height,height],
                       xlabel='$\mu$m', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
 fig.savefig(figpath+'percentile_z_Reff_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# #%% calculate statisticscalc.mean_std_percentiles([ccn5,ccn5_m,ccn5_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_ccn5_'+site+'.txt')
+#%% calculate statistics
 # calc.mean_std_percentiles([ccn2,ccn2_m,ccn2_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_CCN2_'+site+'.txt')
 # calc.mean_std_percentiles([cpc10,ncn10_m,ncn10_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_CPC10_'+site+'.txt')
 # calc.mean_std_percentiles([uhsas100, ncn100_m, ncn100_m2],legend=['Obs','E3SMv1','E3SMv2'], outfile=figpath+'statistics_1var_CN100_'+site+'.txt')
@@ -287,25 +287,31 @@ fig.savefig(figpath+'percentile_z_Reff_'+site+'.png',dpi=fig.dpi,bbox_inches='ti
 # calc.bias_corrcoef_RMSE(reff, reff_m2,label1='Obs',label2='E3SMv2', 
 #                         outfile=figpath+'statistics_Reff_E3SMv2vsOBS_'+site+'.txt')
 
-# #%% joint histogram
-# fig,ax = plot.jointhist([ccn2.data, ccn2_m.data, ccn2_m2.data], [nd_all.data, nd_m.data, nd_m2.data],
-#                     xedges=np.arange(0,200,20), yedges=np.arange(0,200,20), 
-#                     normalize_x=True, #xlimit=(0,1000), ylimit=(0,1000),
-#                     xlabel=['0.2%CCN (cm$^{-3}$)','0.2%CCN (cm$^{-3}$)','0.2%CCN (cm$^{-3}$)'], 
-#                     ylabel='Nd (cm$^{-3}$)', title=['Obs','E3SMv1','E3SMv2'], )
-# fig.savefig(figpath+'jointhist_Nd_CCN_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+#%% joint histogram
+fig,ax = plot.jointhist([uhsas100, ncn100_m, ncn100_m2], [ccn2.data, ccn2_m.data, ccn2_m2.data], 
+                    xedges=np.arange(0,300,30), yedges=np.arange(0,300,30), 
+                    normalize_x=True, #xlimit=(0,1000), ylimit=(0,1000),
+                    xlabel=['CN (>100nm) (cm$^{-3}$)','CN (>100nm) (cm$^{-3}$)','CN (>100nm) (cm$^{-3}$)'], 
+                    ylabel='0.2%CCN (cm$^{-3}$)', title=['Obs','E3SMv1','E3SMv2'], )
+fig.savefig(figpath+'jointhist_CN_CCN_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+fig,ax = plot.jointhist([ccn2.data, ccn2_m.data, ccn2_m2.data], [nd_all.data, nd_m.data, nd_m2.data],
+                    xedges=np.arange(0,200,20), yedges=np.arange(0,200,20), 
+                    normalize_x=True, #xlimit=(0,1000), ylimit=(0,1000),
+                    xlabel=['0.2%CCN (cm$^{-3}$)','0.2%CCN (cm$^{-3}$)','0.2%CCN (cm$^{-3}$)'], 
+                    ylabel='Nd (cm$^{-3}$)', title=['Obs','E3SMv1','E3SMv2'], )
+fig.savefig(figpath+'jointhist_Nd_CCN_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+#%% scatter
+fig,ax = plot.scatter([ccn2.data, ccn2_m.data, ccn2_m2.data], [nd_all.data, nd_m.data, nd_m2.data],
+                      title=['Obs','E3SMv1','E3SMv2'], xlimit=(0,300), ylimit=(0,300),
+                    xlabel='0.2%CCN (cm$^{-3}$)', ylabel='Nd (cm$^{-3}$)', 
+                    linear_fit=True, intercept=True)
+fig.savefig(figpath+'scatter_CCN_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 
-# #%% scatter
-# fig,ax = plot.scatter([ccn2.data, ccn2_m.data, ccn2_m2.data], [nd_all.data, nd_m.data, nd_m2.data],
-#                       title=['Obs','E3SMv1','E3SMv2'], xlimit=(0,300), ylimit=(0,300),
-#                     xlabel='0.2%CCN (cm$^{-3}$)', ylabel='Nd (cm$^{-3}$)', 
-#                     linear_fit=True, intercept=True)
-# fig.savefig(figpath+'scatter_CCN_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-
-# fig,ax = plot.scatter([nd_all.data, nd_m.data, nd_m2.data], [reff.data, reff_m.data, reff_m2.data], 
-#                       title=['Obs','E3SMv1','E3SMv2'], xlimit=(0,300), ylimit=(0,50),
-#                     xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m)', 
-#                     linear_fit=False, intercept=True)
-# fig.savefig(figpath+'scatter_Reff_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig,ax = plot.scatter([nd_all.data, nd_m.data, nd_m2.data], [reff.data, reff_m.data, reff_m2.data], 
+                      title=['Obs','E3SMv1','E3SMv2'], xlimit=(0,300), ylimit=(0,50),
+                    xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m)', 
+                    linear_fit=True, intercept=True)
+fig.savefig(figpath+'scatter_Reff_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
