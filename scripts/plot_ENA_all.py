@@ -259,17 +259,17 @@ nd_wu[nd_wu<10] = np.nan
 nd_sat[nd_sat<10] = np.nan
 nd_m[nd_m<10] = np.nan
 nd_m2[nd_m2<10] = np.nan
-ndrop[ndrop>500] = np.nan
-nd_sat[nd_sat>500] = np.nan
-nd_wu[nd_wu>500] = np.nan
-nd_m[nd_m>500] = np.nan
-nd_m2[nd_m2>500] = np.nan
+ndrop[ndrop>800] = np.nan
+nd_sat[nd_sat>800] = np.nan
+nd_wu[nd_wu>800] = np.nan
+nd_m[nd_m>800] = np.nan
+nd_m2[nd_m2>800] = np.nan
 
-lwp_armbe[lwp_armbe<20] = np.nan
-lwp_mfrsr[lwp_mfrsr<20] = np.nan
-lwp_sat[lwp_sat<20] = np.nan
-lwp_m[lwp_m<20] = np.nan
-lwp_m2[lwp_m2<20] = np.nan
+lwp_armbe[lwp_armbe<10] = np.nan
+lwp_mfrsr[lwp_mfrsr<10] = np.nan
+lwp_sat[lwp_sat<10] = np.nan
+lwp_m[lwp_m<10] = np.nan
+lwp_m2[lwp_m2<10] = np.nan
 
 cod[cod<2] = np.nan
 cod_sat[cod_sat<2] = np.nan
@@ -566,83 +566,83 @@ fig,ax = plot.mean_size_witherror([size_uhsas,np.arange(1,3001),np.arange(1,3001
 fig.savefig(figpath+'mean_aerosol_size_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 #%% calculate statistics
-calc.mean_std_percentiles([org,org_m,org_m2],legend=['Obs','E3SMv1','E3SMv2'], 
-                          outfile=figpath+'statistics_1var_ORG_'+site+'.txt')
-calc.mean_std_percentiles([so4, so4_m, so4_m2],legend=['Obs','E3SMv1','E3SMv2'], 
-                          outfile=figpath+'statistics_1var_SO4_'+site+'.txt')
-calc.mean_std_percentiles([ccn2,ccn2_m,ccn2_m2],legend=['Obs','E3SMv1','E3SMv2'], 
-                          outfile=figpath+'statistics_1var_CCN2_'+site+'.txt')
-calc.mean_std_percentiles([cpc10_withmask,ncn10_m,ncn10_m2],legend=['CPC_masked','E3SMv1','E3SMv2'], 
-                          outfile=figpath+'statistics_1var_CPC10_'+site+'.txt')
-calc.mean_std_percentiles([uhsas100, ncn100_m, ncn100_m2],legend=['UHSAS','E3SMv1','E3SMv2'], 
-                          outfile=figpath+'statistics_1var_CN100_'+site+'.txt')
-calc.mean_std_percentiles([cod,cod_sat, cod_m, cod_m2],legend=['MFRSR','Satellite','E3SMv1','E3SMv2'],
-                          outfile=figpath+'statistics_1var_COD_'+site+'.txt')
-calc.mean_std_percentiles([reff,reff_wu,reff_sat,reff_m,reff_m2],
-                          legend=['MFRSR','Wu_etal','Satellite','E3SMv1','E3SMv2'],
-                          outfile=figpath+'statistics_1var_Reff_'+site+'.txt')
-calc.mean_std_percentiles([lwp_mfrsr,lwp_armbe,lwp_sat,lwp_m,lwp_m2],
-                          legend=['MFRSR','ARMBE','Satellite','E3SMv1','E3SMv2'],
-                          outfile=figpath+'statistics_1var_LWP_'+site+'.txt')
-calc.mean_std_percentiles([ndrop,nd_wu,nd_sat,nd_m,nd_m2],
-                          legend=['Ndrop','Wu_etal','Nd_satellite','E3SMv1','E3SMv2'],
-                          outfile=figpath+'statistics_1var_Nd_'+site+'.txt')
-calc.mean_std_percentiles([precip,precip_m,precip_m2],legend=['Obs','E3SMv1','E3SMv2'],
-                          outfile=figpath+'statistics_1var_Precip_'+site+'.txt')
-calc.mean_std_percentiles([cld_arscl,cld_visst,cld_tsi,cld_m,cld_m2],
-                          legend=['ARSCL','Satellite','TSI','E3SMv1','E3SMv2'],
-                          outfile=figpath+'statistics_1var_totcld_'+site+'.txt')
+# calc.mean_std_percentiles([org,org_m,org_m2],legend=['Obs','E3SMv1','E3SMv2'], 
+#                           outfile=figpath+'statistics_1var_ORG_'+site+'.txt')
+# calc.mean_std_percentiles([so4, so4_m, so4_m2],legend=['Obs','E3SMv1','E3SMv2'], 
+#                           outfile=figpath+'statistics_1var_SO4_'+site+'.txt')
+# calc.mean_std_percentiles([ccn2,ccn2_m,ccn2_m2],legend=['Obs','E3SMv1','E3SMv2'], 
+#                           outfile=figpath+'statistics_1var_CCN2_'+site+'.txt')
+# calc.mean_std_percentiles([cpc10_withmask,ncn10_m,ncn10_m2],legend=['CPC_masked','E3SMv1','E3SMv2'], 
+#                           outfile=figpath+'statistics_1var_CPC10_'+site+'.txt')
+# calc.mean_std_percentiles([uhsas100, ncn100_m, ncn100_m2],legend=['UHSAS','E3SMv1','E3SMv2'], 
+#                           outfile=figpath+'statistics_1var_CN100_'+site+'.txt')
+# calc.mean_std_percentiles([cod,cod_sat, cod_m, cod_m2],legend=['MFRSR','Satellite','E3SMv1','E3SMv2'],
+#                           outfile=figpath+'statistics_1var_COD_'+site+'.txt')
+# calc.mean_std_percentiles([reff,reff_wu,reff_sat,reff_m,reff_m2],
+#                           legend=['MFRSR','Wu_etal','Satellite','E3SMv1','E3SMv2'],
+#                           outfile=figpath+'statistics_1var_Reff_'+site+'.txt')
+# calc.mean_std_percentiles([lwp_mfrsr,lwp_armbe,lwp_sat,lwp_m,lwp_m2],
+#                           legend=['MFRSR','ARMBE','Satellite','E3SMv1','E3SMv2'],
+#                           outfile=figpath+'statistics_1var_LWP_'+site+'.txt')
+# calc.mean_std_percentiles([ndrop,nd_wu,nd_sat,nd_m,nd_m2],
+#                           legend=['Ndrop','Wu_etal','Nd_satellite','E3SMv1','E3SMv2'],
+#                           outfile=figpath+'statistics_1var_Nd_'+site+'.txt')
+# calc.mean_std_percentiles([precip,precip_m,precip_m2],legend=['Obs','E3SMv1','E3SMv2'],
+#                           outfile=figpath+'statistics_1var_Precip_'+site+'.txt')
+# calc.mean_std_percentiles([cld_arscl,cld_visst,cld_tsi,cld_m,cld_m2],
+#                           legend=['ARSCL','Satellite','TSI','E3SMv1','E3SMv2'],
+#                           outfile=figpath+'statistics_1var_totcld_'+site+'.txt')
 
 
-calc.bias_corrcoef_RMSE(org,org_m,label1='Obs',label2='E3SMv1', 
-                        outfile=figpath+'statistics_ORG_E3SMv1vsOBS_'+site+'.txt')
-calc.bias_corrcoef_RMSE(org,org_m2,label1='Obs',label2='E3SMv2', 
-                        outfile=figpath+'statistics_ORG_E3SMv2vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(org,org_m,label1='Obs',label2='E3SMv1', 
+#                         outfile=figpath+'statistics_ORG_E3SMv1vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(org,org_m2,label1='Obs',label2='E3SMv2', 
+#                         outfile=figpath+'statistics_ORG_E3SMv2vsOBS_'+site+'.txt')
 
-calc.bias_corrcoef_RMSE(so4, so4_m,label1='Obs',label2='E3SMv1', 
-                        outfile=figpath+'statistics_SO4_E3SMv1vsOBS_'+site+'.txt')
-calc.bias_corrcoef_RMSE(so4, so4_m2,label1='Obs',label2='E3SMv2', 
-                        outfile=figpath+'statistics_SO4_E3SMv2vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(so4, so4_m,label1='Obs',label2='E3SMv1', 
+#                         outfile=figpath+'statistics_SO4_E3SMv1vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(so4, so4_m2,label1='Obs',label2='E3SMv2', 
+#                         outfile=figpath+'statistics_SO4_E3SMv2vsOBS_'+site+'.txt')
 
-calc.bias_corrcoef_RMSE(ccn2,ccn2_m,label1='Obs',label2='E3SMv1', 
-                        outfile=figpath+'statistics_CCN2_E3SMv1vsOBS_'+site+'.txt')
-calc.bias_corrcoef_RMSE(ccn2,ccn2_m2,label1='Obs',label2='E3SMv2', 
-                        outfile=figpath+'statistics_CCN2_E3SMv2vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(ccn2,ccn2_m,label1='Obs',label2='E3SMv1', 
+#                         outfile=figpath+'statistics_CCN2_E3SMv1vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(ccn2,ccn2_m2,label1='Obs',label2='E3SMv2', 
+#                         outfile=figpath+'statistics_CCN2_E3SMv2vsOBS_'+site+'.txt')
 
-calc.bias_corrcoef_RMSE(cpc10_withmask,ncn10_m,label1='CPC_masked',label2='E3SMv1', 
-                        outfile=figpath+'statistics_CN10nm_E3SMv1vsOBS_'+site+'.txt')
-calc.bias_corrcoef_RMSE(cpc10_withmask,ncn10_m2,label1='CPC_masked',label2='E3SMv2', 
-                        outfile=figpath+'statistics_CN10nm_E3SMv2vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(cpc10_withmask,ncn10_m,label1='CPC_masked',label2='E3SMv1', 
+#                         outfile=figpath+'statistics_CN10nm_E3SMv1vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(cpc10_withmask,ncn10_m2,label1='CPC_masked',label2='E3SMv2', 
+#                         outfile=figpath+'statistics_CN10nm_E3SMv2vsOBS_'+site+'.txt')
 
-calc.bias_corrcoef_RMSE(uhsas100, ncn100_m,label1='Obs',label2='E3SMv1', 
-                        outfile=figpath+'statistics_CN100_E3SMv1vsOBS_'+site+'.txt')
-calc.bias_corrcoef_RMSE(uhsas100, ncn100_m2,label1='Obs',label2='E3SMv2', 
-                        outfile=figpath+'statistics_CN100_E3SMv2vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(uhsas100, ncn100_m,label1='Obs',label2='E3SMv1', 
+#                         outfile=figpath+'statistics_CN100_E3SMv1vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(uhsas100, ncn100_m2,label1='Obs',label2='E3SMv2', 
+#                         outfile=figpath+'statistics_CN100_E3SMv2vsOBS_'+site+'.txt')
 
-calc.bias_corrcoef_RMSE(lwp_armbe, lwp_m,label1='ARMBE',label2='E3SMv1', 
-                        outfile=figpath+'statistics_lwp_E3SMv1vsOBS_'+site+'.txt')
-calc.bias_corrcoef_RMSE(lwp_armbe, lwp_m2,label1='ARMBE',label2='E3SMv2', 
-                        outfile=figpath+'statistics_lwp_E3SMv2vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(lwp_armbe, lwp_m,label1='ARMBE',label2='E3SMv1', 
+#                         outfile=figpath+'statistics_lwp_E3SMv1vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(lwp_armbe, lwp_m2,label1='ARMBE',label2='E3SMv2', 
+#                         outfile=figpath+'statistics_lwp_E3SMv2vsOBS_'+site+'.txt')
 
-calc.bias_corrcoef_RMSE(ndrop, nd_m,label1='Ndrop',label2='E3SMv1', 
-                        outfile=figpath+'statistics_Nd_E3SMv1vsOBS_'+site+'.txt')
-calc.bias_corrcoef_RMSE(ndrop, nd_m2,label1='Ndrop',label2='E3SMv2', 
-                        outfile=figpath+'statistics_Nd_E3SMv2vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(ndrop, nd_m,label1='Ndrop',label2='E3SMv1', 
+#                         outfile=figpath+'statistics_Nd_E3SMv1vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(ndrop, nd_m2,label1='Ndrop',label2='E3SMv2', 
+#                         outfile=figpath+'statistics_Nd_E3SMv2vsOBS_'+site+'.txt')
 
-calc.bias_corrcoef_RMSE(nd_sat, nd_m,label1='Satellite',label2='E3SMv1', 
-                        outfile=figpath+'statistics_Nd_E3SMv1vsSat_'+site+'.txt')
-calc.bias_corrcoef_RMSE(nd_sat, nd_m2,label1='Satellite',label2='E3SMv2', 
-                        outfile=figpath+'statistics_Nd_E3SMv2vsSat_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(nd_sat, nd_m,label1='Satellite',label2='E3SMv1', 
+#                         outfile=figpath+'statistics_Nd_E3SMv1vsSat_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(nd_sat, nd_m2,label1='Satellite',label2='E3SMv2', 
+#                         outfile=figpath+'statistics_Nd_E3SMv2vsSat_'+site+'.txt')
 
-calc.bias_corrcoef_RMSE(reff, reff_m,label1='Obs',label2='E3SMv1', 
-                        outfile=figpath+'statistics_Reff_E3SMv1vsOBS_'+site+'.txt')
-calc.bias_corrcoef_RMSE(reff, reff_m2,label1='Obs',label2='E3SMv2', 
-                        outfile=figpath+'statistics_Reff_E3SMv2vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(reff, reff_m,label1='Obs',label2='E3SMv1', 
+#                         outfile=figpath+'statistics_Reff_E3SMv1vsOBS_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(reff, reff_m2,label1='Obs',label2='E3SMv2', 
+#                         outfile=figpath+'statistics_Reff_E3SMv2vsOBS_'+site+'.txt')
 
-calc.bias_corrcoef_RMSE(reff_sat, reff_m,label1='Satellite',label2='E3SMv1', 
-                        outfile=figpath+'statistics_Reff_E3SMv1vsSat_'+site+'.txt')
-calc.bias_corrcoef_RMSE(reff_sat, reff_m2,label1='Satellite',label2='E3SMv2', 
-                        outfile=figpath+'statistics_Reff_E3SMv2vsSat_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(reff_sat, reff_m,label1='Satellite',label2='E3SMv1', 
+#                         outfile=figpath+'statistics_Reff_E3SMv1vsSat_'+site+'.txt')
+# calc.bias_corrcoef_RMSE(reff_sat, reff_m2,label1='Satellite',label2='E3SMv2', 
+#                         outfile=figpath+'statistics_Reff_E3SMv2vsSat_'+site+'.txt')
 
 #%% joint histogram
 fig,ax = plot.jointhist([uhsas100,ncn100_m,ncn100_m2], [ccn2,ccn2_m,ccn2_m2], 
@@ -677,6 +677,7 @@ fig,ax = plot.jointhist([cod_sat,cod_sat,cod_m,cod_m2],[lwp_armbe,lwp_sat,lwp_m,
                     xlabel='Cloud Optical Depth (N/A)', ylabel='LWP (g/m$^2$)', vmax=0.25,
                     title=['Ground','Satellite','E3SMv1','E3SMv2'])
 fig.savefig(figpath+'jointhist_COD_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 #%% scatter plot
 

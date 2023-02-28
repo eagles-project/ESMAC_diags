@@ -190,6 +190,7 @@ nd_arm_m = modeldata['Nd_ARM'].load()
 nd_visst_m = modeldata['Nd_VISST'].load()
 precip_m = modeldata['PRECT'].load()
 cld_m = modeldata['CLDTOT'].load()
+cldlow_m = modeldata['CLDLOW'].load()
 cbh_m = modeldata['cbh'].load()
 cth_m = modeldata['cth'].load()
 lwdnsfc_m = modeldata['FLDS'].load()
@@ -212,15 +213,19 @@ modeldata.close()
 
 
 #%% specific data treatments
-nd_sat.data[zenith_sat.data>70]=np.nan
-lwp_sat.data[zenith_sat.data>70]=np.nan
+nd_sat.data[zenith_sat.data>65]=np.nan
+lwp_sat.data[zenith_sat.data>65]=np.nan
 
 # select low-level ovarcasting clouds
-idx_sfc = np.logical_and(np.logical_and(cth<4000, cld_armbe>90), thetadiff_cb<2)
-idx_sat = np.logical_and(np.logical_and(cth_sat<4, cfall_sat>90), thetadiff_cb<2)
-idx_m1 = np.logical_and(np.logical_and(cth_m<4000, cld_m>90), thetadiff_cb_m<2)
+idx_sfc = np.logical_and(cth<4000, cld_armbe>90)
+idx_sat = np.logical_and(cth_sat.data<4, cfall_sat.data>90)
+idx_m1 = np.logical_and(cth_m.data<4000, cldlow_m.data>90)
+# select surface coupling samples
+idx_sfc[thetadiff_cb.data>2] = False
+idx_sat[thetadiff_cb.data>2] = False
+idx_m1[thetadiff_cb_m.data>2] = False
 
-idx_sat[zenith_sat.data>70] = False
+idx_sat[zenith_sat.data>65] = False
 
 
 idx_sfc[iwp_sat>10] = False
@@ -275,6 +280,13 @@ for nn in range(3):
     x = [max(np.nanmin(xdata[nn]),10), min(np.nanmax(xdata[nn]),1000)]
     y = np.exp(regress[nn][0] * np.log(x) + regress[nn][1])
     ax[0,nn].plot(x, y, color='r')
+    a = regress[nn][0]
+    b = regress[nn][1]
+    if b<0:
+        ax[0,nn].text(50,600, 'y = '+format(a,'3.2f')+'x - '+format(-b,'3.2f'),color='r')
+    else:
+        ax[0,nn].text(50,600, 'y = '+format(a,'3.2f')+'x + '+format(b,'3.2f'),color='r')
+    ax[0,nn].text(100,400, 'R = '+format(regress[nn][2],'3.2f'),color='r')
 
 # %% LWP vs Nd
 fig,ax = plot.jointhist([ndrop.data[:], nd_sat[:].data, nd_m[:].data], 
@@ -303,6 +315,13 @@ for nn in range(3):
     x = [np.nanmin(xdata[nn]), min(np.nanmax(xdata[nn]),1000)]
     y = np.exp(regress[nn][0] * np.log(x) + regress[nn][1])
     ax[0,nn].plot(x, y, color='r')
+    a = regress[nn][0]
+    b = regress[nn][1]
+    if b<0:
+        ax[0,nn].text(50,600, 'y = '+format(a,'3.2f')+'x - '+format(-b,'3.2f'),color='r')
+    else:
+        ax[0,nn].text(50,600, 'y = '+format(a,'3.2f')+'x + '+format(b,'3.2f'),color='r')
+    ax[0,nn].text(100,400, 'R = '+format(regress[nn][2],'3.2f'),color='r')
     
 # linear regression in different Nd bins
 nd_1 = ndrop.data
@@ -345,12 +364,12 @@ for nn in range(3):
 #%% heatmap of albedo to LWP and Nd
 xedges=np.exp(np.arange(np.log(10),7,0.5))
 yedges=np.exp(np.arange(np.log(10),7,0.5))
-fig,ax = plot.heatmap([nd_sat[:].data, nd_visst_m[:].data,], 
+fig,ax = plot.heatmap([nd_sat[:].data, nd_m[:].data,], 
                       [lwp_sat[:].data, lwp_m[:].data, ], 
                       [albedo_sat[:].data, albedo_m[:].data, ], 
                     # xedges=np.arange(0,310,20), yedges=np.arange(10,300,20), 
                     xedges=xedges, yedges=yedges, 
-                    vmin=20, vmax=60,cmap='plasma',min_sample=4,
+                    vmin=20, vmax=60,cmap='plasma',min_sample=3,
                     xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', 
                     title=['Satellite','E3SMv2'])
 fig.text(.91, .85,'TOA Albedo (%)')      # unit of color variable
@@ -366,6 +385,15 @@ for ax0 in ax:
     ax0.set_xticklabels([10,30,100,300])
     ax0.set_yticklabels([10,30,100,300])
 
+# add sample number PDF
+X=np.arange(0,len(xedges)-1)
+Y=np.arange(0,len(yedges)-1)
+H_count, x, y = np.histogram2d(nd_sat.data[:].flatten(), lwp_sat.data[:].flatten(), bins=(xedges, yedges))
+cs = ax[0].contour(X,Y,H_count.T,np.array([3, 10, 30, 100, 300, 1000]), colors=['k'])
+ax[0].clabel(cs, cs.levels, inline=True, fontsize=10)
+H_count, x, y = np.histogram2d(nd_m.data[:].flatten(), lwp_m.data[:].flatten(), bins=(xedges, yedges))
+cs1 = ax[1].contour(X,Y,H_count.T,np.array([3, 10, 30, 100, 300, 1000]), colors=['k'])
+ax[1].clabel(cs1, cs1.levels, inline=True, fontsize=10)
 
 #%%
 # # Nd vs surface CCN
@@ -397,6 +425,13 @@ for nn in range(3):
     x = [max(np.nanmin(xdata[nn]),10), min(np.nanmax(xdata[nn]),1000)]
     y = np.exp(regress[nn][0] * np.log(x) + regress[nn][1])
     ax[0,nn].plot(x, y, color='r')
+    a = regress[nn][0]
+    b = regress[nn][1]
+    if b<0:
+        ax[0,nn].text(50,600, 'y = '+format(a,'3.2f')+'x - '+format(-b,'3.2f'),color='r')
+    else:
+        ax[0,nn].text(50,600, 'y = '+format(a,'3.2f')+'x + '+format(b,'3.2f'),color='r')
+    ax[0,nn].text(100,400, 'R = '+format(regress[nn][2],'3.2f'),color='r')
 
 # %% LWP vs Nd
 fig,ax = plot.jointhist([ndrop.data[idx_sfc], nd_sat[idx_sat].data, nd_m[idx_m1].data], 
@@ -424,6 +459,13 @@ for nn in range(3):
     x = [np.nanmin(xdata[nn]), min(np.nanmax(xdata[nn]),1000)]
     y = np.exp(regress[nn][0] * np.log(x) + regress[nn][1])
     ax[0,nn].plot(x, y, color='r')
+    a = regress[nn][0]
+    b = regress[nn][1]
+    if b<0:
+        ax[0,nn].text(50,600, 'y = '+format(a,'3.2f')+'x - '+format(-b,'3.2f'),color='r')
+    else:
+        ax[0,nn].text(50,600, 'y = '+format(a,'3.2f')+'x + '+format(b,'3.2f'),color='r')
+    ax[0,nn].text(100,400, 'R = '+format(regress[nn][2],'3.2f'),color='r')
     
 # linear regression in different Nd bins
 nd_1 = ndrop[idx_sfc].data
@@ -466,12 +508,12 @@ for nn in range(3):
 #%% heatmap of albedo to LWP and Nd
 xedges=np.exp(np.arange(np.log(10),7,0.5))
 yedges=np.exp(np.arange(np.log(10),7,0.5))
-fig,ax = plot.heatmap([nd_sat[idx_sat].data, nd_visst_m[idx_m1].data,], 
+fig,ax = plot.heatmap([nd_sat[idx_sat].data, nd_m[idx_m1].data,], 
                       [lwp_sat[idx_sat].data, lwp_m[idx_m1].data, ], 
                       [albedo_sat[idx_sat].data, albedo_m[idx_m1].data, ], 
                     # xedges=np.arange(0,310,20), yedges=np.arange(10,300,20), 
                     xedges=xedges, yedges=yedges, 
-                    vmin=20, vmax=60,cmap='plasma',min_sample=4,
+                    vmin=20, vmax=60,cmap='plasma',min_sample=3,
                     xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', 
                     title=['Satellite','E3SMv2'])
 fig.text(.91, .85,'TOA Albedo (%)')      # unit of color variable
@@ -486,3 +528,13 @@ for ax0 in ax:
     ax0.set_yticks(yticks)
     ax0.set_xticklabels([10,30,100,300])
     ax0.set_yticklabels([10,30,100,300])
+
+# add sample number PDF
+X=np.arange(0,len(xedges)-1)
+Y=np.arange(0,len(yedges)-1)
+H_count, x, y = np.histogram2d(nd_sat.data[idx_sat].flatten(), lwp_sat.data[idx_sat].flatten(), bins=(xedges, yedges))
+cs = ax[0].contour(X,Y,H_count.T,np.array([3, 10, 30, 100, 300, 1000]), colors=['k'])
+ax[0].clabel(cs, cs.levels, inline=True, fontsize=10)
+H_count, x, y = np.histogram2d(nd_m.data[idx_m1].flatten(), lwp_m.data[idx_m1].flatten(), bins=(xedges, yedges))
+cs1 = ax[1].contour(X,Y,H_count.T,np.array([3, 10, 30, 100, 300, 1000]), colors=['k'])
+ax[1].clabel(cs1, cs1.levels, inline=True, fontsize=10)
