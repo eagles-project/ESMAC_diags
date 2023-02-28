@@ -1013,6 +1013,7 @@ def bar(dataall, figsize=None, datalabel=None, varlabel=None, xlabel=None, ylabe
     ax.set_xticklabels(datalabel)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
+    ax.set_ylim(ylimit)
     ax.set_title(title)
     ax.legend(loc='right', shadow=False, bbox_to_anchor=(1.02+0.6/ndata, 0.5))
 
