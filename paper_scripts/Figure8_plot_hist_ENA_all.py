@@ -246,23 +246,3 @@ fig,ax = plot.hist( [LTS850,LTS850_m,], weights=[w0,w1,], legend = ['ARMBE','E3S
                     xlabel = 'Lower Tropospheric Stability (850hPa - Sfc) (K)', ylabel='PDF')
                     # title = 'Lower Tropospheric Stability (850hPa - Sfc) '+site, 
                     # ylabel='PDF', xlabel='K')
-
-#%%
-
-pr0 = precip[precip>0.01]
-prm = precip_m[precip_m>0.01]
-w0 = np.ones_like(pr0)/sum(~np.isnan(pr0.data))
-w1 = np.ones_like(prm)/sum(~np.isnan(prm.data))
-prbin = 10**(np.arange(-2,1,0.15))
-fig,ax = plot.hist( [pr0,prm,], weights=[w0,w1,], legend = ['ARMBE','E3SMv2',], 
-                    color=[CB_color_cycle[1],'k',],  bins=prbin, #np.arange(0,2,.05), 
-                    title = 'Precipitation '+site, ylabel='PDF', xlabel='mm/hr')
-ax.set_xlim(0.01, 10)
-ax.set_xscale('log')
-
-prbin = np.arange(0,11,0.5)
-fig,ax = plot.hist( [pr0,prm,], weights=[w0,w1,], legend = ['ARMBE','E3SMv2',], 
-                    color=[CB_color_cycle[1],'k',],  bins=prbin, #np.arange(0,2,.05), 
-                    title = 'Precipitation '+site, ylabel='PDF', xlabel='mm/hr')
-ax.set_ylim(0.001, 1)
-ax.set_yscale('log')

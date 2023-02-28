@@ -456,18 +456,6 @@ time_magic = obsdata['time'].load()
 reff_wu_magic = obsdata['reff'].load()
 nd_wu_magic = obsdata['cdnc'].load()
 obsdata.close()
-# filename = prep_sfc_path + 'sfc_radiation_'+site+'.nc'
-# obsdata = xr.open_dataset(filename)
-# time_rad = obsdata['time'].load()
-# lwdnsfc = obsdata['lwdn'].load()
-# swdnsfc = obsdata['swdn'].load()
-# lwupsfc = obsdata['lwup'].load()
-# swupsfc = obsdata['swup'].load()
-# obsdata.close()
-# lwdnsfc_aceena = lwdnsfc.sel(time=time_aceena)
-# swdnsfc_aceena = swdnsfc.sel(time=time_aceena)
-# lwupsfc_aceena = lwupsfc.sel(time=time_aceena)
-# swupsfc_aceena = swupsfc.sel(time=time_aceena)
 
 filename = prep_sfc_path + 'totcld_'+site+'.nc'
 obsdata = xr.open_dataset(filename)
@@ -578,18 +566,6 @@ obsdata = xr.open_dataset(filename)
 time_marcus = obsdata['time'].load()
 lwp_marcus = obsdata['lwp'].load()
 obsdata.close()
-# filename = prep_sfc_path + 'sfc_radiation_'+site+'.nc'
-# obsdata = xr.open_dataset(filename)
-# time_rad = obsdata['time'].load()
-# lwdnsfc = obsdata['lwdn'].load()
-# swdnsfc = obsdata['swdn'].load()
-# lwupsfc = obsdata['lwup'].load()
-# swupsfc = obsdata['swup'].load()
-# obsdata.close()
-# lwdnsfc_aceena = lwdnsfc.sel(time=time_aceena)
-# swdnsfc_aceena = swdnsfc.sel(time=time_aceena)
-# lwupsfc_aceena = lwupsfc.sel(time=time_aceena)
-# swupsfc_aceena = swupsfc.sel(time=time_aceena)
 
 filename = prep_sfc_path + 'totcld_'+site+'.nc'
 obsdata = xr.open_dataset(filename)
@@ -833,78 +809,6 @@ i_marcus_m[ctt_m_marcus<273] = False
 if not os.path.exists(figpath):
     os.makedirs(figpath)
     
-# fig,ax = plot.percentiles([ccn2_hiscale, ccn2_m_hiscale, ], 
-#                           [ccn2_aceena, ccn2_m_aceena, ], 
-#                           [ccn2_magic, ccn2_m_magic, ], 
-#                           [ccn2_marcus, ccn2_m_marcus, ],
-#                     title='0.2% CCN (cm$^{-3}$)', figsize=(10,2.5),ylimit=(0,1200), 
-#                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
-#                     color=[CB_color_cycle[1], 'k',], legend=None)
-# # fig.savefig(figpath+'percentiles_CCN_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# fig,ax = plot.percentiles([cpc10_hiscale, ncn10_m_hiscale, ], 
-#                           [cpc10_withmask_aceena, ncn10_m_aceena, ],
-#                           [cpc10_magic, ncn10_m_magic, ],
-#                           [cpc10_marcus, ncn10_m_marcus, ],
-#                     title='(a) CN (>10nm) (cm$^{-3}$)', figsize=(10,2.5), #ylimit=(0,8000),
-#                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
-#                     color=[CB_color_cycle[1], 'k',], legend=None)
-# # fig.savefig(figpath+'percentiles_CN10_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# fig,ax = plot.percentiles([smps100_hiscale, ncn100_m_hiscale, ], 
-#                           [uhsas100_aceena, ncn100_m_aceena, ],
-#                           [uhsas100_magic, ncn100_m_magic, ],
-#                           [uhsas100_marcus, ncn100_m_marcus, ],
-#                     title='(b) CN (>100nm) (cm$^{-3}$)',figsize=(10,2.5),ylimit=(0,1200),
-#                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
-#                     color=[CB_color_cycle[1], 'k',], legend=None)
-# # fig.savefig(figpath+'percentiles_CN100_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# fig,ax = plot.percentiles([ndrop_hiscale, nd_sat_hiscale, nd_m_hiscale, ], 
-#                           [ndrop_aceena, nd_sat_aceena, nd_m_aceena, ],
-#                           [nd_wu_magic, nd_sat_magic, nd_m_magic, ],
-#                           [nd_m_marcus*np.nan, nd_sat_marcus, nd_m_marcus, ],
-#                     title='(c) Nd (cm$^{-3}$)',figsize=(10,2.5),ylimit=(0,500),
-#                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
-#                     color=[CB_color_cycle[1],CB_color_cycle[0], 'k',], legend=['Ground/Ship','Satellite','E3SMv2'])
-# # fig.savefig(figpath+'percentiles_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# fig,ax = plot.percentiles([lwp_armbe_hiscale, lwp_sat_hiscale, lwp_m_hiscale, ], 
-#                           [lwp_armbe_aceena, lwp_sat_aceena, lwp_m_aceena, ],
-#                           [lwp_magic, lwp_sat_magic, lwp_m_magic, ],
-#                           [lwp_marcus, lwp_sat_marcus, lwp_m_marcus, ],
-#                     title='(d) LWP (g/m$^2$)',figsize=(10,2.5),
-#                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
-#                     color=[CB_color_cycle[1],CB_color_cycle[0], 'k',], legend=None)
-# # fig.savefig(figpath+'percentiles_lwp_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# fig,ax = plot.percentiles([reff_hiscale, reff_sat_hiscale, reff_m_hiscale, ], 
-#                           [reff_wu_aceena, reff_sat_aceena, reff_m_aceena, ],
-#                           [reff_wu_magic, reff_sat_magic, reff_m_magic, ],
-#                           [reff_m_marcus*np.nan, reff_sat_marcus, reff_m_marcus, ],
-#                     title='(e) Reff ($\mu$m)',figsize=(10,2.5),#ylimit=(0,500),
-#                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
-#                     color=[CB_color_cycle[1],CB_color_cycle[0], 'k',], legend=None)
-# # fig.savefig(figpath+'percentiles_Reff_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# fig,ax = plot.percentiles([cod_hiscale, cod_sat_hiscale, cod_m_hiscale, ], 
-#                           [cod_aceena, cod_sat_aceena, cod_m_aceena, ],
-#                           [cod_m_magic*np.nan, cod_sat_magic, cod_m_magic, ],
-#                           [cod_m_marcus*np.nan, cod_sat_marcus, cod_m_marcus, ],
-#                     title='(f) Cloud Optical Depth (N/A)',figsize=(10,2.5),
-#                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
-#                     color=[CB_color_cycle[1],CB_color_cycle[0], 'k',], legend=None)
-# # fig.savefig(figpath+'percentiles_cod_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# fig,ax = plot.percentiles([cld_arscl_hiscale, cld_visst_hiscale, cld_m_hiscale, cld_m2_hiscale], 
-#                           [cld_arscl_aceena, cld_visst_aceena, cld_m_aceena, cld_m2_aceena],
-#                           [cld_magic, cld_sat_magic, cld_m_magic, cld_m2_magic],
-#                           [cld_marcus, cld_sat_marcus, cld_m_marcus, cld_m2_marcus],
-#                     title='(g) Cloud Fraction (%)',figsize=(10,2.5),
-#                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
-#                     color=[CB_color_cycle[1],CB_color_cycle[0], 'k'], legend=None)
-# # fig.savefig(figpath+'percentiles_lwp_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
 
 #%% overcasting low cloud only
 fig,ax = plot.percentiles([ccn2_hiscale[i_hiscale_sfc], ccn2_m_hiscale[i_hiscale_m], ], 
@@ -969,12 +873,3 @@ fig,ax = plot.percentiles([cod_hiscale[i_hiscale_sfc], cod_sat_hiscale[i_hiscale
                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
                     color=[CB_color_cycle[1],CB_color_cycle[0], 'k'], legend=None)
 # fig.savefig(figpath+'percentiles_cod_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
-# fig,ax = plot.percentiles([cld_arscl_hiscale[i_hiscale_sfc], cld_visst_hiscale[i_hiscale_sat], cld_m_hiscale[i_hiscale_m], cld_m2_hiscale[i_hiscale_m2]], 
-#                           [cld_arscl_aceena[i_aceena_sfc], cld_visst_aceena[i_aceena_sat], cld_m_aceena[i_aceena_m], cld_m2_aceena[i_aceena_m2]],
-#                           [cld_magic[i_magic_sfc], cld_sat_magic[i_magic_sat], cld_m_magic[i_magic_m], cld_m2_magic[i_magic_m2]],
-#                           [cld_marcus[i_marcus_sfc], cld_sat_marcus[i_marcus_sat], cld_m_marcus[i_marcus_m], cld_m2_marcus[i_marcus_m2]],
-#                     title='(g) Cloud Fraction (%)',figsize=(10,2.5),
-#                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
-#                     color=[CB_color_cycle[1],CB_color_cycle[0], 'k'], legend=None)
-# # fig.savefig(figpath+'percentiles_lwp_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)

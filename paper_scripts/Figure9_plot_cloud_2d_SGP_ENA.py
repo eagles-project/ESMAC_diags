@@ -36,8 +36,6 @@ modeldata = xr.open_dataset(filename)
 time_m = modeldata['time'].load()
 heightm = modeldata['height'].load()
 cf_e3sm = modeldata['cloud_z'].load()
-# lwc_e3sm = modeldata['LWC_z'].load()
-# iwc_e3sm = modeldata['IWC_z'].load()
 modeldata.close()
 
 
@@ -46,8 +44,6 @@ modeldata.close()
 cf_e3sm = cf_e3sm*100  # fraction to %
 height1 = height1.data*0.001   # m to km
 heightm = heightm.data*0.001   # m to km
-
-# cf_e3sm.data[np.logical_and(lwc_e3sm.data<1e-6, iwc_e3sm.data<1e-7)] = 0
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # output plot

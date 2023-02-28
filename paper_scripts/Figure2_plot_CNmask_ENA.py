@@ -1,5 +1,5 @@
 """
-script to generate all plots for ENA data
+script to generate ENA aerosol mask data
 
 """
 import os
@@ -84,64 +84,8 @@ cpc2data.close()
 org_m = np.array(org_o)
 org_m[f_valid<0.5] = np.nan
 
-# #%% pdf
-# plt.rcParams.update({'font.size': 16})
 
-# wt_o = np.ones_like(cpc_o)/np.count_nonzero(~np.isnan(cpc_o))
-# wt_m = np.ones_like(cpc_m)/np.count_nonzero(~np.isnan(cpc_m))
-# fig = plt.figure(figsize=(5,5.))
-# ax1 = fig.add_subplot(1,1,1)
-# ax1.hist([cpc_o, cpc_m], bins=np.arange(21)*100, histtype='bar', weights=[wt_o, wt_m],color=['r','g'])
-# ax1.set_xlim(0,2000)
-# ax1.set_xlabel('Aerosol number from CPC (cm$^{-3}$)', fontsize=15)
-# ax1.set_ylabel('Fraction', fontsize=15)
-# ax1.legend(['contamined','good'])
-# ax1.grid()
-
-
-# wt_o = np.ones_like(org_o)/np.count_nonzero(~np.isnan(org_o))
-# wt_m = np.ones_like(org_m)/np.count_nonzero(~np.isnan(org_m))
-# fig = plt.figure(figsize=(5,5.))
-# ax1 = fig.add_subplot(1,1,1)
-# ax1.hist([org_o, org_m], bins=np.arange(21)*0.075, histtype='bar', weights=[wt_o, wt_m],color=['r','g'])
-# ax1.set_xlim(0,1.5)
-# ax1.set_xlabel('Total Organic from ACSM ($\mu$m/m$^3$)', fontsize=15)
-# ax1.set_ylabel('Fraction', fontsize=15)
-# ax1.legend(['contamined','good'])
-# ax1.grid()
-
-# #%% timeseries
-# fig = plt.figure(figsize=(11.5,3.))
-# ax1 = fig.add_subplot(1,1,1)
-# ax1.plot(mask_time,cpc_o,color='r')
-# ax1.plot(mask_time,cpc_m,color='green')
-# # ax1.set_xlabel('time', fontsize=16)
-# # ax1.set_ylabel('with mask', fontsize=16)
-# ax1.set_title('Aerosol number from CPC (cm$^{-3}$)', fontsize=18)
-# ax1.legend(['contamined','good'])
-# ax1.grid()
-# # ax1.set_xlim(np.datetime64('2017-10-15'), np.datetime64('2017-10-20'))
-# ax1.set_xlim(np.datetime64('2017-10-21'), np.datetime64('2017-11-01'))
-# # ax1.xaxis.set_major_formatter(mdates.DateFormatter('%M-%D'))
-# # ax1.xaxis.set_major_locator(mdates.DayLocator(interval=1))
-
-
-# fig = plt.figure(figsize=(11.5,3.))
-# ax1 = fig.add_subplot(1,1,1)
-# ax1.plot(acsmtime,org_o,color='r',marker='.')
-# ax1.plot(acsmtime,org_m,color='green',marker='.')
-# # ax1.set_xlabel('time', fontsize=16)
-# # ax1.set_ylabel('with mask', fontsize=16)
-# ax1.set_title('Total Organic from ACSM ($\mu$m/m$^3$)', fontsize=18)
-# ax1.legend(['contamined','good'])
-# ax1.grid()
-# # ax1.set_xlim(np.datetime64('2017-10-15'), np.datetime64('2017-10-20'))
-# ax1.set_xlim(np.datetime64('2017-10-21'), np.datetime64('2017-11-01'))
-# ax1.set_ylim(-0.2, 8)
-# # ax1.xaxis.set_major_formatter(mdates.DateFormatter('%M-%D'))
-# # ax1.xaxis.set_major_locator(mdates.DayLocator(interval=1))
-
-#%% all in one figure
+#%% plot timeseries and PDFs in one figure
 fig = plt.figure(figsize=(15,7))
 plt.rcParams.update({'font.size': 13})
 ax1 = fig.add_subplot(2, 4, (1,3))

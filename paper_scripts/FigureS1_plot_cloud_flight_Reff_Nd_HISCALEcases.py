@@ -38,14 +38,7 @@ modis_path = 'C:/Users/tang357/OneDrive - PNNL/EAGLES/Hi-Scale/data/MODIS/'
 # set output path for plots
 figpath= '../figures/'
 
-# date8 = '20160502'
-# date8 = '20160516'
-# date8 = '20160519'
 date8 = '20160520'
-# date8 = '20160829'
-# date8 = '20160901'
-# date8 = '20160907'
-# date8 = '20160915'
 date10 = date8[0:4]+'-'+date8[4:6]+'-'+date8[6:8]
 if date8[4:6]=='05':
     time_start = date10+'T16'
@@ -56,13 +49,6 @@ else:
 
 
 #%% read preprocessed cloud fraction and aircraft location data
-# lst = glob.glob(prep_flight_path + 'WCM_'+site+'_'+date8+'*.nc')
-# obsdata = xr.open_mfdataset(lst,concat_dim='time',combine='nested')
-# time_air = obsdata['time'].load()
-# z_air = obsdata['height'].load()
-# lwc = obsdata['LWC'].load()
-# obsdata.close()
-
 filename = prep_sfc_path + 'cloud_2d_'+site+'.nc'
 obsdata = xr.open_dataset(filename)
 time_cf = obsdata['time'].load()
@@ -151,11 +137,6 @@ for filename in lst:
         cldflag1 = int(iwg[t][35])
         timestr = iwg[t][1].split(' ')
         time1 = hhmmss2sec(timestr[1])
-        # time_iwg = np.hstack((time_iwg, time1/86400+cday))
-        # lon = np.hstack((lon, lon1))
-        # lat = np.hstack((lat, lat1))
-        # height = np.hstack((height, height1))
-        # cldflag = np.hstack((cldflag, cldflag1))
         time_iwg.append(time1/86400+cday)
         lon.append(lon1)
         lat.append(lat1)
@@ -243,19 +224,6 @@ cod = cod_liq_linavg.data
 nd_sat = calc_cdnc_VISST(lwp_sat, ctt, cod, adiabaticity=0.8)
 
 
-# MODIS data
-
-# modisfile = modis_path + 'Reff_CTH_HISCALE_0.5x0.5.nc'
-# modisdata = xr.open_dataset(modisfile)
-# modistime = modisdata['time']
-# reff_21 = modisdata['reff']
-# reff_16 = modisdata['reff_16']
-# reff_37 = modisdata['reff_37']
-# reff_1621 = modisdata['reff_1621']
-# reff_pcl = modisdata['reff_pcl']
-# modisdata.close()
-
-
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # specific data treatment
 
@@ -275,74 +243,8 @@ nd_sfc[nd_sfc<1]=np.nan
 nd_sat[nd_sat<1]=np.nan
 nd_air[lwc_nd<0.01]=np.nan
 
-# # exclude flight far from SGP site
-# radius = 0.5   # threshold distance from SGP, in degree lat/lon
-# dist = np.sqrt((lon+97.48792)**2 + (lat-36.6059)**2)
-# dist_nd = np.interp(time_mergesd, time_iwg, dist)
-# reff_air[dist_nd > radius] = np.nan
-# nd_air[dist_nd > radius] = np.nan
-
 cloudfraction = cf_obs.data
 cloudfraction[cloudfraction<5]=np.nan
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# plot
-
-# time2 = time_mergesd  * 86400
-# mergesdtime = np.datetime64('2015-12-31T00') + time2.astype('timedelta64[s]')
-# time2 = time_iwg  * 86400
-# iwgtime = np.datetime64('2015-12-31T00') + time2.astype('timedelta64[s]')
-
-# plt.rcParams.update({'font.size': 16})
-# fig = plt.figure(figsize=(8,8))
-
-# ax1 = fig.add_subplot(3,1,1)
-# h0=ax1.contourf(time_cf, height_cf*0.001, cloudfraction.T,np.arange(0,101,10),cmap='jet')
-# ax1.plot(iwgtime,height*0.001,'k.')
-# ax1.set_ylim(0,4)
-# ax1.set_ylabel('Height (km)')
-# ax1.set_title('Cloud Fraction (%) and Flight Height')
-# cax = plt.axes([0.96, 0.72, 0.02, 0.2])
-# fig.colorbar(h0, cax=cax) 
-# ax1.grid(True,linestyle=':')
-
-# ax2 = fig.add_subplot(3,1,2)
-# ax2.plot(iwgtime,reff_air,'k.',label='Flight')
-# ax2.plot(mfrsrtime,reff_sfc,'r.',label='MFRSR')
-# ax2.plot(vissttime,reff_sat,'b-',marker='o',label='VISST')
-# # ax2.scatter(modistime,reff_21,300,color='g',linewidth=6,marker='x',label='MODIS')
-# # ax2.scatter(modistime,reff_16,100,color='g',linewidth=1,marker='x')
-# # ax2.scatter(modistime,reff_37,100,color='g',linewidth=1,marker='x')
-# # ax2.scatter(modistime,reff_1621,100,color='g',linewidth=1,marker='x')
-
-# ax2.set_ylim(0,40)
-# ax2.set_title('Reff ($\mu$m)')
-# # ax2.legend(loc='upper left')
-# ax2.grid(True,linestyle=':')
-
-# ax3 = fig.add_subplot(3,1,3)
-# ax3.plot(iwgtime,nd_air,'k.',label='Flight')
-# ax3.plot(mfrsrtime,nd_sfc,'r.',label='MFRSR')
-# ax3.plot(vissttime,nd_sat,'b-',marker='o',label='VISST')
-# # ax3.scatter([],[],300,color='g',linewidth=6,marker='x',label='MODIS')
-# ax3.set_ylim(-20,1000)
-# ax3.set_title('Nd (cm$^{-3}$)')
-# ax3.legend(loc='upper left')
-# ax3.grid(True,linestyle=':')
-
-# ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-# ax2.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-# ax3.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-# ax1.set_xlim(np.datetime64(time_start), np.datetime64(time_end))
-# ax2.set_xlim(np.datetime64(time_start), np.datetime64(time_end))
-# ax3.set_xlim(np.datetime64(time_start), np.datetime64(time_end))
-# ax1.set_xticklabels([])
-# ax2.set_xticklabels([])
-# ax3.set_xlabel('Time (UTC) in '+date10,fontsize=18)
-
-# plt.tight_layout()
-
-# ax2.set_xlim(np.datetime64('2016-05-20T00'), np.datetime64('2016-05-20T23'))
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -381,20 +283,12 @@ reff_air_xr = xr.DataArray(
 )
 nd_air_incld = nd_air_xr.rolling(time=9, center=True).median()
 reff_air_incld = reff_air_xr.rolling(time=9, center=True).median()
-# nd_sfc_3[np.logical_or(cf_sfc<0.9, cth_sfc>4000)] = np.nan
-# nd_sat_3[np.logical_or(cf_sat<90, cth_sat>4)] = np.nan
-# reff_sfc_3[np.logical_or(cf_sfc<0.9, cth_sfc>4000)] = np.nan
-# reff_sat_3[np.logical_or(cf_sat<90, cth_sat>4)] = np.nan
 nd_sat_5 = np.array(nd_sat_3)
 reff_sat_5 = np.array(reff_sat_3)
 nd_air_5 = avg_time_1d(iwgtime, nd_air_incld, vissttime.data)
 nd_sfc_5 = avg_time_1d(mfrsrtime.data, nd_sfc_3, vissttime.data)
 reff_air_5 = avg_time_1d(iwgtime, reff_air_incld, vissttime.data)
 reff_sfc_5 = avg_time_1d(mfrsrtime.data, reff_sfc_3, vissttime.data)
-# cl_sfc_5 = avg_time_1d(mfrsrtime.data, np.int32(~np.isnan(nd_sfc_3)), vissttime.data)
-# nd_sfc_5[cl_sfc_5<0.9] = np.nan
-# cl_sfc_5 = avg_time_1d(mfrsrtime.data, np.int32(~np.isnan(reff_sfc_3)), vissttime.data)
-# reff_sfc_5[cl_sfc_5<0.9] = np.nan
 
 time_start = iwgtime[0] - np.timedelta64(30,'m')
 time_end = iwgtime[-1] + np.timedelta64(30,'m')

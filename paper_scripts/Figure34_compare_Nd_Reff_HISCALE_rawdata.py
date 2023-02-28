@@ -40,11 +40,6 @@ prep_sat_path = 'C:/Users/tang357/Downloads/prep_data/'+site+'/satellite/'
 figpath= '../figures/'+site+'/'
 
 #%% read aircraft data 
-# time_iwg = np.empty(0)
-# lon = np.empty(0)
-# lat = np.empty(0)
-# height = np.empty(0)
-# cldflag = np.empty(0)
 time_iwg = []
 lon = []
 lat = []
