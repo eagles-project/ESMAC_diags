@@ -20,6 +20,8 @@ site = 'ENA'
 
 predatapath = '../prep_data/'+site+'/surface/'
 rawdatapath = 'C:/Users/tang357/OneDrive - PNNL/EAGLES/python_diag_pkg/ESMAC_Diags_Tool/test_raw_data/obs/ENA/ENA_AerosolMask/'
+# set output path for plots
+figpath= '../figures/'
 
 #%% read in obs
 lst = glob.glob(os.path.join(rawdatapath, 'CPC_ENA_AM_*.txt'))
@@ -132,3 +134,5 @@ ax4.legend(['contamined','good'])
 ax4.grid()
 
 plt.tight_layout()
+
+fig.savefig(figpath+'/Figure2.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)

@@ -56,6 +56,7 @@ fig,ax = plot.diurnalcycle_2d([cf_obs, cf_e3sm, ], y = [height1, heightm, ],
                         yticks=[0,3,6,9,12], ylimit=(0,12), ylabel='Height (km)', cmap='hot_r',
                         levellist=np.arange(0,29,1),
                          title= ['Obs', 'E3SMv2', ])
+fig.savefig(figpath+'/Figure9_diurnal_'+site+'.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
 # fig.savefig(figpath+'diurnalcycle_cloud2d_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 fig,ax = plot.seasonalcycle_2d([cf_obs, cf_e3sm, ], y = [height1, heightm, ],
@@ -63,6 +64,7 @@ fig,ax = plot.seasonalcycle_2d([cf_obs, cf_e3sm, ], y = [height1, heightm, ],
                         levellist=np.arange(0,41,1),
                         # title= ['Obs', 'E3SMv2',]
                          )
+fig.savefig(figpath+'/Figure9_seasonal_'+site+'.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
 # fig.savefig(figpath+'seasonalcycle_cloud2d_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
     
     
@@ -74,7 +76,7 @@ ydata = [h.flatten() for i in range(ndata)]
 xedges = np.arange(0.,101.,5.)
 xedges[0]=0.1
 yedges = np.array([0,.2,.4,.6,.8,1,1.5,2,2.5,3,4,5,6,7,8,10,12])
-# yedges = np.arange(18)
+# yedges = np.arange(0,18,.5)
 weights = []
 for mm in range(ndata):
         hnum,x,y=np.histogram2d((xdata[mm]*0.0),ydata[mm],bins=[np.array([-1,1]), yedges])
@@ -95,3 +97,6 @@ if site=='ENA':
               #  title=['Obs','E3SMv2',]
                 )
     # fig.savefig(figpath+'histogram_cloud_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+# ax[0].grid()    
+# ax[1].grid()    
+fig.savefig(figpath+'/Figure9_hist_'+site+'.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)

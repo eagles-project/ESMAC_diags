@@ -38,7 +38,7 @@ prep_sfc_path = 'C:/Users/tang357/Downloads/prep_data/'+site+'/surface/'
 prep_sat_path = 'C:/Users/tang357/Downloads/prep_data/'+site+'/satellite/'
 modis_path = 'C:/Users/tang357/OneDrive - PNNL/EAGLES/Hi-Scale/data/MODIS/'
 # set output path for plots
-figpath= '../figures/'+site+'/'
+figpath= '../figures/'
 
 #%% read aircraft data 
 
@@ -314,6 +314,8 @@ fig,ax = plot.hist([nd_air, nd_sfc, nd_wu, nd_sat], weights=[w0, w1, w2, w3], bi
                     xlabel='cm$^{-3}$', ylabel='Fraction', color=color_4,  ylimit=(0,0.4),
                      title = '(d) All data in original resolution' )
                     # title = 'Cloud Droplet Number Concentration '+site, )
+
+fig.savefig(figpath+'/Figure3d.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
     
 #%% select only for low-level overcast clouds
 nd_air_xr = xr.DataArray(
@@ -337,6 +339,7 @@ fig,ax = plot.hist([nd_air_incld, nd_sfc_st, nd_wu_st, nd_sat_st], weights=[w0, 
                     xlabel='cm$^{-3}$', ylabel='Fraction', color=color_4,  ylimit=(0,0.4),
                      title = '(e) Overcast low clouds in original resolution' )
                     # title = 'Cloud Droplet Number Concentration '+site, )
+fig.savefig(figpath+'/Figure3e.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
     
 #%% remove small Nd and average in VISST resolution, overcast condition
 nd_sat_5 = np.array(nd_sat_st)
@@ -364,6 +367,8 @@ fig,ax = plot.hist([nd_air_5, nd_sfc_5, nd_wu_5, nd_sat_5], weights=[w0, w1, w2,
                     # title = 'Cloud Droplet Number Concentration '+site, )
                      title = '(f) Overcast low clouds averaged into 30-min' )
    
+fig.savefig(figpath+'/Figure3f.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 #%% all data
 w0 = np.ones_like(reff_air)/sum(~np.isnan(reff_air.data))
 w1 = np.ones_like(reff_sfc)/sum(~np.isnan(reff_sfc.data))
@@ -375,6 +380,8 @@ fig,ax = plot.hist([reff_air, reff_sfc, reff_wu, reff_sat], weights=[w0, w1, w2,
                               'Wu_etal ('+format(1/w2[0],'.0f')+')','VISST ('+format(1/w3[0],'.0f')+')'], 
                     color=color_4, title = '(d) All data in original resolution', #title='Cloud Effective Radius '+site, 
                     ylabel='Fraction', xlabel='$\mu$m')
+
+fig.savefig(figpath+'/Figure4d.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
     
 #%% select only for low-level overcast clouds
 reff_air_xr = xr.DataArray(
@@ -398,6 +405,8 @@ fig,ax = plot.hist([reff_air_incld, reff_sfc_st, reff_wu_st, reff_sat_st], weigh
                     color=color_4, title = '(e) Overcast low clouds in original resolution', #title='Cloud Effective Radius '+site, 
                     ylabel='Fraction', xlabel='$\mu$m')
     
+fig.savefig(figpath+'/Figure4e.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 #%% remove small Nd and average in VISST resolution, in overcast condition
 reff_sat_5 = np.array(reff_sat)
 reff_sfc_1 = np.array(reff_sfc)
@@ -430,3 +439,4 @@ fig,ax = plot.hist([reff_air_5, reff_sfc_5, reff_wu_5, reff_sat_5], weights=[w0,
                     color=color_4, title = '(f) Overcast low clouds averaged into 30-min',
                     ylabel='Fraction', xlabel='$\mu$m')
     
+fig.savefig(figpath+'/Figure4f.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)

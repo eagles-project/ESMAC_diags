@@ -108,3 +108,4 @@ for nn in range(len(ax)):
     ax[nn].text(np.log(25),np.log(400), 'R = '+format(regress[nn][2],'3.2f'))
     print(regress[nn][3])
 
+fig.savefig(figpath+'/Figure11a.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)

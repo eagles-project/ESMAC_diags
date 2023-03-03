@@ -18,7 +18,7 @@ prep_sfc_path = '../prep_data/'+site+'/surface/'
 prep_sat_path = '../prep_data/'+site+'/satellite/'
    
 # path of output figures
-figpath= '../figures/'+site+'/'
+figpath= '../figures/'
 
 if not os.path.exists(figpath):
     os.makedirs(figpath)
@@ -181,6 +181,7 @@ w2 = np.ones_like(ccn2_m)/sum(~np.isnan(ccn2_m.data))
 fig,ax = plot.hist([ccn2,ccn2_m], weights=[w1,w2], bins=np.arange(0,1500,50),
                     legend =['CCN Counter', 'E3SMv2',], color=[CB_color_cycle[1],'k'],
                     xlabel = '(a) Surface CCN (SS=0.2%) (cm$^{-3}$)', ylabel='PDF')
+fig.savefig(figpath+'/Figure8a.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
                     # title = '(a) Surface CCN (SS=0.2%) '+site, ylabel='PDF', xlabel='cm$^{-3}$')
 
 w0 = np.ones_like(ndrop[idx_sfc])/sum(~np.isnan(ndrop[idx_sfc].data))
@@ -189,6 +190,7 @@ w1 = np.ones_like(nd_m[idx_m])/sum(~np.isnan(nd_m[idx_m].data))
 fig,ax = plot.hist([ndrop[idx_sfc],nd_sat[idx_sat],nd_m[idx_m]],  weights=[w0,w000,w1], 
                    legend = ['Ndrop','Satellite', 'E3SMv2'], color=[CB_color_cycle[1],CB_color_cycle[0],'k'],bins=np.arange(0,410,20), 
                    xlabel = '(c) Nd (cm$^{-3}$)', ylabel='PDF')
+fig.savefig(figpath+'/Figure8c.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
                     # title = '(c) Nd '+site, ylabel='PDF', xlabel='cm$^{-3}$')
 
 w0 = np.ones_like(reff[idx_sfc])/sum(~np.isnan(reff[idx_sfc].data))
@@ -197,6 +199,7 @@ w1 = np.ones_like(reff_m[idx_m])/sum(~np.isnan(reff_m[idx_m].data))
 fig,ax = plot.hist([reff[idx_sfc],reff_sat[idx_sat],reff_m[idx_m]], weights=[w0,w000,w1], 
                     legend = ['MFRSR','Satellite', 'E3SMv2'], color=[CB_color_cycle[1],CB_color_cycle[0],'k'], bins=np.arange(3,22,1), 
                     xlabel = '(e) Cloud Effective Radius ($\mu$m)', ylabel='PDF')
+fig.savefig(figpath+'/Figure8e.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
                     # title = '(e) Cloud Effective Radius '+site,ylabel='PDF', xlabel='$\mu$m')
 
 w0 = np.ones_like(cod[idx_sfc])/sum(~np.isnan(cod[idx_sfc].data))
@@ -205,6 +208,7 @@ w1 = np.ones_like(cod_m[idx_m])/sum(~np.isnan(cod_m[idx_m].data))
 fig,ax = plot.hist( [cod[idx_sfc], cod_sat[idx_sat], cod_m[idx_m], ], weights=[w0,w00,w1,], 
                     legend = ['MFRSR','Satellite','E3SMv2',], color=[CB_color_cycle[1],CB_color_cycle[0],'k',],bins=np.arange(2,81,3), 
                     xlabel = '(g) Cloud Optical Depth (unitless)', ylabel='PDF')
+fig.savefig(figpath+'/Figure8g.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
                     # title='(g) Cloud Optical Depth '+site, ylabel='PDF', xlabel='unitless')
 # fig.savefig(figpath+'hist_cod_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
@@ -215,6 +219,7 @@ fig,ax = plot.hist([cld_arscl,cld_visst,cld_m],
                     weights=[w0,w00,w1],  bins=np.arange(0,101,5), 
                     legend = ['ARMBE','Satellite','E3SMv2'], color=[CB_color_cycle[1],CB_color_cycle[0],'k'],
                     xlabel = '(i) Cloud Fraction (%)', ylabel='PDF')
+fig.savefig(figpath+'/Figure8i.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
                       # title = '(i) Cloud PDF '+site, ylabel='PDF', xlabel="%")
 # fig.savefig(figpath+'hist_totcld_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 

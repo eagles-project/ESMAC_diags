@@ -827,7 +827,7 @@ fig,ax = plot.percentiles([cpc10_hiscale[i_hiscale_sfc], ncn10_m_hiscale[i_hisca
                     title='(a) CN (>10nm) (cm$^{-3}$)', figsize=(10,2.5), #ylimit=(0,8000),
                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
                     color=[CB_color_cycle[1], 'k'], legend=None)
-# fig.savefig(figpath+'percentiles_CN10_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig.savefig(figpath+'/Figure7a.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
 
 fig,ax = plot.percentiles([smps100_hiscale[i_hiscale_sfc], ncn100_m_hiscale[i_hiscale_m],], 
                           [uhsas100_aceena[i_aceena_sfc], ncn100_m_aceena[i_aceena_m],],
@@ -836,7 +836,7 @@ fig,ax = plot.percentiles([smps100_hiscale[i_hiscale_sfc], ncn100_m_hiscale[i_hi
                     title='(b) CN (>100nm) (cm$^{-3}$)',figsize=(10,2.5),ylimit=(0,1200),
                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
                     color=[CB_color_cycle[1], 'k'], legend=None)
-# fig.savefig(figpath+'percentiles_CN100_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig.savefig(figpath+'/Figure7b.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
 
 fig,ax = plot.percentiles([ndrop_hiscale[i_hiscale_sfc], nd_sat_hiscale[i_hiscale_sat], nd_m_hiscale[i_hiscale_m], ], 
                           [ndrop_aceena[i_aceena_sfc], nd_sat_aceena[i_aceena_sat], nd_m_aceena[i_aceena_m],],
@@ -845,7 +845,7 @@ fig,ax = plot.percentiles([ndrop_hiscale[i_hiscale_sfc], nd_sat_hiscale[i_hiscal
                     title='(c) Nd (cm$^{-3}$)',figsize=(10,2.5),ylimit=(0,500),
                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
                     color=[CB_color_cycle[1],CB_color_cycle[0], 'k'], legend=['Ground/Ship','Satellite','E3SMv2',])
-# fig.savefig(figpath+'percentiles_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig.savefig(figpath+'/Figure7c.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
 
 fig,ax = plot.percentiles([lwp_armbe_hiscale[i_hiscale_sfc], lwp_sat_hiscale[i_hiscale_sat], lwp_m_hiscale[i_hiscale_m],], 
                           [lwp_armbe_aceena[i_aceena_sfc], lwp_sat_aceena[i_aceena_sat], lwp_m_aceena[i_aceena_m],],
@@ -854,7 +854,7 @@ fig,ax = plot.percentiles([lwp_armbe_hiscale[i_hiscale_sfc], lwp_sat_hiscale[i_h
                     title='(d) LWP (g/m$^2$)',figsize=(10,2.5),
                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
                     color=[CB_color_cycle[1],CB_color_cycle[0], 'k'], legend=None)
-# fig.savefig(figpath+'percentiles_lwp_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig.savefig(figpath+'/Figure7d.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
 
 fig,ax = plot.percentiles([reff_hiscale[i_hiscale_sfc], reff_sat_hiscale[i_hiscale_sat], reff_m_hiscale[i_hiscale_m],], 
                           [reff_aceena[i_aceena_sfc], reff_sat_aceena[i_aceena_sat], reff_m_aceena[i_aceena_m],],
@@ -863,7 +863,7 @@ fig,ax = plot.percentiles([reff_hiscale[i_hiscale_sfc], reff_sat_hiscale[i_hisca
                     title='(e) Reff ($\mu$m)',figsize=(10,2.5),#ylimit=(0,500),
                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
                     color=[CB_color_cycle[1],CB_color_cycle[0], 'k'], legend=None)
-# fig.savefig(figpath+'percentiles_Reff_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig.savefig(figpath+'/Figure7e.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
 
 fig,ax = plot.percentiles([cod_hiscale[i_hiscale_sfc], cod_sat_hiscale[i_hiscale_sat], cod_m_hiscale[i_hiscale_m],], 
                           [cod_aceena[i_aceena_sfc], cod_sat_aceena[i_aceena_sat], cod_m_aceena[i_aceena_m],],
@@ -872,4 +872,4 @@ fig,ax = plot.percentiles([cod_hiscale[i_hiscale_sfc], cod_sat_hiscale[i_hiscale
                     title='(f) Cloud Optical Depth (unitless)',figsize=(10,2.5),
                     xlabel=['HI-SCALE','ACE-ENA','MAGIC','MARCUS'], 
                     color=[CB_color_cycle[1],CB_color_cycle[0], 'k'], legend=None)
-# fig.savefig(figpath+'percentiles_cod_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig.savefig(figpath+'/Figure7f.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)

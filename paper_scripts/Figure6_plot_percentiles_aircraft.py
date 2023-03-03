@@ -222,7 +222,7 @@ fig,ax = plot.percentiles([cpc10_hiscale, ncn10_m_hiscale, ],
                     title='(a) CN (>10nm) (cm$^{-3}$)', ylimit=(0,8000),figsize=(10,2.5),
                     xlabel=['HI-SCALE','ACE-ENA','CSET','SOCRATES'], 
                     color=[CB_color_cycle[1],'k',], legend=['Obs','E3SMv2'])
-# fig.savefig(figpath+'percentiles_CN10_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig.savefig(figpath+'/Figure6a.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
 
 fig,ax = plot.percentiles([pcasp100_hiscale, ncn100_m_hiscale, ], 
                           [pcasp100_aceena, ncn100_m_aceena, ],
@@ -231,7 +231,7 @@ fig,ax = plot.percentiles([pcasp100_hiscale, ncn100_m_hiscale, ],
                     title='(b) CN (>100nm) (cm$^{-3}$)',ylimit=(0,1200),figsize=(10,2.5),
                     xlabel=['HI-SCALE','ACE-ENA','CSET','SOCRATES'], 
                     color=[CB_color_cycle[1],'k',], legend=None)
-# fig.savefig(figpath+'percentiles_CN100_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig.savefig(figpath+'/Figure6b.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
 
 fig,ax = plot.percentiles([nd_hiscale, nd_m_hiscale, ], 
                           [nd_aceena, nd_m_aceena, ],
@@ -240,7 +240,7 @@ fig,ax = plot.percentiles([nd_hiscale, nd_m_hiscale, ],
                     title='(c) Nd (cm$^{-3}$)',figsize=(10,2.5),
                     xlabel=['HI-SCALE','ACE-ENA','CSET','SOCRATES'], 
                     color=[CB_color_cycle[1],'k',], legend=None)
-# fig.savefig(figpath+'percentiles_Nd_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig.savefig(figpath+'/Figure6c.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
 
 fig,ax = plot.percentiles([lwc_hiscale, lwc_m_hiscale, ], 
                           [lwc_aceena, lwc_m_aceena, ],
@@ -249,4 +249,4 @@ fig,ax = plot.percentiles([lwc_hiscale, lwc_m_hiscale, ],
                     title='(d) LWC (g/m$^3$)',figsize=(10,2.5),
                     xlabel=['HI-SCALE','ACE-ENA','CSET','SOCRATES'], 
                     color=[CB_color_cycle[1],'k'], legend=None)
-# fig.savefig(figpath+'percentiles_LWC_'+site+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+fig.savefig(figpath+'/Figure6d.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)

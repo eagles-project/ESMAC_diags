@@ -31,7 +31,7 @@ prep_sfc_path = '../prep_data/'+site+'/surface/'
 prep_sat_path = '../prep_data/'+site+'/satellite/'
    
 # path of output figures
-figpath= '../figures/'+site+'/'
+figpath= '../figures/'
 
 if not os.path.exists(figpath):
     os.makedirs(figpath)
@@ -317,6 +317,7 @@ for nn in range(3):
         ax[0,nn].text(50,600, 'y = '+format(a,'3.2f')+'x + '+format(b,'3.2f'),color='r')
     ax[0,nn].text(100,400, 'R = '+format(regress[nn][2],'3.2f'),color='r')
 
+fig.savefig(figpath+'/Figure10a.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
 
 # %% LWP vs Nd
 
@@ -391,6 +392,7 @@ for nn in range(3):
         ax[0,nn].plot(x, y, color='k',linewidth=5,linestyle='--')
     print(regress[nn][2:4])
     
+fig.savefig(figpath+'/Figure12a.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
 
     
 #%% heatmap of albedo to LWP and Nd
@@ -432,3 +434,4 @@ H_count, x, y = np.histogram2d(nd_m.data[idx_m1].flatten(), lwp_m.data[idx_m1].f
 cs1 = ax[1].contour(X,Y,H_count.T,np.array([10, 100, 300, 1000]), colors=['k'])
 ax[1].clabel(cs1, cs1.levels, inline=True, fontsize=10)
 
+fig.savefig(figpath+'/Figure13a.svg',dpi=fig.dpi,bbox_inches='tight', pad_inches=0.1)
