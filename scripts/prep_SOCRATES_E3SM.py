@@ -20,6 +20,7 @@ output_filehead = 'E3SMv2_SOCRATES'
 
 # flight data path
 RFpath = '../raw_data/obs/SOCRATES/aircraft/aircraft_lowrate/'
+E3SMdomain_range = '133e_to_164e_42s_to_63s'    # domain range in E3SM regional output
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-prep.prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, RFpath, dt=60)
+prep.prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, RFpath, E3SMdomain_range='_'+E3SMdomain_range, dt=60)

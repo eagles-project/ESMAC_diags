@@ -33,7 +33,7 @@ from esmac_diags.subroutines.CN_mode_to_size import calc_CNsize_cutoff_0_3000nm
 # shipmetpath = '../../../data/MAGIC/obs/ship/magmarinemetM1.b1/'
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, shipmetpath, dt=3600):
+def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, shipmetpath, E3SMdomain_range='', dt=3600):
     """
     prepare surface (include TOA and vertical integrated) variables from E3SM output along ship tracks
     choose the grid nearest to the ship track location
@@ -65,7 +65,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, ship
     
     #%% settings specific for each site
     
-    E3SMdomain_range = '202e_to_243e_20n_to_35n'    # domain range in E3SM regional output
+    # E3SMdomain_range = '202e_to_243e_20n_to_35n'    # domain range in E3SM regional output
     
     # output time range and resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
@@ -101,8 +101,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, ship
     # first data
     e3smdata = xr.open_mfdataset(lst)
     e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-    lonm = e3smdata['lon'+'_'+E3SMdomain_range].load().data
-    latm = e3smdata['lat'+'_'+E3SMdomain_range].load().data
+    lonm = e3smdata['lon'+E3SMdomain_range].load().data
+    latm = e3smdata['lat'+E3SMdomain_range].load().data
     if len(lonm.shape)>1:   # when use xr.open_mfdataset, lat,lon will add a time dimension
         lonm = lonm[0,:]
         latm = latm[0,:]
@@ -119,27 +119,27 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, ship
             
     # aerosol composition
     print(ttt.ctime(ttt.time())+': aerosol composition:')
-    bc_a1 = e3smdata['bc_a1'+'_'+E3SMdomain_range].load()
-    bc_a3 = e3smdata['bc_a3'+'_'+E3SMdomain_range].load()
-    bc_a4 = e3smdata['bc_a4'+'_'+E3SMdomain_range].load()
-    dst_a1 = e3smdata['dst_a1'+'_'+E3SMdomain_range].load()
-    dst_a3 = e3smdata['dst_a3'+'_'+E3SMdomain_range].load()
-    mom_a1 = e3smdata['mom_a1'+'_'+E3SMdomain_range].load()
-    mom_a2 = e3smdata['mom_a2'+'_'+E3SMdomain_range].load()
-    mom_a3 = e3smdata['mom_a3'+'_'+E3SMdomain_range].load()
-    mom_a4 = e3smdata['mom_a4'+'_'+E3SMdomain_range].load()
-    ncl_a1 = e3smdata['ncl_a1'+'_'+E3SMdomain_range].load()
-    ncl_a2 = e3smdata['ncl_a2'+'_'+E3SMdomain_range].load()
-    ncl_a3 = e3smdata['ncl_a3'+'_'+E3SMdomain_range].load()
-    pom_a1 = e3smdata['pom_a1'+'_'+E3SMdomain_range].load()
-    pom_a3 = e3smdata['pom_a3'+'_'+E3SMdomain_range].load()
-    pom_a4 = e3smdata['pom_a4'+'_'+E3SMdomain_range].load()
-    so4_a1 = e3smdata['so4_a1'+'_'+E3SMdomain_range].load()
-    so4_a2 = e3smdata['so4_a2'+'_'+E3SMdomain_range].load()
-    so4_a3 = e3smdata['so4_a3'+'_'+E3SMdomain_range].load()
-    soa_a1 = e3smdata['soa_a1'+'_'+E3SMdomain_range].load()
-    soa_a2 = e3smdata['soa_a2'+'_'+E3SMdomain_range].load()
-    soa_a3 = e3smdata['soa_a3'+'_'+E3SMdomain_range].load()
+    bc_a1 = e3smdata['bc_a1'+E3SMdomain_range].load()
+    bc_a3 = e3smdata['bc_a3'+E3SMdomain_range].load()
+    bc_a4 = e3smdata['bc_a4'+E3SMdomain_range].load()
+    dst_a1 = e3smdata['dst_a1'+E3SMdomain_range].load()
+    dst_a3 = e3smdata['dst_a3'+E3SMdomain_range].load()
+    mom_a1 = e3smdata['mom_a1'+E3SMdomain_range].load()
+    mom_a2 = e3smdata['mom_a2'+E3SMdomain_range].load()
+    mom_a3 = e3smdata['mom_a3'+E3SMdomain_range].load()
+    mom_a4 = e3smdata['mom_a4'+E3SMdomain_range].load()
+    ncl_a1 = e3smdata['ncl_a1'+E3SMdomain_range].load()
+    ncl_a2 = e3smdata['ncl_a2'+E3SMdomain_range].load()
+    ncl_a3 = e3smdata['ncl_a3'+E3SMdomain_range].load()
+    pom_a1 = e3smdata['pom_a1'+E3SMdomain_range].load()
+    pom_a3 = e3smdata['pom_a3'+E3SMdomain_range].load()
+    pom_a4 = e3smdata['pom_a4'+E3SMdomain_range].load()
+    so4_a1 = e3smdata['so4_a1'+E3SMdomain_range].load()
+    so4_a2 = e3smdata['so4_a2'+E3SMdomain_range].load()
+    so4_a3 = e3smdata['so4_a3'+E3SMdomain_range].load()
+    soa_a1 = e3smdata['soa_a1'+E3SMdomain_range].load()
+    soa_a2 = e3smdata['soa_a2'+E3SMdomain_range].load()
+    soa_a3 = e3smdata['soa_a3'+E3SMdomain_range].load()
     bc_all = xr.concat([bc_a1[i,-1,x_idx_all[i]] + bc_a3[i,-1,x_idx_all[i]] + bc_a4[i,-1,x_idx_all[i]]
                  for i in range(len(e3smtime))],dim='time')
     dst_all = xr.concat([dst_a1[i,-1,x_idx_all[i]] + dst_a3[i,-1,x_idx_all[i]]
@@ -179,14 +179,14 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, ship
     
     # aerosol size
     print(ttt.ctime(ttt.time())+': aerosol size:')
-    num_a1 = e3smdata['num_a1'+'_'+E3SMdomain_range].load()
-    num_a2 = e3smdata['num_a2'+'_'+E3SMdomain_range].load()
-    num_a3 = e3smdata['num_a3'+'_'+E3SMdomain_range].load()
-    num_a4 = e3smdata['num_a4'+'_'+E3SMdomain_range].load()
-    dn1 = e3smdata['dgnd_a01'+'_'+E3SMdomain_range].load()
-    dn2 = e3smdata['dgnd_a02'+'_'+E3SMdomain_range].load()
-    dn3 = e3smdata['dgnd_a03'+'_'+E3SMdomain_range].load()
-    dn4 = e3smdata['dgnd_a04'+'_'+E3SMdomain_range].load()
+    num_a1 = e3smdata['num_a1'+E3SMdomain_range].load()
+    num_a2 = e3smdata['num_a2'+E3SMdomain_range].load()
+    num_a3 = e3smdata['num_a3'+E3SMdomain_range].load()
+    num_a4 = e3smdata['num_a4'+E3SMdomain_range].load()
+    dn1 = e3smdata['dgnd_a01'+E3SMdomain_range].load()
+    dn2 = e3smdata['dgnd_a02'+E3SMdomain_range].load()
+    dn3 = e3smdata['dgnd_a03'+E3SMdomain_range].load()
+    dn4 = e3smdata['dgnd_a04'+E3SMdomain_range].load()
     P0 = e3smdata['P0'].load()
     hyam = e3smdata['hyam'].load()
     hybm = e3smdata['hybm'].load()
@@ -194,8 +194,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, ship
         hyam = hyam[0,:]
         hybm = hybm[0,:]
         P0 = P0[0]
-    T = e3smdata['T'+'_'+E3SMdomain_range].load()
-    PS = e3smdata['PS'+'_'+E3SMdomain_range].load()
+    T = e3smdata['T'+E3SMdomain_range].load()
+    PS = e3smdata['PS'+E3SMdomain_range].load()
     Pres = np.nan*T
     zlen = T.shape[1]
     for kk in range(zlen):
@@ -219,8 +219,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, ship
     
     # variables to calculate Reff and Nd
     print(ttt.ctime(ttt.time())+': Reff and Nd:')
-    z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
-    cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
+    z3 = e3smdata['Z3'+E3SMdomain_range].load()
+    cloud = e3smdata['CLOUD'+E3SMdomain_range].load()
     z3 = xr.concat([z3[i,:,x_idx_all[i]] for i in range(len(e3smtime))],dim='time').data
     cloud = xr.concat([cloud[i,:,x_idx_all[i]] for i in range(len(e3smtime))],dim='time').data
     dz = (z3[:,:-2] - z3[:,2:])/2
@@ -277,12 +277,12 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, ship
         attrs=dict(long_name="cloud top temperature",units="K"),)
     
     # cloud optical depth and effective radius
-    rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
-    freql = e3smdata['FREQL'+'_'+E3SMdomain_range].load()
-    icwnc = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
-    cod_a = e3smdata['TOT_CLD_VISTAU'+'_'+E3SMdomain_range].load()
-    cod_m = e3smdata['TAUWMODIS'+'_'+E3SMdomain_range].load()*0.01 #  cod from MODIS simulator, cloud fraction is treated as 1 but is 100
-    solin = e3smdata['SOLIN'+'_'+E3SMdomain_range].load()
+    rel = e3smdata['REL'+E3SMdomain_range].load()
+    freql = e3smdata['FREQL'+E3SMdomain_range].load()
+    icwnc = e3smdata['ICWNC'+E3SMdomain_range].load()
+    cod_a = e3smdata['TOT_CLD_VISTAU'+E3SMdomain_range].load()
+    cod_m = e3smdata['TAUWMODIS'+E3SMdomain_range].load()*0.01 #  cod from MODIS simulator, cloud fraction is treated as 1 but is 100
+    solin = e3smdata['SOLIN'+E3SMdomain_range].load()
     rel = xr.concat([rel[i,:,x_idx_all[i]] for i in range(len(e3smtime))],dim='time').data
     freql = xr.concat([freql[i,:,x_idx_all[i]] for i in range(len(e3smtime))],dim='time').data
     icwnc = xr.concat([icwnc[i,:,x_idx_all[i]] for i in range(len(e3smtime))],dim='time').data
@@ -303,7 +303,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, ship
         attrs=dict(long_name="column-total cloud optical depth",units="N/A"),)
     
     # mean cloud droplet number concentration
-    cdnc_col = e3smdata['CDNUMC'+'_'+E3SMdomain_range].load()
+    cdnc_col = e3smdata['CDNUMC'+E3SMdomain_range].load()
     cdnc_col = xr.concat([cdnc_col[i,x_idx_all[i]] for i in range(len(e3smtime))],dim='time').data
     cdnc_mean = cdnc_col/np.sum(weight,axis=1)
     cdnc_mean[cdnc_mean >2e9] = np.nan
@@ -312,7 +312,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, ship
         attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
     
     # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
-    lwp = e3smdata['TGCLDLWP'+'_'+E3SMdomain_range]
+    lwp = e3smdata['TGCLDLWP'+E3SMdomain_range]
     lwp = xr.concat([lwp[i,x_idx_all[i]] for i in range(len(e3smtime))],dim='time').data
     e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
     T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
@@ -336,7 +336,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, ship
                         #'MEANPTOP_ISCCP', 'MEANCLDALB_ISCCP', 'MEANTAU_ISCCP',
                         'PBLH', 'PRECT', 'PRECL', 'PRECC', 'PS', 'TREFHT', ]
     for varname in variable2d_names:
-        var = e3smdata[varname + '_'+E3SMdomain_range].load()
+        var = e3smdata[varname + E3SMdomain_range].load()
         var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
         if varname=='AODABS' or varname=='AODALL':
             var.attrs['units']='N/A'
@@ -347,7 +347,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, ship
     # all other 3D (with vertical level) variables at the lowest model level
     variable3d_names = ['CCN1', 'CCN3', 'CCN4', 'CCN5', 'Q', 'T', 'RELHUM', 'U', 'V'] 
     for varname in variable3d_names:
-        var = e3smdata[varname + '_'+E3SMdomain_range].load()
+        var = e3smdata[varname + E3SMdomain_range].load()
         var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
         var3 = xr.concat([var[i,-1,x_idx_all[i]] for i in range(len(e3smtime))],dim='time')
         variables.append(var3)
@@ -465,7 +465,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, ship
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, shipmetpath, 
-                      height_out, lev_out=np.arange(25.,1001,25.), dt=3600):
+                      height_out, lev_out=np.arange(25.,1001,25.), E3SMdomain_range='', dt=3600):
     """
     prepare vertical profile (to p or to z) variables from E3SM output along ship tracks
     choose the grid nearest to the ship location
@@ -501,7 +501,7 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
         os.makedirs(output_path)
     
     #%% settings specific for each site
-    E3SMdomain_range = '202e_to_243e_20n_to_35n'    # domain range in E3SM regional output
+    # E3SMdomain_range = '202e_to_243e_20n_to_35n'    # domain range in E3SM regional output
     
     # output time range and resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
@@ -535,20 +535,20 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     
     e3smdata = xr.open_mfdataset(lst)
     e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-    lonm = e3smdata['lon'+'_'+E3SMdomain_range].load()
-    latm = e3smdata['lat'+'_'+E3SMdomain_range].load()
-    z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
+    lonm = e3smdata['lon'+E3SMdomain_range].load()
+    latm = e3smdata['lat'+E3SMdomain_range].load()
+    z3 = e3smdata['Z3'+E3SMdomain_range].load()
     hyam = e3smdata['hyam'].load()
     hybm = e3smdata['hybm'].load()
     p0 = e3smdata['P0'].load()
-    ps = e3smdata['PS'+'_'+E3SMdomain_range].load()
-    Ts = e3smdata['TREFHT'+'_'+E3SMdomain_range].load()
-    T = e3smdata['T'+'_'+E3SMdomain_range].load()
-    Q = e3smdata['Q'+'_'+E3SMdomain_range].load()
-    U = e3smdata['U'+'_'+E3SMdomain_range].load()
-    V = e3smdata['V'+'_'+E3SMdomain_range].load()
-    RH = e3smdata['RELHUM'+'_'+E3SMdomain_range].load()
-    cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
+    ps = e3smdata['PS'+E3SMdomain_range].load()
+    Ts = e3smdata['TREFHT'+E3SMdomain_range].load()
+    T = e3smdata['T'+E3SMdomain_range].load()
+    Q = e3smdata['Q'+E3SMdomain_range].load()
+    U = e3smdata['U'+E3SMdomain_range].load()
+    V = e3smdata['V'+E3SMdomain_range].load()
+    RH = e3smdata['RELHUM'+E3SMdomain_range].load()
+    cloud = e3smdata['CLOUD'+E3SMdomain_range].load()
     e3smdata.close()
     
     if len(lonm.shape)>1:   # when use xr.open_mfdataset, lat,lon will add a time dimension

@@ -29,12 +29,16 @@ def timeseries(time, data, figsize=(10,4), xlimit=None, ylimit=None,
     ndata = len(data)
     if legend is None:
         legend = [None for mm in range(ndata)]
-        
+        islegend=False
+    else:
+        islegend=True
+    
     plt.rcParams.update({'font.size': 16})
     fig,ax = plt.subplots(figsize=figsize)
     for nn in range(ndata):
         ax.plot(time[nn],data[nn],color=color[nn],label=legend[nn], **kwargs)
-    ax.legend()
+    if islegend:
+        ax.legend()
     ax.set_ylim(ylimit)
     ax.set_xlim(xlimit)
     ax.set_xlabel(xlabel)
@@ -145,7 +149,7 @@ def timeseries_size(time, size, data, figsize=None, leveltick=[0.1,1,10,100,1000
     for nn in range(ndata):
         ax0 = fig.add_subplot(ndata, 1, nn+1)
         ax.append(ax0)
-        h = ax0.contourf(time[nn],size[nn],np.log10(data[nn]),levellist,cmap=plt.get_cmap('jet'))
+        h = ax0.contourf(time[nn],size[nn],np.log10(data[nn]),levellist)
         ax0.set_yscale('log')
         ax0.set_ylim(ylimit)
         ax0.set_ylabel(ylabel)
@@ -261,7 +265,7 @@ def mean_size_witherror(size, data, figsize=(8,6), xlimit=None, ylimit=None, xsc
         meandata = np.nanmean(data[nn],axis=0)
         
         ax.plot(size[nn],meandata,marker=marker[nn],linestyle=linestyles[nn],color=color[nn],label=legend[nn])
-        if marker[nn]=='.':
+        if marker[nn] is not None:
             ax.errorbar(size[nn],meandata,yerr=[meandata-pct[:,0], meandata+pct[:,1]], 
                         marker='.',linestyle=linestyles[nn],color=color[nn], alpha=0.5)
             # ax.errorbar(size[nn][1:-1:5],meandata[1:-1:5],yerr=[meandata[1:-1:5]-pct[nn][1:-1:5,0], meandata[1:-1:5]+pct[nn][1:-1:5,1]], 
