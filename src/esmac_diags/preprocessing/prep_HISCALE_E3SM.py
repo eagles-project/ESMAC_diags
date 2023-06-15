@@ -450,10 +450,10 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     
     #%% read in data
     
-    lst = glob.glob(input_path + input_filehead+'.*2016-04-2?-00000.nc') + \
+    lst = glob.glob(input_path + input_filehead+'.*2016-04-??-00000.nc') + \
             glob.glob(input_path + input_filehead+'.*2016-05-??-00000.nc') + \
             glob.glob(input_path + input_filehead+'.*2016-06-0?-00000.nc') + \
-            glob.glob(input_path + input_filehead+'.*2016-08-2?-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2016-08-??-00000.nc') + \
             glob.glob(input_path + input_filehead+'.*2016-09-??-00000.nc') 
     lst.sort()
     # first data
@@ -769,10 +769,10 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead,
     variable_names = list()
     variables = list()
     
-    lst = glob.glob(input_path + input_filehead+'.*2016-04-2?-00000.nc') + \
+    lst = glob.glob(input_path + input_filehead+'.*2016-04-??-00000.nc') + \
             glob.glob(input_path + input_filehead+'.*2016-05-??-00000.nc') + \
             glob.glob(input_path + input_filehead+'.*2016-06-0?-00000.nc') + \
-            glob.glob(input_path + input_filehead+'.*2016-08-2?-00000.nc') + \
+            glob.glob(input_path + input_filehead+'.*2016-08-??-00000.nc') + \
             glob.glob(input_path + input_filehead+'.*2016-09-??-00000.nc') 
     lst.sort()
     # first data

@@ -725,7 +725,7 @@ for IOP in ['IOP1','IOP2']:
         
         pr0 = precip_hiscale[precip_hiscale!=0]
         prm = precip_m_hiscale[precip_m_hiscale!=0]
-        prm2 = precip_m_hiscale[precip_m2_hiscale!=0]
+        prm2 = precip_m2_hiscale[precip_m2_hiscale!=0]
         w0 = np.ones_like(pr0)/sum(~np.isnan(pr0.data))
         w1 = np.ones_like(prm)/sum(~np.isnan(prm.data))
         w2 = np.ones_like(prm2)/sum(~np.isnan(prm2.data))
