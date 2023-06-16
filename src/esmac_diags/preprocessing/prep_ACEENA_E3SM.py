@@ -48,7 +48,7 @@ from netCDF4 import Dataset
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, 
-                      iwgpath, dt=60):
+                      iwgpath, E3SMdomain_range='', dt=60):
     """
     prepare E3SM output along flight tracks
     choose the nearest grid and level of the aircraft location
@@ -80,7 +80,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         
     #%% settings specific for each site
     # ACEENA
-    E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
+    # E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
     
     #%% find all data
     lst = glob.glob(iwgpath + '*.a2.txt')
@@ -153,63 +153,63 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
             raise ValueError('Should only contain one file: '+lstm)
         e3smdata = xr.open_dataset(lstm[0])
         e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-        lonm = e3smdata['lon'+'_'+E3SMdomain_range].load()
-        latm = e3smdata['lat'+'_'+E3SMdomain_range].load()
-        z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
+        lonm = e3smdata['lon'+E3SMdomain_range].load()
+        latm = e3smdata['lat'+E3SMdomain_range].load()
+        z3 = e3smdata['Z3'+E3SMdomain_range].load()
         # change time format into seconds of the day
         timem = np.float64((e3smtime - e3smtime[0]).seconds)
         
         # variables for calculating aerosol size
-        num_a1 = e3smdata['num_a1'+'_'+E3SMdomain_range].load()
-        num_a2 = e3smdata['num_a2'+'_'+E3SMdomain_range].load()
-        num_a3 = e3smdata['num_a3'+'_'+E3SMdomain_range].load()
-        num_a4 = e3smdata['num_a4'+'_'+E3SMdomain_range].load()
-        dn1 = e3smdata['dgnd_a01'+'_'+E3SMdomain_range].load()
-        dn2 = e3smdata['dgnd_a02'+'_'+E3SMdomain_range].load()
-        dn3 = e3smdata['dgnd_a03'+'_'+E3SMdomain_range].load()
-        dn4 = e3smdata['dgnd_a04'+'_'+E3SMdomain_range].load()
+        num_a1 = e3smdata['num_a1'+E3SMdomain_range].load()
+        num_a2 = e3smdata['num_a2'+E3SMdomain_range].load()
+        num_a3 = e3smdata['num_a3'+E3SMdomain_range].load()
+        num_a4 = e3smdata['num_a4'+E3SMdomain_range].load()
+        dn1 = e3smdata['dgnd_a01'+E3SMdomain_range].load()
+        dn2 = e3smdata['dgnd_a02'+E3SMdomain_range].load()
+        dn3 = e3smdata['dgnd_a03'+E3SMdomain_range].load()
+        dn4 = e3smdata['dgnd_a04'+E3SMdomain_range].load()
         P0 = e3smdata['P0'].load()
         hyam = e3smdata['hyam'].load()
         hybm = e3smdata['hybm'].load()
-        T = e3smdata['T'+'_'+E3SMdomain_range].load()
-        PS = e3smdata['PS'+'_'+E3SMdomain_range].load()
+        T = e3smdata['T'+E3SMdomain_range].load()
+        PS = e3smdata['PS'+E3SMdomain_range].load()
         Pres = np.nan*T
         zlen = T.shape[1]
         for kk in range(zlen):
             Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
             
         # aerosol composition
-        bc_a1 = e3smdata['bc_a1'+'_'+E3SMdomain_range].load()
-        bc_a3 = e3smdata['bc_a3'+'_'+E3SMdomain_range].load()
-        bc_a4 = e3smdata['bc_a4'+'_'+E3SMdomain_range].load()
-        dst_a1 = e3smdata['dst_a1'+'_'+E3SMdomain_range].load()
-        dst_a3 = e3smdata['dst_a3'+'_'+E3SMdomain_range].load()
-        mom_a1 = e3smdata['mom_a1'+'_'+E3SMdomain_range].load()
-        mom_a2 = e3smdata['mom_a2'+'_'+E3SMdomain_range].load()
-        mom_a3 = e3smdata['mom_a3'+'_'+E3SMdomain_range].load()
-        mom_a4 = e3smdata['mom_a4'+'_'+E3SMdomain_range].load()
-        ncl_a1 = e3smdata['ncl_a1'+'_'+E3SMdomain_range].load()
-        ncl_a2 = e3smdata['ncl_a2'+'_'+E3SMdomain_range].load()
-        ncl_a3 = e3smdata['ncl_a3'+'_'+E3SMdomain_range].load()
-        pom_a1 = e3smdata['pom_a1'+'_'+E3SMdomain_range].load()
-        pom_a3 = e3smdata['pom_a3'+'_'+E3SMdomain_range].load()
-        pom_a4 = e3smdata['pom_a4'+'_'+E3SMdomain_range].load()
-        so4_a1 = e3smdata['so4_a1'+'_'+E3SMdomain_range].load()
-        so4_a2 = e3smdata['so4_a2'+'_'+E3SMdomain_range].load()
-        so4_a3 = e3smdata['so4_a3'+'_'+E3SMdomain_range].load()
-        soa_a1 = e3smdata['soa_a1'+'_'+E3SMdomain_range].load()
-        soa_a2 = e3smdata['soa_a2'+'_'+E3SMdomain_range].load()
-        soa_a3 = e3smdata['soa_a3'+'_'+E3SMdomain_range].load()
+        bc_a1 = e3smdata['bc_a1'+E3SMdomain_range].load()
+        bc_a3 = e3smdata['bc_a3'+E3SMdomain_range].load()
+        bc_a4 = e3smdata['bc_a4'+E3SMdomain_range].load()
+        dst_a1 = e3smdata['dst_a1'+E3SMdomain_range].load()
+        dst_a3 = e3smdata['dst_a3'+E3SMdomain_range].load()
+        mom_a1 = e3smdata['mom_a1'+E3SMdomain_range].load()
+        mom_a2 = e3smdata['mom_a2'+E3SMdomain_range].load()
+        mom_a3 = e3smdata['mom_a3'+E3SMdomain_range].load()
+        mom_a4 = e3smdata['mom_a4'+E3SMdomain_range].load()
+        ncl_a1 = e3smdata['ncl_a1'+E3SMdomain_range].load()
+        ncl_a2 = e3smdata['ncl_a2'+E3SMdomain_range].load()
+        ncl_a3 = e3smdata['ncl_a3'+E3SMdomain_range].load()
+        pom_a1 = e3smdata['pom_a1'+E3SMdomain_range].load()
+        pom_a3 = e3smdata['pom_a3'+E3SMdomain_range].load()
+        pom_a4 = e3smdata['pom_a4'+E3SMdomain_range].load()
+        so4_a1 = e3smdata['so4_a1'+E3SMdomain_range].load()
+        so4_a2 = e3smdata['so4_a2'+E3SMdomain_range].load()
+        so4_a3 = e3smdata['so4_a3'+E3SMdomain_range].load()
+        soa_a1 = e3smdata['soa_a1'+E3SMdomain_range].load()
+        soa_a2 = e3smdata['soa_a2'+E3SMdomain_range].load()
+        soa_a3 = e3smdata['soa_a3'+E3SMdomain_range].load()
         
         # droplet size distribution
-        nd_cld = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
-        lmda = e3smdata['lambda_cloud'+'_'+E3SMdomain_range].load()
-        mu = e3smdata['mu_cloud'+'_'+E3SMdomain_range].load()
+        nd_cld = e3smdata['ICWNC'+E3SMdomain_range].load()
+        lmda = e3smdata['lambda_cloud'+E3SMdomain_range].load()
+        mu = e3smdata['mu_cloud'+E3SMdomain_range].load()
         
         
         # other variables
         for varname in variable3d_names:
-            var = e3smdata[varname+'_'+E3SMdomain_range].load()
+            var = e3smdata[varname+E3SMdomain_range].load()
             variables.append(var)
         e3smdata.close()
         
@@ -405,7 +405,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, 
-                      height_out, lev_out=np.arange(25.,1001,25.), dt=3600):
+                      height_out, lev_out=np.arange(25.,1001,25.), E3SMdomain_range='', dt=3600):
     """
     prepare vertical profile (to p or to z) variables from E3SM output
     choose the grid nearest to the ARM site
@@ -442,7 +442,7 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     # ACEENA
     lat0 = 39.09527
     lon0 = -28.0339
-    E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
+    # E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
     
     # output time range and resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
@@ -457,20 +457,20 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     # first data
     e3smdata = xr.open_dataset(lst[0])
     e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-    lonm = e3smdata['lon'+'_'+E3SMdomain_range].load()
-    latm = e3smdata['lat'+'_'+E3SMdomain_range].load()
-    z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
+    lonm = e3smdata['lon'+E3SMdomain_range].load()
+    latm = e3smdata['lat'+E3SMdomain_range].load()
+    z3 = e3smdata['Z3'+E3SMdomain_range].load()
     hyam = e3smdata['hyam'].load()
     hybm = e3smdata['hybm'].load()
     p0 = e3smdata['P0'].load()
-    ps = e3smdata['PS'+'_'+E3SMdomain_range].load()
-    Ts = e3smdata['TREFHT'+'_'+E3SMdomain_range].load()
-    T = e3smdata['T'+'_'+E3SMdomain_range].load()
-    Q = e3smdata['Q'+'_'+E3SMdomain_range].load()
-    U = e3smdata['U'+'_'+E3SMdomain_range].load()
-    V = e3smdata['V'+'_'+E3SMdomain_range].load()
-    RH = e3smdata['RELHUM'+'_'+E3SMdomain_range].load()
-    cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
+    ps = e3smdata['PS'+E3SMdomain_range].load()
+    Ts = e3smdata['TREFHT'+E3SMdomain_range].load()
+    T = e3smdata['T'+E3SMdomain_range].load()
+    Q = e3smdata['Q'+E3SMdomain_range].load()
+    U = e3smdata['U'+E3SMdomain_range].load()
+    V = e3smdata['V'+E3SMdomain_range].load()
+    RH = e3smdata['RELHUM'+E3SMdomain_range].load()
+    cloud = e3smdata['CLOUD'+E3SMdomain_range].load()
     e3smdata.close()
     # only extract the model column at the site
     if lon0<0:
@@ -531,15 +531,15 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
         e3smtime_i = e3smdata.indexes['time'].to_datetimeindex()
         e3smtime = np.hstack((e3smtime, e3smtime_i))
         
-        z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
-        ps = e3smdata['PS'+'_'+E3SMdomain_range].load()
-        Ts = e3smdata['TREFHT'+'_'+E3SMdomain_range].load()
-        T = e3smdata['T'+'_'+E3SMdomain_range].load()
-        Q = e3smdata['Q'+'_'+E3SMdomain_range].load()
-        U = e3smdata['U'+'_'+E3SMdomain_range].load()
-        V = e3smdata['V'+'_'+E3SMdomain_range].load()
-        RH = e3smdata['RELHUM'+'_'+E3SMdomain_range].load()
-        cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
+        z3 = e3smdata['Z3'+E3SMdomain_range].load()
+        ps = e3smdata['PS'+E3SMdomain_range].load()
+        Ts = e3smdata['TREFHT'+E3SMdomain_range].load()
+        T = e3smdata['T'+E3SMdomain_range].load()
+        Q = e3smdata['Q'+E3SMdomain_range].load()
+        U = e3smdata['U'+E3SMdomain_range].load()
+        V = e3smdata['V'+E3SMdomain_range].load()
+        RH = e3smdata['RELHUM'+E3SMdomain_range].load()
+        cloud = e3smdata['CLOUD'+E3SMdomain_range].load()
         e3smdata.close()
         
         levm = 0.01* (ps[:,x_idx]*hybm + hyam*p0)  # hPa
@@ -725,7 +725,7 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
 
      
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3600):
+def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, E3SMdomain_range='', dt=3600):
     """
     prepare surface (include TOA and vertical integrated) variables from E3SM output
     choose the grid nearest to the ARM site
@@ -757,7 +757,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     # ACEENA
     lat0 = 39.09527
     lon0 = -28.0339
-    E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
+    # E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
     
     # output time range and resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
@@ -774,35 +774,35 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     # first data
     e3smdata = xr.open_dataset(lst[0])
     e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-    lonm = e3smdata['lon'+'_'+E3SMdomain_range].load()
-    latm = e3smdata['lat'+'_'+E3SMdomain_range].load()
+    lonm = e3smdata['lon'+E3SMdomain_range].load()
+    latm = e3smdata['lat'+E3SMdomain_range].load()
     # only extract the model column at the site
     if lon0<0:
         lon0=lon0+360   # make longitude consistent with E3SM from 0 to 360
     x_idx = find_nearest(lonm,latm,lon0,lat0)
     
     # aerosol composition
-    bc_a1 = e3smdata['bc_a1'+'_'+E3SMdomain_range].load()
-    bc_a3 = e3smdata['bc_a3'+'_'+E3SMdomain_range].load()
-    bc_a4 = e3smdata['bc_a4'+'_'+E3SMdomain_range].load()
-    dst_a1 = e3smdata['dst_a1'+'_'+E3SMdomain_range].load()
-    dst_a3 = e3smdata['dst_a3'+'_'+E3SMdomain_range].load()
-    mom_a1 = e3smdata['mom_a1'+'_'+E3SMdomain_range].load()
-    mom_a2 = e3smdata['mom_a2'+'_'+E3SMdomain_range].load()
-    mom_a3 = e3smdata['mom_a3'+'_'+E3SMdomain_range].load()
-    mom_a4 = e3smdata['mom_a4'+'_'+E3SMdomain_range].load()
-    ncl_a1 = e3smdata['ncl_a1'+'_'+E3SMdomain_range].load()
-    ncl_a2 = e3smdata['ncl_a2'+'_'+E3SMdomain_range].load()
-    ncl_a3 = e3smdata['ncl_a3'+'_'+E3SMdomain_range].load()
-    pom_a1 = e3smdata['pom_a1'+'_'+E3SMdomain_range].load()
-    pom_a3 = e3smdata['pom_a3'+'_'+E3SMdomain_range].load()
-    pom_a4 = e3smdata['pom_a4'+'_'+E3SMdomain_range].load()
-    so4_a1 = e3smdata['so4_a1'+'_'+E3SMdomain_range].load()
-    so4_a2 = e3smdata['so4_a2'+'_'+E3SMdomain_range].load()
-    so4_a3 = e3smdata['so4_a3'+'_'+E3SMdomain_range].load()
-    soa_a1 = e3smdata['soa_a1'+'_'+E3SMdomain_range].load()
-    soa_a2 = e3smdata['soa_a2'+'_'+E3SMdomain_range].load()
-    soa_a3 = e3smdata['soa_a3'+'_'+E3SMdomain_range].load()
+    bc_a1 = e3smdata['bc_a1'+E3SMdomain_range].load()
+    bc_a3 = e3smdata['bc_a3'+E3SMdomain_range].load()
+    bc_a4 = e3smdata['bc_a4'+E3SMdomain_range].load()
+    dst_a1 = e3smdata['dst_a1'+E3SMdomain_range].load()
+    dst_a3 = e3smdata['dst_a3'+E3SMdomain_range].load()
+    mom_a1 = e3smdata['mom_a1'+E3SMdomain_range].load()
+    mom_a2 = e3smdata['mom_a2'+E3SMdomain_range].load()
+    mom_a3 = e3smdata['mom_a3'+E3SMdomain_range].load()
+    mom_a4 = e3smdata['mom_a4'+E3SMdomain_range].load()
+    ncl_a1 = e3smdata['ncl_a1'+E3SMdomain_range].load()
+    ncl_a2 = e3smdata['ncl_a2'+E3SMdomain_range].load()
+    ncl_a3 = e3smdata['ncl_a3'+E3SMdomain_range].load()
+    pom_a1 = e3smdata['pom_a1'+E3SMdomain_range].load()
+    pom_a3 = e3smdata['pom_a3'+E3SMdomain_range].load()
+    pom_a4 = e3smdata['pom_a4'+E3SMdomain_range].load()
+    so4_a1 = e3smdata['so4_a1'+E3SMdomain_range].load()
+    so4_a2 = e3smdata['so4_a2'+E3SMdomain_range].load()
+    so4_a3 = e3smdata['so4_a3'+E3SMdomain_range].load()
+    soa_a1 = e3smdata['soa_a1'+E3SMdomain_range].load()
+    soa_a2 = e3smdata['soa_a2'+E3SMdomain_range].load()
+    soa_a3 = e3smdata['soa_a3'+E3SMdomain_range].load()
     bc_all  = bc_a1[:,-1,x_idx] +                       bc_a3[:,-1,x_idx] + bc_a4[:,-1,x_idx]
     dst_all = dst_a1[:,-1,x_idx] +                      dst_a3[:,-1,x_idx]
     mom_all = mom_a1[:,-1,x_idx] + mom_a2[:,-1,x_idx] + mom_a3[:,-1,x_idx] + mom_a4[:,-1,x_idx]
@@ -834,19 +834,19 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     soa_all.coords['time'] = soa_all.indexes['time'].to_datetimeindex()
     
     # aerosol size
-    num_a1 = e3smdata['num_a1'+'_'+E3SMdomain_range].load()
-    num_a2 = e3smdata['num_a2'+'_'+E3SMdomain_range].load()
-    num_a3 = e3smdata['num_a3'+'_'+E3SMdomain_range].load()
-    num_a4 = e3smdata['num_a4'+'_'+E3SMdomain_range].load()
-    dn1 = e3smdata['dgnd_a01'+'_'+E3SMdomain_range].load()
-    dn2 = e3smdata['dgnd_a02'+'_'+E3SMdomain_range].load()
-    dn3 = e3smdata['dgnd_a03'+'_'+E3SMdomain_range].load()
-    dn4 = e3smdata['dgnd_a04'+'_'+E3SMdomain_range].load()
+    num_a1 = e3smdata['num_a1'+E3SMdomain_range].load()
+    num_a2 = e3smdata['num_a2'+E3SMdomain_range].load()
+    num_a3 = e3smdata['num_a3'+E3SMdomain_range].load()
+    num_a4 = e3smdata['num_a4'+E3SMdomain_range].load()
+    dn1 = e3smdata['dgnd_a01'+E3SMdomain_range].load()
+    dn2 = e3smdata['dgnd_a02'+E3SMdomain_range].load()
+    dn3 = e3smdata['dgnd_a03'+E3SMdomain_range].load()
+    dn4 = e3smdata['dgnd_a04'+E3SMdomain_range].load()
     P0 = e3smdata['P0'].load()
     hyam = e3smdata['hyam'].load()
     hybm = e3smdata['hybm'].load()
-    T = e3smdata['T'+'_'+E3SMdomain_range].load()
-    PS = e3smdata['PS'+'_'+E3SMdomain_range].load()
+    T = e3smdata['T'+E3SMdomain_range].load()
+    PS = e3smdata['PS'+E3SMdomain_range].load()
     Pres = np.nan*T
     zlen = T.shape[1]
     for kk in range(zlen):
@@ -859,8 +859,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
     
     # variables to calculate Reff and Nd
-    z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
-    cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
+    z3 = e3smdata['Z3'+E3SMdomain_range].load()
+    cloud = e3smdata['CLOUD'+E3SMdomain_range].load()
     z3 = z3[:,:,x_idx]
     cloud = cloud[:,:,x_idx]
     dz = (z3[:,:-2].data - z3[:,2:].data)/2
@@ -917,12 +917,12 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         attrs=dict(long_name="cloud top temperature",units="K"),)
     
     # cloud optical depth and effective radius
-    rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
-    freql = e3smdata['FREQL'+'_'+E3SMdomain_range].load()
-    icwnc = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
-    cod_a = e3smdata['TOT_CLD_VISTAU'+'_'+E3SMdomain_range].load()
-    cod_m = e3smdata['TAUWMODIS'+'_'+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
-    solin = e3smdata['SOLIN'+'_'+E3SMdomain_range].load()
+    rel = e3smdata['REL'+E3SMdomain_range].load()
+    freql = e3smdata['FREQL'+E3SMdomain_range].load()
+    icwnc = e3smdata['ICWNC'+E3SMdomain_range].load()
+    cod_a = e3smdata['TOT_CLD_VISTAU'+E3SMdomain_range].load()
+    cod_m = e3smdata['TAUWMODIS'+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
+    solin = e3smdata['SOLIN'+E3SMdomain_range].load()
     rel = rel[:,:,x_idx]
     freql = freql[:,:,x_idx]
     icwnc = icwnc[:,:,x_idx]
@@ -944,7 +944,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         attrs=dict(long_name="column-total cloud optical depth",units="N/A"),)
     
     # mean cloud droplet number concentration
-    cdnc_col = e3smdata['CDNUMC'+'_'+E3SMdomain_range].load()
+    cdnc_col = e3smdata['CDNUMC'+E3SMdomain_range].load()
     cdnc_col = cdnc_col[:,x_idx]
     cdnc_mean = cdnc_col/np.sum(weight,axis=1)
     cdnc_mean[cdnc_mean >2e9] = np.nan
@@ -953,7 +953,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
     
     # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
-    lwp = e3smdata['TGCLDLWP'+'_'+E3SMdomain_range][:,x_idx].data
+    lwp = e3smdata['TGCLDLWP'+E3SMdomain_range][:,x_idx].data
     e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
     T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
     nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
@@ -975,7 +975,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
                         #'MEANPTOP_ISCCP', 'MEANCLDALB_ISCCP', 'MEANTAU_ISCCP',
                         'PBLH', 'PRECT', 'PRECL', 'PRECC', 'PS', 'TREFHT', ]
     for varname in variable2d_names:
-        var = e3smdata[varname + '_'+E3SMdomain_range].load()
+        var = e3smdata[varname + E3SMdomain_range].load()
         var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
         if varname=='AODABS' or varname=='AODALL':
             var.attrs['units']='N/A'
@@ -985,7 +985,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     # all other 3D (with vertical level) variables at the lowest model level
     variable3d_names = ['CCN1', 'CCN3', 'CCN4', 'CCN5', 'Q', 'T', 'RELHUM', 'U', 'V'] 
     for varname in variable3d_names:
-        var = e3smdata[varname + '_'+E3SMdomain_range].load()
+        var = e3smdata[varname + E3SMdomain_range].load()
         var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
         variables.append(var[:,-1,x_idx])
         variable_names.append(varname)
@@ -1000,27 +1000,27 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         e3smtime = np.hstack((e3smtime, e3smtime_i))
         
         # aerosol composition
-        bc_a1 = e3smdata['bc_a1'+'_'+E3SMdomain_range].load()
-        bc_a3 = e3smdata['bc_a3'+'_'+E3SMdomain_range].load()
-        bc_a4 = e3smdata['bc_a4'+'_'+E3SMdomain_range].load()
-        dst_a1 = e3smdata['dst_a1'+'_'+E3SMdomain_range].load()
-        dst_a3 = e3smdata['dst_a3'+'_'+E3SMdomain_range].load()
-        mom_a1 = e3smdata['mom_a1'+'_'+E3SMdomain_range].load()
-        mom_a2 = e3smdata['mom_a2'+'_'+E3SMdomain_range].load()
-        mom_a3 = e3smdata['mom_a3'+'_'+E3SMdomain_range].load()
-        mom_a4 = e3smdata['mom_a4'+'_'+E3SMdomain_range].load()
-        ncl_a1 = e3smdata['ncl_a1'+'_'+E3SMdomain_range].load()
-        ncl_a2 = e3smdata['ncl_a2'+'_'+E3SMdomain_range].load()
-        ncl_a3 = e3smdata['ncl_a3'+'_'+E3SMdomain_range].load()
-        pom_a1 = e3smdata['pom_a1'+'_'+E3SMdomain_range].load()
-        pom_a3 = e3smdata['pom_a3'+'_'+E3SMdomain_range].load()
-        pom_a4 = e3smdata['pom_a4'+'_'+E3SMdomain_range].load()
-        so4_a1 = e3smdata['so4_a1'+'_'+E3SMdomain_range].load()
-        so4_a2 = e3smdata['so4_a2'+'_'+E3SMdomain_range].load()
-        so4_a3 = e3smdata['so4_a3'+'_'+E3SMdomain_range].load()
-        soa_a1 = e3smdata['soa_a1'+'_'+E3SMdomain_range].load()
-        soa_a2 = e3smdata['soa_a2'+'_'+E3SMdomain_range].load()
-        soa_a3 = e3smdata['soa_a3'+'_'+E3SMdomain_range].load()
+        bc_a1 = e3smdata['bc_a1'+E3SMdomain_range].load()
+        bc_a3 = e3smdata['bc_a3'+E3SMdomain_range].load()
+        bc_a4 = e3smdata['bc_a4'+E3SMdomain_range].load()
+        dst_a1 = e3smdata['dst_a1'+E3SMdomain_range].load()
+        dst_a3 = e3smdata['dst_a3'+E3SMdomain_range].load()
+        mom_a1 = e3smdata['mom_a1'+E3SMdomain_range].load()
+        mom_a2 = e3smdata['mom_a2'+E3SMdomain_range].load()
+        mom_a3 = e3smdata['mom_a3'+E3SMdomain_range].load()
+        mom_a4 = e3smdata['mom_a4'+E3SMdomain_range].load()
+        ncl_a1 = e3smdata['ncl_a1'+E3SMdomain_range].load()
+        ncl_a2 = e3smdata['ncl_a2'+E3SMdomain_range].load()
+        ncl_a3 = e3smdata['ncl_a3'+E3SMdomain_range].load()
+        pom_a1 = e3smdata['pom_a1'+E3SMdomain_range].load()
+        pom_a3 = e3smdata['pom_a3'+E3SMdomain_range].load()
+        pom_a4 = e3smdata['pom_a4'+E3SMdomain_range].load()
+        so4_a1 = e3smdata['so4_a1'+E3SMdomain_range].load()
+        so4_a2 = e3smdata['so4_a2'+E3SMdomain_range].load()
+        so4_a3 = e3smdata['so4_a3'+E3SMdomain_range].load()
+        soa_a1 = e3smdata['soa_a1'+E3SMdomain_range].load()
+        soa_a2 = e3smdata['soa_a2'+E3SMdomain_range].load()
+        soa_a3 = e3smdata['soa_a3'+E3SMdomain_range].load()
         bc  = bc_a1[:,-1,x_idx] +                       bc_a3[:,-1,x_idx] + bc_a4[:,-1,x_idx]
         dst = dst_a1[:,-1,x_idx] +                      dst_a3[:,-1,x_idx]
         mom = mom_a1[:,-1,x_idx] + mom_a2[:,-1,x_idx] + mom_a3[:,-1,x_idx] + mom_a4[:,-1,x_idx]
@@ -1045,19 +1045,19 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         soa_all = xr.concat([soa_all, soa], dim="time")
         
         # aerosol size
-        num_a1 = e3smdata['num_a1'+'_'+E3SMdomain_range].load()
-        num_a2 = e3smdata['num_a2'+'_'+E3SMdomain_range].load()
-        num_a3 = e3smdata['num_a3'+'_'+E3SMdomain_range].load()
-        num_a4 = e3smdata['num_a4'+'_'+E3SMdomain_range].load()
-        dn1 = e3smdata['dgnd_a01'+'_'+E3SMdomain_range].load()
-        dn2 = e3smdata['dgnd_a02'+'_'+E3SMdomain_range].load()
-        dn3 = e3smdata['dgnd_a03'+'_'+E3SMdomain_range].load()
-        dn4 = e3smdata['dgnd_a04'+'_'+E3SMdomain_range].load()
+        num_a1 = e3smdata['num_a1'+E3SMdomain_range].load()
+        num_a2 = e3smdata['num_a2'+E3SMdomain_range].load()
+        num_a3 = e3smdata['num_a3'+E3SMdomain_range].load()
+        num_a4 = e3smdata['num_a4'+E3SMdomain_range].load()
+        dn1 = e3smdata['dgnd_a01'+E3SMdomain_range].load()
+        dn2 = e3smdata['dgnd_a02'+E3SMdomain_range].load()
+        dn3 = e3smdata['dgnd_a03'+E3SMdomain_range].load()
+        dn4 = e3smdata['dgnd_a04'+E3SMdomain_range].load()
         P0 = e3smdata['P0'].load()
         hyam = e3smdata['hyam'].load()
         hybm = e3smdata['hybm'].load()
-        T = e3smdata['T'+'_'+E3SMdomain_range].load()
-        PS = e3smdata['PS'+'_'+E3SMdomain_range].load()
+        T = e3smdata['T'+E3SMdomain_range].load()
+        PS = e3smdata['PS'+E3SMdomain_range].load()
         Pres = np.nan*T
         zlen = T.shape[1]
         for kk in range(zlen):
@@ -1071,8 +1071,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         NCNall = xr.concat([NCNall, NCN2], dim="time")
     
         # variables to calculate Reff and Nd
-        z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
-        cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
+        z3 = e3smdata['Z3'+E3SMdomain_range].load()
+        cloud = e3smdata['CLOUD'+E3SMdomain_range].load()
         z3 = z3[:,:,x_idx]
         cloud = cloud[:,:,x_idx]
         dz = (z3[:,:-2].data - z3[:,2:].data)/2
@@ -1124,12 +1124,12 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         
     
         # cloud optical depth and effective radius
-        rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
-        freql = e3smdata['FREQL'+'_'+E3SMdomain_range].load()
-        icwnc = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
-        cod_a = e3smdata['TOT_CLD_VISTAU'+'_'+E3SMdomain_range].load()
-        cod_m = e3smdata['TAUWMODIS'+'_'+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
-        solin = e3smdata['SOLIN'+'_'+E3SMdomain_range].load()
+        rel = e3smdata['REL'+E3SMdomain_range].load()
+        freql = e3smdata['FREQL'+E3SMdomain_range].load()
+        icwnc = e3smdata['ICWNC'+E3SMdomain_range].load()
+        cod_a = e3smdata['TOT_CLD_VISTAU'+E3SMdomain_range].load()
+        cod_m = e3smdata['TAUWMODIS'+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
+        solin = e3smdata['SOLIN'+E3SMdomain_range].load()
         rel = rel[:,:,x_idx]
         freql = freql[:,:,x_idx]
         icwnc = icwnc[:,:,x_idx]
@@ -1154,7 +1154,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         cod_mean = xr.concat([cod_mean, cod_2], dim="time")
         
         # mean cloud droplet number concentration
-        cdnc_col = e3smdata['CDNUMC'+'_'+E3SMdomain_range].load()
+        cdnc_col = e3smdata['CDNUMC'+E3SMdomain_range].load()
         cdnc_col = cdnc_col[:,x_idx]
         cdnc = cdnc_col/np.sum(weight,axis=1)
         cdnc[cdnc >2e9] = np.nan
@@ -1164,7 +1164,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         cdnc_mean = xr.concat([cdnc_mean, cdnc], dim="time")
         
         # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
-        lwp = e3smdata['TGCLDLWP'+'_'+E3SMdomain_range][:,x_idx].data
+        lwp = e3smdata['TGCLDLWP'+E3SMdomain_range][:,x_idx].data
         e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
         T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
         nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
@@ -1183,14 +1183,14 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         
         # all other 2D (surface and vertical integrated) variables
         for varname in variable2d_names:
-            var = e3smdata[varname + '_'+E3SMdomain_range].load()
+            var = e3smdata[varname + E3SMdomain_range].load()
             var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
             vv = variable_names.index(varname)
             variables[vv] = xr.concat([variables[vv], var[:,x_idx]],dim='time')
         
         # all other 3D (with vertical level) variables at the lowest model level
         for varname in variable3d_names:
-            var = e3smdata[varname + '_'+E3SMdomain_range].load()
+            var = e3smdata[varname + E3SMdomain_range].load()
             var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
             vv = variable_names.index(varname)
             variables[vv] = xr.concat([variables[vv], var[:,-1,x_idx]],dim='time')

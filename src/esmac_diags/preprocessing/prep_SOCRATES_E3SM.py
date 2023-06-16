@@ -35,7 +35,7 @@ from netCDF4 import Dataset
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, 
-                      RFpath, dt=60):
+                      RFpath, E3SMdomain_range='', dt=60):
     """
     prepare E3SM output along flight tracks
     choose the nearest grid and level of the aircraft location
@@ -67,7 +67,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         
     #%% settings specific for each site
     # SOCRATES
-    E3SMdomain_range = '133e_to_164e_42s_to_63s'    # domain range in E3SM regional output
+    # E3SMdomain_range = '133e_to_164e_42s_to_63s'    # domain range in E3SM regional output
     
     #%% find all data
     lst = glob.glob(RFpath + 'RF*.PNI.nc')
@@ -126,66 +126,66 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
             raise ValueError('Should only contain two files')
         e3smdata = xr.open_mfdataset(lstm)
         e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-        lonm = e3smdata['lon'+'_'+E3SMdomain_range].load()
-        latm = e3smdata['lat'+'_'+E3SMdomain_range].load()
-        z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
+        lonm = e3smdata['lon'+E3SMdomain_range].load()
+        latm = e3smdata['lat'+E3SMdomain_range].load()
+        z3 = e3smdata['Z3'+E3SMdomain_range].load()
         # change time format into seconds of the day
         timem = np.float64((e3smtime - e3smtime[0]).seconds)
         
         # variables for calculating aerosol size
-        num_a1 = e3smdata['num_a1'+'_'+E3SMdomain_range].load()
-        num_a2 = e3smdata['num_a2'+'_'+E3SMdomain_range].load()
-        num_a3 = e3smdata['num_a3'+'_'+E3SMdomain_range].load()
-        num_a4 = e3smdata['num_a4'+'_'+E3SMdomain_range].load()
-        dn1 = e3smdata['dgnd_a01'+'_'+E3SMdomain_range].load()
-        dn2 = e3smdata['dgnd_a02'+'_'+E3SMdomain_range].load()
-        dn3 = e3smdata['dgnd_a03'+'_'+E3SMdomain_range].load()
-        dn4 = e3smdata['dgnd_a04'+'_'+E3SMdomain_range].load()
+        num_a1 = e3smdata['num_a1'+E3SMdomain_range].load()
+        num_a2 = e3smdata['num_a2'+E3SMdomain_range].load()
+        num_a3 = e3smdata['num_a3'+E3SMdomain_range].load()
+        num_a4 = e3smdata['num_a4'+E3SMdomain_range].load()
+        dn1 = e3smdata['dgnd_a01'+E3SMdomain_range].load()
+        dn2 = e3smdata['dgnd_a02'+E3SMdomain_range].load()
+        dn3 = e3smdata['dgnd_a03'+E3SMdomain_range].load()
+        dn4 = e3smdata['dgnd_a04'+E3SMdomain_range].load()
         P0 = e3smdata['P0'].load()
         hyam = e3smdata['hyam'].load()
         hybm = e3smdata['hybm'].load()
         if len(hyam.shape)>1:   # when use xr.open_mfdataset, hyam will add a time dimension
             hyam = hyam[0,:]
             hybm = hybm[0,:]
-        T = e3smdata['T'+'_'+E3SMdomain_range].load()
-        PS = e3smdata['PS'+'_'+E3SMdomain_range].load()
+        T = e3smdata['T'+E3SMdomain_range].load()
+        PS = e3smdata['PS'+E3SMdomain_range].load()
         Pres = np.nan*T
         zlen = T.shape[1]
         for kk in range(zlen):
             Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
             
         # aerosol composition
-        bc_a1 = e3smdata['bc_a1'+'_'+E3SMdomain_range].load()
-        bc_a3 = e3smdata['bc_a3'+'_'+E3SMdomain_range].load()
-        bc_a4 = e3smdata['bc_a4'+'_'+E3SMdomain_range].load()
-        dst_a1 = e3smdata['dst_a1'+'_'+E3SMdomain_range].load()
-        dst_a3 = e3smdata['dst_a3'+'_'+E3SMdomain_range].load()
-        mom_a1 = e3smdata['mom_a1'+'_'+E3SMdomain_range].load()
-        mom_a2 = e3smdata['mom_a2'+'_'+E3SMdomain_range].load()
-        mom_a3 = e3smdata['mom_a3'+'_'+E3SMdomain_range].load()
-        mom_a4 = e3smdata['mom_a4'+'_'+E3SMdomain_range].load()
-        ncl_a1 = e3smdata['ncl_a1'+'_'+E3SMdomain_range].load()
-        ncl_a2 = e3smdata['ncl_a2'+'_'+E3SMdomain_range].load()
-        ncl_a3 = e3smdata['ncl_a3'+'_'+E3SMdomain_range].load()
-        pom_a1 = e3smdata['pom_a1'+'_'+E3SMdomain_range].load()
-        pom_a3 = e3smdata['pom_a3'+'_'+E3SMdomain_range].load()
-        pom_a4 = e3smdata['pom_a4'+'_'+E3SMdomain_range].load()
-        so4_a1 = e3smdata['so4_a1'+'_'+E3SMdomain_range].load()
-        so4_a2 = e3smdata['so4_a2'+'_'+E3SMdomain_range].load()
-        so4_a3 = e3smdata['so4_a3'+'_'+E3SMdomain_range].load()
-        soa_a1 = e3smdata['soa_a1'+'_'+E3SMdomain_range].load()
-        soa_a2 = e3smdata['soa_a2'+'_'+E3SMdomain_range].load()
-        soa_a3 = e3smdata['soa_a3'+'_'+E3SMdomain_range].load()
+        bc_a1 = e3smdata['bc_a1'+E3SMdomain_range].load()
+        bc_a3 = e3smdata['bc_a3'+E3SMdomain_range].load()
+        bc_a4 = e3smdata['bc_a4'+E3SMdomain_range].load()
+        dst_a1 = e3smdata['dst_a1'+E3SMdomain_range].load()
+        dst_a3 = e3smdata['dst_a3'+E3SMdomain_range].load()
+        mom_a1 = e3smdata['mom_a1'+E3SMdomain_range].load()
+        mom_a2 = e3smdata['mom_a2'+E3SMdomain_range].load()
+        mom_a3 = e3smdata['mom_a3'+E3SMdomain_range].load()
+        mom_a4 = e3smdata['mom_a4'+E3SMdomain_range].load()
+        ncl_a1 = e3smdata['ncl_a1'+E3SMdomain_range].load()
+        ncl_a2 = e3smdata['ncl_a2'+E3SMdomain_range].load()
+        ncl_a3 = e3smdata['ncl_a3'+E3SMdomain_range].load()
+        pom_a1 = e3smdata['pom_a1'+E3SMdomain_range].load()
+        pom_a3 = e3smdata['pom_a3'+E3SMdomain_range].load()
+        pom_a4 = e3smdata['pom_a4'+E3SMdomain_range].load()
+        so4_a1 = e3smdata['so4_a1'+E3SMdomain_range].load()
+        so4_a2 = e3smdata['so4_a2'+E3SMdomain_range].load()
+        so4_a3 = e3smdata['so4_a3'+E3SMdomain_range].load()
+        soa_a1 = e3smdata['soa_a1'+E3SMdomain_range].load()
+        soa_a2 = e3smdata['soa_a2'+E3SMdomain_range].load()
+        soa_a3 = e3smdata['soa_a3'+E3SMdomain_range].load()
         
         # droplet size distribution
-        nd_cld = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
-        lmda = e3smdata['lambda_cloud'+'_'+E3SMdomain_range].load()
-        mu = e3smdata['mu_cloud'+'_'+E3SMdomain_range].load()
+        nd_cld = e3smdata['ICWNC'+E3SMdomain_range].load()
+        lmda = e3smdata['lambda_cloud'+E3SMdomain_range].load()
+        mu = e3smdata['mu_cloud'+E3SMdomain_range].load()
         
         
         # other variables
         for varname in variable3d_names:
-            var = e3smdata[varname+'_'+E3SMdomain_range].load()
+            var = e3smdata[varname+E3SMdomain_range].load()
             variables.append(var)
         e3smdata.close()
         

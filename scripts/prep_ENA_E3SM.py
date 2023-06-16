@@ -14,8 +14,8 @@ warnings.filterwarnings("ignore")
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settings
 input_path = '../raw_data/model/'
 output_path = '../prep_data/ENA/model/'
-input_filehead = 'E3SMv1_SGP_ENA_2011_2020'
-output_filehead = 'E3SMv1_ENA'
+input_filehead = 'E3SMv2_SGP_ENA_2011_2020'
+output_filehead = 'E3SMv2_ENA'
 
 # vertical coordinates for output
 lev_out=np.arange(25.,1001,25.)
@@ -24,8 +24,10 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
                     3500,4000,4500,5000,5500,6000,6500,7000,7500,8000,8500,9000,9500,\
                     10000,10500,11000,11500,12000,12500,13000,14000,15000,16000,17000,18000])
 
+    E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
+
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # output time in 1hr (dt=3600s) for other data
-prep.prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3600)
-# prep.prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, height_out, lev_out=lev_out, dt=3600)
+prep.prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, E3SMdomain_range='_'+E3SMdomain_range, dt=3600)
+prep.prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, height_out, lev_out=lev_out, E3SMdomain_range='_'+E3SMdomain_range, dt=3600)
 
