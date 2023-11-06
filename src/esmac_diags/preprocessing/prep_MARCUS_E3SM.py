@@ -96,7 +96,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, ship
     variables = list()
     
     print(ttt.ctime(ttt.time())+': read in E3SM data:')
-    lst = glob.glob(input_path + input_filehead+'.*-00000.nc') 
+    lst = glob.glob(input_path + input_filehead+'.*.h?.*-00000.nc') 
     lst.sort()
     # first data
     e3smdata = xr.open_mfdataset(lst)
@@ -532,7 +532,7 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     variables = list()
     print(ttt.ctime(ttt.time())+': read in E3SM data:')
     
-    lst = glob.glob(input_path + input_filehead+'.*-00000.nc') 
+    lst = glob.glob(input_path + input_filehead+'.*.h?.*-00000.nc') 
     lst.sort()
     
     e3smdata = xr.open_mfdataset(lst)
