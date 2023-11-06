@@ -81,11 +81,11 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, site
     variables = list()
     
     if site=='SGP':
-        lst = glob.glob(input_path + input_filehead+'.*-00000.nc') 
+        lst = glob.glob(input_path + input_filehead+'.*.h?.*-00000.nc') 
     elif site=='ENA':
-        lst = glob.glob(input_path + input_filehead+'.*2016-*-00000.nc') + \
-                glob.glob(input_path + input_filehead+'.*2017-*-00000.nc') + \
-                glob.glob(input_path + input_filehead+'.*2018-*-00000.nc')
+        lst = glob.glob(input_path + input_filehead+'.*.h?.*2016-*-00000.nc') + \
+                glob.glob(input_path + input_filehead+'.*.h?.*2017-*-00000.nc') + \
+                glob.glob(input_path + input_filehead+'.*.h?.*2018-*-00000.nc')
     lst.sort()
     # first data
     e3smdata = xr.open_dataset(lst[0])
