@@ -855,9 +855,9 @@ def heatmap(xdata, ydata, zdata, figsize=None, xedges=None, yedges=None,vmin=Non
         h.append(h0)
         ax[mm].grid()
         ax[mm].set_xticks(xticks)
-        ax[mm].set_xticklabels(xticklabels[xticks].astype(np.int))
+        ax[mm].set_xticklabels(xticklabels[xticks].astype(int))
         ax[mm].set_yticks(yticks)
-        ax[mm].set_yticklabels(yticklabels[yticks].astype(np.int))
+        ax[mm].set_yticklabels(yticklabels[yticks].astype(int))
         ax[mm].set_title(title[mm], fontsize=18)
         if type(xlabel) is list:
             ax[mm].set_xlabel(xlabel[mm])

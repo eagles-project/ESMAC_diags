@@ -100,10 +100,15 @@ def bias_corrcoef_RMSE(data1,data2,outfile,label1='data',label2='reference'):
     datab=data2[idx]
     
     bias = np.nanmean(dataa)-np.nanmean(datab)
-    corr = scipy.stats.pearsonr(dataa,datab)
-    corrcoef = [corr[0],corr[1]]
-    rmse = np.sqrt(np.nanmean((dataa-datab)**2))
-    
+    if len(dataa.values) > 2:
+        corr = scipy.stats.pearsonr(dataa,datab)
+        corrcoef = [corr[0],corr[1]]
+        rmse = np.sqrt(np.nanmean((dataa-datab)**2))
+    else:
+        corr = np.nan
+        corrcoef = [np.nan,np.nan]
+        rmse = np.nan
+ 
     print('bias    [corr, pvalue]    RMSE')
     print(bias,corrcoef,rmse)
     
