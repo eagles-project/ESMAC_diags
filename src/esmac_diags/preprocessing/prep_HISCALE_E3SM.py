@@ -783,6 +783,9 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     hybm = e3smdata['hybm'].load()
     T = e3smdata['T'+'_'+E3SMdomain_range].load()
     PS = e3smdata['PS'+'_'+E3SMdomain_range].load()
+    # getting column and levels
+    len_ncol = len(e3smdata['ncol_'+E3SMdomain_range])
+    len_lev = len(e3smdata['lev'])
     # only extract the model column at the site
     if lon0<0:
         lon0=lon0+360   # make longitude consistent with E3SM from 0 to 360
@@ -1046,9 +1049,6 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
                         #'MEANPTOP_ISCCP', 'MEANCLDALB_ISCCP', 'MEANTAU_ISCCP',
                         'PBLH', 'PRECT', 'PRECL', 'PRECC', 'PS', 'TREFHT', ]
     
-    # getting column and levels
-    len_ncol = len(e3smdata['ncol_'+E3SMdomain_range])
-    len_lev = len(e3smdata['lev'])
     for varname in variable2d_names:
         try:
             var = e3smdata[varname + '_'+E3SMdomain_range].load()
@@ -1174,7 +1174,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         else:
             NCNall = xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name='NCNall',attrs={'units':'dummy_unit','long_name':'Dummy'})
     
-        # variables to calculate Reff and Nd
+        # variables to calculate cloud heights and depth
         req_vlist = ['Z3', 'CLOUD']
         req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
