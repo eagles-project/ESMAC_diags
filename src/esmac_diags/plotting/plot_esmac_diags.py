@@ -29,12 +29,16 @@ def timeseries(time, data, figsize=(10,4), xlimit=None, ylimit=None,
     ndata = len(data)
     if legend is None:
         legend = [None for mm in range(ndata)]
-        
+        islegend=False
+    else:
+        islegend=True
+    
     plt.rcParams.update({'font.size': 16})
     fig,ax = plt.subplots(figsize=figsize)
     for nn in range(ndata):
         ax.plot(time[nn],data[nn],color=color[nn],label=legend[nn], **kwargs)
-    ax.legend()
+    if islegend:
+        ax.legend()
     ax.set_ylim(ylimit)
     ax.set_xlim(xlimit)
     ax.set_xlabel(xlabel)
@@ -145,7 +149,7 @@ def timeseries_size(time, size, data, figsize=None, leveltick=[0.1,1,10,100,1000
     for nn in range(ndata):
         ax0 = fig.add_subplot(ndata, 1, nn+1)
         ax.append(ax0)
-        h = ax0.contourf(time[nn],size[nn],np.log10(data[nn]),levellist,cmap=plt.get_cmap('jet'))
+        h = ax0.contourf(time[nn],size[nn],np.log10(data[nn]),levellist)
         ax0.set_yscale('log')
         ax0.set_ylim(ylimit)
         ax0.set_ylabel(ylabel)
@@ -261,7 +265,7 @@ def mean_size_witherror(size, data, figsize=(8,6), xlimit=None, ylimit=None, xsc
         meandata = np.nanmean(data[nn],axis=0)
         
         ax.plot(size[nn],meandata,marker=marker[nn],linestyle=linestyles[nn],color=color[nn],label=legend[nn])
-        if marker[nn]=='.':
+        if marker[nn] is not None:
             ax.errorbar(size[nn],meandata,yerr=[meandata-pct[:,0], meandata+pct[:,1]], 
                         marker='.',linestyle=linestyles[nn],color=color[nn], alpha=0.5)
             # ax.errorbar(size[nn][1:-1:5],meandata[1:-1:5],yerr=[meandata[1:-1:5]-pct[nn][1:-1:5,0], meandata[1:-1:5]+pct[nn][1:-1:5,1]], 
@@ -353,7 +357,7 @@ def diurnalcycle(data, nozero_percentile=False, figsize=(8,6),
     # make plot
     # set position shift so that models and obs are not overlapped
     p_shift = np.arange(ndata)
-    p_shift = (p_shift - p_shift.mean())*0.2
+    p_shift = (p_shift - p_shift.mean())/(ndata+1)
     plt.rcParams.update({'font.size': 16})
     fig,ax = plt.subplots(figsize=figsize)
     for nn in range(ndata):
@@ -367,7 +371,7 @@ def diurnalcycle(data, nozero_percentile=False, figsize=(8,6),
         datab = [dataa[i].data for i in range(24)]
         datac = [d[~np.isnan(d)] for d in datab]
         ax.boxplot(datac,whis=(10,90),showmeans=False,showfliers=False,
-                positions=np.arange(24)+p_shift[nn],widths=0.15,
+                positions=np.arange(24)+p_shift[nn],widths=1/(ndata*2),
                 boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
                 medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
                 vert=True, patch_artist=True)    # need patch_artist to fill color in box
@@ -519,7 +523,7 @@ def seasonalcycle(data,figsize=(9,6), xlimit=(0.5,12.5), xticks=np.arange(1,13,1
     # make plot
     # set position shift so that models and obs are not overlapped
     p_shift = np.arange(ndata)
-    p_shift = (p_shift - p_shift.mean())*0.2
+    p_shift = (p_shift - p_shift.mean())/(ndata+1)
     plt.rcParams.update({'font.size': 16})
     fig,ax = plt.subplots(figsize=figsize)
     for nn in range(ndata):
@@ -533,7 +537,7 @@ def seasonalcycle(data,figsize=(9,6), xlimit=(0.5,12.5), xticks=np.arange(1,13,1
         datab = [dataa[i].data for i in range(1,13)]
         datac = [d[~np.isnan(d)] for d in datab]
         ax.boxplot(datac,whis=(10,90),showmeans=False,showfliers=False,
-                positions=np.arange(1,13)+p_shift[nn],widths=0.15,
+                positions=np.arange(1,13)+p_shift[nn],widths=1/(ndata*2),
                 boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
                 medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
                 vert=True, patch_artist=True)    # need patch_artist to fill color in box
@@ -943,7 +947,7 @@ def scatter(xdata, ydata, figsize=None, xlimit=None, ylimit=None,
                 else:
                     fit_line = 'y = '+format(coef[0],'2.2f')+'x - '+format(-coef[1],'2.2f')
                 print('linear fit: ' + fit_line)
-                ax1.text(0.45*xlimit[1], 0.9*ylimit[1], fit_line)
+                ax1.text(xlimit[0]+0.1*xlimit[1], 0.9*ylimit[1], fit_line)
             else:   # y=ax
                 x = xdata[mm][idx,np.newaxis]
                 a,_,_,_ = np.linalg.lstsq(x, ydata[mm][idx])
@@ -955,7 +959,7 @@ def scatter(xdata, ydata, figsize=None, xlimit=None, ylimit=None,
                 fit_line = 'y = '+format(a[0],'2.2f')+'x'
                 print('linear fit: ' + fit_line)
                 # ax1.text(x[-1], y[-1], fit_line)
-                ax1.text(0.7*xlimit[1], 0.9*ylimit[1], fit_line)
+                ax1.text(xlimit[0]+0.1*xlimit[1], 0.9*ylimit[1], fit_line)
         else:
             fit_line = 'None'
     
@@ -1274,11 +1278,65 @@ def percentile_z(data, height, height_bin, figsize=(3,8), xlimit=None, ylimit=No
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def vertical(data, z, figsize=(4,6), xlimit=None, ylimit=None, errorevery=1,
+def vertical_mean(data, z, figsize=(4,6), xlimit=None, ylimit=None, errorevery=1,
+                 xlabel=None, ylabel=None, title=None, legend=None, 
+                 fmt=None, marker=None, color=['k','b','g','c','r','orange','gray']):
+    """
+    plot vertical mean profiles with error bar of two standard error (std/sqrt(ntimes)  )
+
+    Parameters
+    ----------
+    data : list of arrays
+        input 2-d timeseries
+    z : 1-d array
+        coordinate of vertical dimension
+    errorevery : int, optional
+        options of plotting errorbar every "errorevery" data points
+    
+    Returns
+    -------
+    fig : Figure
+    ax : Axes
+
+    """
+    
+    ndata = len(data)
+    if marker is None:
+        marker = ['.' for mm in range(ndata)]
+    if fmt is None:
+        fmt = ['-' for mm in range(ndata)]
+    if legend is None:
+        legend = [None for mm in range(ndata)]
+        
+        
+    if data[0].shape[1]!=z.shape[0]:
+        raise ValueError('the second dimension of data should be consistent with z dimension')
+    ndata = len(data)
+    ntime = data[0].shape[0]
+    
+    plt.rcParams.update({'font.size': 16})
+    fig, ax = plt.subplots(figsize=figsize)
+    for mm in range(ndata):
+        ax.errorbar(np.nanmean(data[mm],axis=0), z, 
+                    xerr=np.nanstd(data[mm],axis=0)/np.sqrt(ntime)*2, 
+                    errorevery=errorevery,
+                    fmt=fmt[mm], marker=marker[mm],color=color[mm],label=legend[mm])
+    ax.legend()
+    ax.set_xlim(xlimit)
+    ax.set_ylim(ylimit)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title, fontsize=18)
+    ax.grid()
+    plt.tight_layout()  
+    return(fig, ax)
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def vertical_pct(data, z, figsize=(4,6), xlimit=None, ylimit=None, errorevery=1,
                  xlabel=None, ylabel=None, title=None, legend=None, pct=[0.25,0.75],
                  fmt=None, marker=None, color=['k','b','g','c','r','orange','gray']):
     """
-    plot vertical profiles and percentiles
+    plot vertical percentiles
 
     Parameters
     ----------
