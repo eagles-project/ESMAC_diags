@@ -149,3 +149,84 @@ def calc_CNsize_cutoff_0_3000nm(dnall,numall,T,P):
 
     
     return(ncut)
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# 
+def calc_CN_custom_sizerange(dnall,numall,T,P, dmin, dmax):
+    """
+    main function to calculate CN number for size range [dmin, dmax] in
+    MAM3, MAM4 or MAM5 (with nucleation mode) aerosol modes in CESM or E3SM
+    
+    Parameters
+    ----------
+    numall : [num_a1, num_a2, num_a3, num_a4]
+            number concentration in each mode in #/kg (num_a*)
+    dnall : [dgnd_a01, dgnd_a02, dgnd_a03, dgnd_a04]
+            number median diameter of each mode in m (dgnd_a*)
+    T: temperature, in K
+    P: pressure, in Pa
+    dmin : lower size bound [m]
+    dmax : upper size bound [m]
+
+    Returns
+    -------
+    ncut: numpy array of [size_of_num_a1]
+            aerosol number concentration between dmin and dmax [#/m3]
+    
+    """
+    
+    nmode = len(dnall)
+    if nmode not in [3,4,5]:
+        raise ValueError("Error: Currently only apply for MAM3, MAM4 and MAM5 with 3, 4 or 5 modes")
+        
+    if dmin>=dmax:
+        print(dmin, dmax)
+        raise ValueError("dmin should be smaller than dmax")
+        
+    #%% set constant and other variables
+    
+    # SHR_CONST_STEBOL  = 5.67e-8      # Stefan-Boltzmann constant ~ W/m^2/K^4
+    SHR_CONST_BOLTZ   = 1.38065e-23  # Boltzmann's constant ~ J/K/molecule
+    SHR_CONST_AVOGAD  = 6.02214e26   # Avogadro's number ~ molecules/kmole
+    SHR_CONST_RGAS    = SHR_CONST_AVOGAD*SHR_CONST_BOLTZ       # Universal gas constant ~ J/K/kmole
+    SHR_CONST_MWDAIR  = 28.966     # molecular weight dry air ~ kg/kmole
+    # SHR_CONST_MWWV    = 18.016     # molecular weight water vapor
+    SHR_CONST_RDAIR   = SHR_CONST_RGAS/SHR_CONST_MWDAIR        # Dry air gas constant     ~ J/K/kg
+    # pi = 3.1415926
+    
+    # calculate rho
+    Rho = P / (SHR_CONST_RDAIR * T)   # kg/m3 
+    
+    # set geometric standard deviation of each mode
+    Sg = [1.8, 1.6, 1.8, 1.6, 1.6] # [Acc, Aik, Coa, PrC, Nuc]
+    # Sg = [1.6, 1.49, 1.8, 1.6, 1.6] 
+    lnSg = np.log(Sg)
+    
+    # unit convert to #/m3
+    numall = [var*Rho for var in numall]
+    
+    
+    #%% calculate aerosol size in each size bin
+    if type(dnall[0]) is float:
+        ncut = np.array(0.0)
+        NNall = np.array(0.0)
+    else:      
+        ncut = np.full(tuple(dnall[0].shape),0.0)
+        NNall = np.full(tuple(dnall[0].shape),0.0)
+        
+    for ii in range(nmode):
+        ncut_i = func_cutoff_NN(numall[ii],dnall[ii],lnSg[ii],dmax,dmin)
+        ncut=ncut+ncut_i
+        n_i = func_cutoff_NN(numall[ii],dnall[ii],lnSg[ii],1e-2,1e-10)
+        NNall=NNall+n_i
+
+    # calculate total aerosol number and relative error
+    NN = sum(numall)
+    # NN[NN==0] = np.nan
+    
+    diff = np.abs(NNall-NN)/NN
+    
+    if np.nanmax(diff)>0.01:
+        print(['maximum absolute relative error: '+str(100*np.nanmax(diff))+'%'])
+
+    return(ncut)

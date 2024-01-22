@@ -78,7 +78,9 @@ def timeseries_2d(time, height, data, figsize=None, levellist=None, title=None,
     if legend is None:
         legend = [None for mm in range(ndata)]
     if levellist is None:
-        levellist = np.linspace(np.nanmin(data[0]), np.nanmax(data[0]), 10)
+        minvalue = min([np.nanmin(tmpdata) for tmpdata in data])
+        maxvalue = max([np.nanmax(tmpdata) for tmpdata in data])
+        levellist = np.linspace(minvalue, maxvalue, 10)
     
     fig = plt.figure(figsize=figsize)
     plt.rcParams.update({'font.size': 16})
@@ -368,10 +370,11 @@ def diurnalcycle(data, nozero_percentile=False, figsize=(8,6),
             dataa = data_nozero.groupby('time.hour')
         else:
             dataa = data[nn].groupby('time.hour')
-        datab = [dataa[i].data for i in range(24)]
+        datab = [dataa[i].data for i in dataa.groups.keys()]
         datac = [d[~np.isnan(d)] for d in datab]
         ax.boxplot(datac,whis=(10,90),showmeans=False,showfliers=False,
-                positions=np.arange(24)+p_shift[nn],widths=1/(ndata*2),
+                positions=np.array([i for i in dataa.groups.keys()])+p_shift[nn],
+                widths=1/(ndata*2),
                 boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
                 medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
                 vert=True, patch_artist=True)    # need patch_artist to fill color in box
@@ -391,7 +394,7 @@ def diurnalcycle(data, nozero_percentile=False, figsize=(8,6),
     return(fig, ax)
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def diurnalcycle_2d(data, y=None, figsize=None, x=np.arange(24), 
+def diurnalcycle_2d(data, y=None, figsize=None, 
                  xlimit=(0,23), xticks=np.arange(0,24,3), ylimit=None, 
                  levellist=None,
                  xlabel='Hours', ylabel=None, title=None, **kwargs):
@@ -424,14 +427,16 @@ def diurnalcycle_2d(data, y=None, figsize=None, x=np.arange(24),
     data_dc = []
     for nn in range(ndata):
         dc = data[nn].groupby('time.hour').mean()
-        if dc.shape[0] == 24:
+        if dc.shape[0] == len(dc):
             dc = dc.T
         data_dc.append(dc)
         
     if y is None:
         y = [np.arange(data_dc[mm].shape[0]) for mm in range(ndata)]
     if levellist is None:
-        levellist = np.linspace(np.nanmin(data_dc[0]), np.nanmax(data_dc[0]), 10)
+        minvalue = min([np.nanmin(tmpdata) for tmpdata in data_dc])
+        maxvalue = max([np.nanmax(tmpdata) for tmpdata in data_dc])
+        levellist = np.linspace(minvalue, maxvalue, 10)
     if title is None:
         title = [None for mm in range(ndata)]
     if figsize is None:
@@ -441,6 +446,7 @@ def diurnalcycle_2d(data, y=None, figsize=None, x=np.arange(24),
     plt.rcParams.update({'font.size': 20})
     fig = plt.figure(figsize=figsize)
     for nn in range(ndata):
+        x = np.array([i for i in data[nn].groupby('time.hour').groups.keys()])
         ax1 = fig.add_subplot(1,ndata,nn+1)
         h0=ax1.contourf(x,y[nn],data_dc[nn],levellist, **kwargs)
         ax1.set_xlim(xlimit)
@@ -534,10 +540,11 @@ def seasonalcycle(data,figsize=(9,6), xlimit=(0.5,12.5), xticks=np.arange(1,13,1
             dataa = data_nozero.groupby('time.month')
         else:
             dataa = data[nn].groupby('time.month')
-        datab = [dataa[i].data for i in range(1,13)]
+        datab = [dataa[i].data for i in dataa.groups.keys()]
         datac = [d[~np.isnan(d)] for d in datab]
         ax.boxplot(datac,whis=(10,90),showmeans=False,showfliers=False,
-                positions=np.arange(1,13)+p_shift[nn],widths=1/(ndata*2),
+                positions=np.array([i for i in dataa.groups.keys()])+p_shift[nn],
+                widths=1/(ndata*2),
                 boxprops=dict(facecolor=c, color=c),whiskerprops=dict(color=c),
                 medianprops=dict(color='lightyellow',linewidth=1),capprops=dict(color=c),
                 vert=True, patch_artist=True)    # need patch_artist to fill color in box
@@ -557,8 +564,8 @@ def seasonalcycle(data,figsize=(9,6), xlimit=(0.5,12.5), xticks=np.arange(1,13,1
     return(fig, ax)
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def seasonalcycle_2d(data, figsize=None, x=np.arange(12)+1, y=None, 
-                xlimit=(1,12), xticks=np.arange(1,13,1), 
+def seasonalcycle_2d(data, figsize=None, y=None, 
+                xlimit=(1,12), xticks=np.arange(1,13,1),
                 ylimit=None, levellist=None,
                 xlabel='Months', ylabel=None, title=None, **kwargs):
     """
@@ -589,14 +596,16 @@ def seasonalcycle_2d(data, figsize=None, x=np.arange(12)+1, y=None,
     data_sc = []
     for nn in range(ndata):
         sc = data[nn].groupby('time.month').mean()
-        if sc.shape[0] == 12:
+        if sc.shape[0] == len(sc):
             sc = sc.T
         data_sc.append(sc)
         
     if y is None:
         y = [np.arange(data_sc[mm].shape[0]) for mm in range(ndata)]
     if levellist is None:
-        levellist = np.linspace(np.nanmin(data_sc[0]), np.nanmax(data_sc[0]), 10)
+        minvalue = min([np.nanmin(tmpdata) for tmpdata in data_sc])
+        maxvalue = max([np.nanmax(tmpdata) for tmpdata in data_sc])
+        levellist = np.linspace(minvalue, maxvalue, 10)
     if title is None:
         title = [None for mm in range(ndata)]
     if figsize is None:
@@ -606,6 +615,7 @@ def seasonalcycle_2d(data, figsize=None, x=np.arange(12)+1, y=None,
     plt.rcParams.update({'font.size': 20})
     fig = plt.figure(figsize=figsize)
     for nn in range(ndata):
+        x = np.array([i for i in data[nn].groupby('time.month').groups.keys()])
         ax1 = fig.add_subplot(1,ndata,nn+1)
         h0=ax1.contourf(x,y[nn],data_sc[nn],levellist, **kwargs)
         ax1.set_xlim(xlimit)
@@ -859,9 +869,9 @@ def heatmap(xdata, ydata, zdata, figsize=None, xedges=None, yedges=None,vmin=Non
         h.append(h0)
         ax[mm].grid()
         ax[mm].set_xticks(xticks)
-        ax[mm].set_xticklabels(xticklabels[xticks].astype(int))
+        ax[mm].set_xticklabels(xticklabels[xticks].astype(np.int))
         ax[mm].set_yticks(yticks)
-        ax[mm].set_yticklabels(yticklabels[yticks].astype(int))
+        ax[mm].set_yticklabels(yticklabels[yticks].astype(np.int))
         ax[mm].set_title(title[mm], fontsize=18)
         if type(xlabel) is list:
             ax[mm].set_xlabel(xlabel[mm])
