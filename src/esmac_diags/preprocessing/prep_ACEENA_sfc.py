@@ -51,7 +51,7 @@ from esmac_diags.subroutines.specific_data_treatment import calc_cdnc_ARM
 #                 10000,10500,11000,11500,12000,12500,13000,14000,15000,16000,17000,18000])
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_ACSM(acsmpath, predatapath, dt=3600):
+def prep_ACSM(acsmpath, predatapath, dt=300):
     """
     prepare acsm data
 
@@ -147,7 +147,7 @@ def prep_ACSM(acsmpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_ccn(ccnpath, predatapath, dt=3600):
+def prep_ccn(ccnpath, predatapath, dt=300): # probably need to interpolate ~hourly data to get 5-min dt
     """
     prepare surface CCN data. 
     two IOPs are different .dat files, save them separately
@@ -264,7 +264,7 @@ def prep_ccn(ccnpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_cloud_2d(armbepath, predatapath, height_out, dt=3600):
+def prep_cloud_2d(armbepath, predatapath, height_out, dt=3600): # need to change to ARSCL dataset for 5-min dt
     """
     prepare cloud fraction data from ARMBE
 
@@ -334,7 +334,7 @@ def prep_cloud_2d(armbepath, predatapath, height_out, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_cloudheight_ARSCL(arsclpath, predatapath, dt=3600):
+def prep_cloudheight_ARSCL(arsclpath, predatapath, dt=300):
     """
     prepare cloud base and top height data at ARM sites from ARSCL
     include multi-layer clouds
@@ -417,7 +417,7 @@ def prep_cloudheight_ARSCL(arsclpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_CPC(cpcpath,  predatapath, dt=3600):
+def prep_CPC(cpcpath,  predatapath, dt=300):
     """
     prepare CPC data
 
@@ -479,7 +479,7 @@ def prep_CPC(cpcpath,  predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_CPC_withENAmask(aerosolmaskpath, predatapath, dt=3600):
+def prep_CPC_withENAmask(aerosolmaskpath, predatapath, dt=300):
     """
     prepare aerosol number concentration data (>10nm) from CPC
     apply aerosol mask data specifically for ENA site
@@ -594,7 +594,7 @@ def prep_CPC_withENAmask(aerosolmaskpath, predatapath, dt=3600):
     
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=3600):
+def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=300):
     """
     prepare UHSAS data
 
@@ -677,7 +677,7 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=3600):
 
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_LWP(armbepath, mfrsrpath, predatapath, dt=3600):
+def prep_LWP(armbepath, mfrsrpath, predatapath, dt=300): # add in MWRRET files; ARMBE won't work for subhourly
     """
     prepare liquid water path
     Although LWP is measured by microwave radiometer (MWR), it is processed in 
@@ -773,7 +773,7 @@ def prep_LWP(armbepath, mfrsrpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_LTS(armbepath, predatapath, dt=3600):
+def prep_LTS(armbepath, predatapath, dt=300): # check to see what ARMBE bases this off of
     """
     prepare lower tropospheric stability (potential temperature difference between 700hPa and surface) from ARMBE
 
@@ -870,7 +870,7 @@ def prep_LTS(armbepath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_mfrsr_cod(mfrsrpath,  predatapath, dt=3600):
+def prep_mfrsr_cod(mfrsrpath,  predatapath, dt=300):
     """
     prepare cloud optical depth data from MFRSR
 
@@ -941,7 +941,7 @@ def prep_mfrsr_cod(mfrsrpath,  predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=3600):
+def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=300): # check to see if fill values are being removed
     """
     prepare cloud effective radius data from MFRSR
 
@@ -1012,7 +1012,7 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_precip(armbepath, predatapath, dt=3600):
+def prep_precip(armbepath, predatapath, dt=3600): # need to use different dataset (disdrometer is probably best) for 5 min dt
     """
     prepare surface precipitation data from ARMBE
 
@@ -1068,7 +1068,7 @@ def prep_precip(armbepath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_radiation(armbepath, predatapath, dt=3600):
+def prep_radiation(armbepath, predatapath, dt=3600): # need to switch to RADFLUX for 5 min dt
     """
     prepare surface radiation data from ARMBE
 
@@ -1139,7 +1139,7 @@ def prep_radiation(armbepath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_totcld(armbepath, predatapath, dt=3600):
+def prep_totcld(armbepath, predatapath, dt=3600): # need to switch to ARSCL and TSI datastreams for 5 min dt
     """
     prepare total cloud fraction data from ARMBE
 
@@ -1224,9 +1224,9 @@ def prep_totcld(armbepath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_Ndrop(ndroppath, predatapath, dt=3600):
+def prep_Ndrop(ndroppath, predatapath, dt=300):
     """
-    prepare cloud deoplet number concentration from Ndrop data
+    prepare cloud droplet number concentration from Ndrop data
     
     Parameters
     ----------
@@ -1295,7 +1295,7 @@ def prep_Ndrop(ndroppath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_Nd_ARMretrieval(mfrsrpath, arsclpath, predatapath, dt=3600):
+def prep_Nd_ARMretrieval(mfrsrpath, arsclpath, predatapath, dt=300): # change to use 5-min inputs rather than 20 s; check filters
     """
     prepare cloud deoplet number concentration (Nd) data at ARM sites
     input data is cloud optical depth from MFRSR, LWP from MWR (in the MFRSR data), 
@@ -1416,7 +1416,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_Nd_WU(Nd_WUpath, predatapath, dt=3600):
+def prep_Nd_WU(Nd_WUpath, predatapath, dt=300):
     """
     prepare cloud deoplet number concentration (Nd) and effective radius data for ACEENA
     retrieval algorithm developed by Peng Wu, et al., 2020
