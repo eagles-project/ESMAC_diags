@@ -51,7 +51,7 @@ from esmac_diags.subroutines.specific_data_treatment import calc_cdnc_ARM
 #                 10000,10500,11000,11500,12000,12500,13000,14000,15000,16000,17000,18000])
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_ACSM(acsmpath, predatapath, dt=300):
+def prep_ACSM(acsmpath, predatapath, dt=300): #data is every 30 min so need to nearest neighbor or interpolate for high res
     """
     prepare acsm data
 
@@ -147,7 +147,7 @@ def prep_ACSM(acsmpath, predatapath, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_ccn(ccnpath, predatapath, dt=300): # probably need to interpolate ~hourly data to get 5-min dt
+def prep_ccn(ccnpath, predatapath, dt=300): # data is hourly so need to nearest neighbor or interpolate for high res
     """
     prepare surface CCN data. 
     two IOPs are different .dat files, save them separately
@@ -264,7 +264,8 @@ def prep_ccn(ccnpath, predatapath, dt=300): # probably need to interpolate ~hour
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_cloud_2d(armbepath, predatapath, height_out, dt=3600): # need to change to ARSCL dataset for 5-min dt
+#def prep_cloud_2d(armbepath, predatapath, height_out, dt=3600): #for hourly or coarser resolution
+def prep_cloud_2d(arsclpath, predatapath, height_out, dt=300): #for sub-hourly
     """
     prepare cloud fraction data from ARMBE
 
@@ -677,7 +678,8 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=300):
 
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_LWP(armbepath, mfrsrpath, predatapath, dt=300): # add in MWRRET files; ARMBE won't work for subhourly
+#def prep_LWP(armbepath, mfrsrpath, predatapath, dt=3600): #for hourly or coarser res
+def prep_LWP(mwrpath, mfrsrpath, predatapath, dt=300): #for subhourly
     """
     prepare liquid water path
     Although LWP is measured by microwave radiometer (MWR), it is processed in 
@@ -773,7 +775,7 @@ def prep_LWP(armbepath, mfrsrpath, predatapath, dt=300): # add in MWRRET files; 
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_LTS(armbepath, predatapath, dt=300): # check to see what ARMBE bases this off of
+def prep_LTS(armbepath, predatapath, dt=300): # check to see what ARMBE bases this off of; need to interpolate to higher res
     """
     prepare lower tropospheric stability (potential temperature difference between 700hPa and surface) from ARMBE
 
@@ -1012,7 +1014,8 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=300): # check to see if fill val
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_precip(armbepath, predatapath, dt=3600): # need to use different dataset (disdrometer is probably best) for 5 min dt
+#def prep_precip(armbepath, predatapath, dt=3600): #for hourly or coarser
+def prep_precip(parspath, predatapath, dt=300): # for subhourly
     """
     prepare surface precipitation data from ARMBE
 
@@ -1068,7 +1071,8 @@ def prep_precip(armbepath, predatapath, dt=3600): # need to use different datase
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_radiation(armbepath, predatapath, dt=3600): # need to switch to RADFLUX for 5 min dt
+#def prep_radiation(armbepath, predatapath, dt=3600): # for hourly or coarser res
+def prep_radiation(radfluxpath, predatapath, dt=300s): # for subhourly
     """
     prepare surface radiation data from ARMBE
 
@@ -1139,7 +1143,8 @@ def prep_radiation(armbepath, predatapath, dt=3600): # need to switch to RADFLUX
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_totcld(armbepath, predatapath, dt=3600): # need to switch to ARSCL and TSI datastreams for 5 min dt
+#def prep_totcld(armbepath, predatapath, dt=3600): # for hourly of coarser res
+def prep_totcld(arsclpath, predatapath, dt=300): # for subhourly
     """
     prepare total cloud fraction data from ARMBE
 
