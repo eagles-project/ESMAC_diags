@@ -264,8 +264,7 @@ def prep_ccn(ccnpath, predatapath, dt=300): # data is hourly so need to nearest 
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#def prep_cloud_2d(armbepath, predatapath, height_out, dt=3600): #for hourly or coarser resolution
-def prep_cloud_2d(arsclpath, predatapath, height_out, dt=300): #for sub-hourly
+def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=3000):
     """
     prepare cloud fraction data from ARMBE
 
