@@ -287,29 +287,32 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=3000):
                        
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
-        
-    #%% read in data
-    lst = glob.glob(os.path.join(armbepath, '*armbecldrad*.nc'))
-    obsdata = xr.open_mfdataset(lst, combine='by_coords')
-    time = obsdata['time']
-    height = obsdata['height'].load()
-    cloud = obsdata['cld_frac'].load()
-    qc_cloud = obsdata['qc_cld_frac'].load()
-    obsdata.close()    
-    
+
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
+  
+    #%% read in data
+    if dt >= 3600:
+        lst = glob.glob(os.path.join(armbepath, '*armbecldrad*.nc'))
+        obsdata = xr.open_mfdataset(lst, combine='by_coords')
+        time = obsdata['time']
+        height = obsdata['height'].load()
+        cloud = obsdata['cld_frac'].load()
+        qc_cloud = obsdata['qc_cld_frac'].load()
+        obsdata.close()    
     
-    cloud_i = np.full((len(time_new),len(height)), np.nan)
-    for kk in range(len(height)):
-        # quality controls. For ARMBE cloud fraction, remove data with <30% valid points within 1-hr window 
-        cl = cloud[:,kk]
-        cl[qc_cloud[:,kk]>=2] = np.nan
-        # interpolate into standard time
-        cloud_i[:,kk] = np.interp(time_new, time, cl)
-        
-    cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
-        
+       cloud_i = np.full((len(time_new),len(height)), np.nan)
+       for kk in range(len(height)):
+           # quality controls. For ARMBE cloud fraction, remove data with <30% valid points within 1-hr window 
+           cl = cloud[:,kk]
+           cl[qc_cloud[:,kk]>=2] = np.nan
+           # interpolate into standard time
+           cloud_i[:,kk] = np.interp(time_new, time, cl)
+
+       cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
+
+    if dt < 3600:
+      
     
     #%% output file
     outfile = predatapath + 'cloud_2d_ACEENA.nc'
@@ -677,8 +680,7 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=300):
 
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#def prep_LWP(armbepath, mfrsrpath, predatapath, dt=3600): #for hourly or coarser res
-def prep_LWP(mwrpath, mfrsrpath, predatapath, dt=300): #for subhourly
+def prep_LWP(armbepath, mwrpath, mfrsrpath, predatapath, dt=300):
     """
     prepare liquid water path
     Although LWP is measured by microwave radiometer (MWR), it is processed in 
@@ -1013,8 +1015,7 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=300): # check to see if fill val
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#def prep_precip(armbepath, predatapath, dt=3600): #for hourly or coarser
-def prep_precip(parspath, predatapath, dt=300): # for subhourly
+def prep_precip(armbepath, parspath, predatapath, dt=300):
     """
     prepare surface precipitation data from ARMBE
 
@@ -1070,8 +1071,7 @@ def prep_precip(parspath, predatapath, dt=300): # for subhourly
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#def prep_radiation(armbepath, predatapath, dt=3600): # for hourly or coarser res
-def prep_radiation(radfluxpath, predatapath, dt=300s): # for subhourly
+def prep_radiation(armbepath, radfluxpath, predatapath, dt=300):
     """
     prepare surface radiation data from ARMBE
 
@@ -1142,8 +1142,7 @@ def prep_radiation(radfluxpath, predatapath, dt=300s): # for subhourly
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#def prep_totcld(armbepath, predatapath, dt=3600): # for hourly of coarser res
-def prep_totcld(arsclpath, predatapath, dt=300): # for subhourly
+def prep_totcld(armbepath, arsclpath, predatapath, dt=300):
     """
     prepare total cloud fraction data from ARMBE
 
