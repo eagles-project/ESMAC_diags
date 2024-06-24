@@ -36,6 +36,7 @@ from esmac_diags.subroutines.specific_data_treatment import calc_cdnc_ARM
 # acsmpath = '../../../data/ACEENA/obs/surface/arm_acsm/'
 # armbepath = '../../../data/ACEENA/obs/profile/armbe/'
 # arsclpath = '../../../data/ACEENA/obs/profile/arscl/'
+# arsclbndpath = '../../../data/ACEENA/obs/profile/arsclbnd/'
 # ccnpath = '../../../data/ACEENA/obs/surface/arm_aosccn1/'
 # cpcpath = '../../../data/ACEENA/obs/surface/arm_cpcf/'
 # uhsaspath = '../../../data/ACEENA/obs/surface/arm_uhsas/'
@@ -289,7 +290,7 @@ def prep_ccn(ccnpath, predatapath, dt=300):
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=3000):
+def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=300):
     """
     prepare cloud fraction data from ARMBE
 
@@ -297,6 +298,8 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=3000):
     ----------
     armbepath : str
         input datapath. use hourly-averaged ARMBE data
+    arsclpath : str
+        input datapath.
     predatapath : str
         output datapath
     height_out : numpy array
@@ -326,18 +329,27 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=3000):
         qc_cloud = obsdata['qc_cld_frac'].load()
         obsdata.close()    
     
-       cloud_i = np.full((len(time_new),len(height)), np.nan)
-       for kk in range(len(height)):
-           # quality controls. For ARMBE cloud fraction, remove data with <30% valid points within 1-hr window 
-           cl = cloud[:,kk]
-           cl[qc_cloud[:,kk]>=2] = np.nan
-           # interpolate into standard time
-           cloud_i[:,kk] = np.interp(time_new, time, cl)
+        cloud_i = np.full((len(time_new),len(height)), np.nan)
+        for kk in range(len(height)):
+            # quality controls. For ARMBE cloud fraction, remove data with <30% valid points within 1-hr window 
+            cl = cloud[:,kk]
+            cl[qc_cloud[:,kk]>=2] = np.nan
+            # interpolate into standard time
+            cloud_i[:,kk] = np.interp(time_new, time, cl)
 
-       cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
+        cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
 
     if dt < 3600:
-      
+        lst = glob.glob(os.path.join(arsclpath, 'enaarsclkazr1kolliasC1.c0*.nc'))
+        lst.sort()
+        arscldata = xr.open_mfdataset(lst, combine='by_coords')
+        time = arscldata['time'].load()
+        height = arscldata['height'].load()
+        cloud_flag = arscldata['cloud_source_flag'].load() #0=missing; 1=clear, 2+=cloud
+        arscldata.close()
+
+        #Need to compute cloud fraction (cloud_o) within dt and height_out bins (add up 2+ points and divide by 1+ points)
+        
     
     #%% output file
     outfile = predatapath + 'cloud_2d_ACEENA.nc'
@@ -353,23 +365,28 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=3000):
     ds['cloud'].attrs["long_name"] = "Cloud Fraction"
     ds['cloud'].attrs["units"] = "%"
     ds['cloud'].attrs["description"] = "Cloud Fraction based on radar and MPL"
-    
-    ds.attrs["title"] = 'ARMBE hourly 2-d cloud fraction data derived from ARSCL data'
-    ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'interpolated into each time window'
+
+    if dt >= 3600:
+        ds.attrs["title"] = 'ARMBE hourly 2-d cloud fraction data derived from ARSCL data'
+        ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
+        ds.attrs["description"] = 'interpolated into each time window'
+    if dt < 3600:
+        ds.attrs["title"] = 'ARSCL 2-d cloud fraction data'
+        ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
+        ds.attrs["description"] = 'accumulated into each time window'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_cloudheight_ARSCL(arsclpath, predatapath, dt=300):
+def prep_cloudheight_ARSCL(arsclbndpath, predatapath, dt=300):
     """
     prepare cloud base and top height data at ARM sites from ARSCL
     include multi-layer clouds
     
     Parameters
     ----------
-    arsclpath : char
+    arsclbndpath : char
         input datapath.  
     predatapath : char
         output datapath
@@ -386,7 +403,7 @@ def prep_cloudheight_ARSCL(arsclpath, predatapath, dt=300):
         os.makedirs(predatapath)
             
     #%% read in data
-    lst1 = glob.glob(os.path.join(arsclpath, 'enaarsclkazrbnd1kolliasC1.c0*.nc'))
+    lst1 = glob.glob(os.path.join(arsclbndpath, 'enaarsclkazrbnd1kolliasC1.c0*.nc'))
     lst1.sort()
     arscldata = xr.open_mfdataset(lst1, combine='by_coords')
     arscltime = arscldata['time'].load()
@@ -705,7 +722,7 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=300):
 
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_LWP(armbepath, mwrpath, mfrsrpath, predatapath, dt=300):
+def prep_LWP(armbepath, mfrsrpath, mwrpath, predatapath, dt=300):
     """
     prepare liquid water path
     Although LWP is measured by microwave radiometer (MWR), it is processed in 
@@ -718,6 +735,8 @@ def prep_LWP(armbepath, mwrpath, mfrsrpath, predatapath, dt=300):
         input datapath for ARMBE (MWR data)
     mfrsrpath : str
         input datapath for MFRSR
+    mwrpath : str
+        input datapath
     predatapath : str
         output datapath
     dt : float
@@ -1048,6 +1067,8 @@ def prep_precip(armbepath, parspath, predatapath, dt=300):
     ----------
     armbepath : str
         input datapath. use hourly-averaged ARMBE data
+    parspath : str
+        input datapath for disdrometer data
     predatapath : str
         output datapath
     dt : float
@@ -1104,6 +1125,8 @@ def prep_radiation(armbepath, radfluxpath, predatapath, dt=300):
     ----------
     armbepath : str
         input datapath. use hourly-averaged ARMBE data
+    radfluxpath : str
+        input datapath.
     predatapath : str
         output datapath
     dt : float
@@ -1167,7 +1190,7 @@ def prep_radiation(armbepath, radfluxpath, predatapath, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_totcld(armbepath, arsclpath, predatapath, dt=300):
+def prep_totcld(armbepath, arsclbndpath, predatapath, dt=300):
     """
     prepare total cloud fraction data from ARMBE
 
@@ -1175,6 +1198,8 @@ def prep_totcld(armbepath, arsclpath, predatapath, dt=300):
     ----------
     armbepath : str
         input datapath. use hourly-averaged ARMBE data
+    arsclbndpath : char
+        input datapath.  
     predatapath : str
         output datapath
     dt : float
@@ -1323,7 +1348,7 @@ def prep_Ndrop(ndroppath, predatapath, dt=300):
     ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_Nd_ARMretrieval(mfrsrpath, arsclpath, predatapath, dt=300): # change to use 5-min inputs rather than 20 s; check filters
+def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, predatapath, dt=300): # change to use 5-min inputs rather than 20 s; check filters
     """
     prepare cloud deoplet number concentration (Nd) data at ARM sites
     input data is cloud optical depth from MFRSR, LWP from MWR (in the MFRSR data), 
@@ -1336,7 +1361,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclpath, predatapath, dt=300): # change to
     ----------
     mfrsrpath : char
         input datapath. 
-    arsclpath : char
+    arsclbndpath : char
         input datapath.  
     predatapath : char
         output datapath
@@ -1353,7 +1378,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclpath, predatapath, dt=300): # change to
         os.makedirs(predatapath)
         
     #%% read in data
-    lst1 = glob.glob(os.path.join(arsclpath, 'enaarsclkazrbnd1kolliasC1.c0*.nc'))
+    lst1 = glob.glob(os.path.join(arsclbndpath, 'enaarsclkazrbnd1kolliasC1.c0*.nc'))
     lst1.sort()
     arscldata = xr.open_mfdataset(lst1, combine='by_coords')
     arscltime = arscldata['time']
