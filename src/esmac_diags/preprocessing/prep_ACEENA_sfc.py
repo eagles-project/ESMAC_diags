@@ -51,7 +51,7 @@ from esmac_diags.subroutines.specific_data_treatment import calc_cdnc_ARM
 #                 10000,10500,11000,11500,12000,12500,13000,14000,15000,16000,17000,18000])
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_ACSM(acsmpath, predatapath, dt=300): #data is every 30 min so need to nearest neighbor or interpolate for high res
+def prep_ACSM(acsmpath, predatapath, dt=300): #data is every 30 min so need to interpolate for higher res
     """
     prepare acsm data
 
@@ -105,13 +105,19 @@ def prep_ACSM(acsmpath, predatapath, dt=300): #data is every 30 min so need to n
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
-    
-    org_new = median_time_1d(time, org, time_new)
-    no3_new = median_time_1d(time, no3, time_new)
-    so4_new = median_time_1d(time, so4, time_new)
-    nh4_new = median_time_1d(time, nh4, time_new)
-    chl_new = median_time_1d(time, chl, time_new)
-    
+
+    if dt >= 1800: #note that a mean could also be used
+        org_new = median_time_1d(time, org, time_new)
+        no3_new = median_time_1d(time, no3, time_new)
+        so4_new = median_time_1d(time, so4, time_new)
+        nh4_new = median_time_1d(time, nh4, time_new)
+        chl_new = median_time_1d(time, chl, time_new)
+    if dt < 1800:
+        org_new = interp_time_1d(time, org, time_new)
+        no3_new = interp_time_1d(time, no3, time_new)
+        so4_new = interp_time_1d(time, so4, time_new)
+        nh4_new = interp_time_1d(time, nh4, time_new)
+        chl_new = interp_time_1d(time, chl, time_new)
     
     #%% output file
     outfile = predatapath + 'sfc_ACSM_ACEENA.nc'
