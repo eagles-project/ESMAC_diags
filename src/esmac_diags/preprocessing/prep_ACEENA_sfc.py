@@ -1423,8 +1423,8 @@ def prep_Ndrop(ndroppath, predatapath, dt=300):
     # # exclude ice clouds or multi-layer clouds
     # nd[ctype!=1] = np.nan
     
-    # exclude small values
-    nd[nd<10] = np.nan
+    # exclude small values (AV removed this filter 6/24/2024)
+    # nd[nd<10] = np.nan
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
@@ -1455,7 +1455,7 @@ def prep_Ndrop(ndroppath, predatapath, dt=300):
     ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, predatapath, dt=300): # change to use 5-min inputs rather than 20 s; check filters
+def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=300): # change to use 5-min inputs rather than 20 s; check filters
     """
     prepare cloud deoplet number concentration (Nd) data at ARM sites
     input data is cloud optical depth from MFRSR, LWP from MWR (in the MFRSR data), 
@@ -1499,20 +1499,27 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, predatapath, dt=300): # change
     # first data
     mfrsrdata = xr.open_dataset(lst2[0])
     mfrsrtime = mfrsrdata['time']
-    lwp = mfrsrdata['lwp']
-    qc_lwp = mfrsrdata['qc_lwp']
+    # lwp = mfrsrdata['lwp']
+    # qc_lwp = mfrsrdata['qc_lwp']
     cod = mfrsrdata['optical_depth_instantaneous']
     qc_cod = mfrsrdata['qc_optical_depth_instantaneous']
     mfrsrdata.close()
     for file in lst2[1:]:
         mfrsrdata = xr.open_dataset(file)
         mfrsrtime = xr.concat([mfrsrtime, mfrsrdata['time']], dim="time")
-        lwp = xr.concat([lwp, mfrsrdata['lwp']], dim="time")
-        qc_lwp = xr.concat([qc_lwp, mfrsrdata['qc_lwp']], dim="time")
+        # lwp = xr.concat([lwp, mfrsrdata['lwp']], dim="time")
+        # qc_lwp = xr.concat([qc_lwp, mfrsrdata['qc_lwp']], dim="time")
         cod = xr.concat([cod, mfrsrdata['optical_depth_instantaneous']], dim="time")
         qc_cod = xr.concat([qc_cod, mfrsrdata['qc_optical_depth_instantaneous']], dim="time")
         mfrsrdata.close()
+
+    lst3 = glob.glob(os.path.join(mwrpath, '*.nc'))
+    mwrdata = xr.open_mfdataset(files, combine='by_coords')
     
+    mwrtime = mwrdata['time']
+    lwp = mwrdata['phys_lwp']*1e-3 #kg/m**2
+    qc_lwp = mwrdata['qc_phys_lwp']
+  
     lwp.load()
     qc_lwp.load()
     cod.load()
@@ -1521,31 +1528,35 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, predatapath, dt=300): # change
     cbhs.load()
     cths.load()
     
-    # lwp = qc_mask_qcflag(lwp,qc_lwp)  # do not mask LWP since clearsky (LWP=0) is flagged
-    cod = qc_mask_qcflag(cod,qc_cod)
+    lwp = qc_mask_qcflag(lwp,qc_lwp)  # do not mask LWP with MFRSR input since clearsky (LWP=0) is flagged (should be okay in MWR datastream, but need to check, AV 6/24/2024)
+    cod = qc_mask_qcflag(cod, qc_cod)
     cbh = qc_remove_neg(cbh, remove_zero='True')
     
     #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     # calculate CDNC
     # calculate cloud depth for the lowest cloud layer in ARSCL
     cth = cths[:,0]
-    H = cths[:,0] - cbh
+    H = cth - cbh
     H.load()
     H = qc_remove_neg(H, remove_zero='true')
-    H[cbhs[:,1] > 0] = np.nan
+    H[cbhs[:,1] > 0] = np.nan #remove multiple cloud layers
     
     # filter some data samples
-    H[cth>5000.] = np.nan   # remove deep clouds with cloud top >5km
-    lwp[np.logical_or(lwp<0.02, lwp>0.3)] = np.nan
-    cod[np.logical_or(cod<2, cod>60)] = np.nan
+    H[cth > 5000.] = np.nan   # remove deep clouds with cloud top > 5 km (AV: a better way to do this is by cloud top temperature because this will include cloud tops < 0C, especially in winter, but cloud top temperature requires interpolating from ARMBE or interpsonde to cloud top heights)
+    lwp[np.logical_or(lwp < 0.02, lwp > 0.3)] = np.nan # may want to revisit upper limit on LWP
+    cod[np.logical_or(cod < 4, cod > 60)] = np.nan # changed lower COD limit from 2 to 4 (AV 6/24/2024)
     
     # calculate CDNC first then average into 1hr
-    time = mfrsrtime.data
-    H_tmp = np.interp(np.int64(time), np.int64(arscltime), H)
-    nd = calc_cdnc_ARM(lwp, cod, H_tmp)
+    # time = mfrsrtime.data
+    # H_tmp = np.interp(np.int64(time), np.int64(arscltime), H)
+    time_5min = pd.date_range(start='2017-06-20', end='2018-02-21', freq=str(int(300))+"s") # make inputs every 5 min to avoid high frequency noise in nd retrieval (COD looks like it doesn't vary at timescales < ~5 min)
+    H_5min = avg_time_1d(arscltime, H, time_5min)
+    cod_5min = avg_time_1d(mfrsrtime, cod, time_5min)
+    lwp_5min = avg_time_1d(mwrtime, lwp, time_5min
+    nd = calc_cdnc_ARM(lwp_5min, cod_5min, H_5min)
     
-    # exclude small values
-    nd[nd<10] = np.nan
+    # exclude small values (AV removed this filter 6/24/2024)
+    # nd[nd < 10] = np.nan
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
