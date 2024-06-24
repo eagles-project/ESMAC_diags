@@ -1528,7 +1528,8 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=300):
     cbhs.load()
     cths.load()
     
-    lwp = qc_mask_qcflag(lwp,qc_lwp)  # do not mask LWP with MFRSR input since clearsky (LWP=0) is flagged (should be okay in MWR datastream, but need to check, AV 6/24/2024)
+    lwp = qc_mask_qcflag(lwp, qc_lwp)  # do not mask LWP with MFRSR input since clearsky (LWP=0) is flagged (should be okay in MWR datastream, but need to check, AV 6/24/2024)
+    lwp[lwp < 0] = 0 #can be small negative values retrieved that should be set to 0
     cod = qc_mask_qcflag(cod, qc_cod)
     cbh = qc_remove_neg(cbh, remove_zero='True')
     
