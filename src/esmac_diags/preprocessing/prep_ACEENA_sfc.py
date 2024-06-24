@@ -12,7 +12,7 @@ from netCDF4 import Dataset
 import time as ttt
 import esmac_diags
 from esmac_diags.subroutines.time_resolution_change import median_time_1d, median_time_2d,\
-                avg_time_1d, avg_time_2d
+                avg_time_1d, avg_time_2d, interp_time_1d
 from esmac_diags.subroutines.read_ARMdata import read_uhsas
 from esmac_diags.subroutines.quality_control import qc_remove_neg, qc_mask_qcflag, \
                 qc_mask_qcflag_cpc
