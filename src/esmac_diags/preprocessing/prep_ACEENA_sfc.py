@@ -722,7 +722,7 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=300):
 
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_LWP(armbepath, mfrsrpath, mwrpath, predatapath, dt=300):
+def prep_LWP(armbepath, mwrpath, predatapath, dt=300):
     """
     prepare liquid water path
     Although LWP is measured by microwave radiometer (MWR), it is processed in 
@@ -733,8 +733,6 @@ def prep_LWP(armbepath, mfrsrpath, mwrpath, predatapath, dt=300):
     ----------
     armbepath : str
         input datapath for ARMBE (MWR data)
-    mfrsrpath : str
-        input datapath for MFRSR
     mwrpath : str
         input datapath
     predatapath : str
@@ -766,39 +764,54 @@ def prep_LWP(armbepath, mfrsrpath, mwrpath, predatapath, dt=300):
     # quality controls. For ARMBE lwp, remove data with <30% valid points within 1-hr window 
     lwp[qc_lwp>=2] = np.nan
     
-    #%% read in MFRSR LWP for comparison
-    lst2 = glob.glob(os.path.join(mfrsrpath, '*.cdf'))
-    lst2.sort()
-    # first data
-    mfrsrdata = xr.open_dataset(lst2[0])
-    time2 = mfrsrdata['time']
-    lwp2 = mfrsrdata['lwp']
-    qc_lwp2 = mfrsrdata['qc_lwp']
-    mfrsrdata.close()
-    for file in lst2[1:]:
-        mfrsrdata = xr.open_dataset(file)
-        time2 = xr.concat([time2, mfrsrdata['time']], dim="time")
-        lwp2 = xr.concat([lwp2, mfrsrdata['lwp']], dim="time")
-        qc_lwp2 = xr.concat([qc_lwp2, mfrsrdata['qc_lwp']], dim="time")
-        mfrsrdata.close()
+    #%% read in MFRSR LWP for comparison (this block is commented out since it is from the previous version of ESMAC Diags)
+    # lst2 = glob.glob(os.path.join(mfrsrpath, '*.cdf'))
+    # lst2.sort()
+    # # first data
+    # mfrsrdata = xr.open_dataset(lst2[0])
+    # time2 = mfrsrdata['time']
+    # lwp2 = mfrsrdata['lwp']
+    # qc_lwp2 = mfrsrdata['qc_lwp']
+    # mfrsrdata.close()
+    # for file in lst2[1:]:
+    #     mfrsrdata = xr.open_dataset(file)
+    #     time2 = xr.concat([time2, mfrsrdata['time']], dim="time")
+    #     lwp2 = xr.concat([lwp2, mfrsrdata['lwp']], dim="time")
+    #     qc_lwp2 = xr.concat([qc_lwp2, mfrsrdata['qc_lwp']], dim="time")
+    #     mfrsrdata.close()
         
-    lwp2.load()
-    qc_lwp2.load()
-    lwp2 = qc_mask_qcflag(lwp2, qc_lwp2)
-    lwp2 = lwp2*1000. # change unit from kg/m2 (mm) to g/m2
+    # lwp2.load()
+    # qc_lwp2.load()
+    # lwp2 = qc_mask_qcflag(lwp2, qc_lwp2)
+    # lwp2 = lwp2*1000. # change unit from kg/m2 (mm) to g/m2
+
+    #%% read in MWR LWP
+    lst2 = glob.glob(os.path.join(mwrpath, '*.nc'))
+    mwrdata = xr.open_mfdataset(lst2, combine='by_coords')
+    time2 = mwrdata['time']
+    lwp2 = mwrdata['phys_lwp'] #units are g/m2
+    qc_lwp2 = mwrdata['qc_phys_lwp']
+    mwrdata.close()
+
+    mwr_lwp.load()
+    mwr_lwp[qc_mwr_lwp > 0] = np.nan
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     lwp_new = avg_time_1d(time1, lwp, time_new)
     lwp2_new = avg_time_1d(time2, lwp2, time_new)
-    
+
+    #%% sometimes, there can be negative LWP values when LWP is noise, so set those to 0
+    lwp_new[lwp_new < 0] = 0
+    lwp2_new[lwp2_new < 0] = 0
+
     #%% output file
     outfile = predatapath + 'LWP_ACEENA.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'lwp_armbe': ('time', np.float32(lwp_new)),
-                    'lwp_mfrsr': ('time', np.float32(lwp2_new))
+                    'lwp_mwr': ('time', np.float32(lwp2_new))
                     },
                      coords={'time': ('time', time_new)})
     
@@ -808,9 +821,9 @@ def prep_LWP(armbepath, mfrsrpath, mwrpath, predatapath, dt=300):
     ds['lwp_armbe'].attrs["long_name"] = "liquid water path"
     ds['lwp_armbe'].attrs["units"] = "g/m2"
     ds['lwp_armbe'].attrs["description"] = "liquid water path from ARMBE data based on MWR measurements"
-    ds['lwp_mfrsr'].attrs["long_name"] = "liquid water path"
-    ds['lwp_mfrsr'].attrs["units"] = "g/m2"
-    ds['lwp_mfrsr'].attrs["description"] = "liquid water path from MFRSR data based on MWR measurements"
+    ds['lwp_mwr'].attrs["long_name"] = "liquid water path"
+    ds['lwp_mwr'].attrs["units"] = "g/m2"
+    ds['lwp_mwr'].attrs["description"] = "liquid water path from MWR retrievals"
     
     ds.attrs["title"] = 'surface-retrieved cloud liquid water path'
     ds.attrs["inputfile_sample"] = [lst1[0].split('/')[-1], lst2[0].split('/')[-1]]
