@@ -1337,6 +1337,8 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, dt=300):
         arscl_dt = np.abs(arscltime[1].dt.second - arscltime[0].dt.second) # arscl time step
         arscl_nt = dt/arscl_dt # number of arscl timesteps in the time windoe
         cf_arscl_new = np.size(np.where(cloud > 0))/arscl_nt # fraction of times in window with cloud bases present
+        # change unit from 1 to %
+        cf_arscl = cf_arscl*100
       
         # average TSI cloud fraction over dt
         cf_opaque_tsi.load()
@@ -1344,7 +1346,7 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, dt=300):
         cf_thin_tsi.load()
         qc_cf_thin_tsi.load()
 
-        cf_tsi = cf_opaque_tsi + cf_thin_tsi # add opaque and thin cloud fractions to get total
+        cf_tsi = cf_opaque_tsi + cf_thin_tsi # add opaque and thin cloud fractions to get total (should be in units of %)
         cf_tsi[qc_cf_opaque_tsi > 0] = np.nan
         cf_tsi[qc_cf_thin_tsi > 0] = np.nan
         cf_tsi_new = avg_time_1d(tsitime, cf_tsi, time_new)
