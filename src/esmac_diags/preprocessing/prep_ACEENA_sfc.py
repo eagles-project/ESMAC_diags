@@ -1035,19 +1035,24 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=300): # check to see if fill val
     time = mfrsrdata['time']
     reff = mfrsrdata['effective_radius_instantaneous']
     qc_reff = mfrsrdata['qc_effective_radius_instantaneous']
+    lwp_source = mfrsrdata['lwp_aource']
     mfrsrdata.close()
     for file in lst[1:]:
         mfrsrdata = xr.open_dataset(file)
         time = xr.concat([time, mfrsrdata['time']], dim="time")
         reff = xr.concat([reff, mfrsrdata['effective_radius_instantaneous']], dim="time")
         qc_reff = xr.concat([qc_reff, mfrsrdata['qc_effective_radius_instantaneous']], dim="time")
+        lwp_source = xr.concat([lwp_soource, mfrsrdata['lwp_source']], dim="time")
         mfrsrdata.close()
     
     # quality controls
     reff.load()
     qc_reff.load()
+    lwp_source.load()
     reff = qc_mask_qcflag(reff, qc_reff)
-    
+    # remove effective radii values not derived from LWP retrieved from MWR
+    reff[lwp_source == 2] = np.nan
+    reff[lwp_source < 0] = np.nan
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
