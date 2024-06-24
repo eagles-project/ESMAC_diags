@@ -1197,14 +1197,24 @@ def prep_radiation(armbepath, radfluxpath, predatapath, dt=300):
         os.makedirs(predatapath)
         
     #%% read in data
-    lst = glob.glob(os.path.join(armbepath, '*armbecldradC1*.nc'))
-    obsdata = xr.open_mfdataset(lst, combine='by_coords')
-    time = obsdata['time']
-    lwdn = obsdata['lwdn'].load()
-    lwup = obsdata['lwup'].load()
-    swdn = obsdata['swdn'].load()
-    swup = obsdata['swup'].load()
-    obsdata.close()    
+    if dt >= 3600:
+        lst = glob.glob(os.path.join(armbepath, '*armbecldradC1*.nc'))
+        obsdata = xr.open_mfdataset(lst, combine='by_coords')
+        time = obsdata['time']
+        lwdn = obsdata['lwdn'].load()
+        lwup = obsdata['lwup'].load()
+        swdn = obsdata['swdn'].load()
+        swup = obsdata['swup'].load()
+        obsdata.close()
+    if dt < 3600:
+        lst = glob.glob(os.path.join(radfluxpath, '*.nc'))
+        obsdata = xr.open_mfdataset(lst, combine='by_coords')
+        time = obsdata['time']
+        lwdn = obsdata['downwelling_longwave'].load()
+        lwup = obsdata['upwelling_longwave'].load()
+        swdn = obsdata['downwelling_shortwave'].load()
+        swup = obsdata['upwelling_shortwave'].load()
+        obsdata.close()
                 
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
@@ -1236,8 +1246,11 @@ def prep_radiation(armbepath, radfluxpath, predatapath, dt=300):
     ds['lwup'].attrs["units"] = "W/m2"
     ds['swup'].attrs["long_name"] = "Surface upward shortwave flux"
     ds['swup'].attrs["units"] = "W/m2"
-    
-    ds.attrs["title"] = 'surface radiative flux data from ARMBE hourly data'
+
+    if dt >= 3600:
+        ds.attrs["title"] = 'surface radiative flux data from ARMBE hourly data'
+    if dt < 3600:
+        ds.attrs["title"] = 'surface radiative flux data from RADFLUX data'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
     ds.attrs["description"] = 'mean of each time window'
     ds.attrs["date"] = ttt.ctime(ttt.time())
