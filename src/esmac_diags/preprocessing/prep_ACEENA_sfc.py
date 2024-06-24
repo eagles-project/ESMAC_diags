@@ -112,7 +112,7 @@ def prep_ACSM(acsmpath, predatapath, dt=300): #data is every 30 min so need to i
         so4_new = median_time_1d(time, so4, time_new)
         nh4_new = median_time_1d(time, nh4, time_new)
         chl_new = median_time_1d(time, chl, time_new)
-    if dt < 1800:
+    if dt < 1800: #less than time resolution of the data so interpolation is required
         org_new = interp_time_1d(time, org, time_new)
         no3_new = interp_time_1d(time, no3, time_new)
         so4_new = interp_time_1d(time, so4, time_new)
