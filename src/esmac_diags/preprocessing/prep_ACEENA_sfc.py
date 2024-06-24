@@ -1258,7 +1258,7 @@ def prep_radiation(armbepath, radfluxpath, predatapath, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_totcld(armbepath, arsclbndpath, predatapath, dt=300):
+def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, dt=300):
     """
     prepare total cloud fraction data from ARMBE
 
@@ -1267,7 +1267,9 @@ def prep_totcld(armbepath, arsclbndpath, predatapath, dt=300):
     armbepath : str
         input datapath. use hourly-averaged ARMBE data
     arsclbndpath : char
-        input datapath.  
+        input datapath.
+    tsipath : char
+        input datapath.
     predatapath : str
         output datapath
     dt : float
@@ -1281,38 +1283,71 @@ def prep_totcld(armbepath, arsclbndpath, predatapath, dt=300):
                        
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
-        
-    #%% read in data
-    lst = glob.glob(os.path.join(armbepath, '*armbecldrad*.nc'))
-    obsdata = xr.open_mfdataset(lst, combine='by_coords')
-    time = obsdata['time']
-    cf_arscl = obsdata['tot_cld']
-    qc_cf_arscl = obsdata['qc_tot_cld']
-    cf_tsi = obsdata['tot_cld_tsi']
-    qc_cf_tsi = obsdata['qc_tot_cld_tsi']
-    cf_visst = obsdata['cld_tot']
-    obsdata.close()
-    
-    cf_arscl.load()
-    cf_tsi.load()
-    cf_visst.load()
-    qc_cf_arscl.load()
-    qc_cf_tsi.load()
-    
-    # quality controls. For ARMBE cloud fraction, <30% valid points within 1-hr window are flagged and removed
-    cf_arscl[qc_cf_arscl>=2] = np.nan
-    cf_tsi[qc_cf_tsi>=2] = np.nan
-    
-    # change unit from 1 to %
-    cf_arscl = cf_arscl*100
-    cf_tsi = cf_tsi*100
-                
-    #%% re-shape the data into coarser resolution
+
+    #%% time array for re-shaping the original data into a different resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
-    
-    cf_arscl_new = avg_time_1d(time, cf_arscl, time_new)
-    cf_tsi_new = avg_time_1d(time, cf_tsi, time_new)
-    cf_visst_new = avg_time_1d(time, cf_visst, time_new)
+  
+    #%% read in data
+    if dt >= 3600:
+        lst = glob.glob(os.path.join(armbepath, '*armbecldrad*.nc'))
+        obsdata = xr.open_mfdataset(lst, combine='by_coords')
+        time = obsdata['time']
+        cf_arscl = obsdata['tot_cld']
+        qc_cf_arscl = obsdata['qc_tot_cld']
+        cf_tsi = obsdata['tot_cld_tsi']
+        qc_cf_tsi = obsdata['qc_tot_cld_tsi']
+        # cf_visst = obsdata['cld_tot'] #this data is already preprocessed in the satellite program
+        obsdata.close()
+
+        cf_arscl.load()
+        cf_tsi.load()
+        # cf_visst.load()
+        qc_cf_arscl.load()
+        qc_cf_tsi.load()
+
+        # quality controls. For ARMBE cloud fraction, <30% valid points within 1-hr window are flagged and removed
+        cf_arscl[qc_cf_arscl>=2] = np.nan
+        cf_tsi[qc_cf_tsi>=2] = np.nan
+
+        # change unit from 1 to %
+        cf_arscl = cf_arscl*100
+        cf_tsi = cf_tsi*100
+
+        cf_arscl_new = avg_time_1d(time, cf_arscl, time_new)
+        cf_tsi_new = avg_time_1d(time, cf_tsi, time_new)
+        # cf_visst_new = avg_time_1d(time, cf_visst, time_new)
+  
+    if dt < 3600:
+        lst = glob.glob(os.path.join(arsclbndpath, '*.nc'))
+        arscldata = xr.open_mfdataset(lst, combine='by_coords')
+        arscltime = arscldata['time']
+        cloud_base = arscldata['cloud_layer_base_height'][:,0] #first cloud layer base
+        arscldata.close()
+
+        lst = glob.glob(os.path.join(tsipath, '*.nc'))
+        tsidata = xr.open_mfdataset(lst, combine='by_coords')
+        cf_opaque_tsi = obsdata['percent_opaque']
+        qc_cf_opaque_tsi = obsdata['qc_percent_opaque']
+        cf_thin_tsi = obsdata['percent_thin']
+        qc_cf_thin_tsi = obsdata['qc_percent_thin']
+        tsidata.close()
+
+        # compute ARSCL cloud fraction over dt
+        cloud.load()
+        arscl_dt = np.abs(arscltime[1].dt.second - arscltime[0].dt.second) # arscl time step
+        arscl_nt = dt/arscl_dt # number of arscl timesteps in the time windoe
+        cf_arscl_new = np.size(np.where(cloud > 0))/arscl_nt # fraction of times in window with cloud bases present
+      
+        # average TSI cloud fraction over dt
+        cf_opaque_tsi.load()
+        qc_cf_opaque_tsi.load()
+        cf_thin_tsi.load()
+        qc_cf_thin_tsi.load()
+
+        cf_tsi = cf_opaque_tsi + cf_thin_tsi # add opaque and thin cloud fractions to get total
+        cf_tsi[qc_cf_opaque_tsi > 0] = np.nan
+        cf_tsi[qc_cf_thin_tsi > 0] = np.nan
+        cf_tsi_new = avg_time_1d(tsitime, cf_tsi, time_new)
     
     #%% output file
     outfile = predatapath + 'totcld_ACEENA.nc'
@@ -1320,7 +1355,7 @@ def prep_totcld(armbepath, arsclbndpath, predatapath, dt=300):
     ds = xr.Dataset({
                     'tot_cld_arscl': ('time', np.float32(cf_arscl_new)),
                     'tot_cld_tsi': ('time', np.float32(cf_tsi_new)),
-                    'tot_cld_visst': ('time', np.float32(cf_visst_new))
+                    # 'tot_cld_visst': ('time', np.float32(cf_visst_new))
                     },
                      coords={'time': ('time', time_new)})
     
@@ -1333,12 +1368,14 @@ def prep_totcld(armbepath, arsclbndpath, predatapath, dt=300):
     ds['tot_cld_tsi'].attrs["long_name"] = "cloud_area_fraction"
     ds['tot_cld_tsi'].attrs["units"] = "%"
     ds['tot_cld_tsi'].attrs["description"] = "Total cloud fraction based on total sky imager, 100 degree FOV"
-    ds['tot_cld_visst'].attrs["long_name"] = "cloud_area_fraction"
-    ds['tot_cld_visst'].attrs["units"] = "%"
-    ds['tot_cld_visst'].attrs["description"] = "Total cloud fraction based on VISST satellite product"
-    
-    
-    ds.attrs["title"] = 'total cloud fraction from ARMBE hourly data'
+    # ds['tot_cld_visst'].attrs["long_name"] = "cloud_area_fraction"
+    # ds['tot_cld_visst'].attrs["units"] = "%"
+    # ds['tot_cld_visst'].attrs["description"] = "Total cloud fraction based on VISST satellite product"
+
+    if dt >= 3600:
+        ds.attrs["title"] = 'total cloud fraction from ARMBE hourly data (from ARSCL and TSI)'
+    if dt < 3600:
+        ds.attrs["title"] = 'total cloud fraction from ARSCL and TSI'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
