@@ -51,7 +51,7 @@ from esmac_diags.subroutines.specific_data_treatment import calc_cdnc_ARM
 #                 10000,10500,11000,11500,12000,12500,13000,14000,15000,16000,17000,18000])
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_ACSM(acsmpath, predatapath, dt=300): #data is every 30 min so need to interpolate for higher res
+def prep_ACSM(acsmpath, predatapath, dt=300):
     """
     prepare acsm data
 
@@ -106,13 +106,14 @@ def prep_ACSM(acsmpath, predatapath, dt=300): #data is every 30 min so need to i
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
 
-    if dt >= 1800: #note that a mean could also be used
+    # data resolution is 30-min, so interpolate for finer resolution; a mean could also be used for coarser resolution is warranted
+    if dt >= 1800:
         org_new = median_time_1d(time, org, time_new)
         no3_new = median_time_1d(time, no3, time_new)
         so4_new = median_time_1d(time, so4, time_new)
         nh4_new = median_time_1d(time, nh4, time_new)
         chl_new = median_time_1d(time, chl, time_new)
-    if dt < 1800: #less than time resolution of the data so interpolation is required
+    if dt < 1800:
         org_new = interp_time_1d(time, org, time_new)
         no3_new = interp_time_1d(time, no3, time_new)
         so4_new = interp_time_1d(time, so4, time_new)
@@ -147,13 +148,16 @@ def prep_ACSM(acsmpath, predatapath, dt=300): #data is every 30 min so need to i
     
     ds.attrs["title"] = 'Aerosol composition from surface ACSM'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'median value of each time window'
+    if dt >= 1800:
+        ds.attrs["description"] = 'median value of each time window'
+    if dt < 1800:
+        ds.attrs["description"] = 'interpolated value from 30-min resolution data'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_ccn(ccnpath, predatapath, dt=300): # data is hourly so need to nearest neighbor or interpolate for high res
+def prep_ccn(ccnpath, predatapath, dt=300):
     """
     prepare surface CCN data. 
     two IOPs are different .dat files, save them separately
@@ -209,14 +213,26 @@ def prep_ccn(ccnpath, predatapath, dt=300): # data is hourly so need to nearest 
           
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
-    ccn1_new = median_time_1d(time1, ccn1, time_new)
-    ss1_i = median_time_1d(time1, ss1, time_new)
-    ccn2_new = median_time_1d(time2, ccn2, time_new)
-    ss2_i = median_time_1d(time2, ss2, time_new)
-    ccn5_new = median_time_1d(time5, ccn5, time_new)
-    ss5_i = median_time_1d(time5, ss5, time_new)
-    ccn6_new = median_time_1d(time6, ccn6, time_new)
-    ss6_i = median_time_1d(time6, ss6, time_new)
+
+    # data resolution is hourly, so interpolate for finer resolution
+    if dt >= 3600:
+        ccn1_new = median_time_1d(time1, ccn1, time_new)
+        ss1_i = median_time_1d(time1, ss1, time_new)
+        ccn2_new = median_time_1d(time2, ccn2, time_new)
+        ss2_i = median_time_1d(time2, ss2, time_new)
+        ccn5_new = median_time_1d(time5, ccn5, time_new)
+        ss5_i = median_time_1d(time5, ss5, time_new)
+        ccn6_new = median_time_1d(time6, ccn6, time_new)
+        ss6_i = median_time_1d(time6, ss6, time_new)
+    if dt < 3600:
+        ccn1_new = interp_time_1d(time1, ccn1, time_new)
+        ss1_i = interp_time_1d(time1, ss1, time_new)
+        ccn2_new = interp_time_1d(time2, ccn2, time_new)
+        ss2_i = interp_time_1d(time2, ss2, time_new)
+        ccn5_new = interp_time_1d(time5, ccn5, time_new)
+        ss5_i = interp_time_1d(time5, ss5, time_new)
+        ccn6_new = interp_time_1d(time6, ccn6, time_new)
+        ss6_i = interp_time_1d(time6, ss6, time_new)
         
     
     #%% output file
@@ -239,32 +255,35 @@ def prep_ccn(ccnpath, predatapath, dt=300): # data is hourly so need to nearest 
     ds['time'].attrs["standard_name"] = "time"
     ds['CCN1'].attrs["long_name"] = "0.1% Cloud Condensation Nuclei - measured"
     ds['CCN1'].attrs["units"] = "cm-3"
-    ds['CCN1'].attrs["description"] = "ARM-measured CCN targetted to 0.1% SS. see SS1 for actual measured SS"
-    ds['ss1'].attrs["long_name"] = "Actual Supersaturation targetted to 0.1%"
+    ds['CCN1'].attrs["description"] = "ARM-measured CCN targeted to 0.1% SS. see SS1 for actual measured SS"
+    ds['ss1'].attrs["long_name"] = "Actual Supersaturation targeted to 0.1%"
     ds['ss1'].attrs["units"] = "%"
     ds['ss1'].attrs["description"] = "measured SS that is closest to 0.1%. ccn1_m is measured at this SS"
     ds['CCN2'].attrs["long_name"] = "0.2% Cloud Condensation Nuclei"
     ds['CCN2'].attrs["units"] = "cm-3"
-    ds['CCN2'].attrs["description"] = "ARM-measured CCN targetted to 0.2% SS. see SS2 for actual measured SS"
-    ds['ss2'].attrs["long_name"] = "Actual Supersaturation targetted to 0.2%"
+    ds['CCN2'].attrs["description"] = "ARM-measured CCN targeted to 0.2% SS. see SS2 for actual measured SS"
+    ds['ss2'].attrs["long_name"] = "Actual Supersaturation targeted to 0.2%"
     ds['ss2'].attrs["units"] = "%"
     ds['ss2'].attrs["description"] = "measured SS that is closest to 0.2%. ccn2_m is measured at this SS"
     ds['CCN5'].attrs["long_name"] = "0.5% Cloud Condensation Nuclei"
     ds['CCN5'].attrs["units"] = "cm-3"
-    ds['CCN5'].attrs["description"] = "ARM-measured CCN targetted to 0.5% SS. see SS5 for actual measured SS"
-    ds['ss5'].attrs["long_name"] = "Actual Supersaturation targetted to 0.5%"
+    ds['CCN5'].attrs["description"] = "ARM-measured CCN targeted to 0.5% SS. see SS5 for actual measured SS"
+    ds['ss5'].attrs["long_name"] = "Actual Supersaturation targeted to 0.5%"
     ds['ss5'].attrs["units"] = "%"
     ds['ss5'].attrs["description"] = "measured SS that is closest to 0.5%. ccn5_m is measured at this SS"
     ds['CCN6'].attrs["long_name"] = "0.6% Cloud Condensation Nuclei"
     ds['CCN6'].attrs["units"] = "cm-3"
-    ds['CCN6'].attrs["description"] = "ARM-measured CCN targetted to 0.6% SS. see SS6 for actual measured SS"
-    ds['ss6'].attrs["long_name"] = "Actual Supersaturation targetted to 0.6%"
+    ds['CCN6'].attrs["description"] = "ARM-measured CCN targeted to 0.6% SS. see SS6 for actual measured SS"
+    ds['ss6'].attrs["long_name"] = "Actual Supersaturation targeted to 0.6%"
     ds['ss6'].attrs["units"] = "%"
     ds['ss6'].attrs["description"] = "measured SS that is closest to 0.6%. ccn6_m is measured at this SS"
     
     ds.attrs["title"] = 'Surface CCN number concentration'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'median value of each time window'
+    if dt >= 3600:
+        ds.attrs["description"] = 'median value of each time window'
+    if dt < 3600:
+        ds.attrs["description"] = 'interpolated value from hourly resolution data'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
