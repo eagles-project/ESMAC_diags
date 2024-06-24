@@ -40,7 +40,11 @@ from esmac_diags.subroutines.specific_data_treatment import calc_cdnc_ARM
 # ccnpath = '../../../data/ACEENA/obs/surface/arm_aosccn1/'
 # cpcpath = '../../../data/ACEENA/obs/surface/arm_cpcf/'
 # uhsaspath = '../../../data/ACEENA/obs/surface/arm_uhsas/'
+# mwrpath = '../../../data/ACEENA/obs/surface/arm_mwr/'
 # mfrsrpath = '../../../data/ACEENA/obs/surface/arm_mfrsr/'
+# metpath = '../../../data/ACEENA/obs/surface/arm_met/'
+# parspath =  '../../../data/ACEENA/obs/surface/arm_pars/'
+# radfluxpath =  '../../../data/ACEENA/obs/surface/arm_radflux/'
 # Nd_WUpath = '../../../data/ACEENA/obs/surface/Wu_etal_retrieval/'
 # ndroppath = '../../../data/ACEENA/obs/surface/enandrop/'
 # predatapath = 'C:/Users/tang357/Downloads/ACEENA/'
@@ -1081,7 +1085,7 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=300): # check to see if fill val
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_precip(armbepath, parspath, predatapath, dt=300):
+def prep_precip(armbepath, metpath, parspath, predatapath, dt=300):
     """
     prepare surface precipitation data from ARMBE
 
@@ -1089,6 +1093,8 @@ def prep_precip(armbepath, parspath, predatapath, dt=300):
     ----------
     armbepath : str
         input datapath. use hourly-averaged ARMBE data
+    metpath : str
+        input datapath for ORG data
     parspath : str
         input datapath for disdrometer data
     predatapath : str
@@ -1105,35 +1111,62 @@ def prep_precip(armbepath, parspath, predatapath, dt=300):
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
         
-    #%% read in data
-    lst = glob.glob(os.path.join(armbepath, '*armbeatmC1*.nc'))
+    #%% read in data (old way used ARMBE hourly rainfalls from MET, potentially from the PWD
+    # lst = glob.glob(os.path.join(armbepath, '*armbeatmC1*.nc'))
+    # obsdata = xr.open_mfdataset(lst, combine='by_coords')
+    # time = obsdata['time']
+    # precip = obsdata['precip_rate_sfc'].load()
+    # obsdata.close()
+
+    #%% read in data (new way uses the optical rain gauge (ORG) and Parsivel disdrometer rates that are better for light
+    lst = glob.glob(os.path.join(metpath, '*.cdf'))
     obsdata = xr.open_mfdataset(lst, combine='by_coords')
     time = obsdata['time']
-    precip = obsdata['precip_rate_sfc'].load()
-    obsdata.close()    
-                
+    precip_org = obsdata['org_precip_rate_mean'].load()
+    qc_precip_org = obsdata['qc_org_precip_rate_mean'].load()
+    precip_pwd = obsdata['pwd_precip_rate_mean_1min'].load()
+    qc_precip_pwd = obsdata['qc_pwd_precip_rate_mean_1min'].load()
+    obsdata.close()
+
+    precip_org = qc_mask_qcflag(precip_org, qc_precip_org)
+    precip_pwd = qc_mask_qcflag(precip_pwd, qc_precip_pwd)
+
+    lst = glob.glob(os.path.join(parspath, '*.nc'))
+    parsdata = xr.open_mfdataset(lst, combine='by_coords')
+    time = obsdata['time']
+    precip_pars = obsdata['rain_rate'].load()
+    parsdata.close()
+  
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
-    precip_new = avg_time_1d(time, precip, time_new)
+    precip_org_new = avg_time_1d(time, precip_org, time_new)
+    precip_pwd_new = avg_time_1d(time, precip_pwd, time_new)
+    precip_pars_new = avg_time_1d(time, precip_pars, time_new)
         
     #%% output file
     outfile = predatapath + 'precip_ACEENA.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'precip': (['time'], np.float32(precip_new))
+                    'precip_org': (['time'], np.float32(precip_org_new)),
+                    'precip_pwd': (['time'], np.float32(precip_pwd_new)),
+                    'precip_pars': (['time'], np.float32(precip_pars_new)),
                     },
                      coords={'time': ('time', time_new)})
     
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
     ds['time'].attrs["standard_name"] = "time"
-    ds['precip'].attrs["long_name"] = "Surface Precipitation Rate"
-    ds['precip'].attrs["units"] = "mm/hr"
-    
-    ds.attrs["title"] = 'surface precipitation data from ARMBE hourly data'
+    ds['precip_org'].attrs["long_name"] = "ORG Surface Precipitation Rate"
+    ds['precip_org'].attrs["units"] = "mm/hr"
+    ds['precip_pwd'].attrs["long_name"] = "PWD Surface Precipitation Rate"
+    ds['precip_pwd'].attrs["units"] = "mm/hr"
+    ds['precip_pars'].attrs["long_name"] = "Parsivel Surface Precipitation Rate"
+    ds['precip_pars'].attrs["units"] = "mm/hr"
+
+    ds.attrs["title"] = 'surface precipitation data from MET data and Parsivel disdrometer'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'precipitation at ENA is measured by ARM Present Weather Detector (PWD). mean of each time window'
+    ds.attrs["description"] = 'precipitation at ENA is measured by ARM optical rain gauge (ORG), present weather detector (PWD), and Parsivel2 disdrometer. mean of each time window'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
