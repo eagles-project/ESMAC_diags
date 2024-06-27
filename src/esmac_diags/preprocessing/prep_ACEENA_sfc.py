@@ -357,8 +357,8 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=300):
         dt_new = time_new[1]-time_new[0]
         #%% count the number of cloudy points at each height in the new time interval and divide by all points at that height to get cloud fraction
         #%% do a half time interval offset so that the time arrays don't shift
-        cloud_i = cloud_flag.resample(time = dt, offset = dt/2, skipna=True).sum()/cloud_flag.resample(time = dt, offset = dt/2, skipna=True).count()
-        cloud_i['time'] = cloud_i['time'] + dt/2
+        cloud_i = cloud_flag.resample(time = dt_new, offset = dt_new/2).sum()/cloud_flag.resample(time = dt_new, offset = dt_new/2).count()
+        cloud_i['time'] = cloud_i['time'] + dt_new/2
         
         cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
     
