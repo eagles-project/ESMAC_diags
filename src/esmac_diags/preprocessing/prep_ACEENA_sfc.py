@@ -12,7 +12,7 @@ from netCDF4 import Dataset
 import time as ttt
 import esmac_diags
 from esmac_diags.subroutines.time_resolution_change import median_time_1d, median_time_2d,\
-                avg_time_1d, avg_time_2d, interp_time_1d
+                avg_time_1d, avg_time_2d, interp_time_1d, avg_height_2d
 from esmac_diags.subroutines.read_ARMdata import read_uhsas
 from esmac_diags.subroutines.quality_control import qc_remove_neg, qc_mask_qcflag, \
                 qc_mask_qcflag_cpc
@@ -341,7 +341,7 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=300):
             # interpolate into standard time
             cloud_i[:,kk] = np.interp(time_new, time, cl)
 
-        cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
+        cloud_o = avg_height_2d(height,cloud_i.T,height_out).T
 
     if dt < 3600:
         lst = glob.glob(os.path.join(arsclpath, 'enaarsclkazr1kolliasC1.c0*.nc'))
@@ -360,7 +360,7 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=300):
         cloud_i = cloud_flag.resample(time = dt_new, offset = dt_new/2).sum()/cloud_flag.resample(time = dt_new, offset = dt_new/2).count()
         cloud_i['time'] = cloud_i['time'] + dt_new/2
         
-        cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
+        cloud_o = avg_height_2d(height,cloud_i.T,height_out).T
     
     #%% output file
     outfile = predatapath + 'cloud_2d_ACEENA.nc'
