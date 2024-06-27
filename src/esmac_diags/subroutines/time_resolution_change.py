@@ -60,6 +60,38 @@ def avg_time_2d(time0, data0, time):
     return(data)
 
 #%%
+def avg_height_2d(height0, data0, height):
+    """
+    average 2d data into a different height resolution
+
+    Parameters
+    ----------
+    height0 : numpy array
+        height dimension for input data
+    data0 : numpy array
+        input data
+    height : numpy array
+        height dimension for output data
+
+    Returns
+    -------
+    data : output data
+
+    """
+    if data0.shape[0] != len(height0):
+        raise ValueError("the first dimension of input data must have the same size with time")
+    data = np.full((data0.shape[0], len(height)), np.nan)
+    dz = np.full(len(height)+1, np.nan) #spacing between height levels
+    dz[1:-1] = height[1:] - height[0:len(height)-1]
+    dz[0] = dz[1] #layer extending below lowest output height
+    dz[-1] = dz[-2] #layer extending above highest output height
+    for tt in range(len(height)):
+        idx = np.logical_and(height0 > height[tt] - dz[tt]/2, height0 <= height[tt] + dz[tt+1]/2)
+        #%% for now, this just averages any points within the height layer, not accounting for weighting of height levels differently
+        data[:, tt] = np.nanmean(data0[:, idx], axis = 1)
+    return(data)
+
+#%%
 def avg_time_3d(time0, data0, time):
     """
     average 3d data into coarser time resolution
