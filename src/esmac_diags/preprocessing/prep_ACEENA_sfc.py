@@ -341,7 +341,7 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=300):
             # interpolate into standard time
             cloud_i[:,kk] = np.interp(time_new, time, cl)
 
-        cloud_o = avg_height_2d(height,cloud_i.T,height_out).T
+        cloud_o = avg_height_2d(height,cloud_i,height_out)
 
     if dt < 3600:
         lst = glob.glob(os.path.join(arsclpath, 'enaarsclkazr1kolliasC1.c0*.nc'))
@@ -360,7 +360,7 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=300):
         cloud_i = cloud_flag.resample(time = dt_new, offset = dt_new/2).sum()/cloud_flag.resample(time = dt_new, offset = dt_new/2).count()
         cloud_i['time'] = cloud_i['time'] + dt_new/2
         
-        cloud_o = avg_height_2d(height,cloud_i.T,height_out).T
+        cloud_o = avg_height_2d(height,cloud_i,height_out)
     
     #%% output file
     outfile = predatapath + 'cloud_2d_ACEENA.nc'
