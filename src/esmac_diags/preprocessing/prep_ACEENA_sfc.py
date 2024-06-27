@@ -349,11 +349,18 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=300):
         arscldata = xr.open_mfdataset(lst, combine='by_coords')
         time = arscldata['time'].load()
         height = arscldata['height'].load()
-        cloud_flag = arscldata['cloud_source_flag'].load() #0=missing; 1=clear, 2+=cloud
+        tmpcloud_flag = arscldata['cloud_source_flag'].load() #0=missing; 1=clear, 2+=cloud
         arscldata.close()
 
-        #Need to compute cloud fraction (cloud_o) within dt and height_out bins (add up 2+ points and divide by 1+ points)
+        cloud_flag = xr.where(tmpcloud_flag >= 2, 1, 0) #sets cloud to 1 and no cloud to 0
+        cloud_flag = xr.where(tmpcloud_flag == 0, np.nan, cloud_flag) #sets missing to NaN
+        dt_new = time_new[1]-time_new[0]
+        #%% count the number of cloudy points at each height in the new time interval and divide by all points at that height to get cloud fraction
+        #%% do a half time interval offset so that the time arrays don't shift
+        cloud_i = cloud_flag.resample(time = dt, offset = dt/2, skipna=True).sum()/cloud_flag.resample(time = dt, offset = dt/2, skipna=True).count()
+        cloud_i['time'] = tmp3['time'] + dt/2
         
+        cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
     
     #%% output file
     outfile = predatapath + 'cloud_2d_ACEENA.nc'
