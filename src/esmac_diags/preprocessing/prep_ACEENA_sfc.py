@@ -184,7 +184,8 @@ def prep_ccn(ccnpath, predatapath, dt=300):
     
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
-    
+
+    # this is currently not using the CCN spectra files but can be updated to use those
     lst = glob.glob(os.path.join(ccnpath, '*.nc'))
     ccndata = xr.open_mfdataset(lst, combine='by_coords')
     time = ccndata['time'].load()
