@@ -811,7 +811,7 @@ def prep_LWP(armbepath, mwrpath, predatapath, dt=300):
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
-    
+
     lwp_new = avg_time_1d(time1, lwp, time_new)
     lwp2_new = avg_time_1d(time2, lwp2, time_new)
 
@@ -833,7 +833,7 @@ def prep_LWP(armbepath, mwrpath, predatapath, dt=300):
     ds['time'].attrs["standard_name"] = "time"
     ds['lwp_armbe'].attrs["long_name"] = "liquid water path"
     ds['lwp_armbe'].attrs["units"] = "g/m2"
-    ds['lwp_armbe'].attrs["description"] = "liquid water path from ARMBE data based on MWR measurements"
+    ds['lwp_armbe'].attrs["description"] = "liquid water path from hourly ARMBE data based on MWR measurements"
     ds['lwp_mwr'].attrs["long_name"] = "liquid water path"
     ds['lwp_mwr'].attrs["units"] = "g/m2"
     ds['lwp_mwr'].attrs["description"] = "liquid water path from MWR retrievals"
@@ -941,7 +941,7 @@ def prep_LTS(armbepath, predatapath, dt=300):
     
     ds.attrs["title"] = 'Lower Tropospheric Stability from ARMBE hourly data'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'mean of each time window'
+    ds.attrs["description"] = 'mean of each time window (hourly or longer time); interpolated from hourly (shorter than hourly time)'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
@@ -1120,7 +1120,7 @@ def prep_precip(armbepath, metpath, parspath, predatapath, dt=300):
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
         
-    #%% read in data (old way used ARMBE hourly rainfalls from MET, potentially from the PWD
+    # #%% read in data (old way used ARMBE hourly rainfalls from MET, potentially from the PWD
     # lst = glob.glob(os.path.join(armbepath, '*armbeatmC1*.nc'))
     # obsdata = xr.open_mfdataset(lst, combine='by_coords')
     # time = obsdata['time']
@@ -1464,7 +1464,7 @@ def prep_Ndrop(ndroppath, predatapath, dt=300):
     ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=300): # change to use 5-min inputs rather than 20 s; check filters
+def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=300):
     """
     prepare cloud deoplet number concentration (Nd) data at ARM sites
     input data is cloud optical depth from MFRSR, LWP from MWR (in the MFRSR data), 
@@ -1478,7 +1478,9 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=300):
     mfrsrpath : char
         input datapath. 
     arsclbndpath : char
-        input datapath.  
+        input datapath.
+    mwrpath : char
+        input datapath.
     predatapath : char
         output datapath
     dt : float
@@ -1557,6 +1559,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=300):
     cod[np.logical_or(cod < 4, cod > 60)] = np.nan # changed lower COD limit from 2 to 4 (AV 6/24/2024)
     
     # calculate CDNC first then average into 1hr
+    # use 5-min inputs rather than 20 s, which was originally used; 5-min is closer to resolution of coarsest input and 20-s is noisy
     # time = mfrsrtime.data
     # H_tmp = np.interp(np.int64(time), np.int64(arscltime), H)
     time_5min = pd.date_range(start='2017-06-20', end='2018-02-21', freq=str(int(300))+"s") # make inputs every 5 min to avoid high frequency noise in nd retrieval (COD looks like it doesn't vary at timescales < ~5 min)
