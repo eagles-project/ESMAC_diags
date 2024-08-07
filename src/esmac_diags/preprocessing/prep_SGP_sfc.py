@@ -30,7 +30,7 @@ from esmac_diags.subroutines.specific_data_treatment import calc_cdnc_ARM
 # dt=3600
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_ACSM(acsmpath, predatapath, year, dt=3600):
+def prep_ACSM(acsmpath, predatapath, year, dt=300):
     """
     prepare acsm data
 
@@ -88,11 +88,19 @@ def prep_ACSM(acsmpath, predatapath, year, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    org_new = median_time_1d(time, org, time_new)
-    no3_new = median_time_1d(time, no3, time_new)
-    so4_new = median_time_1d(time, so4, time_new)
-    nh4_new = median_time_1d(time, nh4, time_new)
-    chl_new = median_time_1d(time, chl, time_new)
+    # data resolution is 30-min, so interpolate for finer resolution; a mean could also be used for coarser resolution is warranted
+    if dt >= 1800:
+        org_new = median_time_1d(time, org, time_new)
+        no3_new = median_time_1d(time, no3, time_new)
+        so4_new = median_time_1d(time, so4, time_new)
+        nh4_new = median_time_1d(time, nh4, time_new)
+        chl_new = median_time_1d(time, chl, time_new)
+    if dt < 1800:
+        org_new = interp_time_1d(time, org, time_new)
+        no3_new = interp_time_1d(time, no3, time_new)
+        so4_new = interp_time_1d(time, so4, time_new)
+        nh4_new = interp_time_1d(time, nh4, time_new)
+        chl_new = interp_time_1d(time, chl, time_new)
     
     #%% output file
     outfile = predatapath + 'sfc_ACSM_SGP_'+year+'.nc'
@@ -122,13 +130,16 @@ def prep_ACSM(acsmpath, predatapath, year, dt=3600):
     
     ds.attrs["title"] = 'Aerosol composition from surface ACSM'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'median value of each time window'
+    if dt >= 1800:
+        ds.attrs["description"] = 'median value of each time window'
+    if dt < 1800:
+        ds.attrs["description"] = 'interpolated value from 30-min resolution data'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_ccn(ccnpath, predatapath, year, dt=3600):
+def prep_ccn(ccnpath, predatapath, year, dt=300):
     """
     prepare surface CCN data. 
 
@@ -153,7 +164,6 @@ def prep_ccn(ccnpath, predatapath, year, dt=3600):
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
 
-    #%%
     lst = glob.glob(os.path.join(ccnpath, '*.b1.'+year+'*.nc'))
     lst.sort()
     # first data
@@ -205,7 +215,12 @@ def prep_ccn(ccnpath, predatapath, year, dt=3600):
     ccn1 = qc_mask_qcflag(ccn1, qc_ccns[:,0])
     ccn2 = qc_mask_qcflag(ccn2, qc_ccns[:,1])
     ccn5 = qc_mask_qcflag(ccn5, qc_ccns[:,2])
-          
+
+    #apply to ccn fits
+    ccn1_fit = qc_mask_qcflag(ccn1_fit, qc_ccns[:,0])
+    ccn2_fit = qc_mask_qcflag(ccn2_fit, qc_ccns[:,1])
+    ccn5_fit = qc_mask_qcflag(ccn5_fit, qc_ccns[:,2])
+  
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
