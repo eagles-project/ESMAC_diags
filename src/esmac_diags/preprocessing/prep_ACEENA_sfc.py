@@ -221,7 +221,7 @@ def prep_ccn(ccnpath, predatapath, dt=300):
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
 
     # data resolution is hourly, so interpolate for finer resolution
-    # note that ENA code does not use these functions and includes polynomial fits (should make consistent in future)
+    # note that ENA code includes polynomial fits (should make consistent in future)
     if dt >= 3600:
         ccn1_new = median_time_1d(time1, ccn1, time_new)
         ss1_i = median_time_1d(time1, ss1, time_new)
