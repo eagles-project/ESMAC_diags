@@ -329,7 +329,7 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=300):
         cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
 
     if dt < 3600:
-        lst = glob.glob(os.path.join(arsclpath, 'enaarsclkazr1kolliasC1.c0*.nc'))
+        lst = glob.glob(os.path.join(arsclpath, 'sgparsclkazr1kolliasC1.c0*.nc'))
         lst.sort()
         arscldata = xr.open_mfdataset(lst, combine='by_coords')
         time = arscldata['time'].load()
@@ -375,14 +375,14 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_cloudheight_ARSCL(arsclpath, predatapath, dt=3600):
+def prep_cloudheight_ARSCL(arsclbndpath, predatapath, dt=300):
     """
     prepare cloud base and top height data at ARM sites from ARSCL
     include multi-layer clouds
     
     Parameters
     ----------
-    arsclpath : char
+    arsclbndpath : char
         input datapath.  
     predatapath : char
         output datapath
@@ -458,7 +458,7 @@ def prep_cloudheight_ARSCL(arsclpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_CPC(cpcpath, cpcupath, predatapath, dt=3600):
+def prep_CPC(cpcpath, cpcupath, predatapath, dt=300):
     """
     prepare CPC and CPCu data
 
@@ -535,7 +535,7 @@ def prep_CPC(cpcpath, cpcupath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=3600):
+def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=300):
     """
     prepare UHSAS data
 
@@ -621,7 +621,7 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_CNsize_SMPS_IOP1(smpspath, nanosmpspath, predatapath, dt=3600):
+def prep_CNsize_SMPS_IOP1(smpspath, nanosmpspath, predatapath, dt=300):
     """
     prepare BNL SMPS data for HISCALE IOP1
 
@@ -724,7 +724,7 @@ def prep_CNsize_SMPS_IOP1(smpspath, nanosmpspath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_CNsize_SMPS_IOP2(smps_pnnl_path, predatapath, dt=3600):
+def prep_CNsize_SMPS_IOP2(smps_pnnl_path, predatapath, dt=300):
     """
     prepare PNNL SMPS data for HISCALE IOP2
 
@@ -803,7 +803,7 @@ def prep_CNsize_SMPS_IOP2(smps_pnnl_path, predatapath, dt=3600):
     
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_mfrsr_cod(mfrsrpath,  predatapath, dt=3600):
+def prep_mfrsr_cod(mfrsrpath,  predatapath, dt=300):
     """
     prepare cloud optical depth data from MFRSR
 
@@ -883,7 +883,7 @@ def prep_mfrsr_cod(mfrsrpath,  predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=3600):
+def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=300):
     """
     prepare cloud effective radius data from MFRSR
 
@@ -913,19 +913,24 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=3600):
     time = mfrsrdata['time']
     reff = mfrsrdata['effective_radius_instantaneous']
     qc_reff = mfrsrdata['qc_effective_radius_instantaneous']
+    lwp_source = mfrsrdata['lwp_aource']
     mfrsrdata.close()
     for file in lst[1:]:
         mfrsrdata = xr.open_dataset(file)
         time = xr.concat([time, mfrsrdata['time']], dim="time")
         reff = xr.concat([reff, mfrsrdata['effective_radius_instantaneous']], dim="time")
         qc_reff = xr.concat([qc_reff, mfrsrdata['qc_effective_radius_instantaneous']], dim="time")
+        lwp_source = xr.concat([lwp_soource, mfrsrdata['lwp_source']], dim="time")
         mfrsrdata.close()
     
     # quality controls
     reff.load()
     qc_reff.load()
+    lwp_source.load()
     reff = qc_mask_qcflag(reff, qc_reff)
-    
+    # remove effective radii values not derived from LWP retrieved from MWR
+    reff[lwp_source == 2] = np.nan
+    reff[lwp_source < 0] = np.nan
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
