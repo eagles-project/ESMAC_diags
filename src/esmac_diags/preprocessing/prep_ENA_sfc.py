@@ -93,7 +93,6 @@ def prep_ACSM(acsmpath, predatapath, year, dt=300):
     
     
     #%% re-shape the data into coarser resolution
-    
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
 
     # data resolution is 30-min, so interpolate for finer resolution; a mean could also be used for coarser resolution is warranted
@@ -181,7 +180,6 @@ def prep_ccn(ccnpath, predatapath, year, dt=300):
     idx1 = np.nanargmin(np.abs(ss_m-0.1), axis=1)
     idx2 = np.nanargmin(np.abs(ss_m-0.2), axis=1)
     idx5 = np.nanargmin(np.abs(ss_m-0.5), axis=1)
-  
     ccn_m = ccndata['N_CCN'].load().data
     ss1 = np.array([ss_m[i,idx1[i]] for i in range(len(idx1))])
     ss2 = np.array([ss_m[i,idx2[i]] for i in range(len(idx2))])
@@ -210,7 +208,7 @@ def prep_ccn(ccnpath, predatapath, year, dt=300):
     ccn2_fit = qc_mask_qcflag(ccn2_fit, qc_ccns[:,1])
     ccn5_fit = qc_mask_qcflag(ccn5_fit, qc_ccns[:,2])
 
-    #remove known bad data ranges
+    #remove known bad data ranges from ENA data quality reports
     if year == '2020':
       ccn5[:] = np.nan
       ccn5_fit[:] = np.nan
@@ -233,20 +231,41 @@ def prep_ccn(ccnpath, predatapath, year, dt=300):
       ccn5_fit[ind1] = np.nan
           
     #%% re-shape the data into coarser resolution
-    
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
+
+    # Old code
+    # ccn1_fit_i = np.interp(np.int64(time_new), np.int64(ccntime), ccn1_fit, left=np.nan, right=np.nan)
+    # ccn2_fit_i = np.interp(np.int64(time_new), np.int64(ccntime), ccn2_fit, left=np.nan, right=np.nan)
+    # ccn5_fit_i = np.interp(np.int64(time_new), np.int64(ccntime), ccn5_fit, left=np.nan, right=np.nan)
+    # ccn1_measure = np.interp(np.int64(time_new), np.int64(ccntime), ccn1, left=np.nan, right=np.nan)
+    # ccn2_measure = np.interp(np.int64(time_new), np.int64(ccntime), ccn2, left=np.nan, right=np.nan)
+    # ccn5_measure = np.interp(np.int64(time_new), np.int64(ccntime), ccn5, left=np.nan, right=np.nan)
+    # ss1_i = np.interp(np.int64(time_new), np.int64(ccntime), ss1, left=np.nan, right=np.nan)
+    # ss2_i = np.interp(np.int64(time_new), np.int64(ccntime), ss2, left=np.nan, right=np.nan)
+    # ss5_i = np.interp(np.int64(time_new), np.int64(ccntime), ss5, left=np.nan, right=np.nan)
     
-    #below differs from ACE-ENA code that uses median_time_1d and interp_time_1d functions
-    ccn1_fit_i = np.interp(np.int64(time_new), np.int64(ccntime), ccn1_fit, left=np.nan, right=np.nan)
-    ccn2_fit_i = np.interp(np.int64(time_new), np.int64(ccntime), ccn2_fit, left=np.nan, right=np.nan)
-    ccn5_fit_i = np.interp(np.int64(time_new), np.int64(ccntime), ccn5_fit, left=np.nan, right=np.nan)
-    ccn1_measure = np.interp(np.int64(time_new), np.int64(ccntime), ccn1, left=np.nan, right=np.nan)
-    ccn2_measure = np.interp(np.int64(time_new), np.int64(ccntime), ccn2, left=np.nan, right=np.nan)
-    ccn5_measure = np.interp(np.int64(time_new), np.int64(ccntime), ccn5, left=np.nan, right=np.nan)
-    ss1_i = np.interp(np.int64(time_new), np.int64(ccntime), ss1, left=np.nan, right=np.nan)
-    ss2_i = np.interp(np.int64(time_new), np.int64(ccntime), ss2, left=np.nan, right=np.nan)
-    ss5_i = np.interp(np.int64(time_new), np.int64(ccntime), ss5, left=np.nan, right=np.nan)
-    
+    # data resolution is hourly, so interpolate for finer resolution
+    # note that ENA code does not use these functions and includes polynomial fits (should make consistent in future)
+    if dt >= 3600:
+        ccn1_fit_i = median_time_1d(ccntime, ccn1_fit, time_new)
+        ccn2_fit_i = median_time_1d(ccntime, ccn2_fit, time_new)
+        ccn5_fit_i = median_time_1d(ccntime, ccn5_fit, time_new)
+        ccn1_measure = median_time_1d(ccntime, ccn1, time_new)
+        ccn2_measure = median_time_1d(ccntime, ccn2, time_new)
+        ccn5_measure = median_time_1d(ccntime, ccn5, time_new)
+        ss1_i = median_time_1d(ccntime, ss1, time_new)
+        ss2_i = median_time_1d(ccntime, ss2, time_new)
+        ss5_i = median_time_1d(ccntime, ss5, time_new)
+    if dt < 3600:
+        ccn1_fit_i = interp_time_1d(ccntime, ccn1_fit, time_new)
+        ccn2_fit_i = interp_time_1d(ccntime, ccn2_fit, time_new)
+        ccn5_fit_i = interp_time_1d(ccntime, ccn5_fit, time_new)
+        ccn1_measure = interp_time_1d(ccntime, ccn1, time_new)
+        ccn2_measure = interp_time_1d(ccntime, ccn2, time_new)
+        ccn5_measure = interp_time_1d(ccntime, ccn5, time_new)
+        ss1_i = interp_time_1d(ccntime, ss1, time_new)
+        ss2_i = interp_time_1d(ccntime, ss2, time_new)
+        ss5_i = interp_time_1d(ccntime, ss5, time_new)
     
     #%% output file
     outfile = predatapath + 'sfc_CCN_ENA_'+year+'.nc'
@@ -268,34 +287,38 @@ def prep_ccn(ccnpath, predatapath, year, dt=300):
     ds['time'].attrs["standard_name"] = "time"
     ds['ccn1_fit'].attrs["long_name"] = "0.1% Cloud Condensation Nuclei"
     ds['ccn1_fit'].attrs["units"] = "cm-3"
-    ds['ccn1_fit'].attrs["description"] = "Interpolated hourly values calculated using a polynomial fit to ARM-measured CCN spectra"
+    ds['ccn1_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
     ds['ccn2_fit'].attrs["long_name"] = "0.2% Cloud Condensation Nuclei"
     ds['ccn2_fit'].attrs["units"] = "cm-3"
-    ds['ccn2_fit'].attrs["description"] = "Interpolated hourly values calculated using a polynomial fit to ARM-measured CCN spectra"
+    ds['ccn2_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
     ds['ccn5_fit'].attrs["long_name"] = "0.5% Cloud Condensation Nuclei"
     ds['ccn5_fit'].attrs["units"] = "cm-3"
-    ds['ccn5_fit'].attrs["description"] = "Interpolated hourly values calculated using a polynomial fit to ARM-measured CCN spectra"
+    ds['ccn5_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
     ds['ccn1_m'].attrs["long_name"] = "0.1% Cloud Condensation Nuclei - measured"
     ds['ccn1_m'].attrs["units"] = "cm-3"
-    ds['ccn1_m'].attrs["description"] = "Interpolated hourly values ARM-measured CCN targetted to 0.1% SS. see SS1 for actual measured SS"
+    ds['ccn1_m'].attrs["description"] = "ARM-measured CCN targetted to 0.1% SS. see SS1 for actual measured SS"
     ds['ss1'].attrs["long_name"] = "Actual Supersaturation targetted to 0.1%"
     ds['ss1'].attrs["units"] = "%"
-    ds['ss1'].attrs["description"] = "measured SS that is closest to 0.1%. Interpolated into hourly. ccn1_m is measured at this SS"
+    ds['ss1'].attrs["description"] = "Measured SS that is closest to 0.1%. Interpolated into hourly. ccn1_m is measured at this SS"
     ds['ccn2_m'].attrs["long_name"] = "0.2% Cloud Condensation Nuclei"
     ds['ccn2_m'].attrs["units"] = "cm-3"
-    ds['ccn2_m'].attrs["description"] = "Interpolated hourly values ARM-measured CCN targetted to 0.2% SS. see SS2 for actual measured SS"
+    ds['ccn2_m'].attrs["description"] = "ARM-measured CCN targetted to 0.2% SS. see SS2 for actual measured SS"
     ds['ss2'].attrs["long_name"] = "Actual Supersaturation targetted to 0.2%"
     ds['ss2'].attrs["units"] = "%"
-    ds['ss2'].attrs["description"] = "measured SS that is closest to 0.2%. Interpolated into hourly. ccn2_m is measured at this SS"
+    ds['ss2'].attrs["description"] = "Measured SS that is closest to 0.2%. Interpolated into hourly. ccn2_m is measured at this SS"
     ds['ccn5_m'].attrs["long_name"] = "0.5% Cloud Condensation Nuclei"
     ds['ccn5_m'].attrs["units"] = "cm-3"
-    ds['ccn5_m'].attrs["description"] = "Interpolated hourly values ARM-measured CCN targetted to 0.5% SS. see SS5 for actual measured SS"
+    ds['ccn5_m'].attrs["description"] = "ARM-measured CCN targetted to 0.5% SS. see SS5 for actual measured SS"
     ds['ss5'].attrs["long_name"] = "Actual Supersaturation targetted to 0.5%"
     ds['ss5'].attrs["units"] = "%"
-    ds['ss5'].attrs["description"] = "measured SS that is closest to 0.5%. Interpolated into hourly. ccn5_m is measured at this SS"
+    ds['ss5'].attrs["description"] = "Measured SS that is closest to 0.5%. Interpolated into hourly. ccn5_m is measured at this SS"
     
     ds.attrs["title"] = 'Surface CCN number concentration'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
+    if dt >= 3600:
+        ds.attrs["description"] = 'median value of each time window'
+    if dt < 3600:
+        ds.attrs["description"] = 'interpolated value from ~hourly resolution data'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
