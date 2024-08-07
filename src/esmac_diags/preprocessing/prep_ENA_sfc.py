@@ -422,14 +422,14 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_cloudheight_ARSCL(arsclpath, predatapath, year, dt=300):
+def prep_cloudheight_ARSCL(arsclbndpath, predatapath, year, dt=300):
     """
     prepare cloud base and top height data at ARM sites from ARSCL
     include multi-layer clouds
     
     Parameters
     ----------
-    arsclpath : char
+    arsclbndpath : char
         input datapath.  
     predatapath : char
         output datapath
@@ -779,7 +779,7 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_LWP(armbepath, mfrsrpath, predatapath, year, dt=300):
+def prep_LWP(armbepath, mwrpath, predatapath, year, dt=300):
     """
     prepare liquid water path
     Although LWP is measured by microwave radiometer (MWR), it is processed in 
@@ -1079,7 +1079,6 @@ def prep_mfrsr_cod(mfrsrpath,  predatapath, year, dt=300):
     
     
     #%% re-shape the data into coarser resolution
-    
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
     cod_new = avg_time_1d(time, cod, time_new)
