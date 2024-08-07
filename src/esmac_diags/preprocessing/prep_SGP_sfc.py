@@ -223,16 +223,39 @@ def prep_ccn(ccnpath, predatapath, year, dt=300):
   
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
-    
-    ccn1_fit_i = interp_time_1d(ccntime, ccn1_fit, time_new)
-    ccn2_fit_i = interp_time_1d(ccntime, ccn2_fit, time_new)
-    ccn5_fit_i = interp_time_1d(ccntime, ccn5_fit, time_new)
-    ccn1_measure = interp_time_1d(ccntime, ccn1, time_new)
-    ccn2_measure = interp_time_1d(ccntime, ccn2, time_new)
-    ccn5_measure = interp_time_1d(ccntime, ccn5, time_new)
-    ss1_i = interp_time_1d(ccntime, ss1, time_new)
-    ss2_i = interp_time_1d(ccntime, ss2, time_new)
-    ss5_i = interp_time_1d(ccntime, ss5, time_new)
+
+    # Old code
+    # ccn1_fit_i = interp_time_1d(ccntime, ccn1_fit, time_new)
+    # ccn2_fit_i = interp_time_1d(ccntime, ccn2_fit, time_new)
+    # ccn5_fit_i = interp_time_1d(ccntime, ccn5_fit, time_new)
+    # ccn1_measure = interp_time_1d(ccntime, ccn1, time_new)
+    # ccn2_measure = interp_time_1d(ccntime, ccn2, time_new)
+    # ccn5_measure = interp_time_1d(ccntime, ccn5, time_new)
+    # ss1_i = interp_time_1d(ccntime, ss1, time_new)
+    # ss2_i = interp_time_1d(ccntime, ss2, time_new)
+    # ss5_i = interp_time_1d(ccntime, ss5, time_new)
+
+    # data resolution is hourly, so interpolate for finer resolution
+    if dt >= 3600:
+        ccn1_fit_i = median_time_1d(ccntime, ccn1_fit, time_new)
+        ccn2_fit_i = median_time_1d(ccntime, ccn2_fit, time_new)
+        ccn5_fit_i = median_time_1d(ccntime, ccn5_fit, time_new)
+        ccn1_measure = median_time_1d(ccntime, ccn1, time_new)
+        ccn2_measure = median_time_1d(ccntime, ccn2, time_new)
+        ccn5_measure = median_time_1d(ccntime, ccn5, time_new)
+        ss1_i = median_time_1d(ccntime, ss1, time_new)
+        ss2_i = median_time_1d(ccntime, ss2, time_new)
+        ss5_i = median_time_1d(ccntime, ss5, time_new)
+    if dt < 3600:
+        ccn1_fit_i = interp_time_1d(ccntime, ccn1_fit, time_new)
+        ccn2_fit_i = interp_time_1d(ccntime, ccn2_fit, time_new)
+        ccn5_fit_i = interp_time_1d(ccntime, ccn5_fit, time_new)
+        ccn1_measure = interp_time_1d(ccntime, ccn1, time_new)
+        ccn2_measure = interp_time_1d(ccntime, ccn2, time_new)
+        ccn5_measure = interp_time_1d(ccntime, ccn5, time_new)
+        ss1_i = interp_time_1d(ccntime, ss1, time_new)
+        ss2_i = interp_time_1d(ccntime, ss2, time_new)
+        ss5_i = interp_time_1d(ccntime, ss5, time_new)
     
     #%% output file
     outfile = predatapath + 'sfc_CCN_SGP_'+year+'.nc'
@@ -254,40 +277,44 @@ def prep_ccn(ccnpath, predatapath, year, dt=300):
     ds['time'].attrs["standard_name"] = "time"
     ds['ccn1_fit'].attrs["long_name"] = "0.1% Cloud Condensation Nuclei"
     ds['ccn1_fit'].attrs["units"] = "cm-3"
-    ds['ccn1_fit'].attrs["description"] = "Interpolated hourly values calculated using a polynomial fit to ARM-measured CCN spectra"
+    ds['ccn1_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
     ds['ccn2_fit'].attrs["long_name"] = "0.2% Cloud Condensation Nuclei"
     ds['ccn2_fit'].attrs["units"] = "cm-3"
-    ds['ccn2_fit'].attrs["description"] = "Interpolated hourly values calculated using a polynomial fit to ARM-measured CCN spectra"
+    ds['ccn2_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
     ds['ccn5_fit'].attrs["long_name"] = "0.5% Cloud Condensation Nuclei"
     ds['ccn5_fit'].attrs["units"] = "cm-3"
-    ds['ccn5_fit'].attrs["description"] = "Interpolated hourly values calculated using a polynomial fit to ARM-measured CCN spectra"
+    ds['ccn5_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
     ds['ccn1_m'].attrs["long_name"] = "0.1% Cloud Condensation Nuclei - measured"
     ds['ccn1_m'].attrs["units"] = "cm-3"
-    ds['ccn1_m'].attrs["description"] = "Interpolated hourly values ARM-measured CCN targetted to 0.1% SS. see SS1 for actual measured SS"
+    ds['ccn1_m'].attrs["description"] = "ARM-measured CCN targetted to 0.1% SS. see SS1 for actual measured SS"
     ds['ss1'].attrs["long_name"] = "Actual Supersaturation targetted to 0.1%"
     ds['ss1'].attrs["units"] = "%"
-    ds['ss1'].attrs["description"] = "measured SS that is closest to 0.1%. Interpolated into hourly. ccn1_m is measured at this SS"
+    ds['ss1'].attrs["description"] = "Measured SS that is closest to 0.1%. Interpolated into hourly. ccn1_m is measured at this SS"
     ds['ccn2_m'].attrs["long_name"] = "0.2% Cloud Condensation Nuclei"
     ds['ccn2_m'].attrs["units"] = "cm-3"
-    ds['ccn2_m'].attrs["description"] = "Interpolated hourly values ARM-measured CCN targetted to 0.2% SS. see SS2 for actual measured SS"
+    ds['ccn2_m'].attrs["description"] = "ARM-measured CCN targetted to 0.2% SS. see SS2 for actual measured SS"
     ds['ss2'].attrs["long_name"] = "Actual Supersaturation targetted to 0.2%"
     ds['ss2'].attrs["units"] = "%"
-    ds['ss2'].attrs["description"] = "measured SS that is closest to 0.2%. Interpolated into hourly. ccn2_m is measured at this SS"
+    ds['ss2'].attrs["description"] = "Measured SS that is closest to 0.2%. Interpolated into hourly. ccn2_m is measured at this SS"
     ds['ccn5_m'].attrs["long_name"] = "0.5% Cloud Condensation Nuclei"
     ds['ccn5_m'].attrs["units"] = "cm-3"
-    ds['ccn5_m'].attrs["description"] = "Interpolated hourly values ARM-measured CCN targetted to 0.5% SS. see SS5 for actual measured SS"
+    ds['ccn5_m'].attrs["description"] = "ARM-measured CCN targetted to 0.5% SS. see SS5 for actual measured SS"
     ds['ss5'].attrs["long_name"] = "Actual Supersaturation targetted to 0.5%"
     ds['ss5'].attrs["units"] = "%"
-    ds['ss5'].attrs["description"] = "measured SS that is closest to 0.5%. Interpolated into hourly. ccn5_m is measured at this SS"
+    ds['ss5'].attrs["description"] = "Measured SS that is closest to 0.5%. Interpolated into hourly. ccn5_m is measured at this SS"
     
     ds.attrs["title"] = 'Surface CCN number concentration'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
+    if dt >= 3600:
+        ds.attrs["description"] = 'median value of each time window'
+    if dt < 3600:
+        ds.attrs["description"] = 'interpolated value from ~hourly resolution data'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_cloud_2d(armbepath, predatapath, height_out, year, dt=3600):
+def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, year, dt=300):
     """
     prepare cloud fraction data from ARMBE
 
@@ -295,6 +322,8 @@ def prep_cloud_2d(armbepath, predatapath, height_out, year, dt=3600):
     ----------
     armbepath : str
         input datapath. use hourly-averaged ARMBE data
+    arsclpath : str
+        input datapath.
     predatapath : str
         output datapath
     height_out : numpy array
@@ -313,29 +342,48 @@ def prep_cloud_2d(armbepath, predatapath, height_out, year, dt=3600):
                            
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
-        
-    #%% read in data
-    lst = glob.glob(os.path.join(armbepath, '*armbecldradC1.c1.'+year+'*.nc'))
-    obsdata = xr.open_mfdataset(lst, combine='by_coords')
-    time = obsdata['time']
-    height = obsdata['height'].load()
-    cloud = obsdata['cld_frac'].load()
-    qc_cloud = obsdata['qc_cld_frac'].load()
-    obsdata.close()    
-    
+
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
+  
+    #%% read in data
+    if dt >= 3600:
+        lst = glob.glob(os.path.join(armbepath, '*armbecldradC1.c1.'+year+'*.nc'))
+        obsdata = xr.open_mfdataset(lst, combine='by_coords')
+        time = obsdata['time']
+        height = obsdata['height'].load()
+        cloud = obsdata['cld_frac'].load()
+        qc_cloud = obsdata['qc_cld_frac'].load()
+        obsdata.close()    
     
-    cloud_i = np.full((len(time_new),len(height)), np.nan)
-    for kk in range(len(height)):
-        # quality controls. For ARMBE cloud fraction, remove data with <30% valid points within 1-hr window 
-        cl = cloud[:,kk]
-        cl[qc_cloud[:,kk]>=2] = np.nan
-        # interpolate into standard time
-        cloud_i[:,kk] = np.interp(time_new, time, cl)
+        cloud_i = np.full((len(time_new),len(height)), np.nan)
+        for kk in range(len(height)):
+            # quality controls. For ARMBE cloud fraction, remove data with <30% valid points within 1-hr window 
+            cl = cloud[:,kk]
+            cl[qc_cloud[:,kk]>=2] = np.nan
+            # interpolate into standard time
+            cloud_i[:,kk] = np.interp(time_new, time, cl)
         
-    cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
+        cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
+
+    if dt < 3600:
+        lst = glob.glob(os.path.join(arsclpath, 'enaarsclkazr1kolliasC1.c0*.nc'))
+        lst.sort()
+        arscldata = xr.open_mfdataset(lst, combine='by_coords')
+        time = arscldata['time'].load()
+        height = arscldata['height'].load()
+        tmpcloud_flag = arscldata['cloud_source_flag'].load() #0=missing; 1=clear, 2+=cloud
+        arscldata.close()
+
+        cloud_flag = xr.where(tmpcloud_flag >= 2, 1, 0) #sets cloud to 1 and no cloud to 0
+        cloud_flag = xr.where(tmpcloud_flag == 0, np.nan, cloud_flag) #sets missing to NaN
+        dt_new = time_new[1]-time_new[0]
+        #%% count the number of cloudy points at each height in the new time interval and divide by all points at that height to get cloud fraction
+        #%% do a half time interval offset so that the time arrays don't shift
+        cloud_i = cloud_flag.resample(time = dt_new, offset = dt_new/2).sum()/cloud_flag.resample(time = dt_new, offset = dt_new/2).count()
+        cloud_i['time'] = cloud_i['time'] + dt_new/2
         
+        cloud_o = avg_height_2d(height,cloud_i,height_out)
     
     #%% output file
     outfile = predatapath + 'cloud_2d_SGP_'+year+'.nc'
@@ -352,9 +400,14 @@ def prep_cloud_2d(armbepath, predatapath, height_out, year, dt=3600):
     ds['cloud'].attrs["units"] = "%"
     ds['cloud'].attrs["description"] = "Cloud Fraction based on radar and MPL"
     
-    ds.attrs["title"] = 'ARMBE hourly 2-d cloud fraction data derived from ARSCL data'
-    ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'interpolated into each time window'
+    if dt >= 3600:
+        ds.attrs["title"] = 'ARMBE hourly 2-d cloud fraction data derived from ARSCL data'
+        ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
+        ds.attrs["description"] = 'interpolated into each time window'
+    if dt < 3600:
+        ds.attrs["title"] = 'ARSCL 2-d cloud fraction data'
+        ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
+        ds.attrs["description"] = 'accumulated into each time window'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
