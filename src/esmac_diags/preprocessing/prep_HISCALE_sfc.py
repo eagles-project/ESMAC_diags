@@ -209,14 +209,23 @@ def prep_ccn(ccnpath, predatapath, dt=3600):
             time_new = pd.date_range(start='2016-04-25', end='2016-05-22', freq=str(int(dt))+"s")  # HISCALE time period
         elif IOP=='IOP2':
             time_new = pd.date_range(start='2016-08-28', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
-        
-        ccn1_new = median_time_1d(time1, ccn1, time_new)
-        ss1_i = median_time_1d(time1, ss1, time_new)
-        ccn2_new = median_time_1d(time2, ccn2, time_new)
-        ss2_i = median_time_1d(time2, ss2, time_new)
-        ccn5_new = median_time_1d(time5, ccn5, time_new)
-        ss5_i = median_time_1d(time5, ss5, time_new)
 
+        # data resolution is ~hourly, so interpolate for finer resolution
+        # note that SGP includes polynomial fits (should make consistent in future)
+        if dt >= 3600:
+            ccn1_new = median_time_1d(time1, ccn1, time_new)
+            ss1_i = median_time_1d(time1, ss1, time_new)
+            ccn2_new = median_time_1d(time2, ccn2, time_new)
+            ss2_i = median_time_1d(time2, ss2, time_new)
+            ccn5_new = median_time_1d(time5, ccn5, time_new)
+            ss5_i = median_time_1d(time5, ss5, time_new)
+        if dt < 3600:
+            ccn1_new = interp_time_1d(time1, ccn1, time_new)
+            ss1_i = interp_time_1d(time1, ss1, time_new)
+            ccn2_new = interp_time_1d(time2, ccn2, time_new)
+            ss2_i = interp_time_1d(time2, ss2, time_new)
+            ccn5_new = interp_time_1d(time5, ccn5, time_new)
+            ss5_i = interp_time_1d(time5, ss5, time_new)
     
         #%% output file
         outfile = predatapath + 'sfc_CCN_HISCALE_'+IOP+'.nc'
@@ -258,13 +267,16 @@ def prep_ccn(ccnpath, predatapath, dt=3600):
             ds.attrs["inputfile_sample"] = 'HS_SGP_Nccn_data.dat'
         elif IOP=='IOP2':
             ds.attrs["inputfile_sample"] = 'N_CCN_corrected_IOP2.dat'
-        ds.attrs["description"] = 'median value of each time window'
+        if dt >= 3600:
+            ds.attrs["description"] = 'median value of each time window'
+        if dt < 3600:
+            ds.attrs["description"] = 'interpolated value from ~hourly resolution data'
         ds.attrs["date"] = ttt.ctime(ttt.time())
         
         ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_cloud_2d(armbepath, predatapath, height_out, dt=3600):
+def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=300):
     """
     prepare cloud fraction data from ARMBE
 
@@ -272,6 +284,8 @@ def prep_cloud_2d(armbepath, predatapath, height_out, dt=3600):
     ----------
     armbepath : str
         input datapath. use hourly-averaged ARMBE data
+    arsclpath : str
+        input datapath.
     predatapath : str
         output datapath
     height_out : numpy array
@@ -287,32 +301,51 @@ def prep_cloud_2d(armbepath, predatapath, height_out, dt=3600):
                            
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
-        
-    #%% read in data
-    lst = glob.glob(os.path.join(armbepath, '*armbecldrad*.nc'))
-    obsdata = xr.open_mfdataset(lst, combine='by_coords')
-    time = obsdata['time']
-    height = obsdata['height'].load()
-    cloud = obsdata['cld_frac'].load()
-    qc_cloud = obsdata['qc_cld_frac'].load()
-    obsdata.close()    
-    
+
     #%% re-shape the data into coarser resolution
     # startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
     # enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
     # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
+  
+    #%% read in data
+    if dt >= 3600:
+        lst = glob.glob(os.path.join(armbepath, '*armbecldrad*.nc'))
+        obsdata = xr.open_mfdataset(lst, combine='by_coords')
+        time = obsdata['time']
+        height = obsdata['height'].load()
+        cloud = obsdata['cld_frac'].load()
+        qc_cloud = obsdata['qc_cld_frac'].load()
+        obsdata.close()
     
-    cloud_i = np.full((len(time_new),len(height)), np.nan)
-    for kk in range(len(height)):
-        # quality controls. For ARMBE cloud fraction, remove data with <30% valid points within 1-hr window 
-        cl = cloud[:,kk]
-        cl[qc_cloud[:,kk]>=2] = np.nan
-        # interpolate into standard time
-        cloud_i[:,kk] = np.interp(time_new, time, cl)
+        cloud_i = np.full((len(time_new),len(height)), np.nan)
+        for kk in range(len(height)):
+            # quality controls. For ARMBE cloud fraction, remove data with <30% valid points within 1-hr window 
+            cl = cloud[:,kk]
+            cl[qc_cloud[:,kk]>=2] = np.nan
+            # interpolate into standard time
+            cloud_i[:,kk] = np.interp(time_new, time, cl)
+            
+        cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
+
+    if dt < 3600:
+        lst = glob.glob(os.path.join(arsclpath, 'enaarsclkazr1kolliasC1.c0*.nc'))
+        lst.sort()
+        arscldata = xr.open_mfdataset(lst, combine='by_coords')
+        time = arscldata['time'].load()
+        height = arscldata['height'].load()
+        tmpcloud_flag = arscldata['cloud_source_flag'].load() #0=missing; 1=clear, 2+=cloud
+        arscldata.close()
+
+        cloud_flag = xr.where(tmpcloud_flag >= 2, 1, 0) #sets cloud to 1 and no cloud to 0
+        cloud_flag = xr.where(tmpcloud_flag == 0, np.nan, cloud_flag) #sets missing to NaN
+        dt_new = time_new[1]-time_new[0]
+        #%% count the number of cloudy points at each height in the new time interval and divide by all points at that height to get cloud fraction
+        #%% do a half time interval offset so that the time arrays don't shift
+        cloud_i = cloud_flag.resample(time = dt_new, offset = dt_new/2).sum()/cloud_flag.resample(time = dt_new, offset = dt_new/2).count()
+        cloud_i['time'] = cloud_i['time'] + dt_new/2
         
-    cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
-        
+        cloud_o = avg_height_2d(height,cloud_i,height_out)
     
     #%% output file
     outfile = predatapath + 'cloud_2d_HISCALE.nc'
@@ -329,9 +362,14 @@ def prep_cloud_2d(armbepath, predatapath, height_out, dt=3600):
     ds['cloud'].attrs["units"] = "%"
     ds['cloud'].attrs["description"] = "Cloud Fraction based on radar and MPL"
     
-    ds.attrs["title"] = 'ARMBE hourly 2-d cloud fraction data derived from ARSCL data'
-    ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'interpolated into each time window'
+    if dt >= 3600:
+        ds.attrs["title"] = 'ARMBE hourly 2-d cloud fraction data derived from ARSCL data'
+        ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
+        ds.attrs["description"] = 'interpolated into each time window'
+    if dt < 3600:
+        ds.attrs["title"] = 'ARSCL 2-d cloud fraction data'
+        ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
+        ds.attrs["description"] = 'accumulated into each time window'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
