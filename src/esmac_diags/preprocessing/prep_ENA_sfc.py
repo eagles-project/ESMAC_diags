@@ -33,7 +33,7 @@ from esmac_diags.subroutines.specific_data_treatment import calc_cdnc_ARM
 # Nd_WUpath = '../../../data/ENA/Wu_etal_retrieval/'
 # ndroppath = '../../../data/ENA/enandrop/'
 # # predatapath = 'C:/Users/tang357/Downloads/ENA/'
-# dt=3600
+# dt=300
 # year='2017'
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -245,7 +245,6 @@ def prep_ccn(ccnpath, predatapath, year, dt=300):
     # ss5_i = np.interp(np.int64(time_new), np.int64(ccntime), ss5, left=np.nan, right=np.nan)
     
     # data resolution is hourly, so interpolate for finer resolution
-    # note that ENA code does not use these functions and includes polynomial fits (should make consistent in future)
     if dt >= 3600:
         ccn1_fit_i = median_time_1d(ccntime, ccn1_fit, time_new)
         ccn2_fit_i = median_time_1d(ccntime, ccn2_fit, time_new)
@@ -324,7 +323,7 @@ def prep_ccn(ccnpath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_cloud_2d(armbepath, predatapath, height_out, year, dt=300):
+def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, year, dt=300):
     """
     prepare cloud fraction data from ARMBE
 
@@ -332,6 +331,8 @@ def prep_cloud_2d(armbepath, predatapath, height_out, year, dt=300):
     ----------
     armbepath : str
         input datapath. use hourly-averaged ARMBE data
+    arsclpath : str
+        input datapath.
     predatapath : str
         output datapath
     height_out : numpy array
