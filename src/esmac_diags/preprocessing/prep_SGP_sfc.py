@@ -224,15 +224,15 @@ def prep_ccn(ccnpath, predatapath, year, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    ccn1_fit_i = median_time_1d(ccntime, ccn1_fit, time_new)
-    ccn2_fit_i = median_time_1d(ccntime, ccn2_fit, time_new)
-    ccn5_fit_i = median_time_1d(ccntime, ccn5_fit, time_new)
-    ccn1_measure = median_time_1d(ccntime, ccn1, time_new)
-    ccn2_measure = median_time_1d(ccntime, ccn2, time_new)
-    ccn5_measure = median_time_1d(ccntime, ccn5, time_new)
-    ss1_i = median_time_1d(ccntime, ss1, time_new)
-    ss2_i = median_time_1d(ccntime, ss2, time_new)
-    ss5_i = median_time_1d(ccntime, ss5, time_new)
+    ccn1_fit_i = interp_time_1d(ccntime, ccn1_fit, time_new)
+    ccn2_fit_i = interp_time_1d(ccntime, ccn2_fit, time_new)
+    ccn5_fit_i = interp_time_1d(ccntime, ccn5_fit, time_new)
+    ccn1_measure = interp_time_1d(ccntime, ccn1, time_new)
+    ccn2_measure = interp_time_1d(ccntime, ccn2, time_new)
+    ccn5_measure = interp_time_1d(ccntime, ccn5, time_new)
+    ss1_i = interp_time_1d(ccntime, ss1, time_new)
+    ss2_i = interp_time_1d(ccntime, ss2, time_new)
+    ss5_i = interp_time_1d(ccntime, ss5, time_new)
     
     #%% output file
     outfile = predatapath + 'sfc_CCN_SGP_'+year+'.nc'
