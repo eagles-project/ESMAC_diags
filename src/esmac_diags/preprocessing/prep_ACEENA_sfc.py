@@ -290,7 +290,7 @@ def prep_ccn(ccnpath, predatapath, dt=300):
     if dt >= 3600:
         ds.attrs["description"] = 'median value of each time window'
     if dt < 3600:
-        ds.attrs["description"] = 'interpolated value from hourly resolution data'
+        ds.attrs["description"] = 'interpolated value from ~hourly resolution data'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
