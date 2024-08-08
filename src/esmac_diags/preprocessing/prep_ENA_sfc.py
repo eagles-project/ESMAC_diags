@@ -1537,8 +1537,8 @@ def prep_Ndrop(ndroppath, predatapath, year, dt=300):
     # # exclude ice clouds or multi-layer clouds
     # nd[ctype!=1] = np.nan
     
-    # exclude small values
-    nd[nd<10] = np.nan
+    # exclude small values (AV removed this filter 8/6/2024)
+    # nd[nd<10] = np.nan
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
@@ -1618,16 +1618,16 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, year, dt
     # first data
     mfrsrdata = xr.open_dataset(lst2[0])
     mfrsrtime = mfrsrdata['time']
-    lwp = mfrsrdata['lwp']
-    qc_lwp = mfrsrdata['qc_lwp']
+    # lwp = mfrsrdata['lwp']
+    # qc_lwp = mfrsrdata['qc_lwp']
     cod = mfrsrdata['optical_depth_instantaneous']
     qc_cod = mfrsrdata['qc_optical_depth_instantaneous']
     mfrsrdata.close()
     for file in lst2[1:]:
         mfrsrdata = xr.open_dataset(file)
         mfrsrtime = xr.concat([mfrsrtime, mfrsrdata['time']], dim="time")
-        lwp = xr.concat([lwp, mfrsrdata['lwp']], dim="time")
-        qc_lwp = xr.concat([qc_lwp, mfrsrdata['qc_lwp']], dim="time")
+        # lwp = xr.concat([lwp, mfrsrdata['lwp']], dim="time")
+        # qc_lwp = xr.concat([qc_lwp, mfrsrdata['qc_lwp']], dim="time")
         cod = xr.concat([cod, mfrsrdata['optical_depth_instantaneous']], dim="time")
         qc_cod = xr.concat([qc_cod, mfrsrdata['qc_optical_depth_instantaneous']], dim="time")
         mfrsrdata.close()
