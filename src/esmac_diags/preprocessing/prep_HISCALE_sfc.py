@@ -959,7 +959,7 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_LWP(armbepath, mfrsrpath, predatapath, dt=3600):
+def prep_LWP(armbepath, mwrpath, predatapath, dt=300):
     """
     prepare liquid water path
     Although LWP is measured by microwave radiometer (MWR), it is processed in 
@@ -970,7 +970,7 @@ def prep_LWP(armbepath, mfrsrpath, predatapath, dt=3600):
     ----------
     armbepath : str
         input datapath for ARMBE (MWR data)
-    mfrsrpath : str
+    mwrpath : str
         input datapath for MFRSR
     predatapath : str
         output datapath
@@ -1001,27 +1001,38 @@ def prep_LWP(armbepath, mfrsrpath, predatapath, dt=3600):
     # quality controls. For ARMBE lwp, remove data with <30% valid points within 1-hr window 
     lwp[qc_lwp>=2] = np.nan
     
-    #%% read in MFRSR LWP for comparison
-    lst2 = glob.glob(os.path.join(mfrsrpath, '*.cdf'))
-    lst2.sort()
-    # first data
-    mfrsrdata = xr.open_dataset(lst2[0])
-    time2 = mfrsrdata['time']
-    lwp2 = mfrsrdata['lwp']
-    qc_lwp2 = mfrsrdata['qc_lwp']
-    mfrsrdata.close()
-    for file in lst2[1:]:
-        mfrsrdata = xr.open_dataset(file)
-        time2 = xr.concat([time2, mfrsrdata['time']], dim="time")
-        lwp2 = xr.concat([lwp2, mfrsrdata['lwp']], dim="time")
-        qc_lwp2 = xr.concat([qc_lwp2, mfrsrdata['qc_lwp']], dim="time")
-        mfrsrdata.close()
+    # #%% read in MFRSR LWP for comparison
+    # lst2 = glob.glob(os.path.join(mfrsrpath, '*.cdf'))
+    # lst2.sort()
+    # # first data
+    # mfrsrdata = xr.open_dataset(lst2[0])
+    # time2 = mfrsrdata['time']
+    # lwp2 = mfrsrdata['lwp']
+    # qc_lwp2 = mfrsrdata['qc_lwp']
+    # mfrsrdata.close()
+    # for file in lst2[1:]:
+    #     mfrsrdata = xr.open_dataset(file)
+    #     time2 = xr.concat([time2, mfrsrdata['time']], dim="time")
+    #     lwp2 = xr.concat([lwp2, mfrsrdata['lwp']], dim="time")
+    #     qc_lwp2 = xr.concat([qc_lwp2, mfrsrdata['qc_lwp']], dim="time")
+    #     mfrsrdata.close()
         
-    lwp2.load()
-    qc_lwp2.load()
-    # lwp2 = qc_mask_qcflag(lwp2, qc_lwp2)
-    lwp2 = lwp2*1000. # change unit from kg/m2 (mm) to g/m2
-    
+    # lwp2.load()
+    # qc_lwp2.load()
+    # # lwp2 = qc_mask_qcflag(lwp2, qc_lwp2)
+    # lwp2 = lwp2*1000. # change unit from kg/m2 (mm) to g/m2
+
+    #%% read in MWR LWP
+    lst2 = glob.glob(os.path.join(mwrpath, '*.nc'))
+    mwrdata = xr.open_mfdataset(lst2, combine='by_coords')
+    time2 = mwrdata['time']
+    lwp2 = mwrdata['phys_lwp'] #units are g/m2
+    qc_lwp2 = mwrdata['qc_phys_lwp']
+    mwrdata.close()
+
+    mwr_lwp.load()
+    mwr_lwp[qc_mwr_lwp > 0] = np.nan
+  
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
@@ -1033,7 +1044,7 @@ def prep_LWP(armbepath, mfrsrpath, predatapath, dt=3600):
     print('output file '+outfile)
     ds = xr.Dataset({
                     'lwp_armbe': ('time', np.float32(lwp_new)),
-                    'lwp_mfrsr': ('time', np.float32(lwp2_new))
+                    'lwp_mwr': ('time', np.float32(lwp2_new))
                     },
                      coords={'time': ('time', time_new)})
     
@@ -1043,9 +1054,9 @@ def prep_LWP(armbepath, mfrsrpath, predatapath, dt=3600):
     ds['lwp_armbe'].attrs["long_name"] = "liquid water path"
     ds['lwp_armbe'].attrs["units"] = "g/m2"
     ds['lwp_armbe'].attrs["description"] = "liquid water path from ARMBE data based on MWR measurements"
-    ds['lwp_mfrsr'].attrs["long_name"] = "liquid water path"
-    ds['lwp_mfrsr'].attrs["units"] = "g/m2"
-    ds['lwp_mfrsr'].attrs["description"] = "liquid water path from MFRSR data based on MWR measurements"
+    ds['lwp_mwr'].attrs["long_name"] = "liquid water path"
+    ds['lwp_mwr'].attrs["units"] = "g/m2"
+    ds['lwp_mwr'].attrs["description"] = "liquid water path from MWR retreivals"
     
     ds.attrs["title"] = 'surface-retrieved cloud liquid water path'
     ds.attrs["inputfile_sample"] = [lst1[0].split('/')[-1], lst2[0].split('/')[-1]]
@@ -1055,7 +1066,7 @@ def prep_LWP(armbepath, mfrsrpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_LTS(armbepath, predatapath, dt=3600):
+def prep_LTS(armbepath, predatapath, dt=300):
     """
     prepare lower tropospheric stability (potential temperature difference between 700hPa and surface) from ARMBE
 
@@ -1123,9 +1134,13 @@ def prep_LTS(armbepath, predatapath, dt=3600):
     # enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
     # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
-    
-    LTS700_new = avg_time_1d(time700_valid, LTS700_valid, time_new)
-    LTS850_new = avg_time_1d(time850_valid, LTS850_valid, time_new)
+
+    if dt >= 3600:
+        LTS700_new = avg_time_1d(time700_valid, LTS700_valid, time_new)
+        LTS850_new = avg_time_1d(time850_valid, LTS850_valid, time_new)
+    if dt < 3600:
+        LTS700_new = interp_time_1d(time700_valid, LTS700_valid, time_new)
+        LTS850_new = interp_time_1d(time850_valid, LTS850_valid, time_new)
         
     #%% output file
     outfile = predatapath + 'LTS_HISCALE.nc'
@@ -1150,13 +1165,16 @@ def prep_LTS(armbepath, predatapath, dt=3600):
     
     ds.attrs["title"] = 'Lower Tropospheric Stability from ARMBE hourly data'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'mean of each time window'
+    if dt >= 3600:
+        ds.attrs["description"] = 'mean of each time window'
+    if dt < 3600:
+        ds.attrs["description"] = 'interpolated from hourly ARMBE which uses coarser time resolution interpolated soundings'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_precip(armbepath, predatapath, dt=3600):
+def prep_precip(armbepath, metpath, parspath, predatapath, dt=300):
     """
     prepare surface precipitation data from ARMBE
 
@@ -1164,6 +1182,10 @@ def prep_precip(armbepath, predatapath, dt=3600):
     ----------
     armbepath : str
         input datapath. use hourly-averaged ARMBE data
+    metpath : str
+        input datapath for ORG data
+    parspath : str
+        input datapath for disdrometer data
     predatapath : str
         output datapath
     dt : float
@@ -1178,39 +1200,68 @@ def prep_precip(armbepath, predatapath, dt=3600):
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
         
-    #%% read in data
-    lst = glob.glob(os.path.join(armbepath, '*armbeatmC1*.nc'))
+    # #%% read in data (old way used ARMBE hourly rainfalls from MET, potentially from the PWD)
+    # lst = glob.glob(os.path.join(armbepath, '*armbeatmC1*.nc'))
+    # obsdata = xr.open_mfdataset(lst, combine='by_coords')
+    # time = obsdata['time']
+    # precip = obsdata['precip_rate_sfc'].load()
+    # obsdata.close()    
+
+    #%% read in data (new way uses the optical rain gauge (ORG) and Parsivel disdrometer rates that are better for light)
+    lst = glob.glob(os.path.join(metpath, '*.cdf'))
     obsdata = xr.open_mfdataset(lst, combine='by_coords')
     time = obsdata['time']
-    precip = obsdata['precip_rate_sfc'].load()
-    obsdata.close()    
-                
+    precip_tbrg = obsdata['tbrg_precip_total_corr'].load()*60. #convert from 1-min mm accumulation to mm/h
+    qc_precip_tbrg = obsdata['qc_tbrg_precip_total_corr'].load()
+    precip_pwd = obsdata['pwd_precip_rate_mean_1min'].load()
+    qc_precip_pwd = obsdata['qc_pwd_precip_rate_mean_1min'].load()
+    obsdata.close()
+
+    precip_tbrg = qc_mask_qcflag(precip_tbrg, qc_precip_tbrg)
+    precip_pwd = qc_mask_qcflag(precip_pwd, qc_precip_pwd)
+
+    lst = glob.glob(os.path.join(parspath, '*.cdf'))
+    parsdata = xr.open_mfdataset(lst, combine='by_coords')
+    time = obsdata['time']
+    precip_pars = obsdata['rain_rate'].load()
+    qc_precip_pars = obsdata['qc_rain_rate'].load()
+    parsdata.close()
+
+    precip_pars = qc_mask_qcflag(precip_pars, qc_precip_pars)
+  
     #%% re-shape the data into coarser resolution
     # startdate = np.datetime_as_string(np.datetime64(time[0].data))[:10]
     # enddate = np.datetime_as_string(np.datetime64(time[-1].data))[:10]
     # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    precip_new = avg_time_1d(time, precip, time_new)
-        
+    precip_tbrg_new = avg_time_1d(time, precip_tbrg, time_new)
+    precip_pwd_new = avg_time_1d(time, precip_pwd, time_new)
+    precip_pars_new = avg_time_1d(time, precip_pars, time_new)
     
     #%% output file
     outfile = predatapath + 'precip_HISCALE.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'precip': (['time'], np.float32(precip_new))
+                    'precip_tbrg': (['time'], np.float32(precip_tbrg_new)),
+                    'precip_pwd': (['time'], np.float32(precip_pwd_new)),
+                    'precip_pars': (['time'], np.float32(precip_pars_new)),
                     },
                      coords={'time': ('time', time_new)})
     
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
     ds['time'].attrs["standard_name"] = "time"
-    ds['precip'].attrs["long_name"] = "Surface Precipitation Rate"
-    ds['precip'].attrs["units"] = "mm/hr"
+    ds['precip_tbrg'].attrs["long_name"] = "TBRG Surface Precipitation Rate"
+    ds['precip_tbrg'].attrs["units"] = "mm/hr"
+    ds['precip_pwd'].attrs["long_name"] = "PWD Surface Precipitation Rate"
+    ds['precip_pwd'].attrs["units"] = "mm/hr"
+    ds['precip_pars'].attrs["long_name"] = "Parsivel Surface Precipitation Rate"
+    ds['precip_pars'].attrs["units"] = "mm/hr"
     
-    ds.attrs["title"] = 'surface precipitation data from ARMBE hourly data'
+    ds.attrs["title"] = 'surface precipitation data from MET data and Parsivel disdrometer'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'precipitation at SGP is measured by Tipping Bucket Rain Gauge (TBRG). mean of each time window'
+    ds.attrs["description"] = 'precipitation at SGP is measured by ARM tipping bucket rain gauge (TBRG), present weather detector (PWD), and Parsivel2 disdrometer. mean of each time window'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
