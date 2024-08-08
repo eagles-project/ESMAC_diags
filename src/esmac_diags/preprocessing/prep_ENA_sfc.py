@@ -857,7 +857,6 @@ def prep_LWP(armbepath, mwrpath, predatapath, year, dt=300):
     mwr_lwp[qc_mwr_lwp > 0] = np.nan
   
     #%% re-shape the data into coarser resolution
-    
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
     lwp_new = avg_time_1d(time1, lwp, time_new)
@@ -868,7 +867,7 @@ def prep_LWP(armbepath, mwrpath, predatapath, year, dt=300):
     print('output file '+outfile)
     ds = xr.Dataset({
                     'lwp_armbe': ('time', np.float32(lwp_new)),
-                    'lwp_mfrsr': ('time', np.float32(lwp2_new))
+                    'lwp_mwr': ('time', np.float32(lwp2_new))
                     },
                      coords={'time': ('time', time_new)})
     
@@ -986,7 +985,6 @@ def prep_LTS(armbepath, arsclpath, predatapath, year, dt=300):
             LTS850_valid = np.append(LTS850_valid, theta_850-theta_s )
         
     #%% re-shape the data into coarser resolution
-    
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
 
     if dt >= 3600:
@@ -1025,7 +1023,10 @@ def prep_LTS(armbepath, arsclpath, predatapath, year, dt=300):
     
     ds.attrs["title"] = 'Lower Tropospheric Stability from ARMBE hourly data'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'mean of each time window (hourly or longer time); interpolated from hourly (shorter than hourly time)'
+    if dt >= 3600:
+        ds.attrs["description"] = 'mean of each time window'
+    if dt < 3600:
+        ds.attrs["description"] = 'interpolated from hourly ARMBE which uses coarser time resolution interpolated soundings'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
@@ -1214,14 +1215,14 @@ def prep_precip(armbepath, metpath, parspath, predatapath, year, dt=300):
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
         
-    # #%% read in data (old way used ARMBE hourly rainfalls from MET, potentially from the PWD
+    # #%% read in data (old way used ARMBE hourly rainfalls from MET, potentially from the PWD)
     # lst = glob.glob(os.path.join(armbepath, '*armbeatmC1.c1.'+year+'*.nc'))
     # obsdata = xr.open_mfdataset(lst, combine='by_coords')
     # time = obsdata['time']
     # precip = obsdata['precip_rate_sfc'].load()
     # obsdata.close()    
 
-    #%% read in data (new way uses the optical rain gauge (ORG) and Parsivel disdrometer rates that are better for light
+    #%% read in data (new way uses the optical rain gauge (ORG) and Parsivel disdrometer rates that are better for light)
     lst = glob.glob(os.path.join(metpath, '*.cdf'))
     obsdata = xr.open_mfdataset(lst, combine='by_coords')
     time = obsdata['time']
@@ -1241,7 +1242,6 @@ def prep_precip(armbepath, metpath, parspath, predatapath, year, dt=300):
     parsdata.close()
   
     #%% re-shape the data into coarser resolution
-    
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
     precip_org_new = avg_time_1d(time, precip_org, time_new)
