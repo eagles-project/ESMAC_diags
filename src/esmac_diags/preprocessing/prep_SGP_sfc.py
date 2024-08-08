@@ -1026,7 +1026,7 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_LWP(armbepath, mfrsrpath, predatapath, year, dt=3600):
+def prep_LWP(armbepath, mwrpath, predatapath, year, dt=300):
     """
     prepare liquid water path
     Although LWP is measured by microwave radiometer (MWR), it is processed in 
@@ -1037,7 +1037,7 @@ def prep_LWP(armbepath, mfrsrpath, predatapath, year, dt=3600):
     ----------
     armbepath : str
         input datapath for ARMBE (MWR data)
-    mfrsrpath : str
+    mwrpath : str
         input datapath for MFRSR
     predatapath : str
         output datapath
@@ -1071,27 +1071,38 @@ def prep_LWP(armbepath, mfrsrpath, predatapath, year, dt=3600):
     # quality controls. For ARMBE lwp, remove data with <30% valid points within 1-hr window 
     lwp[qc_lwp>=2] = np.nan
     
-    #%% read in MFRSR LWP for comparison
-    lst2 = glob.glob(os.path.join(mfrsrpath, '*.c1.'+year+'*.cdf'))
-    lst2.sort()
-    # first data
-    mfrsrdata = xr.open_dataset(lst2[0])
-    time2 = mfrsrdata['time']
-    lwp2 = mfrsrdata['lwp']
-    qc_lwp2 = mfrsrdata['qc_lwp']
-    mfrsrdata.close()
-    for file in lst2[1:]:
-        mfrsrdata = xr.open_dataset(file)
-        time2 = xr.concat([time2, mfrsrdata['time']], dim="time")
-        lwp2 = xr.concat([lwp2, mfrsrdata['lwp']], dim="time")
-        qc_lwp2 = xr.concat([qc_lwp2, mfrsrdata['qc_lwp']], dim="time")
-        mfrsrdata.close()
+    # #%% read in MFRSR LWP for comparison
+    # lst2 = glob.glob(os.path.join(mfrsrpath, '*.c1.'+year+'*.cdf'))
+    # lst2.sort()
+    # # first data
+    # mfrsrdata = xr.open_dataset(lst2[0])
+    # time2 = mfrsrdata['time']
+    # lwp2 = mfrsrdata['lwp']
+    # qc_lwp2 = mfrsrdata['qc_lwp']
+    # mfrsrdata.close()
+    # for file in lst2[1:]:
+    #     mfrsrdata = xr.open_dataset(file)
+    #     time2 = xr.concat([time2, mfrsrdata['time']], dim="time")
+    #     lwp2 = xr.concat([lwp2, mfrsrdata['lwp']], dim="time")
+    #     qc_lwp2 = xr.concat([qc_lwp2, mfrsrdata['qc_lwp']], dim="time")
+    #     mfrsrdata.close()
         
-    lwp2.load()
-    qc_lwp2.load()
-    # lwp2 = qc_mask_qcflag(lwp2, qc_lwp2)
-    lwp2 = lwp2*1000. # change unit from kg/m2 (mm) to g/m2
-    
+    # lwp2.load()
+    # qc_lwp2.load()
+    # # lwp2 = qc_mask_qcflag(lwp2, qc_lwp2)
+    # lwp2 = lwp2*1000. # change unit from kg/m2 (mm) to g/m2
+
+    #%% read in MWR LWP
+    lst2 = glob.glob(os.path.join(mwrpath, '*.nc'))
+    mwrdata = xr.open_mfdataset(lst2, combine='by_coords')
+    time2 = mwrdata['time']
+    lwp2 = mwrdata['phys_lwp'] #units are g/m2
+    qc_lwp2 = mwrdata['qc_phys_lwp']
+    mwrdata.close()
+
+    mwr_lwp.load()
+    mwr_lwp[qc_mwr_lwp > 0] = np.nan
+  
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
@@ -1103,7 +1114,7 @@ def prep_LWP(armbepath, mfrsrpath, predatapath, year, dt=3600):
     print('output file '+outfile)
     ds = xr.Dataset({
                     'lwp_armbe': ('time', np.float32(lwp_new)),
-                    'lwp_mfrsr': ('time', np.float32(lwp2_new))
+                    'lwp_mwr': ('time', np.float32(lwp2_new))
                     },
                      coords={'time': ('time', time_new)})
     
@@ -1113,9 +1124,9 @@ def prep_LWP(armbepath, mfrsrpath, predatapath, year, dt=3600):
     ds['lwp_armbe'].attrs["long_name"] = "liquid water path"
     ds['lwp_armbe'].attrs["units"] = "g/m2"
     ds['lwp_armbe'].attrs["description"] = "liquid water path from ARMBE data based on MWR measurements"
-    ds['lwp_mfrsr'].attrs["long_name"] = "liquid water path"
-    ds['lwp_mfrsr'].attrs["units"] = "g/m2"
-    ds['lwp_mfrsr'].attrs["description"] = "liquid water path from MFRSR data based on MWR measurements"
+    ds['lwp_mwr'].attrs["long_name"] = "liquid water path"
+    ds['lwp_mwr'].attrs["units"] = "g/m2"
+    ds['lwp_mwr'].attrs["description"] = "liquid water path from MWR retrievals"
     
     ds.attrs["title"] = 'surface-retrieved cloud liquid water path'
     ds.attrs["inputfile_sample"] = [lst1[0].split('/')[-1], lst2[0].split('/')[-1]]
@@ -1125,7 +1136,7 @@ def prep_LWP(armbepath, mfrsrpath, predatapath, year, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_LTS(armbepath, arsclpath, predatapath, year, dt=3600):
+def prep_LTS(armbepath, arsclpath, predatapath, year, dt=300):
     """
     prepare lower tropospheric stability (potential temperature difference between 700hPa and surface) from ARMBE
 
@@ -1223,9 +1234,14 @@ def prep_LTS(armbepath, arsclpath, predatapath, year, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    LTS700_new = avg_time_1d(time700_valid, LTS700_valid, time_new)
-    LTS850_new = avg_time_1d(time850_valid, LTS850_valid, time_new)
-    thetadiff_new = avg_time_1d(time, thetadiff_cb, time_new)
+    if dt >= 3600:
+        LTS700_new = avg_time_1d(time700_valid, LTS700_valid, time_new)
+        LTS850_new = avg_time_1d(time850_valid, LTS850_valid, time_new)
+        thetadiff_new = avg_time_1d(time, thetadiff_cb, time_new)
+    if dt < 3600:
+        LTS700_new = interp_time_1d(time700_valid, LTS700_valid, time_new)
+        LTS850_new = interp_time_1d(time850_valid, LTS850_valid, time_new)
+        thetadiff_new = interp_time_1d(time, thetadiff_cb, time_new)
         
     #%% output file
     outfile = predatapath + 'LTS_SGP_'+year+'.nc'
@@ -1254,13 +1270,16 @@ def prep_LTS(armbepath, arsclpath, predatapath, year, dt=3600):
     
     ds.attrs["title"] = 'Lower Tropospheric Stability from ARMBE hourly data'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'mean of each time window'
+    if dt >= 3600:
+        ds.attrs["description"] = 'mean of each time window'
+    if dt < 3600:
+        ds.attrs["description"] = 'interpolated from hourly ARMBE which uses coarser time resolution interpolated soundings'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_precip(armbepath, predatapath, year, dt=3600):
+def prep_precip(armbepath,  metpath, parspath, predatapath, year, dt=300):
     """
     prepare surface precipitation data from ARMBE
 
@@ -1268,6 +1287,10 @@ def prep_precip(armbepath, predatapath, year, dt=3600):
     ----------
     armbepath : str
         input datapath. use hourly-averaged ARMBE data
+    metpath : str
+        input datapath for ORG data
+    parspath : str
+        input datapath for disdrometer data
     predatapath : str
         output datapath
     year : int
@@ -1285,42 +1308,72 @@ def prep_precip(armbepath, predatapath, year, dt=3600):
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
         
-    #%% read in data
-    lst = glob.glob(os.path.join(armbepath, '*armbeatmC1.c1.'+year+'*.nc'))
+    # #%% read in data
+    # lst = glob.glob(os.path.join(armbepath, '*armbeatmC1.c1.'+year+'*.nc'))
+    # obsdata = xr.open_mfdataset(lst, combine='by_coords')
+    # time = obsdata['time']
+    # precip = obsdata['precip_rate_sfc'].load()
+    # obsdata.close()    
+
+    #%% read in data (new way uses the present weather detector (PWD) and Parsivel disdrometer rates with tipping bucket rates)
+    # ORG and Pluvio2 weighing bucket rates can be added though they don't cover all of 2011-2020
+    lst = glob.glob(os.path.join(metpath, '*.cdf'))
     obsdata = xr.open_mfdataset(lst, combine='by_coords')
     time = obsdata['time']
-    precip = obsdata['precip_rate_sfc'].load()
-    obsdata.close()    
-                
+    precip_tbrg = obsdata['tbrg_precip_total_corr'].load()*60. #convert from 1-min mm accumulation to mm/h
+    qc_precip_tbrg = obsdata['qc_tbrg_precip_rate_mean'].load()
+    precip_pwd = obsdata['pwd_precip_rate_mean_1min'].load()
+    qc_precip_pwd = obsdata['qc_pwd_precip_rate_mean_1min'].load()
+    obsdata.close()
+
+    precip_tbrg = qc_mask_qcflag(precip_tbrg, qc_precip_tbrg)
+    precip_pwd = qc_mask_qcflag(precip_pwd, qc_precip_pwd)
+
+    lst = glob.glob(os.path.join(parspath, '*.cdf'))
+    parsdata = xr.open_mfdataset(lst, combine='by_coords')
+    time = obsdata['time']
+    precip_pars = obsdata['rain_rate'].load()
+    qc_precip_pars = obsdata['qc_rain_rate'].load()
+    parsdata.close()
+
+    precip_pars = qc_mask_qcflag(precip_pars, qc_precip_pars)
+  
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    precip_new = avg_time_1d(time, precip, time_new)
-        
+    precip_tbrg_new = avg_time_1d(time, precip_tbrg, time_new)
+    precip_pwd_new = avg_time_1d(time, precip_pwd, time_new)
+    precip_pars_new = avg_time_1d(time, precip_pars, time_new) 
     
     #%% output file
     outfile = predatapath + 'precip_SGP_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'precip': (['time'], np.float32(precip_new))
+                    'precip_tbrg': (['time'], np.float32(precip_tbrg_new)),
+                    'precip_pwd': (['time'], np.float32(precip_pwd_new)),
+                    'precip_pars': (['time'], np.float32(precip_pars_new)),
                     },
                      coords={'time': ('time', time_new)})
     
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
     ds['time'].attrs["standard_name"] = "time"
-    ds['precip'].attrs["long_name"] = "Surface Precipitation Rate"
-    ds['precip'].attrs["units"] = "mm/hr"
+    ds['precip_tbrg'].attrs["long_name"] = "TBRG Surface Precipitation Rate"
+    ds['precip_tbrg'].attrs["units"] = "mm/hr"
+    ds['precip_pwd'].attrs["long_name"] = "PWD Surface Precipitation Rate"
+    ds['precip_pwd'].attrs["units"] = "mm/hr"
+    ds['precip_pars'].attrs["long_name"] = "Parsivel Surface Precipitation Rate"
+    ds['precip_pars'].attrs["units"] = "mm/hr"
     
-    ds.attrs["title"] = 'surface precipitation data from ARMBE hourly data'
+    ds.attrs["title"] = 'surface precipitation data from MET data and Parsivel disdrometer'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'precipitation at SGP is measured by Tipping Bucket Rain Gauge (TBRG). mean of each time window'
+    ds.attrs["description"] = 'precipitation at SGP is measured by ARM tipping bucket rain gauge (TBRG), present weather detector (PWD), and Parsivel2 disdrometer. mean of each time window'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_radiation(armbepath, predatapath, year, dt=3600):
+def prep_radiation(armbepath, radfluxpath, predatapath, year, dt=300):
     """
     prepare surface radiation data from ARMBE
 
@@ -1328,6 +1381,8 @@ def prep_radiation(armbepath, predatapath, year, dt=3600):
     ----------
     armbepath : str
         input datapath. use hourly-averaged ARMBE data
+    radfluxpath : str
+        input datapath.
     predatapath : str
         output datapath
     year : int
@@ -1346,14 +1401,24 @@ def prep_radiation(armbepath, predatapath, year, dt=3600):
         os.makedirs(predatapath)
         
     #%% read in data
-    lst = glob.glob(os.path.join(armbepath, '*armbecldradC1.c1.'+year+'*.nc'))
-    obsdata = xr.open_mfdataset(lst, combine='by_coords')
-    time = obsdata['time']
-    lwdn = obsdata['lwdn'].load()
-    lwup = obsdata['lwup'].load()
-    swdn = obsdata['swdn'].load()
-    swup = obsdata['swup'].load()
-    obsdata.close()    
+    if dt >= 3600:
+        lst = glob.glob(os.path.join(armbepath, '*armbecldradC1*.nc'))
+        obsdata = xr.open_mfdataset(lst, combine='by_coords')
+        time = obsdata['time']
+        lwdn = obsdata['lwdn'].load()
+        lwup = obsdata['lwup'].load()
+        swdn = obsdata['swdn'].load()
+        swup = obsdata['swup'].load()
+        obsdata.close()
+    if dt < 3600:
+        lst = glob.glob(os.path.join(radfluxpath, '*.nc'))
+        obsdata = xr.open_mfdataset(lst, combine='by_coords')
+        time = obsdata['time']
+        lwdn = obsdata['downwelling_longwave'].load()
+        lwup = obsdata['upwelling_longwave'].load()
+        swdn = obsdata['downwelling_shortwave'].load()
+        swup = obsdata['upwelling_shortwave'].load()
+        obsdata.close()    
                 
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
@@ -1386,7 +1451,10 @@ def prep_radiation(armbepath, predatapath, year, dt=3600):
     ds['swup'].attrs["long_name"] = "Surface upward shortwave flux"
     ds['swup'].attrs["units"] = "W/m2"
     
-    ds.attrs["title"] = 'surface radiative flux data from ARMBE hourly data'
+    if dt >= 3600:
+        ds.attrs["title"] = 'surface radiative flux data from ARMBE hourly data'
+    if dt < 3600:
+        ds.attrs["title"] = 'surface radiative flux data from RADFLUX data'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
     ds.attrs["description"] = 'mean of each time window'
     ds.attrs["date"] = ttt.ctime(ttt.time())
@@ -1394,7 +1462,7 @@ def prep_radiation(armbepath, predatapath, year, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_totcld(armbepath, predatapath, year, dt=3600):
+def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, year, dt=300):
     """
     prepare total cloud fraction data from ARMBE
 
@@ -1402,6 +1470,10 @@ def prep_totcld(armbepath, predatapath, year, dt=3600):
     ----------
     armbepath : str
         input datapath. use hourly-averaged ARMBE data
+    arsclbndpath : char
+        input datapath.
+    tsipath : char
+        input datapath.
     predatapath : str
         output datapath
     year : int
@@ -1418,46 +1490,81 @@ def prep_totcld(armbepath, predatapath, year, dt=3600):
                        
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
-        
-    #%% read in data
-    lst = glob.glob(os.path.join(armbepath, '*armbecldradC1.c1.'+year+'*.nc'))
-    obsdata = xr.open_mfdataset(lst, combine='by_coords')
-    time = obsdata['time']
-    cf_arscl = obsdata['tot_cld']
-    qc_cf_arscl = obsdata['qc_tot_cld']
-    cf_tsi = obsdata['tot_cld_tsi']
-    qc_cf_tsi = obsdata['qc_tot_cld_tsi']
-    cf_visst = obsdata['cld_tot']
-    obsdata.close()
-    
-    cf_arscl.load()
-    cf_tsi.load()
-    cf_visst.load()
-    qc_cf_arscl.load()
-    qc_cf_tsi.load()
-    
-    # quality controls. For ARMBE cloud fraction, <30% valid points within 1-hr window are flagged and removed
-    cf_arscl[qc_cf_arscl>=2] = np.nan
-    cf_tsi[qc_cf_tsi>=2] = np.nan
-                
-    # change unit from 1 to %
-    cf_arscl = cf_arscl*100
-    cf_tsi = cf_tsi*100
-    
+
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
-    
-    cf_arscl_new = avg_time_1d(time, cf_arscl, time_new)
-    cf_tsi_new = avg_time_1d(time, cf_tsi, time_new)
-    cf_visst_new = avg_time_1d(time, cf_visst, time_new)
-    
+  
+    #%% read in data
+    if dt >= 3600:
+        lst = glob.glob(os.path.join(armbepath, '*armbecldradC1.c1.'+year+'*.nc'))
+        obsdata = xr.open_mfdataset(lst, combine='by_coords')
+        time = obsdata['time']
+        cf_arscl = obsdata['tot_cld']
+        qc_cf_arscl = obsdata['qc_tot_cld']
+        cf_tsi = obsdata['tot_cld_tsi']
+        qc_cf_tsi = obsdata['qc_tot_cld_tsi']
+        # cf_visst = obsdata['cld_tot'] #this data is already preprocessed in the satellite program
+        obsdata.close()
+        
+        cf_arscl.load()
+        cf_tsi.load()
+        # cf_visst.load()
+        qc_cf_arscl.load()
+        qc_cf_tsi.load()
+        
+        # quality controls. For ARMBE cloud fraction, <30% valid points within 1-hr window are flagged and removed
+        cf_arscl[qc_cf_arscl>=2] = np.nan
+        cf_tsi[qc_cf_tsi>=2] = np.nan
+                    
+        # change unit from 1 to %
+        cf_arscl = cf_arscl*100
+        cf_tsi = cf_tsi*100
+        
+        cf_arscl_new = avg_time_1d(time, cf_arscl, time_new)
+        cf_tsi_new = avg_time_1d(time, cf_tsi, time_new)
+        # cf_visst_new = avg_time_1d(time, cf_visst, time_new)
+
+    if dt < 3600:
+        lst = glob.glob(os.path.join(arsclbndpath, '*.nc'))
+        arscldata = xr.open_mfdataset(lst, combine='by_coords')
+        arscltime = arscldata['time']
+        cloud_base = arscldata['cloud_layer_base_height'][:,0] #first cloud layer base
+        arscldata.close()
+
+        lst = glob.glob(os.path.join(tsipath, '*.nc'))
+        tsidata = xr.open_mfdataset(lst, combine='by_coords')
+        cf_opaque_tsi = obsdata['percent_opaque']
+        qc_cf_opaque_tsi = obsdata['qc_percent_opaque']
+        cf_thin_tsi = obsdata['percent_thin']
+        qc_cf_thin_tsi = obsdata['qc_percent_thin']
+        tsidata.close()
+
+        # compute ARSCL cloud fraction over dt
+        cloud.load()
+        arscl_dt = np.abs(arscltime[1].dt.second - arscltime[0].dt.second) # arscl time step
+        arscl_nt = dt/arscl_dt # number of arscl timesteps in the time windoe
+        cf_arscl_new = np.size(np.where(cloud > 0))/arscl_nt # fraction of times in window with cloud bases present
+        # change unit from 1 to %
+        cf_arscl = cf_arscl*100
+      
+        # average TSI cloud fraction over dt
+        cf_opaque_tsi.load()
+        qc_cf_opaque_tsi.load()
+        cf_thin_tsi.load()
+        qc_cf_thin_tsi.load()
+
+        cf_tsi = cf_opaque_tsi + cf_thin_tsi # add opaque and thin cloud fractions to get total (should be in units of %)
+        cf_tsi[qc_cf_opaque_tsi > 0] = np.nan
+        cf_tsi[qc_cf_thin_tsi > 0] = np.nan
+        cf_tsi_new = avg_time_1d(tsitime, cf_tsi, time_new)
+      
     #%% output file
     outfile = predatapath + 'totcld_SGP_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                     'tot_cld_arscl': ('time', np.float32(cf_arscl_new)),
                     'tot_cld_tsi': ('time', np.float32(cf_tsi_new)),
-                    'tot_cld_visst': ('time', np.float32(cf_visst_new))
+                    # 'tot_cld_visst': ('time', np.float32(cf_visst_new))
                     },
                      coords={'time': ('time', time_new)})
     
@@ -1470,19 +1577,21 @@ def prep_totcld(armbepath, predatapath, year, dt=3600):
     ds['tot_cld_tsi'].attrs["long_name"] = "cloud_area_fraction"
     ds['tot_cld_tsi'].attrs["units"] = "%"
     ds['tot_cld_tsi'].attrs["description"] = "Total cloud fraction based on total sky imager, 100 degree FOV"
-    ds['tot_cld_visst'].attrs["long_name"] = "cloud_area_fraction"
-    ds['tot_cld_visst'].attrs["units"] = "%"
-    ds['tot_cld_visst'].attrs["description"] = "Total cloud fraction based on VISST satellite product"
+    # ds['tot_cld_visst'].attrs["long_name"] = "cloud_area_fraction"
+    # ds['tot_cld_visst'].attrs["units"] = "%"
+    # ds['tot_cld_visst'].attrs["description"] = "Total cloud fraction based on VISST satellite product"
     
-    
-    ds.attrs["title"] = 'total cloud fraction from ARMBE hourly data'
+    if dt >= 3600:
+        ds.attrs["title"] = 'total cloud fraction from ARMBE hourly data (from ARSCL and TSI)'
+    if dt < 3600:
+        ds.attrs["title"] = 'total cloud fraction from ARSCL and TSI'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_Ndrop(ndroppath, predatapath, year, dt=3600):
+def prep_Ndrop(ndroppath, predatapath, year, dt=300):
     """
     prepare cloud deoplet number concentration from Ndrop data
     
@@ -1533,7 +1642,7 @@ def prep_Ndrop(ndroppath, predatapath, year, dt=3600):
     # nd[ctype!=1] = np.nan
     
     # exclude small values
-    nd[nd<10] = np.nan
+    # nd[nd<10] = np.nan (AV removed this filter 8/6/2024)
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
@@ -1564,7 +1673,7 @@ def prep_Ndrop(ndroppath, predatapath, year, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_Nd_ARMretrieval(mfrsrpath, arsclpath, predatapath, year, dt=3600):
+def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, year, dt=300):
     """
     prepare cloud deoplet number concentration (Nd) data at ARM sites
     input data is cloud optical depth from MFRSR, LWP from MWR (in the MFRSR data), 
@@ -1577,7 +1686,9 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclpath, predatapath, year, dt=3600):
     ----------
     mfrsrpath : char
         input datapath. 
-    arsclpath : char
+    arsclbndpath : char
+        input datapath.
+    mwrpath : char
         input datapath.  
     predatapath : char
         output datapath
@@ -1611,20 +1722,27 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclpath, predatapath, year, dt=3600):
     # first data
     mfrsrdata = xr.open_dataset(lst2[0])
     mfrsrtime = mfrsrdata['time']
-    lwp = mfrsrdata['lwp']
-    qc_lwp = mfrsrdata['qc_lwp']
+    # lwp = mfrsrdata['lwp']
+    # qc_lwp = mfrsrdata['qc_lwp']
     cod = mfrsrdata['optical_depth_instantaneous']
     qc_cod = mfrsrdata['qc_optical_depth_instantaneous']
     mfrsrdata.close()
     for file in lst2[1:]:
         mfrsrdata = xr.open_dataset(file)
         mfrsrtime = xr.concat([mfrsrtime, mfrsrdata['time']], dim="time")
-        lwp = xr.concat([lwp, mfrsrdata['lwp']], dim="time")
-        qc_lwp = xr.concat([qc_lwp, mfrsrdata['qc_lwp']], dim="time")
+        # lwp = xr.concat([lwp, mfrsrdata['lwp']], dim="time")
+        # qc_lwp = xr.concat([qc_lwp, mfrsrdata['qc_lwp']], dim="time")
         cod = xr.concat([cod, mfrsrdata['optical_depth_instantaneous']], dim="time")
         qc_cod = xr.concat([qc_cod, mfrsrdata['qc_optical_depth_instantaneous']], dim="time")
         mfrsrdata.close()
+
+    lst3 = glob.glob(os.path.join(mwrpath, '*.nc'))
+    mwrdata = xr.open_mfdataset(files, combine='by_coords')
     
+    mwrtime = mwrdata['time']
+    lwp = mwrdata['phys_lwp']*1e-3 #kg/m**2
+    qc_lwp = mwrdata['qc_phys_lwp']
+
     lwp.load()
     qc_lwp.load()
     cod.load()
@@ -1633,7 +1751,8 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclpath, predatapath, year, dt=3600):
     cbhs.load()
     cths.load()
     
-    # lwp = qc_mask_qcflag(lwp,qc_lwp)  # do not mask LWP since clearsky (LWP=0) is flagged
+    lwp = qc_mask_qcflag(lwp,qc_lwp)  # do not mask LWP since clearsky (LWP=0) is flagged (should be okay in MWR datastream, but need to check, AV 8/6/2024)
+    lwp[lwp < 0] = 0 #can be small negative values retrieved that should be set to 0
     cod = qc_mask_qcflag(cod,qc_cod)
     cbh = qc_remove_neg(cbh, remove_zero='True')
     
@@ -1652,17 +1771,17 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclpath, predatapath, year, dt=3600):
     # cod[cod>500] = np.nan
     # lwp[lwp>1] = np.nan
     # lwp[lwp<0.01] = np.nan
-    H[cth>5000.] = np.nan   # remove deep clouds with cloud top >5km
-    lwp[np.logical_or(lwp<0.02, lwp>0.3)] = np.nan
-    cod[np.logical_or(cod<2, cod>60)] = np.nan
+    H[cth>5000.] = np.nan   # remove deep clouds with cloud top > 5km (AV: a better way to do this is by cloud top temperature because this will include cloud tops < 0C, especially in winter, but cloud top temperature requires interpolating from ARMBE or interpsonde to cloud top heights)
+    lwp[np.logical_or(lwp < 0.02, lwp > 0.3)] = np.nan # may want to revisit upper limit on LWP
+    cod[np.logical_or(cod < 4, cod > 60)] = np.nan # changed lower COD limit from 2 to 4 (AV 8/6/2024)
     
     # calculate CDNC first then average into 1hr
     time = mfrsrtime.data
     H_tmp = np.interp(np.int64(time), np.int64(arscltime), H)
     nd = calc_cdnc_ARM(lwp, cod, H_tmp)
     
-    # exclude small values
-    nd[nd<10] = np.nan
+    # exclude small values (AV removed this filter 8/6/2024)
+    # nd[nd<10] = np.nan
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
