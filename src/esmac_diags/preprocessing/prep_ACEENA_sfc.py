@@ -941,7 +941,10 @@ def prep_LTS(armbepath, predatapath, dt=300):
     
     ds.attrs["title"] = 'Lower Tropospheric Stability from ARMBE hourly data'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'mean of each time window (hourly or longer time); interpolated from hourly (shorter than hourly time)'
+    if dt >= 3600:
+        ds.attrs["description"] = 'mean of each time window'
+    if dt < 3600:
+        ds.attrs["description"] = 'interpolated from hourly ARMBE which uses coarser time resolution interpolated soundings'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
@@ -1120,14 +1123,14 @@ def prep_precip(armbepath, metpath, parspath, predatapath, dt=300):
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
         
-    # #%% read in data (old way used ARMBE hourly rainfalls from MET, potentially from the PWD
+    # #%% read in data (old way used ARMBE hourly rainfalls from MET, potentially from the PWD)
     # lst = glob.glob(os.path.join(armbepath, '*armbeatmC1*.nc'))
     # obsdata = xr.open_mfdataset(lst, combine='by_coords')
     # time = obsdata['time']
     # precip = obsdata['precip_rate_sfc'].load()
     # obsdata.close()
 
-    #%% read in data (new way uses the optical rain gauge (ORG) and Parsivel disdrometer rates that are better for light
+    #%% read in data (new way uses the optical rain gauge (ORG) and Parsivel disdrometer rates that are better for light)
     lst = glob.glob(os.path.join(metpath, '*.cdf'))
     obsdata = xr.open_mfdataset(lst, combine='by_coords')
     time = obsdata['time']
