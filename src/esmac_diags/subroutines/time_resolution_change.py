@@ -372,7 +372,32 @@ def interp_time_1d(time0, data0, time):
     if data0.shape[0] != len(time0):
         raise ValueError("Arrays must have the same size")
     data = np.full((len(time)), np.nan)
-    dt = np.abs(time[1]-time[0])/2
     for tt in range(len(time)):
         data[tt] = np.interp(time, time0, data0, left=np.nan, right=np.nan)
+    return(data)
+
+#%%
+def interp_time_2d(time0, data0, time):
+    """
+    linearly interpolate 2d data with a time dimension to a different time array
+
+    Parameters
+    ----------
+    time0 : numpy array
+        time dimension for input data
+    data0 : numpy array
+        input data
+    time : numpy array
+        time dimension for output data
+
+    Returns
+    -------
+    data : output data
+
+    """
+    if data0.shape[0] != len(time0):
+        raise ValueError("the first dimension of input data must have the same size with time")
+    data = np.full((len(time), data0.shape[1]), np.nan)
+    for tt in range(len(time)):
+        data[tt,:] = np.interp(time, time0, data0[tt,:], left=np.nan, right=np.nan)
     return(data)
