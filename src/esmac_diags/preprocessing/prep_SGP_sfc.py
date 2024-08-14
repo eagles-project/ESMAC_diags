@@ -12,7 +12,7 @@ from netCDF4 import Dataset
 import time as ttt
 import esmac_diags
 from esmac_diags.subroutines.time_resolution_change import median_time_1d, median_time_2d,\
-                avg_time_1d, avg_time_2d, interp_time_1d, avg_height_2d
+                avg_time_1d, avg_time_2d, interp_time_1d, interp_time_2d, avg_height_2d
 from esmac_diags.subroutines.read_surface import read_smpsb_pnnl,read_smps_bin
 from esmac_diags.subroutines.quality_control import qc_remove_neg, qc_mask_qcflag, \
                 qc_mask_qcflag_cpc, qc_correction_nanosmps
@@ -413,7 +413,7 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_cloudheight_ARSCL(arsclbndpath, predatapath, year, dt=300):
+def prep_cloudheight_ARSCL(arsclbndpath, armbepath, predatapath, year, dt=300):
     """
     prepare cloud base and top height data at ARM sites from ARSCL
     include multi-layer clouds
@@ -421,6 +421,8 @@ def prep_cloudheight_ARSCL(arsclbndpath, predatapath, year, dt=300):
     Parameters
     ----------
     arsclbndpath : char
+        input datapath.
+    armbepathpath : char
         input datapath.  
     predatapath : char
         output datapath
@@ -440,7 +442,7 @@ def prep_cloudheight_ARSCL(arsclbndpath, predatapath, year, dt=300):
         os.makedirs(predatapath)
             
     #%% read in data
-    lst1 = glob.glob(os.path.join(arsclpath, 'sgparscl*.'+year+'*.nc'))
+    lst1 = glob.glob(os.path.join(arsclbndpath, 'sgparscl*.'+year+'*.nc'))
     lst1.sort()
     arscldata = xr.open_mfdataset(lst1, combine='by_coords')
     arscltime = arscldata['time'].load()
@@ -456,7 +458,33 @@ def prep_cloudheight_ARSCL(arsclbndpath, predatapath, year, dt=300):
         cbhs[:,ll] = qc_remove_neg(cbhs[:,ll], remove_zero='True')
         cths[:,ll] = qc_remove_neg(cths[:,ll], remove_zero='True')
     cth = np.nanmax(cths,axis=1)  # cloud top height for all clouds
-        
+
+    #%% read in ARMBE data for temperature profiles to match to cloud base and top
+    lst = glob.glob(os.path.join(armbepath, '*armbeatmC1.c1.'+year+'*.nc'))
+    obsdata = xr.open_mfdataset(lst, combine='by_coords')
+    time = obsdata['time']
+    ht = obsdata['height'].load()
+    Tz = obsdata['temperature_h'].load()
+    obsdata.close()
+    
+    # interpolate to fill NaNs 
+    Tz_interp = Tz.interpolate_na(dim='time')
+    
+    # convert to mean and median 5-min cloud boundaries for temperature interpolation (could be slow for higher temporal resolution)
+    time_5min = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(300)+"s")
+    # cbh_5min_median = median_time_1d(arscltime, cbh, time_5min)
+    # cth_5min_median = median_time_1d(arscltime, cth, time_5min)
+    cbh_5min_mean = avg_time_1d(arscltime, cbh, time_5min)
+    cth_5min_mean = avg_time_1d(arscltime, cth, time_5min)
+
+    # interpolate temperature to 5 min and match to mean and median boundaries
+    Tz_5min = interp_time_1d(time, Tz_interp, time_5min)
+    for tt in range(len(time_5min)):
+        # cbt_5min_median = interp_time_2d(cbh_5min_median[tt], ht, Tz_interp[tt,:])
+        # ctt_5min_median = interp_time_2d(cth_5min_median[tt], ht, Tz_interp[tt,:])
+        cbt_5min_mean = interp_time_2d(cbh_5min_mean[tt], ht, Tz_interp[tt,:])
+        ctt_5min_mean = interp_time_2d(cth_5min_mean[tt], ht, Tz_interp[tt,:])
+  
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
@@ -464,7 +492,14 @@ def prep_cloudheight_ARSCL(arsclbndpath, predatapath, year, dt=300):
     cth_new = avg_time_1d(arscltime, cth, time_new)
     cbhs_new = avg_time_2d(arscltime, cbhs, time_new)
     cths_new = avg_time_2d(arscltime, cths, time_new)
-    
+    #add medians?
+
+    #add mean and median cbt and ctt and fraction of 5-min ctt < 0C variables
+    cbt_mean = avg_time_1d(time_5min, cbt_5min_mean, time_new)
+    cbt_median
+    ctt_mean
+    ctt_median
+    sub0C_frac
     
     #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     # output file
@@ -475,6 +510,7 @@ def prep_cloudheight_ARSCL(arsclbndpath, predatapath, year, dt=300):
                      'cth': ('time', np.float32(cth_new)),
                      'cbhs': (['time', 'layer'], np.float32(cbhs_new)),
                      'cths': (['time', 'layer'], np.float32(cths_new)),
+      
                     },
                      coords={'time': ('time', time_new), 'layer': ('layer', np.arange(cbhs.shape[1]))})
     
