@@ -217,6 +217,35 @@ def median_time_2d(time0, data0, time):
         #         data[tt,dd] = np.nanmedian(data0[idx,dd], axis = 0)
     return(data)
 
+# #%%
+# def median_time_2d(time0, data0, time):
+#     """
+#     rescale 2d data (time, dim2) into coarser time resolution
+#     get median value in each coarser time window
+
+#     Parameters
+#     ----------
+#     time0 : numpy array
+#         time dimension for input data
+#     data0 : numpy array
+#         input data
+#     time : numpy array
+#         time dimension for output data
+
+#     Returns
+#     -------
+#     data : output data
+
+#     """
+#     if data0.shape[0] != len(time0):
+#         raise ValueError("the first dimension of input data must have the same size with time")
+#     data = np.full((len(time), data0.shape[1]), np.nan)
+#     dt = (time[1]-time[0])/2
+#     for tt in range(len(time)):
+#         idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
+#         data[tt, :] = np.nanmedian(data0[idx, :], axis = 0)
+#     return(data)
+
 #%%
 def median_time_forflight_1d(time0, data0, time, height, hdiff=50.):
     """
@@ -319,35 +348,6 @@ def median_time_forflight_2d(time0, data0, time, height, hdiff=50.):
             # keep data in flight heights between median +/- hdiff
             idx2 = np.logical_and(h>(h0-hdiff), h<(h0+hdiff))
             data[tt, :] = np.nanmedian(data1[idx2, :], axis = 0)
-    return(data)
-
-#%%
-def median_time_2d(time0, data0, time):
-    """
-    rescale 2d data (time, dim2) into coarser time resolution
-    get median value in each coarser time window
-
-    Parameters
-    ----------
-    time0 : numpy array
-        time dimension for input data
-    data0 : numpy array
-        input data
-    time : numpy array
-        time dimension for output data
-
-    Returns
-    -------
-    data : output data
-
-    """
-    if data0.shape[0] != len(time0):
-        raise ValueError("the first dimension of input data must have the same size with time")
-    data = np.full((len(time), data0.shape[1]), np.nan)
-    dt = (time[1]-time[0])/2
-    for tt in range(len(time)):
-        idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
-        data[tt, :] = np.nanmedian(data0[idx, :], axis = 0)
     return(data)
 
 #%%
