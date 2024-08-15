@@ -431,16 +431,16 @@ def interp_time_2d(time0, data0, time):
     return(data)
 
 #%%
-def interp_height(height0, data0, height):
+def interp_time_height(data0, time, height):
     """
     linearly interpolate height data to a different height array
 
     Parameters
     ----------
-    height0 : numpy array
-        height dimension for input data
     data0 : numpy array
         input data
+    time: numpy array
+        time dimension for output data
     height : numpy array
         height dimension for output data
 
@@ -449,11 +449,11 @@ def interp_height(height0, data0, height):
     data : output data
 
     """
-    if data0.shape[1] != len(height0):
-        raise ValueError("Arrays must have the same size")
+    # if data0.shape[1] != len(height0):
+    #     raise ValueError("Arrays must have the same size")
     # data = np.full((len(time)), np.nan)
     # for tt in range(len(time)):
     #     data[tt] = np.interp(time, time0, data0, left=np.nan, right=np.nan)
-    data = data0.interp(height = height, kwargs={"fill_value":np.nan})
+    data = data0.interp(time = time, height = height, kwargs={"fill_value":np.nan})
     
     return(data)
