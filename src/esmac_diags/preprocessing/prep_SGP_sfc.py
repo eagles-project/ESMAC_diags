@@ -314,7 +314,7 @@ def prep_ccn(ccnpath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, year, dt=300):
+def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, temperature_out, year, dt=300):
     """
     prepare cloud fraction data from ARMBE
 
@@ -327,7 +327,9 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, year, dt=300):
     predatapath : str
         output datapath
     height_out : numpy array
-        vertical dimension of output data. will average the original ARSCL resolution to it.
+        vertical height dimension of output data. will average the original ARSCL resolution to it.
+    temperature_out : numpy array
+        vertical temperature dimension of output data.
     year : int
         specify the year of data
     dt : float
@@ -352,19 +354,18 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, year, dt=300):
         obsdata = xr.open_mfdataset(lst, combine='by_coords')
         time = obsdata['time']
         height = obsdata['height'].load()
+        temperature = obsdata['temperature_h'].load()
         cloud = obsdata['cld_frac'].load()
         qc_cloud = obsdata['qc_cld_frac'].load()
         obsdata.close()    
     
-        cloud_i = np.full((len(time_new),len(height)), np.nan)
+        cloud_i = np.full((len(time_new),len(height)), np.nan) # change to xarray
         for kk in range(len(height)):
             # quality controls. For ARMBE cloud fraction, remove data with <30% valid points within 1-hr window 
             cl = cloud[:,kk]
             cl[qc_cloud[:,kk]>=2] = np.nan
             # interpolate into standard time
-            cloud_i[:,kk] = np.interp(time_new, time, cl)
-        
-        cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
+            cloud_i[:,kk] = np.interp(time_new, time, cl) # change to xarray
 
     if dt < 3600:
         lst = glob.glob(os.path.join(arsclpath, 'sgparsclkazr1kolliasC1.c0*.nc'))
@@ -372,6 +373,7 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, year, dt=300):
         arscldata = xr.open_mfdataset(lst, combine='by_coords')
         time = arscldata['time'].load()
         height = arscldata['height'].load()
+        temperature = obsdata['temperature_h'].load()
         tmpcloud_flag = arscldata['cloud_source_flag'].load() #0=missing; 1=clear, 2+=cloud
         arscldata.close()
 
@@ -383,13 +385,15 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, year, dt=300):
         cloud_i = cloud_flag.resample(time = dt_new, offset = dt_new/2).sum()/cloud_flag.resample(time = dt_new, offset = dt_new/2).count()
         cloud_i['time'] = cloud_i['time'] + dt_new/2
         
-        cloud_o = avg_height_2d(height,cloud_i,height_out)
+    cloud_o = avg_height_2d(height,cloud_i,height_out)
+    temp_o = avg_height_2d(height,temperature, height_out)
     
     #%% output file
     outfile = predatapath + 'cloud_2d_SGP_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'cloud': (['time','height'], np.float32(cloud_o))
+                    'cloud': (['time','height'], np.float32(cloud_o)),
+                    'temperature': (['time','height'], np.float32(temp_o)),
                     },
                      coords={'time': ('time', time_new), 'height':('height',np.float32(height_out))})
     
@@ -399,6 +403,9 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, year, dt=300):
     ds['cloud'].attrs["long_name"] = "Cloud Fraction"
     ds['cloud'].attrs["units"] = "%"
     ds['cloud'].attrs["description"] = "Cloud Fraction based on radar and MPL"
+    ds['temperature'].attrs["long_name"] = "Temperature"
+    ds['temperature'].attrs["units"] = "K"
+    ds['temperature'].attrs["description"] = "Temperature from ARMBE based on interpolated soundings"
     
     if dt >= 3600:
         ds.attrs["title"] = 'ARMBE hourly 2-d cloud fraction data derived from ARSCL data'
@@ -503,7 +510,7 @@ def prep_cloudheight_ARSCL(arsclbndpath, armbepath, predatapath, year, dt=300):
     
     #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     # output file
-    outfile = predatapath + 'cloudheight_ARSCL_SGP_'+year+'.nc'
+    outfile = predatapath + 'cloud_height_temperature_ARSCL_SGP_'+year+'.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
                      'cbh': ('time', np.float32(cbh_new)),
