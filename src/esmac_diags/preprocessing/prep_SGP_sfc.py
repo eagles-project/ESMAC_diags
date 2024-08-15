@@ -88,7 +88,7 @@ def prep_ACSM(acsmpath, predatapath, year, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    # data resolution is 30-min, so interpolate for finer resolution; a mean could also be used for coarser resolution is warranted
+    # data resolution is 30-min, so interpolate for finer resolution; a mean could also be used for coarser resolution
     if dt >= 1800:
         org_new = median_time_1d(time, org, time_new)
         no3_new = median_time_1d(time, no3, time_new)
