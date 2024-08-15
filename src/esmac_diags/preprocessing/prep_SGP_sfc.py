@@ -457,7 +457,8 @@ def prep_cloudheight_ARSCL(arsclbndpath, armbepath, predatapath, year, dt=300):
     for ll in range(cbhs.shape[1]):
         cbhs[:,ll] = qc_remove_neg(cbhs[:,ll], remove_zero='True')
         cths[:,ll] = qc_remove_neg(cths[:,ll], remove_zero='True')
-    cth = np.nanmax(cths,axis=1)  # cloud top height for all clouds
+    # cth = np.nanmax(cths,axis=1)  # cloud top height for all clouds
+    cth = cths.max(dim="layer") #xarray to keep cth a xarray DataArray
 
     #%% read in ARMBE data for temperature profiles to match to cloud base and top
     lst = glob.glob(os.path.join(armbepath, '*armbeatmC1.c1.'+year+'*.nc'))
@@ -469,37 +470,36 @@ def prep_cloudheight_ARSCL(arsclbndpath, armbepath, predatapath, year, dt=300):
     
     # interpolate to fill NaNs 
     Tz_interp = Tz.interpolate_na(dim='time')
-    
-    # convert to mean and median 5-min cloud boundaries for temperature interpolation (could be slow for higher temporal resolution)
-    time_5min = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(300)+"s")
-    # cbh_5min_median = median_time_1d(arscltime, cbh, time_5min)
-    # cth_5min_median = median_time_1d(arscltime, cth, time_5min)
-    cbh_5min_mean = avg_time_1d(arscltime, cbh, time_5min)
-    cth_5min_mean = avg_time_1d(arscltime, cth, time_5min)
 
-    # interpolate temperature to 5 min and match to mean and median boundaries
-    Tz_5min = interp_time_1d(time, Tz_interp, time_5min)
-    for tt in range(len(time_5min)):
-        # cbt_5min_median = interp_time_2d(cbh_5min_median[tt], ht, Tz_interp[tt,:])
-        # ctt_5min_median = interp_time_2d(cth_5min_median[tt], ht, Tz_interp[tt,:])
-        cbt_5min_mean = interp_time_2d(cbh_5min_mean[tt], ht, Tz_interp[tt,:])
-        ctt_5min_mean = interp_time_2d(cth_5min_mean[tt], ht, Tz_interp[tt,:])
-  
+    #interpolate temperature to cloud base and top heights
+    cbt = Tz_interp.interp(time = arscltime, height = cbh, kwargs={"fill_value":np.nan})
+    ctt = Tz_interp.interp(time = arscltime, height = cth, kwargs={"fill_value":np.nan})
+    cbts = Tz_interp.interp(time = arscltime, height = cbhs, kwargs={"fill_value":np.nan})
+    ctts = Tz_interp.interp(time = arscltime, height = cths, kwargs={"fill_value":np.nan})
+
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
-    
+    dt = np.abs(time_new[1]-time_new[0])/2
+  
+    # compute means over time periods
     cbh_new = avg_time_1d(arscltime, cbh, time_new)
     cth_new = avg_time_1d(arscltime, cth, time_new)
     cbhs_new = avg_time_2d(arscltime, cbhs, time_new)
     cths_new = avg_time_2d(arscltime, cths, time_new)
-    #add medians?
+    cbt_new = avg_time_1d(arscltime, cbt, time_new)
+    ctt_new = avg_time_1d(arscltime, ctt, time_new)
+    cbts_new = avg_time_2d(arscltime, cbts, time_new)
+    ctts_new = avg_time_2d(arscltime, ctts, time_new)
 
-    #add mean and median cbt and ctt and fraction of 5-min ctt < 0C variables
-    cbt_mean = avg_time_1d(time_5min, cbt_5min_mean, time_new)
-    cbt_median
-    ctt_mean
-    ctt_median
-    sub0C_frac
+    # compute fraction of time sampling period with highest cloud top colder than 0C
+    ctt_lt0 = xr.where(ctt < 273.15, ctt, np.nan)
+    sub0C_frac = ctt_lt0.resample(time=2*dt, offset=-1*dt).count()/ctt.resample(time=2*dt, offset=-1*dt).count()
+    sub0C_frac = sub0C_frac.rename('highest_cloud_top_subfreezing_fraction')
+    sub0C_frac = sub0C_frac.fillna(0)
+    ctts_lt0 = xr.where(ctts < 273.15, ctts, np.nan)
+    sub0C_fracs = ctts_lt0.resample(time=2*dt, offset=-1*dt).count()/ctts.resample(time=2*dt, offset=-1*dt).count()
+    sub0C_fracs = sub0C_fracs.rename('cloud_tops_subfreezing_fractions')
+    sub0C_fracs = sub0C_fracs.fillna(0)
     
     #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     # output file
@@ -510,7 +510,12 @@ def prep_cloudheight_ARSCL(arsclbndpath, armbepath, predatapath, year, dt=300):
                      'cth': ('time', np.float32(cth_new)),
                      'cbhs': (['time', 'layer'], np.float32(cbhs_new)),
                      'cths': (['time', 'layer'], np.float32(cths_new)),
-      
+                     'cbt': ('time', np.float32(cbt_new)),
+                     'ctt': ('time', np.float32(ctt_new)),
+                     'cbts': (['time', 'layer'], np.float32(cbts_new)),
+                     'ctts': (['time', 'layer'], np.float32(ctts_new)),
+                     'ctt_subfreezing_fraction': ('time', np.float32(sub0C_frac)),
+                     'ctts_subfreezing_fractions': (['time', 'layer'], np.float32(sub0C_fracs)),
                     },
                      coords={'time': ('time', time_new), 'layer': ('layer', np.arange(cbhs.shape[1]))})
     
@@ -525,9 +530,19 @@ def prep_cloudheight_ARSCL(arsclbndpath, armbepath, predatapath, year, dt=300):
     ds['cbhs'].attrs["units"] = "m"
     ds['cths'].attrs["long_name"] = 'Top height of hydrometeor layers for up to 10 layers'
     ds['cths'].attrs["units"] = "m"
-    
-    
-    ds.attrs["title"] = "cloud heights for up to 10 cloud layers from ARSCL data"
+    ds['cbt'].attrs["long_name"] = 'cloud base temperature, best estimate from ceilometer and MPL'
+    ds['cbt'].attrs["units"] = "K"
+    ds['ctt'].attrs["long_name"] = 'cloud top temperature, the highest level of cths'
+    ds['ctt'].attrs["units"] = "K"
+    ds['cbts'].attrs["long_name"] = 'Base temperature of hydrometeor layers for up to 10 layers'
+    ds['cbts'].attrs["units"] = "K"
+    ds['ctts'].attrs["long_name"] = 'Top temperature of hydrometeor layers for up to 10 layers'
+    ds['ctts'].attrs["units"] = "K"
+    ds['ctt_subfreezing_fraction'].attrs["long_name"] = 'Fraction of 4-s ARSCL cloud top temperatures for the highest cloud below freezing'
+    ds['ctt_subfreezing_fraction'].attrs["units"] = " "
+    ds['ctts_subfreezing_fractions'].attrs["long_name"] = 'Fraction of 4-s ARSCL cloud top temperatures below freezing for up to 10 layers'
+    ds['ctts_subfreezing_fractions'].attrs["units"] = " "
+    ds.attrs["title"] = "cloud heights and temperatures for up to 10 cloud layers from ARSCL data"
     ds.attrs["description"] = 'average value of each time window'
     ds.attrs["inputfile_sample"] = lst1[0].split('/')[-1]
     ds.attrs["date"] = ttt.ctime(ttt.time())
