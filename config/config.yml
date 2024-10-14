@@ -16,6 +16,12 @@ model_lon = 'lon'
 obs_lat = 'lat'
 obs_lon = 'lon'
 
+# model longitude and latitude limits
+latmin = 37
+latmax = 42
+lonmin = 330
+lonmax = 335
+
 # time resolution in seconds
 model_dt = 3600
 obs_dt = 300
