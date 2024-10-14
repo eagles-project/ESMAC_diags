@@ -11,7 +11,7 @@ obs_input_path = '../raw_data/obs/'+location+'/' #may want to add aircraft/surfa
 obs_output_path = '../prep_data/'+location+'/'
 
 # variable names
-model_lat = 'lat' #old setup had '
+model_lat = 'lat' #old setup had 'lat_330e_to_335e_37n_to_42n'
 model_lon = 'lon'
 obs_lat = 'lat'
 obs_lon = 'lon'
