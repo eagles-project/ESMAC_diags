@@ -83,7 +83,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         
     #%% settings specific for each site
     # ACEENA
-    if config['E3SMsubdomain'] = True:
+    if config['E3SMsubdomain'] == True:
         E3SMdomain_range = '_'+config['E3SMdomain_range']  #'330e_to_335e_37n_to_42n'   # domain range in E3SM regional output
     else:
         E3SMdomain_range = ''
@@ -518,7 +518,7 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     # ACEENA
     lat0 = 39.09527
     lon0 = -28.0339
-    if config['E3SMsubdomain'] = True:
+    if config['E3SMsubdomain'] == True:
         E3SMdomain_range = '_'+config['E3SMdomain_range']  #'330e_to_335e_37n_to_42n'   # domain range in E3SM regional output
     else:
         E3SMdomain_range = ''
@@ -842,7 +842,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     # ACEENA
     lat0 = 39.09527
     lon0 = -28.0339
-    if config['E3SMsubdomain'] = True:
+    if config['E3SMsubdomain'] == True:
         E3SMdomain_range = '_'+config['E3SMdomain_range']  #'330e_to_335e_37n_to_42n'   # domain range in E3SM regional output
     else:
         E3SMdomain_range = ''
