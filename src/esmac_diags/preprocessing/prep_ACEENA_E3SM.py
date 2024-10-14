@@ -804,7 +804,7 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
 
      
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat, lon, dt=3600, config):
+def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3600, config):
     """
     prepare surface (include TOA and vertical integrated) variables from E3SM output
     choose the grid nearest to the ARM site
