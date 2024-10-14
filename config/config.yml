@@ -1,31 +1,23 @@
-# Field campaign or observational location
-location = 'ACEENA'
-
 # data paths and filenames
-model_input_path = '../raw_data/rrm/ena_rrm/'
-model_input_filehead = 'ena_ne32x32pg2'
-model_output_path = '../prep_data/'+location+'/model/'
-model_output_filehead = 'E3SMv2_'+location
+model_input_path: '../raw_data/rrm/ena_rrm/'
+model_input_filehead: 'ena_ne32x32pg2'
 
-obs_input_path = '../raw_data/obs/'+location+'/' #may want to add aircraft/surface/satellite folder and specific dataset folders though these should be static
-obs_output_path = '../prep_data/'+location+'/'
+obs_input_path: '../raw_data/obs/'
 
-# variable names
-model_lat = 'lat' #old setup had 'lat_330e_to_335e_37n_to_42n'
-model_lon = 'lon'
-obs_lat = 'lat'
-obs_lon = 'lon'
+# variable names (in future, can expand this to contain each model variable name so that they aren't hard coded)
+E3SMsubdomain: False
+E3SMdomain_range: 'lat_330e_to_335e_37n_to_42n'
 
 # # model longitude and latitude limits
-# latmin = 37
-# latmax = 42
-# lonmin = 330
-# lonmax = 335
+# latmin: 37
+# latmax: 42
+# lonmin: 330
+# lonmax: 335
 
 # time frequency in seconds
-model_aircraft_dt = 60      #interpolated
-model_surface_dt = 3600     #instantaneous
-model_profile_dt = 3600     #instantaneous
-obs_aircraft_dt = 60        #median or average    
-obs_surface_dt = 300        #median or average
-obs_satellite_dt = 3600     #instantaneous
+model_aircraft_dt: 60      #interpolated
+model_surface_dt: 3600     #instantaneous
+model_profile_dt: 3600     #instantaneous
+obs_aircraft_dt: 60        #median or average    
+obs_surface_dt: 300        #median or average
+obs_satellite_dt: 3600     #instantaneous
