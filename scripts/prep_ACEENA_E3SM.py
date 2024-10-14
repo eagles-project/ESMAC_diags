@@ -12,13 +12,26 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settings
-input_path = '../raw_data/rrm/ena_rrm/'
-output_path = '../prep_data/ACEENA/model/'
-input_filehead = 'ena_ne32x32pg2'
-output_filehead = 'E3SMv2_ACEENA'
+# Load configuration file
+config_file = sys.argv[1]
+config = load_config(config_file)
+input_path = config['model_input_path']
+output_path = config['model_output_path']
+input_filehead = config['model_input_filehead']
+output_filehead = config['model_output_filehead']
+# input_path = '../raw_data/rrm/ena_rrm/'
+# output_path = '../prep_data/ACEENA/model/'
+# input_filehead = 'ena_ne32x32pg2'
+# output_filehead = 'E3SMv2_ACEENA'
 
 # iwg data path for aircraft information
-iwgpath = '../raw_data/obs/ACEENA/aircraft/IWG/'
+obs_input_path = config['obs_input_path']
+iwgpath = obs_input_path + 'aircraft/IWG/'
+
+# time frequencies
+aircraft_dt = config['model_aircraft_dt']
+surface_dt = config['model_surface_dt']
+satellite_dt = config['model_satellite_dt']
 
 # vertical coordinates for output
 lev_out=np.arange(25.,1001,25.)
