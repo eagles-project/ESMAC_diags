@@ -22,7 +22,10 @@ latmax = 42
 lonmin = 330
 lonmax = 335
 
-# time resolution in seconds
-model_dt = 3600
-obs_dt = 300
-
+# time frequency in seconds
+model_aircraft_dt = 60      #interpolated
+obs_aircraft_dt = 60        #median or average    
+model_surface_dt = 3600     #instantaneous
+obs_surface_dt = 300        #median or average
+model_satellite_dt = 3600   #instantaneous
+obs_satellite_dt = 3600     #instantaneous
