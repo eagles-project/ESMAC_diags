@@ -49,7 +49,7 @@ from netCDF4 import Dataset
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, 
-                      iwgpath, dt=60, config):
+                      iwgpath, dt=60, config=config):
     """
     prepare E3SM output along flight tracks
     choose the nearest grid and level of the aircraft location
@@ -475,7 +475,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, 
-                      height_out, lev_out=np.arange(25.,1001,25.), dt=3600, config):
+                      height_out, lev_out=np.arange(25.,1001,25.), dt=3600, config=config):
     """
     prepare vertical profile (to p or to z) variables from E3SM output
     choose the grid nearest to the ARM site
