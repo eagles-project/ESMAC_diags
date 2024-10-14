@@ -85,7 +85,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         
     #%% settings specific for each site
     # ACEENA
-    E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
+    # E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
     
     #%% find all data
     lst = glob.glob(iwgpath + '*.a2.txt')
