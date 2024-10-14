@@ -6,6 +6,7 @@ inlcude:
 
 import os
 import sys
+import yaml
 import numpy as np
 import esmac_diags
 import esmac_diags.preprocessing.prep_ACEENA_E3SM as prep
@@ -16,7 +17,9 @@ warnings.filterwarnings("ignore")
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settings
 # Load configuration file
 config_file = sys.argv[1]
-config = load_config(config_file)
+stream = open(config_file, "r")
+config = yaml.full_load(stream)
+
 input_path = config['model_input_path']
 input_filehead = config['model_input_filehead']
 # input_path = '../raw_data/rrm/ena_rrm/'
