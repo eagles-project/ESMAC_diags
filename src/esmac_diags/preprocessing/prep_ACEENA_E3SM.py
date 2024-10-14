@@ -83,7 +83,10 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         
     #%% settings specific for each site
     # ACEENA
-    # E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
+    if config['E3SMsubdomain'] = True:
+        E3SMdomain_range = '_'+config['E3SMdomain_range']  #'330e_to_335e_37n_to_42n'   # domain range in E3SM regional output
+    else:
+        E3SMdomain_range = ''
     
     #%% find all data
     lst = glob.glob(iwgpath + '*.a2.txt')
@@ -156,15 +159,15 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
             raise ValueError('Should only contain one file: '+lstm)
         e3smdata = xr.open_dataset(lstm[0])
         e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-        lonm = e3smdata['lon'+'_'+E3SMdomain_range].load()
-        latm = e3smdata['lat'+'_'+E3SMdomain_range].load()
-        z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
+        lonm = e3smdata['lon'+E3SMdomain_range].load()
+        latm = e3smdata['lat'+E3SMdomain_range].load()
+        z3 = e3smdata['Z3'+E3SMdomain_range].load()
         
         P0 = e3smdata['P0'].load()
         hyam = e3smdata['hyam'].load()
         hybm = e3smdata['hybm'].load()
-        T = e3smdata['T'+'_'+E3SMdomain_range].load()
-        PS = e3smdata['PS'+'_'+E3SMdomain_range].load()
+        T = e3smdata['T'+E3SMdomain_range].load()
+        PS = e3smdata['PS'+E3SMdomain_range].load()
         Pres = np.nan*T
         zlen = T.shape[1]
         for kk in range(zlen):
@@ -184,14 +187,14 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing for aerosol size')
-            num_a1 = e3smdata['num_a1'+'_'+E3SMdomain_range].load()
-            num_a2 = e3smdata['num_a2'+'_'+E3SMdomain_range].load()
-            num_a3 = e3smdata['num_a3'+'_'+E3SMdomain_range].load()
-            num_a4 = e3smdata['num_a4'+'_'+E3SMdomain_range].load()
-            dn1 = e3smdata['dgnd_a01'+'_'+E3SMdomain_range].load()
-            dn2 = e3smdata['dgnd_a02'+'_'+E3SMdomain_range].load()
-            dn3 = e3smdata['dgnd_a03'+'_'+E3SMdomain_range].load()
-            dn4 = e3smdata['dgnd_a04'+'_'+E3SMdomain_range].load()
+            num_a1 = e3smdata['num_a1'+E3SMdomain_range].load()
+            num_a2 = e3smdata['num_a2'+E3SMdomain_range].load()
+            num_a3 = e3smdata['num_a3'+E3SMdomain_range].load()
+            num_a4 = e3smdata['num_a4'+E3SMdomain_range].load()
+            dn1 = e3smdata['dgnd_a01'+E3SMdomain_range].load()
+            dn2 = e3smdata['dgnd_a02'+E3SMdomain_range].load()
+            dn3 = e3smdata['dgnd_a03'+E3SMdomain_range].load()
+            dn4 = e3smdata['dgnd_a04'+E3SMdomain_range].load()
         else:
             num_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
             num_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -211,27 +214,27 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
-            bc_a1 = e3smdata['bc_a1'+'_'+E3SMdomain_range].load()
-            bc_a3 = e3smdata['bc_a3'+'_'+E3SMdomain_range].load()
-            bc_a4 = e3smdata['bc_a4'+'_'+E3SMdomain_range].load()
-            dst_a1 = e3smdata['dst_a1'+'_'+E3SMdomain_range].load()
-            dst_a3 = e3smdata['dst_a3'+'_'+E3SMdomain_range].load()
-            mom_a1 = e3smdata['mom_a1'+'_'+E3SMdomain_range].load()
-            mom_a2 = e3smdata['mom_a2'+'_'+E3SMdomain_range].load()
-            mom_a3 = e3smdata['mom_a3'+'_'+E3SMdomain_range].load()
-            mom_a4 = e3smdata['mom_a4'+'_'+E3SMdomain_range].load()
-            ncl_a1 = e3smdata['ncl_a1'+'_'+E3SMdomain_range].load()
-            ncl_a2 = e3smdata['ncl_a2'+'_'+E3SMdomain_range].load()
-            ncl_a3 = e3smdata['ncl_a3'+'_'+E3SMdomain_range].load()
-            pom_a1 = e3smdata['pom_a1'+'_'+E3SMdomain_range].load()
-            pom_a3 = e3smdata['pom_a3'+'_'+E3SMdomain_range].load()
-            pom_a4 = e3smdata['pom_a4'+'_'+E3SMdomain_range].load()
-            so4_a1 = e3smdata['so4_a1'+'_'+E3SMdomain_range].load()
-            so4_a2 = e3smdata['so4_a2'+'_'+E3SMdomain_range].load()
-            so4_a3 = e3smdata['so4_a3'+'_'+E3SMdomain_range].load()
-            soa_a1 = e3smdata['soa_a1'+'_'+E3SMdomain_range].load()
-            soa_a2 = e3smdata['soa_a2'+'_'+E3SMdomain_range].load()
-            soa_a3 = e3smdata['soa_a3'+'_'+E3SMdomain_range].load()
+            bc_a1 = e3smdata['bc_a1'+E3SMdomain_range].load()
+            bc_a3 = e3smdata['bc_a3'+E3SMdomain_range].load()
+            bc_a4 = e3smdata['bc_a4'+E3SMdomain_range].load()
+            dst_a1 = e3smdata['dst_a1'+E3SMdomain_range].load()
+            dst_a3 = e3smdata['dst_a3'+E3SMdomain_range].load()
+            mom_a1 = e3smdata['mom_a1'+E3SMdomain_range].load()
+            mom_a2 = e3smdata['mom_a2'+E3SMdomain_range].load()
+            mom_a3 = e3smdata['mom_a3'+E3SMdomain_range].load()
+            mom_a4 = e3smdata['mom_a4'+E3SMdomain_range].load()
+            ncl_a1 = e3smdata['ncl_a1'+E3SMdomain_range].load()
+            ncl_a2 = e3smdata['ncl_a2'+E3SMdomain_range].load()
+            ncl_a3 = e3smdata['ncl_a3'+E3SMdomain_range].load()
+            pom_a1 = e3smdata['pom_a1'+E3SMdomain_range].load()
+            pom_a3 = e3smdata['pom_a3'+E3SMdomain_range].load()
+            pom_a4 = e3smdata['pom_a4'+E3SMdomain_range].load()
+            so4_a1 = e3smdata['so4_a1'+E3SMdomain_range].load()
+            so4_a2 = e3smdata['so4_a2'+E3SMdomain_range].load()
+            so4_a3 = e3smdata['so4_a3'+E3SMdomain_range].load()
+            soa_a1 = e3smdata['soa_a1'+E3SMdomain_range].load()
+            soa_a2 = e3smdata['soa_a2'+E3SMdomain_range].load()
+            soa_a3 = e3smdata['soa_a3'+E3SMdomain_range].load()
         else:
             bc_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
             bc_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -260,9 +263,9 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         if len(matched_vlist) == len(req_vlist):
-            nd_cld = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
-            lmda = e3smdata['lambda_cloud'+'_'+E3SMdomain_range].load()
-            mu = e3smdata['mu_cloud'+'_'+E3SMdomain_range].load()
+            nd_cld = e3smdata['ICWNC'+E3SMdomain_range].load()
+            lmda = e3smdata['lambda_cloud'+E3SMdomain_range].load()
+            mu = e3smdata['mu_cloud'+E3SMdomain_range].load()
         else:
             nd_cld = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
             lmda = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -272,7 +275,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         # other variables
         for varname in variable3d_names:
             try:
-                var = e3smdata[varname + '_'+E3SMdomain_range].load()
+                var = e3smdata[varname + E3SMdomain_range].load()
             except:
                 var = xr.DataArray(np.zeros(z3.shape)*np.nan,name=varname,\
                                    dims=["time","lev","ncol_"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata['lev'],"ncol_"+E3SMdomain_range:e3smdata['ncol_'+E3SMdomain_range]},\
@@ -515,7 +518,10 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     # ACEENA
     lat0 = 39.09527
     lon0 = -28.0339
-    E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
+    if config['E3SMsubdomain'] = True:
+        E3SMdomain_range = '_'+config['E3SMdomain_range']  #'330e_to_335e_37n_to_42n'   # domain range in E3SM regional output
+    else:
+        E3SMdomain_range = ''
     
     # output time range and resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
@@ -530,20 +536,20 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     # first data
     e3smdata = xr.open_dataset(lst[0])
     e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-    lonm = e3smdata['lon'+'_'+E3SMdomain_range].load()
-    latm = e3smdata['lat'+'_'+E3SMdomain_range].load()
-    z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
+    lonm = e3smdata['lon'+E3SMdomain_range].load()
+    latm = e3smdata['lat'+E3SMdomain_range].load()
+    z3 = e3smdata['Z3'+E3SMdomain_range].load()
     hyam = e3smdata['hyam'].load()
     hybm = e3smdata['hybm'].load()
     p0 = e3smdata['P0'].load()
-    ps = e3smdata['PS'+'_'+E3SMdomain_range].load()
-    Ts = e3smdata['TREFHT'+'_'+E3SMdomain_range].load()
-    T = e3smdata['T'+'_'+E3SMdomain_range].load()
-    Q = e3smdata['Q'+'_'+E3SMdomain_range].load()
-    U = e3smdata['U'+'_'+E3SMdomain_range].load()
-    V = e3smdata['V'+'_'+E3SMdomain_range].load()
-    RH = e3smdata['RELHUM'+'_'+E3SMdomain_range].load()
-    cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
+    ps = e3smdata['PS'+E3SMdomain_range].load()
+    Ts = e3smdata['TREFHT'+E3SMdomain_range].load()
+    T = e3smdata['T'+E3SMdomain_range].load()
+    Q = e3smdata['Q'+E3SMdomain_range].load()
+    U = e3smdata['U'+E3SMdomain_range].load()
+    V = e3smdata['V'+E3SMdomain_range].load()
+    RH = e3smdata['RELHUM'+E3SMdomain_range].load()
+    cloud = e3smdata['CLOUD'+E3SMdomain_range].load()
     e3smdata.close()
     # only extract the model column at the site
     if lon0<0:
@@ -604,15 +610,15 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
         e3smtime_i = e3smdata.indexes['time'].to_datetimeindex()
         e3smtime = np.hstack((e3smtime, e3smtime_i))
         
-        z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
-        ps = e3smdata['PS'+'_'+E3SMdomain_range].load()
-        Ts = e3smdata['TREFHT'+'_'+E3SMdomain_range].load()
-        T = e3smdata['T'+'_'+E3SMdomain_range].load()
-        Q = e3smdata['Q'+'_'+E3SMdomain_range].load()
-        U = e3smdata['U'+'_'+E3SMdomain_range].load()
-        V = e3smdata['V'+'_'+E3SMdomain_range].load()
-        RH = e3smdata['RELHUM'+'_'+E3SMdomain_range].load()
-        cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
+        z3 = e3smdata['Z3'+E3SMdomain_range].load()
+        ps = e3smdata['PS'+E3SMdomain_range].load()
+        Ts = e3smdata['TREFHT'+E3SMdomain_range].load()
+        T = e3smdata['T'+E3SMdomain_range].load()
+        Q = e3smdata['Q'+E3SMdomain_range].load()
+        U = e3smdata['U'+E3SMdomain_range].load()
+        V = e3smdata['V'+E3SMdomain_range].load()
+        RH = e3smdata['RELHUM'+E3SMdomain_range].load()
+        cloud = e3smdata['CLOUD'+E3SMdomain_range].load()
         e3smdata.close()
         
         levm = 0.01* (ps[:,x_idx]*hybm + hyam*p0)  # hPa
@@ -836,7 +842,10 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
     # ACEENA
     lat0 = 39.09527
     lon0 = -28.0339
-    E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
+    if config['E3SMsubdomain'] = True:
+        E3SMdomain_range = '_'+config['E3SMdomain_range']  #'330e_to_335e_37n_to_42n'   # domain range in E3SM regional output
+    else:
+        E3SMdomain_range = ''
     
     # output time range and resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
@@ -853,15 +862,15 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
     # first data
     e3smdata = xr.open_dataset(lst[0])
     e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-    lonm = e3smdata['lon'+'_'+E3SMdomain_range].load()
-    latm = e3smdata['lat'+'_'+E3SMdomain_range].load()
+    lonm = e3smdata['lon'+E3SMdomain_range].load()
+    latm = e3smdata['lat'+E3SMdomain_range].load()
     # getting domainless variables
     P0 = e3smdata['P0'].load()
     hyam = e3smdata['hyam'].load()
     hybm = e3smdata['hybm'].load()
     # getting essentials
-    T = e3smdata['T'+'_'+E3SMdomain_range].load()
-    PS = e3smdata['PS'+'_'+E3SMdomain_range].load()
+    T = e3smdata['T'+E3SMdomain_range].load()
+    PS = e3smdata['PS'+E3SMdomain_range].load()
     # getting column and levels
     len_ncol = len(e3smdata['ncol_'+E3SMdomain_range])
     len_lev = len(e3smdata['lev'])
@@ -883,27 +892,27 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
     matched_vlist = list(set(av_vars).intersection(req_vlist))
     
     if len(matched_vlist) == len(req_vlist):
-        bc_a1 = e3smdata['bc_a1'+'_'+E3SMdomain_range].load()
-        bc_a3 = e3smdata['bc_a3'+'_'+E3SMdomain_range].load()
-        bc_a4 = e3smdata['bc_a4'+'_'+E3SMdomain_range].load()
-        dst_a1 = e3smdata['dst_a1'+'_'+E3SMdomain_range].load()
-        dst_a3 = e3smdata['dst_a3'+'_'+E3SMdomain_range].load()
-        mom_a1 = e3smdata['mom_a1'+'_'+E3SMdomain_range].load()
-        mom_a2 = e3smdata['mom_a2'+'_'+E3SMdomain_range].load()
-        mom_a3 = e3smdata['mom_a3'+'_'+E3SMdomain_range].load()
-        mom_a4 = e3smdata['mom_a4'+'_'+E3SMdomain_range].load()
-        ncl_a1 = e3smdata['ncl_a1'+'_'+E3SMdomain_range].load()
-        ncl_a2 = e3smdata['ncl_a2'+'_'+E3SMdomain_range].load()
-        ncl_a3 = e3smdata['ncl_a3'+'_'+E3SMdomain_range].load()
-        pom_a1 = e3smdata['pom_a1'+'_'+E3SMdomain_range].load()
-        pom_a3 = e3smdata['pom_a3'+'_'+E3SMdomain_range].load()
-        pom_a4 = e3smdata['pom_a4'+'_'+E3SMdomain_range].load()
-        so4_a1 = e3smdata['so4_a1'+'_'+E3SMdomain_range].load()
-        so4_a2 = e3smdata['so4_a2'+'_'+E3SMdomain_range].load()
-        so4_a3 = e3smdata['so4_a3'+'_'+E3SMdomain_range].load()
-        soa_a1 = e3smdata['soa_a1'+'_'+E3SMdomain_range].load()
-        soa_a2 = e3smdata['soa_a2'+'_'+E3SMdomain_range].load()
-        soa_a3 = e3smdata['soa_a3'+'_'+E3SMdomain_range].load()
+        bc_a1 = e3smdata['bc_a1'+E3SMdomain_range].load()
+        bc_a3 = e3smdata['bc_a3'+E3SMdomain_range].load()
+        bc_a4 = e3smdata['bc_a4'+E3SMdomain_range].load()
+        dst_a1 = e3smdata['dst_a1'+E3SMdomain_range].load()
+        dst_a3 = e3smdata['dst_a3'+E3SMdomain_range].load()
+        mom_a1 = e3smdata['mom_a1'+E3SMdomain_range].load()
+        mom_a2 = e3smdata['mom_a2'+E3SMdomain_range].load()
+        mom_a3 = e3smdata['mom_a3'+E3SMdomain_range].load()
+        mom_a4 = e3smdata['mom_a4'+E3SMdomain_range].load()
+        ncl_a1 = e3smdata['ncl_a1'+E3SMdomain_range].load()
+        ncl_a2 = e3smdata['ncl_a2'+E3SMdomain_range].load()
+        ncl_a3 = e3smdata['ncl_a3'+E3SMdomain_range].load()
+        pom_a1 = e3smdata['pom_a1'+E3SMdomain_range].load()
+        pom_a3 = e3smdata['pom_a3'+E3SMdomain_range].load()
+        pom_a4 = e3smdata['pom_a4'+E3SMdomain_range].load()
+        so4_a1 = e3smdata['so4_a1'+E3SMdomain_range].load()
+        so4_a2 = e3smdata['so4_a2'+E3SMdomain_range].load()
+        so4_a3 = e3smdata['so4_a3'+E3SMdomain_range].load()
+        soa_a1 = e3smdata['soa_a1'+E3SMdomain_range].load()
+        soa_a2 = e3smdata['soa_a2'+E3SMdomain_range].load()
+        soa_a3 = e3smdata['soa_a3'+E3SMdomain_range].load()
         bc_all  = bc_a1[:,-1,x_idx] +                       bc_a3[:,-1,x_idx] + bc_a4[:,-1,x_idx]
         dst_all = dst_a1[:,-1,x_idx] +                      dst_a3[:,-1,x_idx]
         mom_all = mom_a1[:,-1,x_idx] + mom_a2[:,-1,x_idx] + mom_a3[:,-1,x_idx] + mom_a4[:,-1,x_idx]
@@ -949,14 +958,14 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
     matched_vlist = list(set(av_vars).intersection(req_vlist))
     
     if len(matched_vlist) == len(req_vlist):
-        num_a1 = e3smdata['num_a1'+'_'+E3SMdomain_range].load()
-        num_a2 = e3smdata['num_a2'+'_'+E3SMdomain_range].load()
-        num_a3 = e3smdata['num_a3'+'_'+E3SMdomain_range].load()
-        num_a4 = e3smdata['num_a4'+'_'+E3SMdomain_range].load()
-        dn1 = e3smdata['dgnd_a01'+'_'+E3SMdomain_range].load()
-        dn2 = e3smdata['dgnd_a02'+'_'+E3SMdomain_range].load()
-        dn3 = e3smdata['dgnd_a03'+'_'+E3SMdomain_range].load()
-        dn4 = e3smdata['dgnd_a04'+'_'+E3SMdomain_range].load()
+        num_a1 = e3smdata['num_a1'+E3SMdomain_range].load()
+        num_a2 = e3smdata['num_a2'+E3SMdomain_range].load()
+        num_a3 = e3smdata['num_a3'+E3SMdomain_range].load()
+        num_a4 = e3smdata['num_a4'+E3SMdomain_range].load()
+        dn1 = e3smdata['dgnd_a01'+E3SMdomain_range].load()
+        dn2 = e3smdata['dgnd_a02'+E3SMdomain_range].load()
+        dn3 = e3smdata['dgnd_a03'+E3SMdomain_range].load()
+        dn4 = e3smdata['dgnd_a04'+E3SMdomain_range].load()
         Pres = np.nan*T
         zlen = T.shape[1]
         for kk in range(zlen):
@@ -976,8 +985,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
     matched_vlist = list(set(av_vars).intersection(req_vlist))
     
     if len(matched_vlist) == len(req_vlist):
-        z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
-        cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
+        z3 = e3smdata['Z3'+E3SMdomain_range].load()
+        cloud = e3smdata['CLOUD'+E3SMdomain_range].load()
         z3 = z3[:,:,x_idx]
         cloud = cloud[:,:,x_idx]
         dz = (z3[:,:-2].data - z3[:,2:].data)/2
@@ -1045,12 +1054,12 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
     matched_vlist = list(set(av_vars).intersection(req_vlist))
     
     if len(matched_vlist) == len(req_vlist):
-        rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
-        freql = e3smdata['FREQL'+'_'+E3SMdomain_range].load()
-        icwnc = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
-        cod_a = e3smdata['TOT_CLD_VISTAU'+'_'+E3SMdomain_range].load()
-        cod_m = e3smdata['TAUWMODIS'+'_'+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
-        solin = e3smdata['SOLIN'+'_'+E3SMdomain_range].load()
+        rel = e3smdata['REL'+E3SMdomain_range].load()
+        freql = e3smdata['FREQL'+E3SMdomain_range].load()
+        icwnc = e3smdata['ICWNC'+E3SMdomain_range].load()
+        cod_a = e3smdata['TOT_CLD_VISTAU'+E3SMdomain_range].load()
+        cod_m = e3smdata['TAUWMODIS'+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
+        solin = e3smdata['SOLIN'+E3SMdomain_range].load()
         rel = rel[:,:,x_idx]
         freql = freql[:,:,x_idx]
         icwnc = icwnc[:,:,x_idx]
@@ -1081,7 +1090,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
     matched_vlist = list(set(av_vars).intersection(req_vlist))
     
     if len(matched_vlist) == len(req_vlist):
-        cdnc_col = e3smdata['CDNUMC'+'_'+E3SMdomain_range].load()
+        cdnc_col = e3smdata['CDNUMC'+E3SMdomain_range].load()
         cdnc_col = cdnc_col[:,x_idx]
         cdnc_mean = cdnc_col/np.sum(weight,axis=1)
         cdnc_mean[cdnc_mean >2e9] = np.nan
@@ -1097,7 +1106,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
     matched_vlist = list(set(av_vars).intersection(req_vlist))
     
     if len(matched_vlist) == len(req_vlist):
-        lwp = e3smdata['TGCLDLWP'+'_'+E3SMdomain_range][:,x_idx].data
+        lwp = e3smdata['TGCLDLWP'+E3SMdomain_range][:,x_idx].data
         e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
         T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
         nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
@@ -1123,7 +1132,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
                         'PBLH', 'PRECT', 'PRECL', 'PRECC', 'PS', 'TREFHT', ]
     for varname in variable2d_names:
         try:
-            var = e3smdata[varname + '_'+E3SMdomain_range].load()
+            var = e3smdata[varname + E3SMdomain_range].load()
             var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
         except:
             var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
@@ -1138,7 +1147,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
     variable3d_names = ['CCN1', 'CCN3', 'CCN4', 'CCN5', 'Q', 'T', 'RELHUM', 'U', 'V'] 
     for varname in variable3d_names:
         try:
-            var = e3smdata[varname + '_'+E3SMdomain_range].load()
+            var = e3smdata[varname + E3SMdomain_range].load()
             var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
         except:
             var = xr.DataArray(np.zeros((len(e3smtime),len_lev,len_ncol))*np.nan,name=varname,\
@@ -1165,27 +1174,27 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
-            bc_a1 = e3smdata['bc_a1'+'_'+E3SMdomain_range].load()
-            bc_a3 = e3smdata['bc_a3'+'_'+E3SMdomain_range].load()
-            bc_a4 = e3smdata['bc_a4'+'_'+E3SMdomain_range].load()
-            dst_a1 = e3smdata['dst_a1'+'_'+E3SMdomain_range].load()
-            dst_a3 = e3smdata['dst_a3'+'_'+E3SMdomain_range].load()
-            mom_a1 = e3smdata['mom_a1'+'_'+E3SMdomain_range].load()
-            mom_a2 = e3smdata['mom_a2'+'_'+E3SMdomain_range].load()
-            mom_a3 = e3smdata['mom_a3'+'_'+E3SMdomain_range].load()
-            mom_a4 = e3smdata['mom_a4'+'_'+E3SMdomain_range].load()
-            ncl_a1 = e3smdata['ncl_a1'+'_'+E3SMdomain_range].load()
-            ncl_a2 = e3smdata['ncl_a2'+'_'+E3SMdomain_range].load()
-            ncl_a3 = e3smdata['ncl_a3'+'_'+E3SMdomain_range].load()
-            pom_a1 = e3smdata['pom_a1'+'_'+E3SMdomain_range].load()
-            pom_a3 = e3smdata['pom_a3'+'_'+E3SMdomain_range].load()
-            pom_a4 = e3smdata['pom_a4'+'_'+E3SMdomain_range].load()
-            so4_a1 = e3smdata['so4_a1'+'_'+E3SMdomain_range].load()
-            so4_a2 = e3smdata['so4_a2'+'_'+E3SMdomain_range].load()
-            so4_a3 = e3smdata['so4_a3'+'_'+E3SMdomain_range].load()
-            soa_a1 = e3smdata['soa_a1'+'_'+E3SMdomain_range].load()
-            soa_a2 = e3smdata['soa_a2'+'_'+E3SMdomain_range].load()
-            soa_a3 = e3smdata['soa_a3'+'_'+E3SMdomain_range].load()
+            bc_a1 = e3smdata['bc_a1'+E3SMdomain_range].load()
+            bc_a3 = e3smdata['bc_a3'+E3SMdomain_range].load()
+            bc_a4 = e3smdata['bc_a4'+E3SMdomain_range].load()
+            dst_a1 = e3smdata['dst_a1'+E3SMdomain_range].load()
+            dst_a3 = e3smdata['dst_a3'+E3SMdomain_range].load()
+            mom_a1 = e3smdata['mom_a1'+E3SMdomain_range].load()
+            mom_a2 = e3smdata['mom_a2'+E3SMdomain_range].load()
+            mom_a3 = e3smdata['mom_a3'+E3SMdomain_range].load()
+            mom_a4 = e3smdata['mom_a4'+E3SMdomain_range].load()
+            ncl_a1 = e3smdata['ncl_a1'+E3SMdomain_range].load()
+            ncl_a2 = e3smdata['ncl_a2'+E3SMdomain_range].load()
+            ncl_a3 = e3smdata['ncl_a3'+E3SMdomain_range].load()
+            pom_a1 = e3smdata['pom_a1'+E3SMdomain_range].load()
+            pom_a3 = e3smdata['pom_a3'+E3SMdomain_range].load()
+            pom_a4 = e3smdata['pom_a4'+E3SMdomain_range].load()
+            so4_a1 = e3smdata['so4_a1'+E3SMdomain_range].load()
+            so4_a2 = e3smdata['so4_a2'+E3SMdomain_range].load()
+            so4_a3 = e3smdata['so4_a3'+E3SMdomain_range].load()
+            soa_a1 = e3smdata['soa_a1'+E3SMdomain_range].load()
+            soa_a2 = e3smdata['soa_a2'+E3SMdomain_range].load()
+            soa_a3 = e3smdata['soa_a3'+E3SMdomain_range].load()
             bc  = bc_a1[:,-1,x_idx] +                       bc_a3[:,-1,x_idx] + bc_a4[:,-1,x_idx]
             dst = dst_a1[:,-1,x_idx] +                      dst_a3[:,-1,x_idx]
             mom = mom_a1[:,-1,x_idx] + mom_a2[:,-1,x_idx] + mom_a3[:,-1,x_idx] + mom_a4[:,-1,x_idx]
@@ -1224,19 +1233,19 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
-            num_a1 = e3smdata['num_a1'+'_'+E3SMdomain_range].load()
-            num_a2 = e3smdata['num_a2'+'_'+E3SMdomain_range].load()
-            num_a3 = e3smdata['num_a3'+'_'+E3SMdomain_range].load()
-            num_a4 = e3smdata['num_a4'+'_'+E3SMdomain_range].load()
-            dn1 = e3smdata['dgnd_a01'+'_'+E3SMdomain_range].load()
-            dn2 = e3smdata['dgnd_a02'+'_'+E3SMdomain_range].load()
-            dn3 = e3smdata['dgnd_a03'+'_'+E3SMdomain_range].load()
-            dn4 = e3smdata['dgnd_a04'+'_'+E3SMdomain_range].load()
+            num_a1 = e3smdata['num_a1'+E3SMdomain_range].load()
+            num_a2 = e3smdata['num_a2'+E3SMdomain_range].load()
+            num_a3 = e3smdata['num_a3'+E3SMdomain_range].load()
+            num_a4 = e3smdata['num_a4'+E3SMdomain_range].load()
+            dn1 = e3smdata['dgnd_a01'+E3SMdomain_range].load()
+            dn2 = e3smdata['dgnd_a02'+E3SMdomain_range].load()
+            dn3 = e3smdata['dgnd_a03'+E3SMdomain_range].load()
+            dn4 = e3smdata['dgnd_a04'+E3SMdomain_range].load()
             P0 = e3smdata['P0'].load()
             hyam = e3smdata['hyam'].load()
             hybm = e3smdata['hybm'].load()
-            T = e3smdata['T'+'_'+E3SMdomain_range].load()
-            PS = e3smdata['PS'+'_'+E3SMdomain_range].load()
+            T = e3smdata['T'+E3SMdomain_range].load()
+            PS = e3smdata['PS'+E3SMdomain_range].load()
             Pres = np.nan*T
             zlen = T.shape[1]
             for kk in range(zlen):
@@ -1257,8 +1266,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
-            z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
-            cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
+            z3 = e3smdata['Z3'+E3SMdomain_range].load()
+            cloud = e3smdata['CLOUD'+E3SMdomain_range].load()
             z3 = z3[:,:,x_idx]
             cloud = cloud[:,:,x_idx]
             dz = (z3[:,:-2].data - z3[:,2:].data)/2
@@ -1321,12 +1330,12 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
-            rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
-            freql = e3smdata['FREQL'+'_'+E3SMdomain_range].load()
-            icwnc = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
-            cod_a = e3smdata['TOT_CLD_VISTAU'+'_'+E3SMdomain_range].load()
-            cod_m = e3smdata['TAUWMODIS'+'_'+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
-            solin = e3smdata['SOLIN'+'_'+E3SMdomain_range].load()
+            rel = e3smdata['REL'+E3SMdomain_range].load()
+            freql = e3smdata['FREQL'+E3SMdomain_range].load()
+            icwnc = e3smdata['ICWNC'+E3SMdomain_range].load()
+            cod_a = e3smdata['TOT_CLD_VISTAU'+E3SMdomain_range].load()
+            cod_m = e3smdata['TAUWMODIS'+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
+            solin = e3smdata['SOLIN'+E3SMdomain_range].load()
             rel = rel[:,:,x_idx]
             freql = freql[:,:,x_idx]
             icwnc = icwnc[:,:,x_idx]
@@ -1360,7 +1369,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
-            cdnc_col = e3smdata['CDNUMC'+'_'+E3SMdomain_range].load()
+            cdnc_col = e3smdata['CDNUMC'+E3SMdomain_range].load()
             cdnc_col = cdnc_col[:,x_idx]
             cdnc = cdnc_col/np.sum(weight,axis=1)
             cdnc[cdnc >2e9] = np.nan
@@ -1377,7 +1386,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
-            lwp = e3smdata['TGCLDLWP'+'_'+E3SMdomain_range][:,x_idx].data
+            lwp = e3smdata['TGCLDLWP'+E3SMdomain_range][:,x_idx].data
             e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
             T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
             nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
@@ -1400,7 +1409,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
         # all other 2D (surface and vertical integrated) variables
         for varname in variable2d_names:
             try:
-                var = e3smdata[varname + '_'+E3SMdomain_range].load()
+                var = e3smdata[varname + E3SMdomain_range].load()
                 var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
             except:
                 var = xr.DataArray(np.zeros((len(e3smtime_i),len_ncol))*np.nan,name=varname,\
@@ -1412,7 +1421,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat,
         # all other 3D (with vertical level) variables at the lowest model level
         for varname in variable3d_names:
             try:
-                var = e3smdata[varname + '_'+E3SMdomain_range].load()
+                var = e3smdata[varname + E3SMdomain_range].load()
                 var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
             except:
                 var = xr.DataArray(np.zeros((len(e3smtime_i),len_lev,len_ncol))*np.nan,name=varname,\
