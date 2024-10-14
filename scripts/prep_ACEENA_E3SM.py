@@ -33,6 +33,14 @@ aircraft_dt = config['model_aircraft_dt']
 surface_dt = config['model_surface_dt']
 profile_dt = config['model_profile_dt']
 
+# horizontal coordinates and limits
+lat = config['lat']
+lon = config['lon']
+# latmin = config['latmin']    #can add later if wanting to save more than single closest surface and profile grids to observing site
+# latmax = config['latmax']
+# lonmin = config['lonmin']
+# lonmax = config['lonmax']
+
 # vertical coordinates for output
 lev_out=np.arange(25.,1001,25.)    #pressure
 height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900,1000,\
@@ -42,7 +50,7 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # output time in 1min (dt=60s) resolution for flight track and 1hr (dt=3600s) for other data
-# prep.prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, iwgpath, dt=aircraft_dt)
-prep.prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=surface_dt)
-# prep.prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, height_out, lev_out=lev_out, dt=profile_dt)
+# prep.prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, iwgpath, lat, lon, dt=aircraft_dt)
+prep.prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, lat, lon, dt=surface_dt)
+# prep.prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, height_out, lev_out=lev_out, lat, lon, dt=profile_dt)
 
