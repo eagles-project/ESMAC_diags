@@ -24,8 +24,8 @@ lonmax = 335
 
 # time frequency in seconds
 model_aircraft_dt = 60      #interpolated
-obs_aircraft_dt = 60        #median or average    
 model_surface_dt = 3600     #instantaneous
+model_profile_dt = 3600     #instantaneous
+obs_aircraft_dt = 60        #median or average    
 obs_surface_dt = 300        #median or average
-model_satellite_dt = 3600   #instantaneous
 obs_satellite_dt = 3600     #instantaneous
