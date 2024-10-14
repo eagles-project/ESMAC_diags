@@ -1,0 +1,22 @@
+# Field campaign or observational location
+location = 'ACEENA'
+
+# data paths and filenames
+model_input_path = '../raw_data/rrm/ena_rrm/'
+model_input_filehead = 'ena_ne32x32pg2'
+model_output_path = '../prep_data/'+location+'/model/'
+model_output_filehead = 'E3SMv2_'+location
+
+obs_input_path = '../raw_data/obs/'+location+'/' #may want to add aircraft/surface/satellite folder and specific dataset folders though these should be static
+obs_output_path = '../prep_data/'+location+'/'
+
+# variable names
+model_lat = 'lat' #old setup had '
+model_lon = 'lon'
+obs_lat = 'lat'
+obs_lon = 'lon'
+
+# time resolution in seconds
+model_dt = 3600
+obs_dt = 300
+
