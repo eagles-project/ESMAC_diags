@@ -12,9 +12,9 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settings
-input_path = '../raw_data/rrm/'
+input_path = '../raw_data/rrm/ena_rrm'
 output_path = '../prep_data/ACEENA/model/'
-input_filehead = 'ena_ne32x32pg2'
+input_filehead = 'ena_ne32x32pg2.eam.h1'
 output_filehead = 'E3SMv2_ACEENA'
 
 # iwg data path for aircraft information
