@@ -278,7 +278,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, c
                 var = e3smdata[varname + E3SMdomain_range].load()
             except:
                 var = xr.DataArray(np.zeros(z3.shape)*np.nan,name=varname,\
-                                   dims=["time","lev","ncol_"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata['lev'],"ncol_"+E3SMdomain_range:e3smdata['ncol_'+E3SMdomain_range]},\
+                                   dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata['lev'],"ncol"+E3SMdomain_range:e3smdata['ncol'+E3SMdomain_range]},\
                                    attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             variables.append(var)
         e3smdata.close()
@@ -872,7 +872,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
     T = e3smdata['T'+E3SMdomain_range].load()
     PS = e3smdata['PS'+E3SMdomain_range].load()
     # getting column and levels
-    len_ncol = len(e3smdata['ncol_'+E3SMdomain_range])
+    len_ncol = len(e3smdata['ncol'+E3SMdomain_range])
     len_lev = len(e3smdata['lev'])
     # only extract the model column at the site
     if lon0<0:
@@ -1136,7 +1136,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
             var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
         except:
             var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
-                               dims=["time","ncol_"+E3SMdomain_range],coords={"time":e3smtime,"ncol_"+E3SMdomain_range:np.arange(len_ncol)},\
+                               dims=["time","ncol"+E3SMdomain_range],coords={"time":e3smtime,"ncol"+E3SMdomain_range:np.arange(len_ncol)},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
         if varname=='AODABS' or varname=='AODALL':
             var.attrs['units']='N/A'
@@ -1151,7 +1151,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
             var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
         except:
             var = xr.DataArray(np.zeros((len(e3smtime),len_lev,len_ncol))*np.nan,name=varname,\
-                               dims=["time","lev","ncol_"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata['lev'],"ncol_"+E3SMdomain_range:e3smdata['ncol_'+E3SMdomain_range]},\
+                               dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata['lev'],"ncol"+E3SMdomain_range:e3smdata['ncol'+E3SMdomain_range]},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
         variables.append(var[:,-1,x_idx])
         variable_names.append(varname)
@@ -1413,7 +1413,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
                 var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
             except:
                 var = xr.DataArray(np.zeros((len(e3smtime_i),len_ncol))*np.nan,name=varname,\
-                               dims=["time","ncol_"+E3SMdomain_range],coords={"time":e3smtime_i,"ncol_"+E3SMdomain_range:np.arange(len_ncol)},\
+                               dims=["time","ncol"+E3SMdomain_range],coords={"time":e3smtime_i,"ncol"+E3SMdomain_range:np.arange(len_ncol)},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             vv = variable_names.index(varname)
             variables[vv] = xr.concat([variables[vv], var[:,x_idx]],dim='time')
@@ -1425,7 +1425,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
                 var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
             except:
                 var = xr.DataArray(np.zeros((len(e3smtime_i),len_lev,len_ncol))*np.nan,name=varname,\
-                               dims=["time","lev","ncol_"+E3SMdomain_range],coords={"time":e3smtime_i,"lev":e3smdata['lev'],"ncol_"+E3SMdomain_range:e3smdata['ncol_'+E3SMdomain_range]},\
+                               dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime_i,"lev":e3smdata['lev'],"ncol"+E3SMdomain_range:e3smdata['ncol'+E3SMdomain_range]},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             vv = variable_names.index(varname)
             variables[vv] = xr.concat([variables[vv], var[:,-1,x_idx]],dim='time')
