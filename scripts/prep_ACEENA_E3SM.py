@@ -4,6 +4,8 @@ inlcude:
     prep_ACEENA_E3SM in src/esmac_diags/preprocessing/
 """
 
+import os
+import sys
 import numpy as np
 import esmac_diags
 import esmac_diags.preprocessing.prep_ACEENA_E3SM as prep
