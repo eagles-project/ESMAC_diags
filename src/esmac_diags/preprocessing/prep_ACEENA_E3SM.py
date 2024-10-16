@@ -1259,7 +1259,9 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
             NCNall = xr.concat([NCNall, NCN2], dim="time")
         else:
             NCNall = xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name='NCNall',attrs={'units':'dummy_unit','long_name':'Dummy'})
-    
+
+        print(np.shape(NCNall))
+        
         # variables to calculate Reff and Nd
         req_vlist = ['Z3', 'CLOUD']
         req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
