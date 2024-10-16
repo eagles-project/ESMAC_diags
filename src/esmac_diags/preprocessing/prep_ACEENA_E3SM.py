@@ -183,7 +183,8 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, c
         # variables for calculating aerosol size
         req_vlist = ['num_a1', 'num_a2', 'num_a3', 'num_a4', 'dgnd_a01', 'dgnd_a02', \
                      'dgnd_a03', 'dgnd_a04']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        # req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing for aerosol size')
@@ -210,7 +211,8 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, c
                      'mom_a2', 'mom_a3', 'mom_a4', 'ncl_a1', 'ncl_a2', 'ncl_a3', \
                      'pom_a1', 'pom_a3', 'pom_a4', 'so4_a1', 'so4_a2', 'so4_a3', \
                      'soa_a1', 'soa_a2', 'soa_a3']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        # req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
@@ -260,7 +262,8 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, c
         
         # droplet size distribution
         req_vlist = ['ICWNC', 'lambda_cloud', 'mu_cloud']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        # req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         if len(matched_vlist) == len(req_vlist):
             nd_cld = e3smdata['ICWNC'+E3SMdomain_range].load()
@@ -888,7 +891,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
                  'mom_a2', 'mom_a3', 'mom_a4', 'ncl_a1', 'ncl_a2', 'ncl_a3', \
                  'pom_a1', 'pom_a3', 'pom_a4', 'so4_a1', 'so4_a2', 'so4_a3', \
                  'soa_a1', 'soa_a2', 'soa_a3']
-    req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+    # req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+    req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
     matched_vlist = list(set(av_vars).intersection(req_vlist))
     
     if len(matched_vlist) == len(req_vlist):
@@ -954,7 +958,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
     # aerosol size
     req_vlist = ['num_a1', 'num_a2', 'num_a3', 'num_a4', 'dgnd_a01', 'dgnd_a02', \
                  'dgnd_a03', 'dgnd_a04']
-    req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+    # req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+    req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
     matched_vlist = list(set(av_vars).intersection(req_vlist))
     
     if len(matched_vlist) == len(req_vlist):
@@ -981,7 +986,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
     
     # variables to calculate cloud heights and depth
     req_vlist = ['Z3', 'CLOUD']
-    req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+    # req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+    req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
     matched_vlist = list(set(av_vars).intersection(req_vlist))
     
     if len(matched_vlist) == len(req_vlist):
@@ -1050,7 +1056,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
     
     # cloud optical depth and effective radius
     req_vlist = ['REL', 'FREQL', 'ICWNC', 'TOT_CLD_VISTAU', 'TAUWMODIS', 'SOLIN']
-    req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+    # req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+    req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
     matched_vlist = list(set(av_vars).intersection(req_vlist))
     
     if len(matched_vlist) == len(req_vlist):
@@ -1086,7 +1093,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
     
     # mean cloud droplet number concentration
     req_vlist = ['CDNUMC']
-    req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+    # req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+    req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
     matched_vlist = list(set(av_vars).intersection(req_vlist))
     
     if len(matched_vlist) == len(req_vlist):
@@ -1102,7 +1110,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
     
     # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
     req_vlist = ['TGCLDLWP']
-    req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+    # req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+    req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
     matched_vlist = list(set(av_vars).intersection(req_vlist))
     
     if len(matched_vlist) == len(req_vlist):
@@ -1170,7 +1179,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
                      'mom_a2', 'mom_a3', 'mom_a4', 'ncl_a1', 'ncl_a2', 'ncl_a3', \
                      'pom_a1', 'pom_a3', 'pom_a4', 'so4_a1', 'so4_a2', 'so4_a3', \
                      'soa_a1', 'soa_a2', 'soa_a3']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        # req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
@@ -1229,11 +1239,9 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
         # aerosol size
         req_vlist = ['num_a1', 'num_a2', 'num_a3', 'num_a4', 'dgnd_a01', 'dgnd_a02', \
                      'dgnd_a03', 'dgnd_a04']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        # req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
-
-        print(matched_vlist)
-        print(req_vlist)
       
         if len(matched_vlist) == len(req_vlist):
             num_a1 = e3smdata['num_a1'+E3SMdomain_range].load()
@@ -1265,7 +1273,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
         
         # variables to calculate Reff and Nd
         req_vlist = ['Z3', 'CLOUD']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        # req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
@@ -1329,7 +1338,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
     
         # cloud optical depth and effective radius
         req_vlist = ['REL', 'FREQL', 'ICWNC', 'TOT_CLD_VISTAU', 'TAUWMODIS', 'SOLIN']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        # req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
@@ -1368,7 +1378,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
         
         # mean cloud droplet number concentration
         req_vlist = ['CDNUMC']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        # req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
@@ -1385,7 +1396,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
         
         # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
         req_vlist = ['TGCLDLWP']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        # req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
