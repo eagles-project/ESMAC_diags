@@ -6,7 +6,7 @@ obs_input_path: '../raw_data/obs/'
 
 # variable names (in future, can expand this to contain each model variable name so that they aren't hard coded)
 E3SMsubdomain: True
-E3SMdomain_range: 'lat_330e_to_335e_37n_to_42n'
+E3SMdomain_range: '330e_to_335e_37n_to_42n'
 
 # # model longitude and latitude limits
 # latmin: 37
