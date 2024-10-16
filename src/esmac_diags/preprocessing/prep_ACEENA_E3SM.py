@@ -1231,7 +1231,10 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
                      'dgnd_a03', 'dgnd_a04']
         req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
-        
+
+        print(matched_vlist)
+        print(req_vlist)
+      
         if len(matched_vlist) == len(req_vlist):
             num_a1 = e3smdata['num_a1'+E3SMdomain_range].load()
             num_a2 = e3smdata['num_a2'+E3SMdomain_range].load()
@@ -1259,8 +1262,6 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
             NCNall = xr.concat([NCNall, NCN2], dim="time")
         else:
             NCNall = xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name='NCNall',attrs={'units':'dummy_unit','long_name':'Dummy'})
-
-        print(np.shape(NCNall))
         
         # variables to calculate Reff and Nd
         req_vlist = ['Z3', 'CLOUD']
