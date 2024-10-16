@@ -863,6 +863,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
             glob.glob(input_path + input_filehead+'.*.h?.*2018-02-??-00000.nc') 
     lst.sort()
     # first data
+    print(lst[0])
     e3smdata = xr.open_dataset(lst[0])
     e3smtime = e3smdata.indexes['time'].to_datetimeindex()
     lonm = e3smdata['lon'+E3SMdomain_range].load()
