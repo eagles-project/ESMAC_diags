@@ -1,11 +1,11 @@
 # data paths and filenames
-model_input_path: '../raw_data/model/'  # '../raw_data/rrm/ena_rrm/'
-model_input_filehead: 'E3SMv2_SGP_ENA_2011_2020'  # 'ena_ne32x32pg2'
+model_input_path: '../raw_data/rrm/ena_rrm/'  # '../raw_data/rrm/ena_rrm/' or '../raw_data/model/'
+model_input_filehead: 'ena_ne32x32pg2'  # 'ena_ne32x32pg2' or 'E3SMv2_SGP_ENA_2011_2020'
 
 obs_input_path: '../raw_data/obs/'
 
 # variable names (in future, can expand this to contain each model variable name so that they aren't hard coded)
-E3SMsubdomain: True
+E3SMsubdomain: False
 E3SMdomain_range: '330e_to_335e_37n_to_42n'
 
 # # model longitude and latitude limits
