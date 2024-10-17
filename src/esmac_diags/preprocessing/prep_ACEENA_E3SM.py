@@ -866,22 +866,26 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
     print(lst[0])
     e3smdata = xr.open_dataset(lst[0])
     e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-    lonm = e3smdata['lon'+E3SMdomain_range].load()
-    latm = e3smdata['lat'+E3SMdomain_range].load()
-    # getting domainless variables
-    P0 = e3smdata['P0'].load()
-    hyam = e3smdata['hyam'].load()
-    hybm = e3smdata['hybm'].load()
-    # getting essentials
-    T = e3smdata['T'+E3SMdomain_range].load()
-    PS = e3smdata['PS'+E3SMdomain_range].load()
+
     # getting column and levels
     len_ncol = len(e3smdata['ncol'+E3SMdomain_range])
     len_lev = len(e3smdata['lev'])
+  
+    lonm = e3smdata['lon'+E3SMdomain_range].load()
+    latm = e3smdata['lat'+E3SMdomain_range].load()
     # only extract the model column at the site
     if lon0<0:
         lon0=lon0+360   # make longitude consistent with E3SM from 0 to 360
     x_idx = find_nearest(lonm,latm,lon0,lat0)
+  
+    # getting domainless variables
+    P0 = e3smdata['P0'].load()
+    hyam = e3smdata['hyam'].load()
+    hybm = e3smdata['hybm'].load()
+  
+    # getting essentials
+    T = e3smdata['T'+E3SMdomain_range].load()
+    PS = e3smdata['PS'+E3SMdomain_range].load()
     
     # Get all simulated variables
     vlist = list(e3smdata.variables.keys())
