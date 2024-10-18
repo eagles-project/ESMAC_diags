@@ -529,40 +529,45 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     # output time range and resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
-    #%% read in data
-    
+    #%% read in data    
     lst = glob.glob(input_path + input_filehead+'.*.h?.*2017-06-2?-00000.nc') + \
             glob.glob(input_path + input_filehead+'.*.h?.*2017-07-??-00000.nc') + \
             glob.glob(input_path + input_filehead+'.*.h?.*2018-01-??-00000.nc') + \
             glob.glob(input_path + input_filehead+'.*.h?.*2018-02-??-00000.nc') 
     lst.sort()
+                        
     # first data
     e3smdata = xr.open_dataset(lst[0])
+                        
     e3smtime = e3smdata.indexes['time'].to_datetimeindex()
     lonm = e3smdata['lon'+E3SMdomain_range].load()
     latm = e3smdata['lat'+E3SMdomain_range].load()
-    z3 = e3smdata['Z3'+E3SMdomain_range].load()
-    hyam = e3smdata['hyam'].load()
-    hybm = e3smdata['hybm'].load()
-    p0 = e3smdata['P0'].load()
-    ps = e3smdata['PS'+E3SMdomain_range].load()
-    Ts = e3smdata['TREFHT'+E3SMdomain_range].load()
-    T = e3smdata['T'+E3SMdomain_range].load()
-    Q = e3smdata['Q'+E3SMdomain_range].load()
-    U = e3smdata['U'+E3SMdomain_range].load()
-    V = e3smdata['V'+E3SMdomain_range].load()
-    RH = e3smdata['RELHUM'+E3SMdomain_range].load()
-    cloud = e3smdata['CLOUD'+E3SMdomain_range].load()
-    e3smdata.close()
     # only extract the model column at the site
     if lon0<0:
         lon0=lon0+360   # make longitude consistent with E3SM from 0 to 360
     x_idx = find_nearest(lonm,latm,lon0,lat0)
+                        
+    hyam = e3smdata['hyam'].load()
+    hybm = e3smdata['hybm'].load()
+    p0 = e3smdata['P0'].load()
+                        
+    ps = e3smdata['PS'+E3SMdomain_range][:,x_idx].load()
+    Ts = e3smdata['TREFHT'+E3SMdomain_range][:,x_idx].load()
+                        
+    z3 = e3smdata['Z3'+E3SMdomain_range][:,:,i_dx].load()
+    T = e3smdata['T'+E3SMdomain_range][:,:,i_dx].load()
+    Q = e3smdata['Q'+E3SMdomain_range][:,:,i_dx].load()
+    U = e3smdata['U'+E3SMdomain_range][:,:,i_dx].load()
+    V = e3smdata['V'+E3SMdomain_range][:,:,i_dx].load()
+    RH = e3smdata['RELHUM'+E3SMdomain_range][:,:,i_dx].load()
+    cloud = e3smdata['CLOUD'+E3SMdomain_range][:,:,i_dx].load()
+                        
+    e3smdata.close()
     
-    levm = 0.01* (ps[:,x_idx]*hybm + hyam*p0)  # hPa
+    levm = 0.01* (ps*hybm + hyam*p0)  # hPa
     # calculate theta
     theta = T * (1000./levm)**0.286
-    theta_s = Ts[:, x_idx] * (100000./ps[:, x_idx])**0.286
+    theta_s = Ts * (100000./ps)**0.286
     
     # interpolate data into pressure coordinate
     cloud_p = np.empty((cloud.shape[0],len(lev_out)))
@@ -572,12 +577,12 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     theta_p = np.empty((T.shape[0],len(lev_out)))
     z_p = np.empty((T.shape[0],len(lev_out)))
     for i in range(len(e3smtime)):
-        cloud_p[i,:] = np.interp(lev_out,levm[i,:],cloud[i,:,x_idx])
-        T_p[i,:] = np.interp(lev_out,levm[i,:],T[i,:,x_idx])
-        Q_p[i,:] = np.interp(lev_out,levm[i,:],Q[i,:,x_idx])
-        RH_p[i,:] = np.interp(lev_out,levm[i,:],RH[i,:,x_idx])
-        theta_p[i,:] = np.interp(lev_out,levm[i,:],theta[i,:,x_idx])
-        z_p[i,:] = np.interp(lev_out,levm[i,:],z3[i,:,x_idx])
+        cloud_p[i,:] = np.interp(lev_out,levm[i,:],cloud[i,:])
+        T_p[i,:] = np.interp(lev_out,levm[i,:],T[i,:])
+        Q_p[i,:] = np.interp(lev_out,levm[i,:],Q[i,:])
+        RH_p[i,:] = np.interp(lev_out,levm[i,:],RH[i,:])
+        theta_p[i,:] = np.interp(lev_out,levm[i,:],theta[i,:])
+        z_p[i,:] = np.interp(lev_out,levm[i,:],z3[i,:])
             
     # interpolate data into height coordinate. flip model data since numpy.interp only works for increasing dimension
     cloud_z = np.empty((len(e3smtime),len(height_out)))
@@ -587,12 +592,12 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     Q_z = np.empty((len(e3smtime),len(height_out)))
     p_z = np.empty((len(e3smtime),len(height_out)))
     for i in range(len(e3smtime)):
-        cloud_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(cloud[i,:,x_idx]))
-        T_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(T[i,:,x_idx]))
-        RH_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(RH[i,:,x_idx]))
-        theta_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(theta[i,:,x_idx]))
-        Q_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(Q[i,:,x_idx]))
-        p_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(levm[i,:]))
+        cloud_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(cloud[i,:]))
+        T_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(T[i,:]))
+        RH_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(RH[i,:]))
+        theta_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(theta[i,:]))
+        Q_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(Q[i,:]))
+        p_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(levm[i,:]))
         
     # lower tropospheric stability (theta diff between sfc and 700hPa)
     idx700 = 27
@@ -610,24 +615,27 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     for file in lst[1:]:
         print(file)
         e3smdata = xr.open_dataset(file)
+      
         e3smtime_i = e3smdata.indexes['time'].to_datetimeindex()
         e3smtime = np.hstack((e3smtime, e3smtime_i))
-        
-        z3 = e3smdata['Z3'+E3SMdomain_range].load()
-        ps = e3smdata['PS'+E3SMdomain_range].load()
-        Ts = e3smdata['TREFHT'+E3SMdomain_range].load()
-        T = e3smdata['T'+E3SMdomain_range].load()
-        Q = e3smdata['Q'+E3SMdomain_range].load()
-        U = e3smdata['U'+E3SMdomain_range].load()
-        V = e3smdata['V'+E3SMdomain_range].load()
-        RH = e3smdata['RELHUM'+E3SMdomain_range].load()
-        cloud = e3smdata['CLOUD'+E3SMdomain_range].load()
+
+        ps = e3smdata['PS'+E3SMdomain_range][:,x_idx].load()
+        Ts = e3smdata['TREFHT'+E3SMdomain_range][:,x_idx].load()
+      
+        z3 = e3smdata['Z3'+E3SMdomain_range][:,:,x_idx].load()
+        T = e3smdata['T'+E3SMdomain_range][:,:,x_idx].load()
+        Q = e3smdata['Q'+E3SMdomain_range][:,:,x_idx].load()
+        U = e3smdata['U'+E3SMdomain_range][:,:,x_idx].load()
+        V = e3smdata['V'+E3SMdomain_range][:,:,x_idx].load()
+        RH = e3smdata['RELHUM'+E3SMdomain_range][:,:,x_idx].load()
+        cloud = e3smdata['CLOUD'+E3SMdomain_range][:,:,x_idx].load()
+      
         e3smdata.close()
         
-        levm = 0.01* (ps[:,x_idx]*hybm + hyam*p0)  # hPa
+        levm = 0.01* (ps*hybm + hyam*p0)  # hPa
         # calculate theta
         theta = T * (1000./levm)**0.286
-        theta_s2 = Ts[:, x_idx] * (100000./ps[:, x_idx])**0.286
+        theta_s2 = Ts * (100000./ps)**0.286
     
         # interpolate data into pressure coordinate
         cloud_p2 = np.empty((len(e3smtime_i),len(lev_out)))
@@ -637,12 +645,12 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
         theta_p2 = np.empty((len(e3smtime_i),len(lev_out)))
         z_p2 = np.empty((T.shape[0],len(lev_out)))
         for i in range(len(e3smtime_i)):
-            cloud_p2[i,:] = np.interp(lev_out,levm[i,:],cloud[i,:,x_idx])
-            T_p2[i,:] = np.interp(lev_out,levm[i,:],T[i,:,x_idx])
-            Q_p2[i,:] = np.interp(lev_out,levm[i,:],Q[i,:,x_idx])
-            RH_p2[i,:] = np.interp(lev_out,levm[i,:],RH[i,:,x_idx])
-            theta_p2[i,:] = np.interp(lev_out,levm[i,:],theta[i,:,x_idx])
-            z_p2[i,:] = np.interp(lev_out,levm[i,:],z3[i,:,x_idx])
+            cloud_p2[i,:] = np.interp(lev_out,levm[i,:],cloud[i,:])
+            T_p2[i,:] = np.interp(lev_out,levm[i,:],T[i,:])
+            Q_p2[i,:] = np.interp(lev_out,levm[i,:],Q[i,:])
+            RH_p2[i,:] = np.interp(lev_out,levm[i,:],RH[i,:])
+            theta_p2[i,:] = np.interp(lev_out,levm[i,:],theta[i,:])
+            z_p2[i,:] = np.interp(lev_out,levm[i,:],z3[i,:])
         
         # interpolate data into height coordinate
         cloud_z2 = np.empty((len(e3smtime_i),len(height_out)))
@@ -652,12 +660,12 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
         Q_z2 = np.empty((len(e3smtime_i),len(height_out)))
         p_z2 = np.empty((len(e3smtime_i),len(height_out)))
         for i in range(len(e3smtime_i)):
-            cloud_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(cloud[i,:,x_idx]))
-            T_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(T[i,:,x_idx]))
-            RH_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(RH[i,:,x_idx]))
-            theta_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(theta[i,:,x_idx]))
-            Q_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(Q[i,:,x_idx]))
-            p_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(levm[i,:]))
+            cloud_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(cloud[i,:]))
+            T_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(T[i,:]))
+            RH_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(RH[i,:]))
+            theta_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(theta[i,:]))
+            Q_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(Q[i,:]))
+            p_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(levm[i,:]))
             
         # lower tropospheric stability (theta diff between sfc and 700hPa)
         LTS700_2 = theta_p2[:, idx700] - theta_s2   
