@@ -6,6 +6,10 @@ inlcude:
     prep_CSET_E3SM
 """
 
+import os
+import sys
+import yaml
+import numpy as np
 import esmac_diags
 import esmac_diags.preprocessing.prep_CSET_E3SM as prep
 
@@ -30,4 +34,4 @@ obs_input_path = config['obs_input_path']
 RFpath = obs_input_path + 'CSET/aircraft/aircraft_lowrate/'
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-prep.prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, RFpath, dt=60)
+prep.prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, RFpath, config, dt=60)
