@@ -48,8 +48,8 @@ from netCDF4 import Dataset
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, config, 
-                      iwgpath, dt=60):
+def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, 
+                      iwgpath, config, dt=60):
     """
     prepare E3SM output along flight tracks
     choose the nearest grid and level of the aircraft location
