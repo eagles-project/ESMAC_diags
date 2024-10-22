@@ -38,7 +38,7 @@ from netCDF4 import Dataset
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, 
-                      RFpath, dt=60):
+                      RFpath, config, dt=60):
     """
     prepare E3SM output along flight tracks
     choose the nearest grid and level of the aircraft location
@@ -58,6 +58,8 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         data path of aircraft location
     dt : float
         time resolution (unit: sec) of output
+    config: dictionary
+        Dictionary containing config parameters.
 
     Returns
     -------
@@ -70,7 +72,10 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         
     #%% settings specific for each site
     # CSET
-    E3SMdomain_range = '202e_to_240e_19n_to_40n'    # domain range in E3SM regional output
+    if config['E3SMsubdomain'] == True:
+        E3SMdomain_range = '_'+config['E3SMdomain_range']  #'202e_to_240e_19n_to_40n'   # domain range in E3SM regional output
+    else:
+        E3SMdomain_range = ''
     
     #%% find all data
     lst = glob.glob(RFpath + 'RF*.PNI.nc')
@@ -120,63 +125,66 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
             raise ValueError('Should only contain one file: '+lstm)
         e3smdata = xr.open_dataset(lstm[0])
         e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-        lonm = e3smdata['lon'+'_'+E3SMdomain_range].load()
-        latm = e3smdata['lat'+'_'+E3SMdomain_range].load()
-        z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
-        # change time format into seconds of the day
-        timem = np.float64((e3smtime - e3smtime[0]).seconds)
-        
-        # variables for calculating aerosol size
-        num_a1 = e3smdata['num_a1'+'_'+E3SMdomain_range].load()
-        num_a2 = e3smdata['num_a2'+'_'+E3SMdomain_range].load()
-        num_a3 = e3smdata['num_a3'+'_'+E3SMdomain_range].load()
-        num_a4 = e3smdata['num_a4'+'_'+E3SMdomain_range].load()
-        dn1 = e3smdata['dgnd_a01'+'_'+E3SMdomain_range].load()
-        dn2 = e3smdata['dgnd_a02'+'_'+E3SMdomain_range].load()
-        dn3 = e3smdata['dgnd_a03'+'_'+E3SMdomain_range].load()
-        dn4 = e3smdata['dgnd_a04'+'_'+E3SMdomain_range].load()
+        lonm = e3smdata['lon'+E3SMdomain_range].load()
+        latm = e3smdata['lat'+E3SMdomain_range].load()
+
         P0 = e3smdata['P0'].load()
         hyam = e3smdata['hyam'].load()
         hybm = e3smdata['hybm'].load()
-        T = e3smdata['T'+'_'+E3SMdomain_range].load()
-        PS = e3smdata['PS'+'_'+E3SMdomain_range].load()
+      
+        z3 = e3smdata['Z3'+E3SMdomain_range]#.load()
+        T = e3smdata['T'+E3SMdomain_range]#.load()
+        PS = e3smdata['PS'+E3SMdomain_range].load()   
         Pres = np.nan*T
         zlen = T.shape[1]
         for kk in range(zlen):
             Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
+      
+        # change time format into seconds of the day
+        timem = np.float64((e3smtime - e3smtime[0]).seconds)
+        
+        # variables for calculating aerosol size
+        num_a1 = e3smdata['num_a1'+E3SMdomain_range]#.load()
+        num_a2 = e3smdata['num_a2'+E3SMdomain_range]#.load()
+        num_a3 = e3smdata['num_a3'+E3SMdomain_range]#.load()
+        num_a4 = e3smdata['num_a4'+E3SMdomain_range]#.load()
+        dn1 = e3smdata['dgnd_a01'+E3SMdomain_range]#.load()
+        dn2 = e3smdata['dgnd_a02'+E3SMdomain_range]#.load()
+        dn3 = e3smdata['dgnd_a03'+E3SMdomain_range]#.load()
+        dn4 = e3smdata['dgnd_a04'+E3SMdomain_range]#.load()
             
         # aerosol composition
-        bc_a1 = e3smdata['bc_a1'+'_'+E3SMdomain_range].load()
-        bc_a3 = e3smdata['bc_a3'+'_'+E3SMdomain_range].load()
-        bc_a4 = e3smdata['bc_a4'+'_'+E3SMdomain_range].load()
-        dst_a1 = e3smdata['dst_a1'+'_'+E3SMdomain_range].load()
-        dst_a3 = e3smdata['dst_a3'+'_'+E3SMdomain_range].load()
-        mom_a1 = e3smdata['mom_a1'+'_'+E3SMdomain_range].load()
-        mom_a2 = e3smdata['mom_a2'+'_'+E3SMdomain_range].load()
-        mom_a3 = e3smdata['mom_a3'+'_'+E3SMdomain_range].load()
-        mom_a4 = e3smdata['mom_a4'+'_'+E3SMdomain_range].load()
-        ncl_a1 = e3smdata['ncl_a1'+'_'+E3SMdomain_range].load()
-        ncl_a2 = e3smdata['ncl_a2'+'_'+E3SMdomain_range].load()
-        ncl_a3 = e3smdata['ncl_a3'+'_'+E3SMdomain_range].load()
-        pom_a1 = e3smdata['pom_a1'+'_'+E3SMdomain_range].load()
-        pom_a3 = e3smdata['pom_a3'+'_'+E3SMdomain_range].load()
-        pom_a4 = e3smdata['pom_a4'+'_'+E3SMdomain_range].load()
-        so4_a1 = e3smdata['so4_a1'+'_'+E3SMdomain_range].load()
-        so4_a2 = e3smdata['so4_a2'+'_'+E3SMdomain_range].load()
-        so4_a3 = e3smdata['so4_a3'+'_'+E3SMdomain_range].load()
-        soa_a1 = e3smdata['soa_a1'+'_'+E3SMdomain_range].load()
-        soa_a2 = e3smdata['soa_a2'+'_'+E3SMdomain_range].load()
-        soa_a3 = e3smdata['soa_a3'+'_'+E3SMdomain_range].load()
+        bc_a1 = e3smdata['bc_a1'+E3SMdomain_range]#.load()
+        bc_a3 = e3smdata['bc_a3'+E3SMdomain_range]#.load()
+        bc_a4 = e3smdata['bc_a4'+E3SMdomain_range]#.load()
+        dst_a1 = e3smdata['dst_a1'+E3SMdomain_range]#.load()
+        dst_a3 = e3smdata['dst_a3'+E3SMdomain_range]#.load()
+        mom_a1 = e3smdata['mom_a1'+E3SMdomain_range]#.load()
+        mom_a2 = e3smdata['mom_a2'+E3SMdomain_range]#.load()
+        mom_a3 = e3smdata['mom_a3'+E3SMdomain_range]#.load()
+        mom_a4 = e3smdata['mom_a4'+E3SMdomain_range]#.load()
+        ncl_a1 = e3smdata['ncl_a1'+E3SMdomain_range]#.load()
+        ncl_a2 = e3smdata['ncl_a2'+E3SMdomain_range]#.load()
+        ncl_a3 = e3smdata['ncl_a3'+E3SMdomain_range]#.load()
+        pom_a1 = e3smdata['pom_a1'+E3SMdomain_range]#.load()
+        pom_a3 = e3smdata['pom_a3'+E3SMdomain_range]#.load()
+        pom_a4 = e3smdata['pom_a4'+E3SMdomain_range]#.load()
+        so4_a1 = e3smdata['so4_a1'+E3SMdomain_range]#.load()
+        so4_a2 = e3smdata['so4_a2'+E3SMdomain_range]#.load()
+        so4_a3 = e3smdata['so4_a3'+E3SMdomain_range]#.load()
+        soa_a1 = e3smdata['soa_a1'+E3SMdomain_range]#.load()
+        soa_a2 = e3smdata['soa_a2'+E3SMdomain_range]#.load()
+        soa_a3 = e3smdata['soa_a3'+E3SMdomain_range]#.load()
         
         # droplet size distribution
-        nd_cld = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
-        lmda = e3smdata['lambda_cloud'+'_'+E3SMdomain_range].load()
-        mu = e3smdata['mu_cloud'+'_'+E3SMdomain_range].load()
+        nd_cld = e3smdata['ICWNC'+E3SMdomain_range]#.load()
+        lmda = e3smdata['lambda_cloud'+E3SMdomain_range]#.load()
+        mu = e3smdata['mu_cloud'+E3SMdomain_range]#.load()
         
         
         # other variables
         for varname in variable3d_names:
-            var = e3smdata[varname+'_'+E3SMdomain_range].load()
+            var = e3smdata[varname+E3SMdomain_range]#.load()
             variables.append(var)
         e3smdata.close()
         
@@ -186,35 +194,35 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
             x_idx = find_nearest(lonm, latm, lon_new[tt], lat_new[tt])
             z_idx = np.abs(z3[t_idx, :, x_idx]-height_new[tt]).argmin()
             for vv in range(len(variable3d_names)):
-                variables_new[vv].append(float(variables[vv][t_idx, z_idx, x_idx]))
+                variables_new[vv].append(float(variables[vv][t_idx, z_idx, x_idx].load()))
             p.append(Pres[t_idx, z_idx, x_idx].data)
             # calculate aerosol size
-            numall = [num_a1[t_idx, z_idx, x_idx].data, num_a2[t_idx, z_idx, x_idx].data, 
-                      num_a3[t_idx, z_idx, x_idx].data, num_a4[t_idx, z_idx, x_idx].data]
-            dnall  = [dn1[t_idx, z_idx, x_idx].data,    dn2[t_idx, z_idx, x_idx].data,    
-                      dn3[t_idx, z_idx, x_idx].data,    dn4[t_idx, z_idx, x_idx].data]
-            NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[t_idx, z_idx, x_idx].data, Pres[t_idx, z_idx, x_idx].data)
+            numall = [num_a1[t_idx, z_idx, x_idx].load().data, num_a2[t_idx, z_idx, x_idx].load().data, 
+                      num_a3[t_idx, z_idx, x_idx].load().data, num_a4[t_idx, z_idx, x_idx].load().data]
+            dnall  = [dn1[t_idx, z_idx, x_idx].load().data,    dn2[t_idx, z_idx, x_idx].load().data,    
+                      dn3[t_idx, z_idx, x_idx].load().data,    dn4[t_idx, z_idx, x_idx].load().data]
+            NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[t_idx, z_idx, x_idx].load().data, Pres[t_idx, z_idx, x_idx].load().data)
             NCNall = np.hstack((NCNall, np.reshape(NCN,(3000,1))))
             # calculate aerosol composition
-            bc_all.append(bc_a1[t_idx, z_idx, x_idx].data +                       
-                    bc_a3[t_idx, z_idx, x_idx].data + bc_a4[t_idx, z_idx, x_idx].data)
-            dst_all.append(dst_a1[t_idx, z_idx, x_idx].data +                      
-                    dst_a3[t_idx, z_idx, x_idx].data)
-            mom_all.append(mom_a1[t_idx, z_idx, x_idx].data + mom_a2[t_idx, z_idx, x_idx].data + 
-                    mom_a3[t_idx, z_idx, x_idx].data + mom_a4[t_idx, z_idx, x_idx].data)
-            ncl_all.append(ncl_a1[t_idx, z_idx, x_idx].data + ncl_a2[t_idx, z_idx, x_idx].data + 
-                    ncl_a3[t_idx, z_idx, x_idx].data)
-            pom_all.append(pom_a1[t_idx, z_idx, x_idx].data +                    
-                    pom_a3[t_idx, z_idx, x_idx].data + pom_a4[t_idx, z_idx, x_idx].data)
-            so4_all.append(so4_a1[t_idx, z_idx, x_idx].data + so4_a2[t_idx, z_idx, x_idx].data + 
-                    so4_a3[t_idx, z_idx, x_idx].data)
-            soa_all.append(soa_a1[t_idx, z_idx, x_idx].data + soa_a2[t_idx, z_idx, x_idx].data + 
-                    soa_a3[t_idx, z_idx, x_idx].data)
+            bc_all.append(bc_a1[t_idx, z_idx, x_idx].load().data +                       
+                    bc_a3[t_idx, z_idx, x_idx].load().data + bc_a4[t_idx, z_idx, x_idx].load().data)
+            dst_all.append(dst_a1[t_idx, z_idx, x_idx].load().data +                      
+                    dst_a3[t_idx, z_idx, x_idx].load().data)
+            mom_all.append(mom_a1[t_idx, z_idx, x_idx].load().data + mom_a2[t_idx, z_idx, x_idx].load().data + 
+                    mom_a3[t_idx, z_idx, x_idx].load().data + mom_a4[t_idx, z_idx, x_idx].load().data)
+            ncl_all.append(ncl_a1[t_idx, z_idx, x_idx].load().data + ncl_a2[t_idx, z_idx, x_idx].load().data + 
+                    ncl_a3[t_idx, z_idx, x_idx].load().data)
+            pom_all.append(pom_a1[t_idx, z_idx, x_idx].load().data +                    
+                    pom_a3[t_idx, z_idx, x_idx].load().data + pom_a4[t_idx, z_idx, x_idx].load().data)
+            so4_all.append(so4_a1[t_idx, z_idx, x_idx].load().data + so4_a2[t_idx, z_idx, x_idx].load().data + 
+                    so4_a3[t_idx, z_idx, x_idx].load().data)
+            soa_all.append(soa_a1[t_idx, z_idx, x_idx].load().data + soa_a2[t_idx, z_idx, x_idx].load().data + 
+                    soa_a3[t_idx, z_idx, x_idx].load().data)
             # calculate droplet size distribution
-            N0 = nd_cld[t_idx, z_idx, x_idx].data * (lmda[t_idx, z_idx, x_idx].data ** (mu[t_idx, z_idx, x_idx].data+1)) / \
-                    gamma(mu[t_idx, z_idx, x_idx].data+1)    # parameter N0
+            N0 = nd_cld[t_idx, z_idx, x_idx].load().data * (lmda[t_idx, z_idx, x_idx].load().data ** (mu[t_idx, z_idx, x_idx].load().data+1)) / \
+                    gamma(mu[t_idx, z_idx, x_idx].load().data+1)    # parameter N0
             D_cld = np.arange(1, 1000) * 1e-6  # in m
-            phi = N0 * (D_cld**mu[t_idx, z_idx, x_idx].data) * np.exp(- lmda[t_idx, z_idx, x_idx].data * D_cld)
+            phi = N0 * (D_cld**mu[t_idx, z_idx, x_idx].load().data) * np.exp(- lmda[t_idx, z_idx, x_idx].load().data * D_cld)
             phi_all = np.hstack((phi_all, np.reshape(phi,(len(D_cld),1))))
             nd_bin = phi_all * (D_cld[1] - D_cld[0])   # droplet number concentration in each size bin
             
