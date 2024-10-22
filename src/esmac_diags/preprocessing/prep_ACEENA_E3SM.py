@@ -1149,28 +1149,38 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
                         'PBLH', 'PRECT', 'PRECL', 'PRECC', 'PS', 'TREFHT', ]
     for varname in variable2d_names:
         try:
-            var = e3smdata[varname + E3SMdomain_range].load()
+            # var = e3smdata[varname + E3SMdomain_range].load()
+            var = e3smdata[varname + E3SMdomain_range][:,x_idx].load()
             var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
         except:
-            var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
-                               dims=["time","ncol"+E3SMdomain_range],coords={"time":e3smtime,"ncol"+E3SMdomain_range:np.arange(len_ncol)},\
+            # var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
+                               # dims=["time","ncol"+E3SMdomain_range],coords={"time":e3smtime,"ncol"+E3SMdomain_range:np.arange(len_ncol)},\
+                               # attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+            var = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name=varname,\
+                               dims=["time"],coords={"time":e3smtime},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
         if varname=='AODABS' or varname=='AODALL':
             var.attrs['units']='N/A'
         variable_names.append(varname)
-        variables.append(var[:,x_idx])
+        # variables.append(var[:,x_idx])
+        variables.append(var)
     
     # all other 3D (with vertical level) variables at the lowest model level
     variable3d_names = ['CCN1', 'CCN3', 'CCN4', 'CCN5', 'Q', 'T', 'RELHUM', 'U', 'V'] 
     for varname in variable3d_names:
         try:
-            var = e3smdata[varname + E3SMdomain_range].load()
+            # var = e3smdata[varname + E3SMdomain_range].load()
+            var = e3smdata[varname + E3SMdomain_range][:,-1,x_idx].load()
             var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
         except:
-            var = xr.DataArray(np.zeros((len(e3smtime),len_lev,len_ncol))*np.nan,name=varname,\
-                               dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata['lev'],"ncol"+E3SMdomain_range:e3smdata['ncol'+E3SMdomain_range]},\
-                               attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
-        variables.append(var[:,-1,x_idx])
+            # var = xr.DataArray(np.zeros((len(e3smtime),len_lev,len_ncol))*np.nan,name=varname,\
+            #                    dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata['lev'],"ncol"+E3SMdomain_range:e3smdata['ncol'+E3SMdomain_range]},\
+            #                    attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+            var = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name=varname,\
+                           dims=["time"],coords={"time":e3smtime},\
+                           attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+        # variables.append(var[:,-1,x_idx])
+        variables.append(var)
         variable_names.append(varname)
     
     e3smdata.close()
@@ -1421,26 +1431,36 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, conf
         # all other 2D (surface and vertical integrated) variables
         for varname in variable2d_names:
             try:
-                var = e3smdata[varname + E3SMdomain_range].load()
+                # var = e3smdata[varname + E3SMdomain_range].load()
+                var = e3smdata[varname + E3SMdomain_range][:,x_idx].load()
                 var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
             except:
-                var = xr.DataArray(np.zeros((len(e3smtime_i),len_ncol))*np.nan,name=varname,\
-                               dims=["time","ncol"+E3SMdomain_range],coords={"time":e3smtime_i,"ncol"+E3SMdomain_range:np.arange(len_ncol)},\
+                # var = xr.DataArray(np.zeros((len(e3smtime_i),len_ncol))*np.nan,name=varname,\
+                #                dims=["time","ncol"+E3SMdomain_range],coords={"time":e3smtime_i,"ncol"+E3SMdomain_range:np.arange(len_ncol)},\
+                #                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+                var = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name=varname,\
+                               dims=["time"],coords={"time":e3smtime_i},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             vv = variable_names.index(varname)
-            variables[vv] = xr.concat([variables[vv], var[:,x_idx]],dim='time')
+            # variables[vv] = xr.concat([variables[vv], var[:,x_idx]],dim='time')
+            variables[vv] = xr.concat([variables[vv], var],dim='time')
         
         # all other 3D (with vertical level) variables at the lowest model level
         for varname in variable3d_names:
             try:
-                var = e3smdata[varname + E3SMdomain_range].load()
+                # var = e3smdata[varname + E3SMdomain_range].load()
+                var = e3smdata[varname + E3SMdomain_range][:,-1,x_idx].load()
                 var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
             except:
-                var = xr.DataArray(np.zeros((len(e3smtime_i),len_lev,len_ncol))*np.nan,name=varname,\
-                               dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime_i,"lev":e3smdata['lev'],"ncol"+E3SMdomain_range:e3smdata['ncol'+E3SMdomain_range]},\
+                # var = xr.DataArray(np.zeros((len(e3smtime_i),len_lev,len_ncol))*np.nan,name=varname,\
+                #                dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime_i,"lev":e3smdata['lev'],"ncol"+E3SMdomain_range:e3smdata['ncol'+E3SMdomain_range]},\
+                #                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+                var = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name=varname,\
+                               dims=["time"],coords={"time":e3smtime_i},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             vv = variable_names.index(varname)
-            variables[vv] = xr.concat([variables[vv], var[:,-1,x_idx]],dim='time')
+            # variables[vv] = xr.concat([variables[vv], var[:,-1,x_idx]],dim='time')
+            variables[vv] = xr.concat([variables[vv], var],dim='time')
     
         e3smdata.close()
         
