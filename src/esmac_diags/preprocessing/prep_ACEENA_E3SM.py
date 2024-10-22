@@ -478,8 +478,8 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, c
     
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, config, 
-                      height_out, lev_out=np.arange(25.,1001,25.), dt=3600):
+def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
+                      height_out, config, lev_out=np.arange(25.,1001,25.), dt=3600):
     """
     prepare vertical profile (to p or to z) variables from E3SM output
     choose the grid nearest to the ARM site
