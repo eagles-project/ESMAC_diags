@@ -293,7 +293,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
             x_idx = find_nearest(lonm, latm, lon_new[tt], lat_new[tt])
             z_idx = np.abs(z3[t_idx, :, x_idx]-height_new[tt]).argmin()
             for vv in range(len(variable3d_names)):
-                variables_new[vv].append(float(variables[vv][t_idx, z_idx, x_idx]))
+                variables_new[vv].append(float(variables[vv][t_idx, z_idx, x_idx].load()))
             p.append(Pres[t_idx, z_idx, x_idx].data)
             # calculate aerosol size
             numall = [num_a1[t_idx, z_idx, x_idx].load().data, num_a2[t_idx, z_idx, x_idx].load().data, 
