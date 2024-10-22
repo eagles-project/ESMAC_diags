@@ -29,7 +29,7 @@ output_filehead = 'E3SMv2_ACEENA'
 
 # iwg data path for aircraft information
 obs_input_path = config['obs_input_path']
-iwgpath = obs_input_path + 'aircraft/IWG/'
+iwgpath = obs_input_path + 'ACEENA/aircraft/IWG/'
 
 # time frequencies
 aircraft_dt = config['model_aircraft_dt']
