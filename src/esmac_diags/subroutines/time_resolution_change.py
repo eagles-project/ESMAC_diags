@@ -12,7 +12,7 @@ def avg_time_1d(time0, data0, time):
     ----------
     time0 : numpy array
         time dimension for input data
-    data0 : numpy array
+    data0 : xarray data array
         input data
     time : numpy array
         time dimension for output data
@@ -44,7 +44,7 @@ def avg_time_2d(time0, data0, time):
     ----------
     time0 : numpy array
         time dimension for input data
-    data0 : numpy array
+    data0 : xarray data array
         input data
     time : numpy array
         time dimension for output data
@@ -76,7 +76,7 @@ def avg_height_2d(height0, data0, height):
     ----------
     height0 : numpy array
         height dimension for input data
-    data0 : numpy array
+    data0 : xarray data array
         input data
     height : numpy array
         height dimension for output data
@@ -110,7 +110,7 @@ def avg_time_3d(time0, data0, time):
     ----------
     time0 : numpy array
         time dimension for input data
-    data0 : numpy array
+    data0 : xarray data array
         input data
     time : numpy array
         time dimension for output data
@@ -182,7 +182,7 @@ def median_time_1d(time0, data0, time):
     ----------
     time0 : numpy array
         time dimension for input data
-    data0 : numpy array
+    data0 : xarray data array
         input data
     time : numpy array
         time dimension for output data
@@ -215,7 +215,7 @@ def median_time_2d(time0, data0, time):
     ----------
     time0 : numpy array
         time dimension for input data
-    data0 : numpy array
+    data0 : xarray data array
         input data
     time : numpy array
         time dimension for output data
@@ -383,7 +383,7 @@ def interp_time_1d(time0, data0, time):
     ----------
     time0 : numpy array
         time dimension for input data
-    data0 : numpy array
+    data0 : xarray data array
         input data
     time : numpy array
         time dimension for output data
@@ -411,7 +411,7 @@ def interp_time_2d(time0, data0, time):
     ----------
     time0 : numpy array
         time dimension for input data
-    data0 : numpy array
+    data0 : xarray data array
         input data
     time : numpy array
         time dimension for output data
@@ -437,7 +437,7 @@ def interp_time_height(data0, time, height):
 
     Parameters
     ----------
-    data0 : numpy array
+    data0 : xarray data array
         input data
     time: numpy array
         time dimension for output data
