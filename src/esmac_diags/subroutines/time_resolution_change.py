@@ -4,7 +4,7 @@ functions of change time resolution (e.g., average into a coarser resolution).
 
 import numpy as np
 #%%
-def avg_time_1d(time0, data0, time):
+def xr_avg_time_1d(time0, data0, time):
     """
     average 1d data into coarser time resolution
 
@@ -24,19 +24,42 @@ def avg_time_1d(time0, data0, time):
     """
     if data0.shape[0] != len(time0):
         raise ValueError("Arrays must have the same size")
-    # data = np.full((len(time)), np.nan)
     dt = np.abs(time[1]-time[0])/2
-    # for tt in range(len(time)):
-    #     idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
-    #     data[tt] = np.nanmean(data0[idx], axis = 0)
     data = data0.resample(time=2*dt, offset=-1*dt).mean() # +/- time delta for time period sampling
     data["time"] = data["time"] + dt #move time to middle of time period rather than beginning
     data = data[:len(data)-1,:] #trim last time that is added from resample method
-    
     return(data)
 
 #%%
-def avg_time_2d(time0, data0, time):
+def np_avg_time_1d(time0, data0, time):
+    """
+    average 1d data into coarser time resolution
+
+    Parameters
+    ----------
+    time0 : numpy array
+        time dimension for input data
+    data0 : numoy array
+        input data
+    time : numpy array
+        time dimension for output data
+
+    Returns
+    -------
+    data : output data
+
+    """
+    if data0.shape[0] != len(time0):
+        raise ValueError("Arrays must have the same size")
+    data = np.full((len(time)), np.nan)
+    dt = np.abs(time[1]-time[0])/2
+    for tt in range(len(time)):
+        idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
+        data[tt] = np.nanmean(data0[idx], axis = 0)
+    return(data)
+    
+#%%
+def xr_avg_time_2d(time0, data0, time):
     """
     average 2d data into coarser time resolution
 
@@ -56,17 +79,40 @@ def avg_time_2d(time0, data0, time):
     """
     if data0.shape[0] != len(time0):
         raise ValueError("the first dimension of input data must have the same size with time")
-    # data = np.full((len(time), data0.shape[1]), np.nan)
     dt = (time[1]-time[0])/2
-    # for tt in range(len(time)):
-    #     idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
-    #     data[tt, :] = np.nanmean(data0[idx, :], axis = 0)
     data = data0.resample(time=2*dt, offset=-1*dt).mean() # +/- time delta for time period sampling
     data["time"] = data["time"] + dt #move time to middle of time period rather than beginning
-    data = data[:data.shape[0]-1,:] #trim last time that is added from resample method
-    
+    data = data[:data.shape[0]-1,:] #trim last time that is added from resample method    
     return(data)
 
+#%%
+def np_avg_time_2d(time0, data0, time):
+    """
+    average 2d data into coarser time resolution
+
+    Parameters
+    ----------
+    time0 : numpy array
+        time dimension for input data
+    data0 : numpy array
+        input data
+    time : numpy array
+        time dimension for output data
+
+    Returns
+    -------
+    data : output data
+
+    """
+    if data0.shape[0] != len(time0):
+        raise ValueError("the first dimension of input data must have the same size with time")
+    data = np.full((len(time), data0.shape[1]), np.nan)
+    dt = (time[1]-time[0])/2
+    for tt in range(len(time)):
+        idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
+        data[tt, :] = np.nanmean(data0[idx, :], axis = 0)    
+    return(data)
+    
 #%%
 def avg_height_2d(height0, data0, height):
     """
@@ -76,7 +122,7 @@ def avg_height_2d(height0, data0, height):
     ----------
     height0 : numpy array
         height dimension for input data
-    data0 : xarray data array
+    data0 : numpy array
         input data
     height : numpy array
         height dimension for output data
@@ -102,7 +148,7 @@ def avg_height_2d(height0, data0, height):
     return(data)
 
 #%%
-def avg_time_3d(time0, data0, time):
+def xr_avg_time_3d(time0, data0, time):
     """
     average 3d data into coarser time resolution
 
@@ -122,20 +168,42 @@ def avg_time_3d(time0, data0, time):
     """
     if data0.shape[0] != len(time0):
         raise ValueError("the first dimension of input data must have the same size with time")
-    # data = np.full((len(time),)+ data0.shape[1:], np.nan)
     dt = (time[1]-time[0])/2
-    # for tt in range(len(time)):
-    #     idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
-    #     if len(data0.shape)==3:
-    #         data[tt, :, :] = np.nanmean(data0[idx, :, :], axis = 0)
-    #     else:
-    #         raise ValueError('check array dimension!')
     data = data0.resample(time=2*dt, offset=-1*dt).mean() # +/- time delta for time period sampling
     data["time"] = data["time"] + dt #move time to middle of time period rather than beginning
-    data = data[:data.shape[0]-1,:,:] #trim last time that is added from resample method
-    
+    data = data[:data.shape[0]-1,:,:] #trim last time that is added from resample method  
     return(data)
 
+#%%
+def np_avg_time_3d(time0, data0, time):
+    """
+    average 3d data into coarser time resolution
+
+    Parameters
+    ----------
+    time0 : numpy array
+        time dimension for input data
+    data0 : numpy array
+        input data
+    time : numpy array
+        time dimension for output data
+
+    Returns
+    -------
+    data : output data
+
+    """
+    if data0.shape[0] != len(time0):
+        raise ValueError("the first dimension of input data must have the same size with time")
+    data = np.full((len(time),)+ data0.shape[1:], np.nan)
+    dt = (time[1]-time[0])/2
+    for tt in range(len(time)):
+        idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
+        if len(data0.shape)==3:
+            data[tt, :, :] = np.nanmean(data0[idx, :, :], axis = 0)
+        else:
+            raise ValueError('check array dimension!') 
+    return(data)
 
 #%%
 def weightmean_time_1d(time0,data0,weight,time):
@@ -173,7 +241,7 @@ def weightmean_time_1d(time0,data0,weight,time):
     return(data)
 
 #%%
-def median_time_1d(time0, data0, time):
+def xr_median_time_1d(time0, data0, time):
     """
     rescale 1d data into coarser time resolution
     get median value in each coarser time window
@@ -194,11 +262,7 @@ def median_time_1d(time0, data0, time):
     """
     if len(data0) != len(time0):
         raise ValueError("Arrays must have the same size")
-    # data = np.full((len(time)), np.nan)
     dt = (time[1]-time[0])/2
-    # for tt in range(len(time)):
-    #     idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
-    #     data[tt] = np.nanmedian(data0[idx], axis = 0)
     data = data0.resample(time=2*dt, offset=-1*dt).median() # +/- time delta for time period sampling
     data["time"] = data["time"] + dt #move time to middle of time period rather than beginning
     data = data[:len(data)-1] #trim last time that is added from resample method
@@ -206,7 +270,36 @@ def median_time_1d(time0, data0, time):
     return(data)
 
 #%%
-def median_time_2d(time0, data0, time):
+def np_median_time_1d(time0, data0, time):
+    """
+    rescale 1d data into coarser time resolution
+    get median value in each coarser time window
+
+    Parameters
+    ----------
+    time0 : numpy array
+        time dimension for input data
+    data0 : numpy array
+        input data
+    time : numpy array
+        time dimension for output data
+
+    Returns
+    -------
+    data : output data
+
+    """
+    if len(data0) != len(time0):
+        raise ValueError("Arrays must have the same size")
+    data = np.full((len(time)), np.nan)
+    dt = (time[1]-time[0])/2
+    for tt in range(len(time)):
+        idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
+        data[tt] = np.nanmedian(data0[idx], axis = 0) 
+    return(data)
+    
+#%%
+def xr_median_time_2d(time0, data0, time):
     """
     rescale 2d data into coarser time resolution
     get median value in each coarser time window
@@ -227,20 +320,44 @@ def median_time_2d(time0, data0, time):
     """
     if data0.shape[0] != len(time0):
         raise ValueError("the first dimension of input data must have the same size with time")
-    # data = np.full((len(time), data0.shape[1]), np.nan)
     dt = (time[1]-time[0])/2
-    # for tt in range(len(time)):
-    #     idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
-    #     data[tt,:] = np.nanmedian(data0[idx,:], axis = 0)
-    #     # for dd in range(data0.shape[1]):
-    #     #     if sum(~np.isnan(data0[idx,dd]))/sum(idx) > 0.4:
-    #     #         data[tt,dd] = np.nanmedian(data0[idx,dd], axis = 0)
     data = data0.resample(time=2*dt, offset=-1*dt).median() # +/- time delta for time period sampling
     data["time"] = data["time"] + dt #move time to middle of time period rather than beginning
     data = data[:data.shape[0]-1,:] #trim last time that is added from resample method
-    
     return(data)
 
+#%%
+def np_median_time_2d(time0, data0, time):
+    """
+    rescale 2d data into coarser time resolution
+    get median value in each coarser time window
+
+    Parameters
+    ----------
+    time0 : numpy array
+        time dimension for input data
+    data0 : numpy array
+        input data
+    time : numpy array
+        time dimension for output data
+
+    Returns
+    -------
+    data : output data
+
+    """
+    if data0.shape[0] != len(time0):
+        raise ValueError("the first dimension of input data must have the same size with time")
+    data = np.full((len(time), data0.shape[1]), np.nan)
+    dt = (time[1]-time[0])/2
+    for tt in range(len(time)):
+        idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
+        data[tt,:] = np.nanmedian(data0[idx,:], axis = 0)
+        # for dd in range(data0.shape[1]):
+        #     if sum(~np.isnan(data0[idx,dd]))/sum(idx) > 0.4:
+        #         data[tt,dd] = np.nanmedian(data0[idx,dd], axis = 0)
+    return(data)
+    
 # #%%
 # def median_time_2d(time0, data0, time):
 #     """
@@ -375,7 +492,7 @@ def median_time_forflight_2d(time0, data0, time, height, hdiff=50.):
     return(data)
 
 #%%
-def interp_time_1d(time0, data0, time):
+def xr_interp_time_1d(time0, data0, time):
     """
     linearly interpolate 1d (time) data to a different time array
 
@@ -395,15 +512,37 @@ def interp_time_1d(time0, data0, time):
     """
     if data0.shape[0] != len(time0):
         raise ValueError("Arrays must have the same size")
-    # data = np.full((len(time)), np.nan)
-    # for tt in range(len(time)):
-    #     data[tt] = np.interp(time, time0, data0, left=np.nan, right=np.nan)
-    data = data0.interp(time = time, kwargs={"fill_value":np.nan})
-    
+    data = data0.interp(time = time, kwargs={"fill_value":np.nan})    
     return(data)
 
 #%%
-def interp_time_2d(time0, data0, time):
+def np_interp_time_1d(time0, data0, time):
+    """
+    linearly interpolate 1d (time) data to a different time array
+
+    Parameters
+    ----------
+    time0 : numpy array
+        time dimension for input data
+    data0 : numpy array
+        input data
+    time : numpy array
+        time dimension for output data
+
+    Returns
+    -------
+    data : output data
+
+    """
+    if data0.shape[0] != len(time0):
+        raise ValueError("Arrays must have the same size")
+    data = np.full((len(time)), np.nan)
+    for tt in range(len(time)):
+        data[tt] = np.interp(time, time0, data0, left=np.nan, right=np.nan)    
+    return(data)
+    
+#%%
+def xr_interp_time_2d(time0, data0, time):
     """
     linearly interpolate 2d data with a time dimension to a different time array
 
@@ -423,15 +562,37 @@ def interp_time_2d(time0, data0, time):
     """
     if data0.shape[0] != len(time0):
         raise ValueError("the first dimension of input data must have the same size with time")
-    # data = np.full((len(time), data0.shape[1]), np.nan)
-    # for tt in range(len(time)):
-    #     data[tt,:] = np.interp(time, time0, data0[tt,:], left=np.nan, right=np.nan)
-    data = data0.interp(time = time, kwargs={"fill_value":np.nan})
-    
+    data = data0.interp(time = time, kwargs={"fill_value":np.nan})    
     return(data)
 
 #%%
-def interp_time_height(data0, time, height):
+def np_interp_time_2d(time0, data0, time):
+    """
+    linearly interpolate 2d data with a time dimension to a different time array
+
+    Parameters
+    ----------
+    time0 : numpy array
+        time dimension for input data
+    data0 : numpy array
+        input data
+    time : numpy array
+        time dimension for output data
+
+    Returns
+    -------
+    data : output data
+
+    """
+    if data0.shape[0] != len(time0):
+        raise ValueError("the first dimension of input data must have the same size with time")
+    data = np.full((len(time), data0.shape[1]), np.nan)
+    for tt in range(len(time)):
+        data[tt,:] = np.interp(time, time0, data0[tt,:], left=np.nan, right=np.nan)    
+    return(data)
+    
+#%%
+def xr_interp_time_height(data0, time, height):
     """
     linearly interpolate height data to a different height array
 
@@ -449,11 +610,31 @@ def interp_time_height(data0, time, height):
     data : output data
 
     """
-    # if data0.shape[1] != len(height0):
-    #     raise ValueError("Arrays must have the same size")
-    # data = np.full((len(time)), np.nan)
-    # for tt in range(len(time)):
-    #     data[tt] = np.interp(time, time0, data0, left=np.nan, right=np.nan)
-    data = data0.interp(time = time, height = height, kwargs={"fill_value":np.nan})
-    
+    data = data0.interp(time = time, height = height, kwargs={"fill_value":np.nan})    
+    return(data)
+
+#%%
+def np_interp_time_height(data0, time, height):
+    """
+    linearly interpolate height data to a different height array
+
+    Parameters
+    ----------
+    data0 : numpy array
+        input data
+    time: numpy array
+        time dimension for output data
+    height : numpy array
+        height dimension for output data
+
+    Returns
+    -------
+    data : output data
+
+    """
+    if data0.shape[1] != len(height0):
+        raise ValueError("Arrays must have the same size")
+    data = np.full((len(time)), np.nan)
+    for tt in range(len(time)):
+        data[tt] = np.interp(time, time0, data0, left=np.nan, right=np.nan)    
     return(data)
