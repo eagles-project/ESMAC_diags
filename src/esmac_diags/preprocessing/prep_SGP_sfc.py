@@ -90,17 +90,17 @@ def prep_ACSM(acsmpath, predatapath, year, dt=300):
     
     # data resolution is 30-min, so interpolate for finer resolution; a mean could also be used for coarser resolution
     if dt >= 1800:
-        org_new = median_time_1d(time, org, time_new)
-        no3_new = median_time_1d(time, no3, time_new)
-        so4_new = median_time_1d(time, so4, time_new)
-        nh4_new = median_time_1d(time, nh4, time_new)
-        chl_new = median_time_1d(time, chl, time_new)
+        org_new = median_time_1d(time, org, time_new, arraytype='xarray')
+        no3_new = median_time_1d(time, no3, time_new, arraytype='xarray')
+        so4_new = median_time_1d(time, so4, time_new, arraytype='xarray')
+        nh4_new = median_time_1d(time, nh4, time_new, arraytype='xarray')
+        chl_new = median_time_1d(time, chl, time_new, arraytype='xarray')
     if dt < 1800:
-        org_new = interp_time_1d(time, org, time_new)
-        no3_new = interp_time_1d(time, no3, time_new)
-        so4_new = interp_time_1d(time, so4, time_new)
-        nh4_new = interp_time_1d(time, nh4, time_new)
-        chl_new = interp_time_1d(time, chl, time_new)
+        org_new = interp_time_1d(time, org, time_new, arraytype='xarray')
+        no3_new = interp_time_1d(time, no3, time_new, arraytype='xarray')
+        so4_new = interp_time_1d(time, so4, time_new, arraytype='xarray')
+        nh4_new = interp_time_1d(time, nh4, time_new, arraytype='xarray')
+        chl_new = interp_time_1d(time, chl, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'sfc_ACSM_SGP_'+year+'.nc'
@@ -237,9 +237,9 @@ def prep_ccn(ccnpath, predatapath, year, dt=300):
 
     # data resolution is hourly, so interpolate for finer resolution
     if dt >= 3600:
-        ccn1_fit_i = median_time_1d(ccntime, ccn1_fit, time_new)
-        ccn2_fit_i = median_time_1d(ccntime, ccn2_fit, time_new)
-        ccn5_fit_i = median_time_1d(ccntime, ccn5_fit, time_new)
+        ccn1_fit_i = median_time_1d(ccntime, ccn1_fit, time_new, arraytype='xarray')
+        ccn2_fit_i = median_time_1d(ccntime, ccn2_fit, time_new, arraytype='xarray')
+        ccn5_fit_i = median_time_1d(ccntime, ccn5_fit, time_new, arraytype='xarray')
         ccn1_measure = median_time_1d(ccntime, ccn1, time_new)
         ccn2_measure = median_time_1d(ccntime, ccn2, time_new)
         ccn5_measure = median_time_1d(ccntime, ccn5, time_new)
@@ -247,9 +247,9 @@ def prep_ccn(ccnpath, predatapath, year, dt=300):
         ss2_i = median_time_1d(ccntime, ss2, time_new)
         ss5_i = median_time_1d(ccntime, ss5, time_new)
     if dt < 3600:
-        ccn1_fit_i = interp_time_1d(ccntime, ccn1_fit, time_new)
-        ccn2_fit_i = interp_time_1d(ccntime, ccn2_fit, time_new)
-        ccn5_fit_i = interp_time_1d(ccntime, ccn5_fit, time_new)
+        ccn1_fit_i = interp_time_1d(ccntime, ccn1_fit, time_new, arraytype='xarray')
+        ccn2_fit_i = interp_time_1d(ccntime, ccn2_fit, time_new, arraytype='xarray')
+        ccn5_fit_i = interp_time_1d(ccntime, ccn5_fit, time_new, arraytype='xarray')
         ccn1_measure = interp_time_1d(ccntime, ccn1, time_new)
         ccn2_measure = interp_time_1d(ccntime, ccn2, time_new)
         ccn5_measure = interp_time_1d(ccntime, ccn5, time_new)
@@ -489,14 +489,14 @@ def prep_cloudheight_ARSCL(arsclbndpath, armbepath, predatapath, year, dt=300):
     dt = np.abs(time_new[1]-time_new[0])/2
   
     # compute means over time periods
-    cbh_new = avg_time_1d(arscltime, cbh, time_new)
-    cth_new = avg_time_1d(arscltime, cth, time_new)
-    cbhs_new = avg_time_2d(arscltime, cbhs, time_new)
-    cths_new = avg_time_2d(arscltime, cths, time_new)
-    cbt_new = avg_time_1d(arscltime, cbt, time_new)
-    ctt_new = avg_time_1d(arscltime, ctt, time_new)
-    cbts_new = avg_time_2d(arscltime, cbts, time_new)
-    ctts_new = avg_time_2d(arscltime, ctts, time_new)
+    cbh_new = avg_time_1d(arscltime, cbh, time_new, arraytype='xarray')
+    cth_new = avg_time_1d(arscltime, cth, time_new, arraytype='xarray')
+    cbhs_new = avg_time_2d(arscltime, cbhs, time_new, arraytype='xarray')
+    cths_new = avg_time_2d(arscltime, cths, time_new, arraytype='xarray')
+    cbt_new = avg_time_1d(arscltime, cbt, time_new, arraytype='xarray')
+    ctt_new = avg_time_1d(arscltime, ctt, time_new, arraytype='xarray')
+    cbts_new = avg_time_2d(arscltime, cbts, time_new, arraytype='xarray')
+    ctts_new = avg_time_2d(arscltime, ctts, time_new, arraytype='xarray')
 
     # compute fraction of time sampling period with highest cloud top colder than 0C
     ctt_lt0 = xr.where(ctt < 273.15, ctt, np.nan)
@@ -597,7 +597,7 @@ def prep_CPC(cpcpath, predatapath, year, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    cpc10_new = median_time_1d(time10, cpc10, time_new)
+    cpc10_new = median_time_1d(time10, cpc10, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'sfc_CPC_SGP_'+year+'.nc'
@@ -672,7 +672,7 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, year, dt=300):
     # enddate = np.datetime_as_string(np.datetime64(time[-1]))[:10]
     # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
     
-    uhsas_new = median_time_2d(time, uhsas, time_new)
+    uhsas_new = median_time_2d(time, uhsas, time_new, arraytype='xarray')
         
     idx100 = dmin[0,:]>=100
     uhsas100_new = np.nansum(uhsas_new[:,idx100], 1)
@@ -782,8 +782,8 @@ def prep_CNsize_SMPS(smpspath, nanosmpspath, predatapath, year, dt=300):
     # enddate = np.datetime_as_string(np.datetime64(time1[-1]))[:10]
     # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
     
-    smps_new = median_time_2d(time1, smps, time_new)
-    nanosmps_new = median_time_2d(time2, nanosmps, time_new)
+    smps_new = median_time_2d(time1, smps, time_new, arraytype='xarray')
+    nanosmps_new = median_time_2d(time2, nanosmps, time_new, arraytype='xarray')
         
     # combine SMPS and nanoSMPS
     smps_new[:,0:80]=nanosmps_new[:,0:80]
@@ -882,7 +882,7 @@ def prep_CNsize_TDMA(tdmapath, predatapath, year, dt=300):
     # enddate = np.datetime_as_string(np.datetime64(time[-1]))[:10]
     # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
     
-    tdma_new = median_time_2d(time, tdma, time_new)
+    tdma_new = median_time_2d(time, tdma, time_new, arraytype='xarray')
     tdma_new = tdma_new * np.mean(d)
     
     idx100 = size>=100
@@ -979,7 +979,7 @@ def prep_mfrsr_cod(mfrsrpath,  predatapath, year, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    cod_new = avg_time_1d(time, cod, time_new)
+    cod_new = avg_time_1d(time, cod, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'cod_SGP_'+year+'.nc'
@@ -1039,14 +1039,14 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, year, dt=300):
     time = mfrsrdata['time']
     reff = mfrsrdata['effective_radius_instantaneous']
     qc_reff = mfrsrdata['qc_effective_radius_instantaneous']
-    lwp_source = mfrsrdata['lwp_aource']
+    lwp_source = mfrsrdata['lwp_source']
     mfrsrdata.close()
     for file in lst[1:]:
         mfrsrdata = xr.open_dataset(file)
         time = xr.concat([time, mfrsrdata['time']], dim="time")
         reff = xr.concat([reff, mfrsrdata['effective_radius_instantaneous']], dim="time")
         qc_reff = xr.concat([qc_reff, mfrsrdata['qc_effective_radius_instantaneous']], dim="time")
-        lwp_source = xr.concat([lwp_soource, mfrsrdata['lwp_source']], dim="time")
+        lwp_source = xr.concat([lwp_source, mfrsrdata['lwp_source']], dim="time")
         mfrsrdata.close()
     
     # quality controls
@@ -1060,7 +1060,7 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, year, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    reff_new = median_time_1d(time, reff, time_new)
+    reff_new = median_time_1d(time, reff, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'reff_SGP_'+year+'.nc'
@@ -1164,8 +1164,8 @@ def prep_LWP(armbepath, mwrpath, predatapath, year, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    lwp_new = avg_time_1d(time1, lwp, time_new)
-    lwp2_new = avg_time_1d(time2, lwp2, time_new)
+    lwp_new = avg_time_1d(time1, lwp, time_new, arraytype='xarray')
+    lwp2_new = avg_time_1d(time2, lwp2, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'LWP_SGP_'+year+'.nc'
@@ -1399,9 +1399,9 @@ def prep_precip(armbepath,  metpath, parspath, predatapath, year, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    precip_tbrg_new = avg_time_1d(time, precip_tbrg, time_new)
-    precip_pwd_new = avg_time_1d(time, precip_pwd, time_new)
-    precip_pars_new = avg_time_1d(time, precip_pars, time_new) 
+    precip_tbrg_new = avg_time_1d(time, precip_tbrg, time_new, arraytype='xarray')
+    precip_pwd_new = avg_time_1d(time, precip_pwd, time_new, arraytype='xarray')
+    precip_pars_new = avg_time_1d(time, precip_pars, time_new, arraytype='xarray') 
     
     #%% output file
     outfile = predatapath + 'precip_SGP_'+year+'.nc'
@@ -1481,10 +1481,10 @@ def prep_radiation(armbepath, radfluxpath, predatapath, year, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    lwdn_new = avg_time_1d(time, lwdn, time_new)
-    swdn_new = avg_time_1d(time, swdn, time_new)
-    lwup_new = avg_time_1d(time, lwup, time_new)
-    swup_new = avg_time_1d(time, swup, time_new)
+    lwdn_new = avg_time_1d(time, lwdn, time_new, arraytype='xarray')
+    swdn_new = avg_time_1d(time, swdn, time_new, arraytype='xarray')
+    lwup_new = avg_time_1d(time, lwup, time_new, arraytype='xarray')
+    swup_new = avg_time_1d(time, swup, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'sfc_radiation_SGP_'+year+'.nc'
@@ -1578,8 +1578,8 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, year, dt=300):
         cf_arscl = cf_arscl*100
         cf_tsi = cf_tsi*100
         
-        cf_arscl_new = avg_time_1d(time, cf_arscl, time_new)
-        cf_tsi_new = avg_time_1d(time, cf_tsi, time_new)
+        cf_arscl_new = avg_time_1d(time, cf_arscl, time_new, arraytype='xarray')
+        cf_tsi_new = avg_time_1d(time, cf_tsi, time_new, arraytype='xarray')
         # cf_visst_new = avg_time_1d(time, cf_visst, time_new)
 
     if dt < 3600:
@@ -1614,7 +1614,7 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, year, dt=300):
         cf_tsi = cf_opaque_tsi + cf_thin_tsi # add opaque and thin cloud fractions to get total (should be in units of %)
         cf_tsi[qc_cf_opaque_tsi > 0] = np.nan
         cf_tsi[qc_cf_thin_tsi > 0] = np.nan
-        cf_tsi_new = avg_time_1d(tsitime, cf_tsi, time_new)
+        cf_tsi_new = avg_time_1d(tsitime, cf_tsi, time_new, arraytype='xarray')
       
     #%% output file
     outfile = predatapath + 'totcld_SGP_'+year+'.nc'
@@ -1705,7 +1705,7 @@ def prep_Ndrop(ndroppath, predatapath, year, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    nd_new = median_time_1d(time, nd, time_new)
+    nd_new = median_time_1d(time, nd, time_new, arraytype='xarray')
     # nd_new = avg_time_1d(time, nd, time_new)
     
     #%% output file
@@ -1844,7 +1844,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, year, dt
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    nd_new = median_time_1d(time, nd, time_new)
+    nd_new = median_time_1d(time, nd, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'Nd_ARMretrieval_SGP_'+year+'.nc'
