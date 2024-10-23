@@ -912,11 +912,11 @@ def prep_LTS(armbepath, predatapath, dt=300):
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
 
     if dt >= 3600:
-        LTS700_new = avg_time_1d(time700_valid, LTS700_valid, time_new, arraytype='xarray')
-        LTS850_new = avg_time_1d(time850_valid, LTS850_valid, time_new, arraytype='xarray')
+        LTS700_new = avg_time_1d(time700_valid, LTS700_valid, time_new)
+        LTS850_new = avg_time_1d(time850_valid, LTS850_valid, time_new)
     if dt < 3600:
-        LTS700_new = interp_time_1d(time700_valid, LTS700_valid, time_new, arraytype='xarray')
-        LTS850_new = interp_time_1d(time850_valid, LTS850_valid, time_new, arraytype='xarray')
+        LTS700_new = interp_time_1d(time700_valid, LTS700_valid, time_new)
+        LTS850_new = interp_time_1d(time850_valid, LTS850_valid, time_new)
         
     #%% output file
     outfile = predatapath + 'LTS_ACEENA.nc'
