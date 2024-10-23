@@ -18,19 +18,9 @@ from esmac_diags.subroutines.quality_control import qc_remove_neg, qc_mask_qcfla
                 qc_mask_qcflag_cpc, qc_correction_nanosmps
 from esmac_diags.subroutines.specific_data_treatment import calc_cdnc_ARM
 
-# acsmpath = '../../../raw_data/obs/SGP/sgpaosacsm/'
-# ccnpath = '../../../raw_data/obs/SGP/sgpccn/'
-# cpcpath = '../../../raw_data/obs/SGP/sgpcpc/'
-# tdmapath = '../../../raw_data/obs/SGP/sgptdmasizeC1.b1/'
-# uhsaspath = '../../../raw_data/obs/SGP/sgpaosuhsasE13.b1/'
-# smpspath = '../../../raw_data/obs/SGP/sgpaossmpsE13.b1/'
-# nanosmpspath = '../../../raw_data/obs/SGP/sgpaosnanosmpsE13.b1/'
-# predatapath = '../../../prep_data/SGP/'
-# year=2020
-# dt=3600
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_ACSM(acsmpath, predatapath, year, dt=300):
+def prep_ACSM(acsmpath, predatapath, year, dt=3600):
     """
     prepare acsm data
 
@@ -139,7 +129,7 @@ def prep_ACSM(acsmpath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_ccn(ccnpath, predatapath, year, dt=300):
+def prep_ccn(ccnpath, predatapath, year, dt=3600):
     """
     prepare surface CCN data. 
 
@@ -314,7 +304,7 @@ def prep_ccn(ccnpath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, temperature_out, year, dt=300):
+def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, temperature_out, year, dt=3600):
     """
     prepare cloud fraction data from ARMBE
 
@@ -420,7 +410,7 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, temperature_out
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_cloudheight_ARSCL(arsclbndpath, armbepath, predatapath, year, dt=300):
+def prep_cloudheight_ARSCL(arsclbndpath, armbepath, predatapath, year, dt=3600):
     """
     prepare cloud base and top height data at ARM sites from ARSCL
     include multi-layer clouds
@@ -557,7 +547,7 @@ def prep_cloudheight_ARSCL(arsclbndpath, armbepath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_CPC(cpcpath, predatapath, year, dt=300):
+def prep_CPC(cpcpath, predatapath, year, dt=3600):
     """
     prepare CPC and CPCu data
 
@@ -621,7 +611,7 @@ def prep_CPC(cpcpath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_CNsize_UHSAS(uhsaspath, predatapath, year, dt=300):
+def prep_CNsize_UHSAS(uhsaspath, predatapath, year, dt=3600):
     """
     prepare UHSAS data
 
@@ -708,7 +698,7 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_CNsize_SMPS(smpspath, nanosmpspath, predatapath, year, dt=300):
+def prep_CNsize_SMPS(smpspath, nanosmpspath, predatapath, year, dt=3600):
     """
     prepare SMPS data
 
@@ -824,7 +814,7 @@ def prep_CNsize_SMPS(smpspath, nanosmpspath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_CNsize_TDMA(tdmapath, predatapath, year, dt=300):
+def prep_CNsize_TDMA(tdmapath, predatapath, year, dt=3600):
     """
     prepare aerosol number size distribution and concentration for size>100nm from TDMA
     
@@ -923,7 +913,7 @@ def prep_CNsize_TDMA(tdmapath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_mfrsr_cod(mfrsrpath,  predatapath, year, dt=300):
+def prep_mfrsr_cod(mfrsrpath,  predatapath, year, dt=3600):
     """
     prepare cloud optical depth data from MFRSR
 
@@ -1006,7 +996,7 @@ def prep_mfrsr_cod(mfrsrpath,  predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_mfrsr_Reff(mfrsrpath,  predatapath, year, dt=300):
+def prep_mfrsr_Reff(mfrsrpath,  predatapath, year, dt=3600):
     """
     prepare cloud effective radius data from MFRSR
 
@@ -1084,7 +1074,7 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_LWP(armbepath, mwrpath, predatapath, year, dt=300):
+def prep_LWP(armbepath, mwrpath, predatapath, year, dt=3600):
     """
     prepare liquid water path
     Although LWP is measured by microwave radiometer (MWR), it is processed in 
@@ -1194,7 +1184,7 @@ def prep_LWP(armbepath, mwrpath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_LTS(armbepath, arsclpath, predatapath, year, dt=300):
+def prep_LTS(armbepath, arsclpath, predatapath, year, dt=3600):
     """
     prepare lower tropospheric stability (potential temperature difference between 700hPa and surface) from ARMBE
 
@@ -1337,7 +1327,7 @@ def prep_LTS(armbepath, arsclpath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
         
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_precip(armbepath,  metpath, parspath, predatapath, year, dt=300):
+def prep_precip(armbepath,  metpath, parspath, predatapath, year, dt=3600):
     """
     prepare surface precipitation data from ARMBE
 
@@ -1431,7 +1421,7 @@ def prep_precip(armbepath,  metpath, parspath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_radiation(armbepath, radfluxpath, predatapath, year, dt=300):
+def prep_radiation(armbepath, radfluxpath, predatapath, year, dt=3600):
     """
     prepare surface radiation data from ARMBE
 
@@ -1520,7 +1510,7 @@ def prep_radiation(armbepath, radfluxpath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, year, dt=300):
+def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, year, dt=3600):
     """
     prepare total cloud fraction data from ARMBE
 
@@ -1649,7 +1639,7 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_Ndrop(ndroppath, predatapath, year, dt=300):
+def prep_Ndrop(ndroppath, predatapath, year, dt=3600):
     """
     prepare cloud deoplet number concentration from Ndrop data
     
@@ -1731,7 +1721,7 @@ def prep_Ndrop(ndroppath, predatapath, year, dt=300):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, year, dt=300):
+def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, year, dt=3600):
     """
     prepare cloud deoplet number concentration (Nd) data at ARM sites
     input data is cloud optical depth from MFRSR, LWP from MWR (in the MFRSR data), 
