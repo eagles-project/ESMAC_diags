@@ -73,7 +73,7 @@ def qc_mask_qcflag_cpc(data,qc):
 
     Parameters
     ----------
-    data : numpy array
+    data : numpy or xarray array
         input data
     qc : numpy array, int format
         quality control flag data.
