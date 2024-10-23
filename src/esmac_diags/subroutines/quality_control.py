@@ -84,7 +84,7 @@ def qc_mask_qcflag_cpc(data,qc):
 
     """
     data_out = np.array(data)
-    qc = qc.astype(np.int)
+    qc = qc.astype('int32')
     for tt in range(len(qc)):
         if qc[tt] != 0:
             qc_bin = bin(qc[tt])
@@ -98,7 +98,7 @@ def qc_mask_qcflag_cpc(data,qc):
 
 def qc_mask_qcflag_cpcu(data,qc):
     data_out = np.array(data)
-    qc = qc.astype(np.int)
+    qc = qc.astype('int32')
     for tt in range(len(qc)):
         if qc[tt] != 0:
             qc_bin = bin(qc[tt])
