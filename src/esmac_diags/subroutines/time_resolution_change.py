@@ -218,7 +218,8 @@ def median_time_1d(time0, data0, time, arraytype='numpy'):
     if arraytype == 'xarray':
         data = data0.resample(time=2*dt, offset=-1*dt).median() # +/- time delta for time period sampling
         data["time"] = data["time"] + dt #move time to middle of time period rather than beginning
-        data = data[:len(data)-1] #trim last time that is added from resample method
+        data = data.sel(time=slice(time[0], time[-1])) #limit data to within the new times
+        # data = data[:len(data)-1,:] #trim last time that is added from resample method
     elif arraytype == 'numpy':
         data = np.full((len(time)), np.nan)
         for tt in range(len(time)):
