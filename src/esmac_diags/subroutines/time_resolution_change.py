@@ -31,7 +31,7 @@ def avg_time_1d(time0, data0, time, arraytype='numpy'):
         data = data0.resample(time=2*dt, offset=-1*dt).mean() # +/- time delta for time period sampling
         data["time"] = data["time"] + dt #move time to middle of time period rather than beginning
         data = data[:len(data)-1,:] #trim last time that is added from resample method
-    else if arraytype == 'numpy':
+    elif arraytype == 'numpy':
         data = np.full((len(time)), np.nan)
         for tt in range(len(time)):
             idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
@@ -69,7 +69,7 @@ def avg_time_2d(time0, data0, time, arraytype='numpy'):
         data = data0.resample(time=2*dt, offset=-1*dt).mean() # +/- time delta for time period sampling
         data["time"] = data["time"] + dt #move time to middle of time period rather than beginning
         data = data[:data.shape[0]-1,:] #trim last time that is added from resample method  
-    else if arraytype == 'numpy':
+    elif arraytype == 'numpy':
         data = np.full((len(time), data0.shape[1]), np.nan)
         for tt in range(len(time)):
             idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
@@ -141,7 +141,7 @@ def avg_time_3d(time0, data0, time, arraytype='numpy'):
         data = data0.resample(time=2*dt, offset=-1*dt).mean() # +/- time delta for time period sampling
         data["time"] = data["time"] + dt #move time to middle of time period rather than beginning
         data = data[:data.shape[0]-1,:,:] #trim last time that is added from resample method 
-    else if arraytype == 'numpy':
+    elif arraytype == 'numpy':
         data = np.full((len(time),)+ data0.shape[1:], np.nan)
         for tt in range(len(time)):
             idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
@@ -218,7 +218,7 @@ def median_time_1d(time0, data0, time, arraytype='numpy'):
         data = data0.resample(time=2*dt, offset=-1*dt).median() # +/- time delta for time period sampling
         data["time"] = data["time"] + dt #move time to middle of time period rather than beginning
         data = data[:len(data)-1] #trim last time that is added from resample method
-    else if arraytype == 'numpy':
+    elif arraytype == 'numpy':
         data = np.full((len(time)), np.nan)
         for tt in range(len(time)):
             idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
@@ -257,7 +257,7 @@ def median_time_2d(time0, data0, time, arraytype='numpy'):
         data = data0.resample(time=2*dt, offset=-1*dt).median() # +/- time delta for time period sampling
         data["time"] = data["time"] + dt #move time to middle of time period rather than beginning
         data = data[:data.shape[0]-1,:] #trim last time that is added from resample method
-    else if arraytype == 'numpy':
+    elif arraytype == 'numpy':
         data = np.full((len(time), data0.shape[1]), np.nan)
         for tt in range(len(time)):
             idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
@@ -428,7 +428,7 @@ def interp_time_1d(time0, data0, time, arraytype='numpy'):
         raise ValueError("Arrays must have the same size")
     if arraytype == 'xarray':
         data = data0.interp(time = time, kwargs={"fill_value":np.nan})    
-    else if arraytype == 'numpy':
+    elif arraytype == 'numpy':
         data = np.full((len(time)), np.nan)
         for tt in range(len(time)):
             data[tt] = np.interp(time, time0, data0, left=np.nan, right=np.nan) 
@@ -462,7 +462,7 @@ def interp_time_2d(time0, data0, time, arraytype='xarray'):
         raise ValueError("the first dimension of input data must have the same size with time")
     if arraytype == 'xarray':
         data = data0.interp(time = time, kwargs={"fill_value":np.nan})
-    else if arraytype == 'numpy':
+    elif arraytype == 'numpy':
         data = np.full((len(time), data0.shape[1]), np.nan)
         for tt in range(len(time)):
             data[tt,:] = np.interp(time, time0, data0[tt,:], left=np.nan, right=np.nan)
@@ -496,7 +496,7 @@ def interp_time_height(data0, time, height, arraytype='numpy'):
     #     raise ValueError("Arrays must have the same size")
     if arraytype == 'xarray':
         data = data0.interp(time = time, height = height, kwargs={"fill_value":np.nan})    
-    else if arraytype == 'numpy':
+    elif arraytype == 'numpy':
         data = np.full((len(time)), np.nan)
         for tt in range(len(time)):
             data[tt] = np.interp(time, time0, data0, left=np.nan, right=np.nan) 
