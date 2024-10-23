@@ -373,7 +373,7 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, year, dt=300):
             # interpolate into standard time
             cloud_i[:,kk] = np.interp(time_new, time, cl)
             
-        cloud_o = avg_time_2d(height,cloud_i.T,height_out, arraytype='xarray').T
+        cloud_o = avg_height_2d(height,cloud_i.T,height_out).T
 
     if dt < 3600:
         lst = glob.glob(os.path.join(arsclpath, 'enaarsclkazr1kolliasC1.c0*.nc'))
@@ -470,10 +470,10 @@ def prep_cloudheight_ARSCL(arsclbndpath, predatapath, year, dt=300):
     
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    cbh_new = avg_time_1d(arscltime, cbh, time_new)
+    cbh_new = avg_time_1d(arscltime, cbh, time_new, arraytype='xarray')
     cth_new = avg_time_1d(arscltime, cth, time_new)
-    cbhs_new = avg_time_2d(arscltime, cbhs, time_new)
-    cths_new = avg_time_2d(arscltime, cths, time_new)
+    cbhs_new = avg_time_2d(arscltime, cbhs, time_new, arraytype='xarray')
+    cths_new = avg_time_2d(arscltime, cths, time_new, arraytype='xarray')
     
     
     #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -551,7 +551,7 @@ def prep_CPC(cpcpath,  predatapath, year, dt=300):
     
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    cpc10_new = median_time_1d(time10, cpc10, time_new)
+    cpc10_new = median_time_1d(time10, cpc10, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'sfc_CPC_ENA_'+year+'.nc'
@@ -743,7 +743,7 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, year, dt=300):
     # enddate = np.datetime_as_string(np.datetime64(time[-1]))[:10]
     # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
     
-    uhsas_new = median_time_2d(time, uhsas, time_new)
+    uhsas_new = median_time_2d(time, uhsas, time_new, arraytype='xarray')
         
     idx100 = dmin[0,:]>=100
     uhsas100_new = np.nansum(uhsas_new[:,idx100], 1)
@@ -859,8 +859,8 @@ def prep_LWP(armbepath, mwrpath, predatapath, year, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    lwp_new = avg_time_1d(time1, lwp, time_new)
-    lwp2_new = avg_time_1d(time2, lwp2, time_new)
+    lwp_new = avg_time_1d(time1, lwp, time_new, arraytype='xarray')
+    lwp2_new = avg_time_1d(time2, lwp2, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'LWP_ENA_'+year+'.nc'
@@ -954,7 +954,7 @@ def prep_LTS(armbepath, arsclpath, predatapath, year, dt=300):
     
     # data treatments
     cbh = qc_remove_neg(cbh, remove_zero='True')
-    cbh_armbe = avg_time_1d(arscltime, cbh, time)
+    cbh_armbe = avg_time_1d(arscltime, cbh, time, arraytype='xarray')
     
     # use dry static energy as an approxy to calcalate potential temperature (theta = T + gz/Cp) 
     thetadiff_cb = np.empty((0))
@@ -1082,7 +1082,7 @@ def prep_mfrsr_cod(mfrsrpath,  predatapath, year, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    cod_new = avg_time_1d(time, cod, time_new)
+    cod_new = avg_time_1d(time, cod, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'cod_ENA_'+year+'.nc'
@@ -1162,7 +1162,7 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, year, dt=300):
     
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    reff_new = median_time_1d(time, reff, time_new)
+    reff_new = median_time_1d(time, reff, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'reff_ENA_'+year+'.nc'
@@ -1244,9 +1244,9 @@ def prep_precip(armbepath, metpath, parspath, predatapath, year, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    precip_org_new = avg_time_1d(time, precip_org, time_new)
-    precip_pwd_new = avg_time_1d(time, precip_pwd, time_new)
-    precip_pars_new = avg_time_1d(time, precip_pars, time_new)
+    precip_org_new = avg_time_1d(time, precip_org, time_new, arraytype='xarray')
+    precip_pwd_new = avg_time_1d(time, precip_pwd, time_new, arraytype='xarray')
+    precip_pars_new = avg_time_1d(time, precip_pars, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'precip_ENA_'+year+'.nc'
@@ -1327,10 +1327,10 @@ def prep_radiation(armbepath, radfluxpath, predatapath, year, dt=300):
     
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    lwdn_new = avg_time_1d(time, lwdn, time_new)
-    swdn_new = avg_time_1d(time, swdn, time_new)
-    lwup_new = avg_time_1d(time, lwup, time_new)
-    swup_new = avg_time_1d(time, swup, time_new)
+    lwdn_new = avg_time_1d(time, lwdn, time_new, arraytype='xarray')
+    swdn_new = avg_time_1d(time, swdn, time_new, arraytype='xarray')
+    lwup_new = avg_time_1d(time, lwup, time_new, arraytype='xarray')
+    swup_new = avg_time_1d(time, swup, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'sfc_radiation_ENA_'+year+'.nc'
@@ -1424,8 +1424,8 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, year, dt=300):
         cf_arscl = cf_arscl*100
         cf_tsi = cf_tsi*100
 
-        cf_arscl_new = avg_time_1d(time, cf_arscl, time_new)
-        cf_tsi_new = avg_time_1d(time, cf_tsi, time_new)
+        cf_arscl_new = avg_time_1d(time, cf_arscl, time_new, arraytype='xarray')
+        cf_tsi_new = avg_time_1d(time, cf_tsi, time_new, arraytype='xarray')
         # cf_visst_new = avg_time_1d(time, cf_visst, time_new)
 
     if dt < 3600:
@@ -1460,7 +1460,7 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, year, dt=300):
         cf_tsi = cf_opaque_tsi + cf_thin_tsi # add opaque and thin cloud fractions to get total (should be in units of %)
         cf_tsi[qc_cf_opaque_tsi > 0] = np.nan
         cf_tsi[qc_cf_thin_tsi > 0] = np.nan
-        cf_tsi_new = avg_time_1d(tsitime, cf_tsi, time_new)
+        cf_tsi_new = avg_time_1d(tsitime, cf_tsi, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'totcld_ENA_'+year+'.nc'
@@ -1543,7 +1543,7 @@ def prep_Ndrop(ndroppath, predatapath, year, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    nd_new = median_time_1d(time, nd, time_new)
+    nd_new = median_time_1d(time, nd, time_new, arraytype='xarray')
     # nd_new = avg_time_1d(time, nd, time_new)
     
     #%% output file
@@ -1671,9 +1671,9 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, year, dt
     # time = mfrsrtime.data
     # H_tmp = np.interp(np.int64(time), np.int64(arscltime), H)
     time_5min = pd.date_range(start='2017-06-20', end='2018-02-21', freq=str(int(300))+"s") # make inputs every 5 min to avoid high frequency noise in nd retrieval (COD looks like it doesn't vary at timescales < ~5 min)
-    H_5min = avg_time_1d(arscltime, H, time_5min)
-    cod_5min = avg_time_1d(mfrsrtime, cod, time_5min)
-    lwp_5min = avg_time_1d(mwrtime, lwp, time_5min
+    H_5min = avg_time_1d(arscltime, H, time_5min, arraytype='xarray')
+    cod_5min = avg_time_1d(mfrsrtime, cod, time_5min, arraytype='xarray')
+    lwp_5min = avg_time_1d(mwrtime, lwp, time_5min, arraytype='xarray')
     nd = calc_cdnc_ARM(lwp_5min, cod_5min, H_5min)
     
     # exclude small values (AV removed this filter 6/24/2024)
@@ -1682,7 +1682,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, year, dt
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    nd_new = median_time_1d(time, nd, time_new)
+    nd_new = median_time_1d(time, nd, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'Nd_ARMretrieval_ENA_'+year+'.nc'
