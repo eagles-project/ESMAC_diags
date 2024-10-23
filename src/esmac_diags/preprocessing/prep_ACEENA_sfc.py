@@ -471,7 +471,7 @@ def prep_CPC(cpcpath,  predatapath, dt=3600):
     obsdata.close()
     
     # quality controls
-    cpc10 = qc_mask_qcflag_cpc(cpc10, qc_cpc10.astype(int32).data)
+    cpc10 = qc_mask_qcflag_cpc(cpc10, qc_cpc10.astype('int32').data)
     
     
     #%% re-shape the data into coarser resolution
