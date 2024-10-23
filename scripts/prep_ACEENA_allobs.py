@@ -91,8 +91,8 @@ print('prepare surface data:')
 # sfc.prep_ACSM(acsmpath, prep_data_path+'surface/', dt=surface_dt)            # aerosol composition
 # sfc.prep_ccn(ccnsfcpath, prep_data_path+'surface/', dt=surface_dt)              # CCN number concentration
 # sfc.prep_CPC(cpcpath, prep_data_path+'surface/', dt=surface_dt)    # aerosol number concentration (>3 or 10nm)
-sfc.prep_CPC_withENAmask(aerosolmaskpath, prep_data_path+'surface/', dt=surface_dt)    # aerosol mask data
-# sfc.prep_CNsize_UHSAS(uhsaspath, prep_data_path+'surface/', dt=surface_dt)   # aerosol size distribution from UHSAS
+# sfc.prep_CPC_withENAmask(aerosolmaskpath, prep_data_path+'surface/', dt=surface_dt)    # aerosol mask data
+sfc.prep_CNsize_UHSAS(uhsaspath, prep_data_path+'surface/', dt=surface_dt)   # aerosol size distribution from UHSAS
 # sfc.prep_cloud_2d(armbepath, prep_data_path+'surface/', height_out, dt=surface_dt)   # 2D cloud fraction
 # sfc.prep_cloudheight_ARSCL(arsclpath, prep_data_path+'surface/', dt=surface_dt)   # cloud height 
 # sfc.prep_totcld(armbepath, prep_data_path+'surface/', dt=surface_dt)         # cloud fraction. from ARSCL, TSI and satellite sources
