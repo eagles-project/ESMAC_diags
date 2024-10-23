@@ -113,17 +113,17 @@ def prep_ACSM(acsmpath, predatapath, dt=300):
 
     # data resolution is 30-min, so interpolate for finer resolution; a mean could also be used for coarser resolution is warranted
     if dt >= 1800:
-        org_new = median_time_1d(time, org, time_new)
-        no3_new = median_time_1d(time, no3, time_new)
-        so4_new = median_time_1d(time, so4, time_new)
-        nh4_new = median_time_1d(time, nh4, time_new)
-        chl_new = median_time_1d(time, chl, time_new)
+        org_new = median_time_1d(time, org, time_new, arraytype='xarray')
+        no3_new = median_time_1d(time, no3, time_new, arraytype='xarray')
+        so4_new = median_time_1d(time, so4, time_new, arraytype='xarray')
+        nh4_new = median_time_1d(time, nh4, time_new, arraytype='xarray')
+        chl_new = median_time_1d(time, chl, time_new, arraytype='xarray')
     if dt < 1800:
-        org_new = interp_time_1d(time, org, time_new)
-        no3_new = interp_time_1d(time, no3, time_new)
-        so4_new = interp_time_1d(time, so4, time_new)
-        nh4_new = interp_time_1d(time, nh4, time_new)
-        chl_new = interp_time_1d(time, chl, time_new)
+        org_new = interp_time_1d(time, org, time_new, arraytype='xarray')
+        no3_new = interp_time_1d(time, no3, time_new, arraytype='xarray')
+        so4_new = interp_time_1d(time, so4, time_new, arraytype='xarray')
+        nh4_new = interp_time_1d(time, nh4, time_new, arraytype='xarray')
+        chl_new = interp_time_1d(time, chl, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'sfc_ACSM_ACEENA.nc'
@@ -223,23 +223,23 @@ def prep_ccn(ccnpath, predatapath, dt=300):
     # data resolution is hourly, so interpolate for finer resolution
     # note that ENA code includes polynomial fits (should make consistent in future)
     if dt >= 3600:
-        ccn1_new = median_time_1d(time1, ccn1, time_new)
-        ss1_i = median_time_1d(time1, ss1, time_new)
-        ccn2_new = median_time_1d(time2, ccn2, time_new)
-        ss2_i = median_time_1d(time2, ss2, time_new)
-        ccn5_new = median_time_1d(time5, ccn5, time_new)
-        ss5_i = median_time_1d(time5, ss5, time_new)
-        ccn6_new = median_time_1d(time6, ccn6, time_new)
-        ss6_i = median_time_1d(time6, ss6, time_new)
+        ccn1_new = median_time_1d(time1, ccn1, time_new, arraytype='xarray')
+        ss1_i = median_time_1d(time1, ss1, time_new, arraytype='xarray')
+        ccn2_new = median_time_1d(time2, ccn2, time_new, arraytype='xarray')
+        ss2_i = median_time_1d(time2, ss2, time_new, arraytype='xarray')
+        ccn5_new = median_time_1d(time5, ccn5, time_new, arraytype='xarray')
+        ss5_i = median_time_1d(time5, ss5, time_new, arraytype='xarray')
+        ccn6_new = median_time_1d(time6, ccn6, time_new, arraytype='xarray')
+        ss6_i = median_time_1d(time6, ss6, time_new, arraytype='xarray')
     if dt < 3600:
-        ccn1_new = interp_time_1d(time1, ccn1, time_new)
-        ss1_i = interp_time_1d(time1, ss1, time_new)
-        ccn2_new = interp_time_1d(time2, ccn2, time_new)
-        ss2_i = interp_time_1d(time2, ss2, time_new)
-        ccn5_new = interp_time_1d(time5, ccn5, time_new)
-        ss5_i = interp_time_1d(time5, ss5, time_new)
-        ccn6_new = interp_time_1d(time6, ccn6, time_new)
-        ss6_i = interp_time_1d(time6, ss6, time_new)
+        ccn1_new = interp_time_1d(time1, ccn1, time_new, arraytype='xarray')
+        ss1_i = interp_time_1d(time1, ss1, time_new, arraytype='xarray')
+        ccn2_new = interp_time_1d(time2, ccn2, time_new, arraytype='xarray')
+        ss2_i = interp_time_1d(time2, ss2, time_new, arraytype='xarray')
+        ccn5_new = interp_time_1d(time5, ccn5, time_new, arraytype='xarray')
+        ss5_i = interp_time_1d(time5, ss5, time_new, arraytype='xarray')
+        ccn6_new = interp_time_1d(time6, ccn6, time_new, arraytype='xarray')
+        ss6_i = interp_time_1d(time6, ss6, time_new, arraytype='xarray')
         
     
     #%% output file
@@ -436,10 +436,10 @@ def prep_cloudheight_ARSCL(arsclbndpath, predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
-    cbh_new = avg_time_1d(arscltime, cbh, time_new)
+    cbh_new = avg_time_1d(arscltime, cbh, time_new, arraytype='xarray')
     cth_new = avg_time_1d(arscltime, cth, time_new)
-    cbhs_new = avg_time_2d(arscltime, cbhs, time_new)
-    cths_new = avg_time_2d(arscltime, cths, time_new)
+    cbhs_new = avg_time_2d(arscltime, cbhs, time_new, arraytype='xarray')
+    cths_new = avg_time_2d(arscltime, cths, time_new, arraytype='xarray')
     
     
     #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -513,7 +513,7 @@ def prep_CPC(cpcpath,  predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
-    cpc10_new = median_time_1d(time10, cpc10, time_new)
+    cpc10_new = median_time_1d(time10, cpc10, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'sfc_CPC_ACEENA.nc'
@@ -812,8 +812,8 @@ def prep_LWP(armbepath, mwrpath, predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
 
-    lwp_new = avg_time_1d(time1, lwp, time_new)
-    lwp2_new = avg_time_1d(time2, lwp2, time_new)
+    lwp_new = avg_time_1d(time1, lwp, time_new, arraytype='xarray')
+    lwp2_new = avg_time_1d(time2, lwp2, time_new, arraytype='xarray')
 
     #%% sometimes, there can be negative LWP values when LWP is noise, so set those to 0
     lwp_new[lwp_new < 0] = 0
@@ -912,11 +912,11 @@ def prep_LTS(armbepath, predatapath, dt=300):
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
 
     if dt >= 3600:
-        LTS700_new = avg_time_1d(time700_valid, LTS700_valid, time_new)
-        LTS850_new = avg_time_1d(time850_valid, LTS850_valid, time_new)
+        LTS700_new = avg_time_1d(time700_valid, LTS700_valid, time_new, arraytype='xarray')
+        LTS850_new = avg_time_1d(time850_valid, LTS850_valid, time_new, arraytype='xarray')
     if dt < 3600:
-        LTS700_new = interp_time_1d(time700_valid, LTS700_valid, time_new)
-        LTS850_new = interp_time_1d(time850_valid, LTS850_valid, time_new)
+        LTS700_new = interp_time_1d(time700_valid, LTS700_valid, time_new, arraytype='xarray')
+        LTS850_new = interp_time_1d(time850_valid, LTS850_valid, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'LTS_ACEENA.nc'
@@ -997,7 +997,7 @@ def prep_mfrsr_cod(mfrsrpath,  predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
-    cod_new = avg_time_1d(time, cod, time_new)
+    cod_new = avg_time_1d(time, cod, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'cod_ACEENA.nc'
@@ -1051,14 +1051,14 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=300): # check to see if fill val
     time = mfrsrdata['time']
     reff = mfrsrdata['effective_radius_instantaneous']
     qc_reff = mfrsrdata['qc_effective_radius_instantaneous']
-    lwp_source = mfrsrdata['lwp_aource']
+    lwp_source = mfrsrdata['lwp_source']
     mfrsrdata.close()
     for file in lst[1:]:
         mfrsrdata = xr.open_dataset(file)
         time = xr.concat([time, mfrsrdata['time']], dim="time")
         reff = xr.concat([reff, mfrsrdata['effective_radius_instantaneous']], dim="time")
         qc_reff = xr.concat([qc_reff, mfrsrdata['qc_effective_radius_instantaneous']], dim="time")
-        lwp_source = xr.concat([lwp_soource, mfrsrdata['lwp_source']], dim="time")
+        lwp_source = xr.concat([lwp_source, mfrsrdata['lwp_source']], dim="time")
         mfrsrdata.close()
     
     # quality controls
@@ -1073,7 +1073,7 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=300): # check to see if fill val
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
-    reff_new = median_time_1d(time, reff, time_new)
+    reff_new = median_time_1d(time, reff, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'reff_ACEENA.nc'
@@ -1152,9 +1152,9 @@ def prep_precip(armbepath, metpath, parspath, predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
-    precip_org_new = avg_time_1d(time, precip_org, time_new)
-    precip_pwd_new = avg_time_1d(time, precip_pwd, time_new)
-    precip_pars_new = avg_time_1d(time, precip_pars, time_new)
+    precip_org_new = avg_time_1d(time, precip_org, time_new, arraytype='xarray')
+    precip_pwd_new = avg_time_1d(time, precip_pwd, time_new, arraytype='xarray')
+    precip_pars_new = avg_time_1d(time, precip_pars, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'precip_ACEENA.nc'
@@ -1231,10 +1231,10 @@ def prep_radiation(armbepath, radfluxpath, predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
-    lwdn_new = avg_time_1d(time, lwdn, time_new)
-    swdn_new = avg_time_1d(time, swdn, time_new)
-    lwup_new = avg_time_1d(time, lwup, time_new)
-    swup_new = avg_time_1d(time, swup, time_new)
+    lwdn_new = avg_time_1d(time, lwdn, time_new, arraytype='xarray')
+    swdn_new = avg_time_1d(time, swdn, time_new, arraytype='xarray')
+    lwup_new = avg_time_1d(time, lwup, time_new, arraytype='xarray')
+    swup_new = avg_time_1d(time, swup, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'sfc_radiation_ACEENA.nc'
@@ -1325,8 +1325,8 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, dt=300):
         cf_arscl = cf_arscl*100
         cf_tsi = cf_tsi*100
 
-        cf_arscl_new = avg_time_1d(time, cf_arscl, time_new)
-        cf_tsi_new = avg_time_1d(time, cf_tsi, time_new)
+        cf_arscl_new = avg_time_1d(time, cf_arscl, time_new, arraytype='xarray')
+        cf_tsi_new = avg_time_1d(time, cf_tsi, time_new, arraytype='xarray')
         # cf_visst_new = avg_time_1d(time, cf_visst, time_new)
   
     if dt < 3600:
@@ -1361,7 +1361,7 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, dt=300):
         cf_tsi = cf_opaque_tsi + cf_thin_tsi # add opaque and thin cloud fractions to get total (should be in units of %)
         cf_tsi[qc_cf_opaque_tsi > 0] = np.nan
         cf_tsi[qc_cf_thin_tsi > 0] = np.nan
-        cf_tsi_new = avg_time_1d(tsitime, cf_tsi, time_new)
+        cf_tsi_new = avg_time_1d(tsitime, cf_tsi, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'totcld_ACEENA.nc'
@@ -1441,7 +1441,7 @@ def prep_Ndrop(ndroppath, predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
-    nd_new = median_time_1d(time, nd, time_new)
+    nd_new = median_time_1d(time, nd, time_new, arraytype='xarray')
     # nd_new = avg_time_1d(time, nd, time_new)
     
     #%% output file
@@ -1566,10 +1566,10 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=300):
     # time = mfrsrtime.data
     # H_tmp = np.interp(np.int64(time), np.int64(arscltime), H)
     time_5min = pd.date_range(start='2017-06-20', end='2018-02-21', freq=str(int(300))+"s") # make inputs every 5 min to avoid high frequency noise in nd retrieval (COD looks like it doesn't vary at timescales < ~5 min)
-    H_5min = avg_time_1d(arscltime, H, time_5min)
-    cod_5min = avg_time_1d(mfrsrtime, cod, time_5min)
-    lwp_5min = avg_time_1d(mwrtime, lwp, time_5min
-    nd = calc_cdnc_ARM(lwp_5min, cod_5min, H_5min)
+    H_5min = avg_time_1d(arscltime, H, time_5min, arraytype='xarray')
+    cod_5min = avg_time_1d(mfrsrtime, cod, time_5min, arraytype='xarray')
+    lwp_5min = avg_time_1d(mwrtime, lwp, time_5min, arraytype='xarray')
+    nd = calc_cdnc_ARM(lwp_5min, cod_5min, H_5min, arraytype='xarray')
     
     # exclude small values (AV removed this filter 6/24/2024)
     # nd[nd < 10] = np.nan
@@ -1577,7 +1577,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
-    nd_new = median_time_1d(time, nd, time_new)
+    nd_new = median_time_1d(time, nd, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'Nd_ARMretrieval_ACEENA.nc'
