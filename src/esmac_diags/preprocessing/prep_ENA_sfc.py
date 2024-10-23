@@ -97,17 +97,17 @@ def prep_ACSM(acsmpath, predatapath, year, dt=300):
 
     # data resolution is 30-min, so interpolate for finer resolution; a mean could also be used for coarser resolution is warranted
     if dt >= 1800:
-        org_new = median_time_1d(time, org, time_new)
-        no3_new = median_time_1d(time, no3, time_new)
-        so4_new = median_time_1d(time, so4, time_new)
-        nh4_new = median_time_1d(time, nh4, time_new)
-        chl_new = median_time_1d(time, chl, time_new)
+        org_new = median_time_1d(time, org, time_new, arraytype='xarray')
+        no3_new = median_time_1d(time, no3, time_new, arraytype='xarray')
+        so4_new = median_time_1d(time, so4, time_new, arraytype='xarray')
+        nh4_new = median_time_1d(time, nh4, time_new, arraytype='xarray')
+        chl_new = median_time_1d(time, chl, time_new, arraytype='xarray')
     if dt < 1800:
-        org_new = interp_time_1d(time, org, time_new)
-        no3_new = interp_time_1d(time, no3, time_new)
-        so4_new = interp_time_1d(time, so4, time_new)
-        nh4_new = interp_time_1d(time, nh4, time_new)
-        chl_new = interp_time_1d(time, chl, time_new)
+        org_new = interp_time_1d(time, org, time_new, arraytype='xarray')
+        no3_new = interp_time_1d(time, no3, time_new, arraytype='xarray')
+        so4_new = interp_time_1d(time, so4, time_new, arraytype='xarray')
+        nh4_new = interp_time_1d(time, nh4, time_new, arraytype='xarray')
+        chl_new = interp_time_1d(time, chl, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'sfc_ACSM_ENA_'+year+'.nc'
@@ -246,9 +246,9 @@ def prep_ccn(ccnpath, predatapath, year, dt=300):
     
     # data resolution is hourly, so interpolate for finer resolution
     if dt >= 3600:
-        ccn1_fit_i = median_time_1d(ccntime, ccn1_fit, time_new)
-        ccn2_fit_i = median_time_1d(ccntime, ccn2_fit, time_new)
-        ccn5_fit_i = median_time_1d(ccntime, ccn5_fit, time_new)
+        ccn1_fit_i = median_time_1d(ccntime, ccn1_fit, time_new, arraytype='xarray')
+        ccn2_fit_i = median_time_1d(ccntime, ccn2_fit, time_new, arraytype='xarray')
+        ccn5_fit_i = median_time_1d(ccntime, ccn5_fit, time_new, arraytype='xarray')
         ccn1_measure = median_time_1d(ccntime, ccn1, time_new)
         ccn2_measure = median_time_1d(ccntime, ccn2, time_new)
         ccn5_measure = median_time_1d(ccntime, ccn5, time_new)
@@ -256,9 +256,9 @@ def prep_ccn(ccnpath, predatapath, year, dt=300):
         ss2_i = median_time_1d(ccntime, ss2, time_new)
         ss5_i = median_time_1d(ccntime, ss5, time_new)
     if dt < 3600:
-        ccn1_fit_i = interp_time_1d(ccntime, ccn1_fit, time_new)
-        ccn2_fit_i = interp_time_1d(ccntime, ccn2_fit, time_new)
-        ccn5_fit_i = interp_time_1d(ccntime, ccn5_fit, time_new)
+        ccn1_fit_i = interp_time_1d(ccntime, ccn1_fit, time_new, arraytype='xarray')
+        ccn2_fit_i = interp_time_1d(ccntime, ccn2_fit, time_new, arraytype='xarray')
+        ccn5_fit_i = interp_time_1d(ccntime, ccn5_fit, time_new, arraytype='xarray')
         ccn1_measure = interp_time_1d(ccntime, ccn1, time_new)
         ccn2_measure = interp_time_1d(ccntime, ccn2, time_new)
         ccn5_measure = interp_time_1d(ccntime, ccn5, time_new)
@@ -373,7 +373,7 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, year, dt=300):
             # interpolate into standard time
             cloud_i[:,kk] = np.interp(time_new, time, cl)
             
-        cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
+        cloud_o = avg_time_2d(height,cloud_i.T,height_out, arraytype='xarray').T
 
     if dt < 3600:
         lst = glob.glob(os.path.join(arsclpath, 'enaarsclkazr1kolliasC1.c0*.nc'))
