@@ -69,7 +69,8 @@ def avg_time_2d(time0, data0, time, arraytype='numpy'):
     if arraytype == 'xarray':
         data = data0.resample(time=2*dt, offset=-1*dt).mean() # +/- time delta for time period sampling
         data["time"] = data["time"] + dt #move time to middle of time period rather than beginning
-        data = data[:data.shape[0]-1,:] #trim last time that is added from resample method  
+        data = data.sel(time=slice(time[0], time[-1])) #limit data to within the new times
+        # data = data[:len(data)-1,:] #trim last time that is added from resample method 
     elif arraytype == 'numpy':
         data = np.full((len(time), data0.shape[1]), np.nan)
         for tt in range(len(time)):
@@ -141,7 +142,8 @@ def avg_time_3d(time0, data0, time, arraytype='numpy'):
     if arraytype == 'xarray':
         data = data0.resample(time=2*dt, offset=-1*dt).mean() # +/- time delta for time period sampling
         data["time"] = data["time"] + dt #move time to middle of time period rather than beginning
-        data = data[:data.shape[0]-1,:,:] #trim last time that is added from resample method 
+        data = data.sel(time=slice(time[0], time[-1])) #limit data to within the new times
+        # data = data[:len(data)-1,:] #trim last time that is added from resample method
     elif arraytype == 'numpy':
         data = np.full((len(time),)+ data0.shape[1:], np.nan)
         for tt in range(len(time)):
@@ -258,7 +260,8 @@ def median_time_2d(time0, data0, time, arraytype='numpy'):
     if arraytype == 'xarray':
         data = data0.resample(time=2*dt, offset=-1*dt).median() # +/- time delta for time period sampling
         data["time"] = data["time"] + dt #move time to middle of time period rather than beginning
-        data = data[:data.shape[0]-1,:] #trim last time that is added from resample method
+        data = data.sel(time=slice(time[0], time[-1])) #limit data to within the new times
+        # data = data[:len(data)-1,:] #trim last time that is added from resample method
     elif arraytype == 'numpy':
         data = np.full((len(time), data0.shape[1]), np.nan)
         for tt in range(len(time)):
@@ -271,35 +274,6 @@ def median_time_2d(time0, data0, time, arraytype='numpy'):
         raise ValueError("Array type must by numpy or xarray")
     
     return(data)
-    
-# #%%
-# def median_time_2d(time0, data0, time):
-#     """
-#     rescale 2d data (time, dim2) into coarser time resolution
-#     get median value in each coarser time window
-
-#     Parameters
-#     ----------
-#     time0 : numpy array
-#         time dimension for input data
-#     data0 : numpy array
-#         input data
-#     time : numpy array
-#         time dimension for output data
-
-#     Returns
-#     -------
-#     data : output data
-
-#     """
-#     if data0.shape[0] != len(time0):
-#         raise ValueError("the first dimension of input data must have the same size with time")
-#     data = np.full((len(time), data0.shape[1]), np.nan)
-#     dt = (time[1]-time[0])/2
-#     for tt in range(len(time)):
-#         idx = np.logical_and(time0 >= time[tt]-dt, time0 <= time[tt] + dt)
-#         data[tt, :] = np.nanmedian(data0[idx, :], axis = 0)
-#     return(data)
 
 #%%
 def median_time_forflight_1d(time0, data0, time, height, hdiff=50.):
