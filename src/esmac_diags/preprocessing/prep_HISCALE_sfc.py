@@ -97,11 +97,11 @@ def prep_ACSM(acsmpath, predatapath, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    org_new = median_time_1d(time, org, time_new)
-    no3_new = median_time_1d(time, no3, time_new)
-    so4_new = median_time_1d(time, so4, time_new)
-    nh4_new = median_time_1d(time, nh4, time_new)
-    chl_new = median_time_1d(time, chl, time_new)
+    org_new = median_time_1d(time, org, time_new, arraytype='xarray')
+    no3_new = median_time_1d(time, no3, time_new, arraytype='xarray')
+    so4_new = median_time_1d(time, so4, time_new, arraytype='xarray')
+    nh4_new = median_time_1d(time, nh4, time_new, arraytype='xarray')
+    chl_new = median_time_1d(time, chl, time_new, arraytype='xarray')
     
     #%%
     # import matplotlib.pyplot as plt
@@ -326,7 +326,7 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=300):
             # interpolate into standard time
             cloud_i[:,kk] = np.interp(time_new, time, cl)
             
-        cloud_o = avg_time_2d(height,cloud_i.T,height_out).T
+        cloud_o = avg_height_2d(height,cloud_i.T,height_out).T
 
     if dt < 3600:
         lst = glob.glob(os.path.join(arsclpath, 'sgparsclkazr1kolliasC1.c0*.nc'))
@@ -419,10 +419,10 @@ def prep_cloudheight_ARSCL(arsclbndpath, predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    cbh_new = avg_time_1d(arscltime, cbh, time_new)
+    cbh_new = avg_time_1d(arscltime, cbh, time_new, arraytype='xarray')
     cth_new = avg_time_1d(arscltime, cth, time_new)
-    cbhs_new = avg_time_2d(arscltime, cbhs, time_new)
-    cths_new = avg_time_2d(arscltime, cths, time_new)
+    cbhs_new = avg_time_2d(arscltime, cbhs, time_new, arraytype='xarray')
+    cths_new = avg_time_2d(arscltime, cths, time_new, arraytype='xarray')
     
     
     #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -507,8 +507,8 @@ def prep_CPC(cpcpath, cpcupath, predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    cpc10_new = median_time_1d(time10, cpc10, time_new)
-    cpc3_new = median_time_1d(time3, cpc3, time_new)
+    cpc10_new = median_time_1d(time10, cpc10, time_new, arraytype='xarray')
+    cpc3_new = median_time_1d(time3, cpc3, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'sfc_CPC_HISCALE.nc'
@@ -694,7 +694,7 @@ def prep_CNsize_SMPS_IOP1(smpspath, nanosmpspath, predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-05-22', freq=str(int(dt))+"s")  # HISCALE IOP1
     
-    smps_new = median_time_2d(time1, smps, time_new)
+    smps_new = median_time_2d(time1, smps, time_new, arraytype='xarray')
     smps100_new = median_time_1d(time1, smps100, time_new)
     
     #%% output file
@@ -856,7 +856,7 @@ def prep_mfrsr_cod(mfrsrpath,  predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    cod_new = avg_time_1d(time, cod, time_new)
+    cod_new = avg_time_1d(time, cod, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'cod_HISCALE.nc'
@@ -913,14 +913,14 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=300):
     time = mfrsrdata['time']
     reff = mfrsrdata['effective_radius_instantaneous']
     qc_reff = mfrsrdata['qc_effective_radius_instantaneous']
-    lwp_source = mfrsrdata['lwp_aource']
+    lwp_source = mfrsrdata['lwp_source']
     mfrsrdata.close()
     for file in lst[1:]:
         mfrsrdata = xr.open_dataset(file)
         time = xr.concat([time, mfrsrdata['time']], dim="time")
         reff = xr.concat([reff, mfrsrdata['effective_radius_instantaneous']], dim="time")
         qc_reff = xr.concat([qc_reff, mfrsrdata['qc_effective_radius_instantaneous']], dim="time")
-        lwp_source = xr.concat([lwp_soource, mfrsrdata['lwp_source']], dim="time")
+        lwp_source = xr.concat([lwp_source, mfrsrdata['lwp_source']], dim="time")
         mfrsrdata.close()
     
     # quality controls
@@ -935,7 +935,7 @@ def prep_mfrsr_Reff(mfrsrpath,  predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    reff_new = median_time_1d(time, reff, time_new)
+    reff_new = median_time_1d(time, reff, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'reff_HISCALE.nc'
@@ -1036,8 +1036,8 @@ def prep_LWP(armbepath, mwrpath, predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    lwp_new = avg_time_1d(time1, lwp, time_new)
-    lwp2_new = avg_time_1d(time2, lwp2, time_new)
+    lwp_new = avg_time_1d(time1, lwp, time_new, arraytype='xarray')
+    lwp2_new = avg_time_1d(time2, lwp2, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'LWP_HISCALE.nc'
@@ -1236,9 +1236,9 @@ def prep_precip(armbepath, metpath, parspath, predatapath, dt=300):
     # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    precip_tbrg_new = avg_time_1d(time, precip_tbrg, time_new)
-    precip_pwd_new = avg_time_1d(time, precip_pwd, time_new)
-    precip_pars_new = avg_time_1d(time, precip_pars, time_new)
+    precip_tbrg_new = avg_time_1d(time, precip_tbrg, time_new, arraytype='xarray')
+    precip_pwd_new = avg_time_1d(time, precip_pwd, time_new, arraytype='xarray')
+    precip_pars_new = avg_time_1d(time, precip_pars, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'precip_HISCALE.nc'
@@ -1318,10 +1318,10 @@ def prep_radiation(armbepath, radfluxpath, predatapath, dt=300):
     # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    lwdn_new = avg_time_1d(time, lwdn, time_new)
-    swdn_new = avg_time_1d(time, swdn, time_new)
-    lwup_new = avg_time_1d(time, lwup, time_new)
-    swup_new = avg_time_1d(time, swup, time_new)
+    lwdn_new = avg_time_1d(time, lwdn, time_new, arraytype='xarray')
+    swdn_new = avg_time_1d(time, swdn, time_new, arraytype='xarray')
+    lwup_new = avg_time_1d(time, lwup, time_new, arraytype='xarray')
+    swup_new = avg_time_1d(time, swup, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'sfc_radiation_HISCALE.nc'
@@ -1415,8 +1415,8 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, dt=300):
         cf_arscl = cf_arscl*100
         cf_tsi = cf_tsi*100
         
-        cf_arscl_new = avg_time_1d(time, cf_arscl, time_new)
-        cf_tsi_new = avg_time_1d(time, cf_tsi, time_new)
+        cf_arscl_new = avg_time_1d(time, cf_arscl, time_new, arraytype='xarray')
+        cf_tsi_new = avg_time_1d(time, cf_tsi, time_new, arraytype='xarray')
         # cf_visst_new = avg_time_1d(time, cf_visst, time_new)
 
     if dt < 3600:
@@ -1451,7 +1451,7 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, dt=300):
         cf_tsi = cf_opaque_tsi + cf_thin_tsi # add opaque and thin cloud fractions to get total (should be in units of %)
         cf_tsi[qc_cf_opaque_tsi > 0] = np.nan
         cf_tsi[qc_cf_thin_tsi > 0] = np.nan
-        cf_tsi_new = avg_time_1d(tsitime, cf_tsi, time_new)
+        cf_tsi_new = avg_time_1d(tsitime, cf_tsi, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'totcld_HISCALE.nc'
@@ -1531,7 +1531,7 @@ def prep_Ndrop(ndroppath, predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    nd_new = median_time_1d(time, nd, time_new)
+    nd_new = median_time_1d(time, nd, time_new, arraytype='xarray')
     # nd_new = avg_time_1d(time, nd, time_new)
     
     #%% output file
@@ -1668,7 +1668,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=300):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    nd_new = median_time_1d(time, nd, time_new)
+    nd_new = median_time_1d(time, nd, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'Nd_ARMretrieval_HISCALE.nc'
