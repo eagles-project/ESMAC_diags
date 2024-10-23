@@ -20,21 +20,6 @@ from esmac_diags.subroutines.specific_data_treatment import lwc2cflag, find_near
 from esmac_diags.subroutines.CN_mode_to_size import calc_CNsize_cutoff_0_3000nm
 from netCDF4 import Dataset
 
-# input_path = '../../../data/ACEENA/model/E3SMv1_out/'
-# output_path = 'C:/Users/tang357/Downloads/CSET/'
-# input_filehead = 'E3SMv1_CSET'
-# output_filehead = 'E3SMv1_CSET'
-
-# lev_out=np.arange(25.,1001,25.)
-# height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900,1000,\
-#                     1100,1200,1300,1400,1500,1600,1800,2000,2200,2400,2600,2800,3000,\
-#                     3500,4000,4500,5000,5500,6000,6500,7000,7500,8000,8500,9000,9500,\
-#                     10000,10500,11000,11500,12000,12500,13000,14000,15000,16000,17000,18000])
-
-# dt = 3600
-    
-# dt = 60
-# RFpath = '../../../data/CSET/obs/aircraft/aircraft_lowrate/'
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, 
