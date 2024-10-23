@@ -83,7 +83,7 @@ def qc_mask_qcflag_cpc(data,qc):
     data : output data
 
     """
-    data_out = np.array(data)
+    # data_out = np.array(data)
     qc = qc.astype('int32')
     for tt in range(len(qc)):
         if qc[tt] != 0:
@@ -97,7 +97,7 @@ def qc_mask_qcflag_cpc(data,qc):
     return(data_out)
 
 def qc_mask_qcflag_cpcu(data,qc):
-    data_out = np.array(data)
+    # data_out = np.array(data)
     qc = qc.astype('int32')
     for tt in range(len(qc)):
         if qc[tt] != 0:
