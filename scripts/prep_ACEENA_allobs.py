@@ -54,6 +54,7 @@ parspath =  obs_input_path+'ACEENA/obs/surface/arm_pars/'
 radfluxpath =  obs_input_path+'ACEENA/obs/surface/arm_radflux/'
 ndroppath = obs_input_path+'ACEENA/surface/enandrop/'
 Wuetalpath = obs_input_path+'ACEENA/surface/Wu_etal_retrieval/'
+tsipath = obs_input_path+'ACEENA/surface/arm_tsi/'
 
 # satellite data path
 visstgridpath = obs_input_path+'ACEENA/satellite/visst/grid/'
