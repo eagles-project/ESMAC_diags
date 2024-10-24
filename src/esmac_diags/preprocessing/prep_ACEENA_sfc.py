@@ -325,6 +325,7 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=3600):
         #%% do a half time interval offset so that the time arrays don't shift
         cloud_i = cloud_flag.resample(time = dt_new, offset = dt_new/2).sum()/cloud_flag.resample(time = dt_new, offset = dt_new/2).count()
         cloud_i['time'] = cloud_i['time'] + dt_new/2
+        cloud_i = cloud_i.sel(time=slice(time_new[0], time_new[-1])) #limit data to within the new times
         
         cloud_o = avg_height_2d(height,cloud_i,height_out)
     
