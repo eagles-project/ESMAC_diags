@@ -396,7 +396,7 @@ def prep_cloudheight_ARSCL(arsclbndpath, predatapath, dt=3600):
     for ll in range(cbhs.shape[1]):
         cbhs[:,ll] = qc_remove_neg(cbhs[:,ll], remove_zero='True')
         cths[:,ll] = qc_remove_neg(cths[:,ll], remove_zero='True')
-    cth = np.nanmax(cths,axis=1)  # cloud top height for all clouds
+    # cth = np.nanmax(cths,axis=1)  # cloud top height for all clouds
     cth = cths.max(dim='layer', skipna=True)
         
     #%% re-shape the data into coarser resolution
