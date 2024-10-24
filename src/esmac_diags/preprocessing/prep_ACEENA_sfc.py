@@ -663,10 +663,12 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=3600):
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
-    
-    uhsas_new = median_time_2d(time, uhsas, time_new)
-    uhsas100_new = median_time_1d(time, uhsas100, time_new)
-        
+
+    tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time", "size"], coords=dict(time=time, size=size))
+    tmpuhsas100 = xr.DataArray(data=np.array(uhsas100), dims=["time"], coords=dict(time=time))
+  
+    uhsas_new = median_time_2d(time, tmpuhsas, time_new, arraytype='xarray')
+    uhsas100_new = median_time_1d(time, tmpuhsas100, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'sfc_UHSAS_ACEENA.nc'
@@ -674,6 +676,7 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=3600):
     ds = xr.Dataset({
                     'size_low': (['size'], dmin),
                     'size_high': (['size'], dmax),
+                    'size': (['size'], size),
                     'uhsas_all': (['time', 'size'], uhsas_new),
                     'uhsas100': (['time'], uhsas100_new),
                     },
