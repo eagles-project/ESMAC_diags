@@ -397,12 +397,13 @@ def prep_cloudheight_ARSCL(arsclbndpath, predatapath, dt=3600):
         cbhs[:,ll] = qc_remove_neg(cbhs[:,ll], remove_zero='True')
         cths[:,ll] = qc_remove_neg(cths[:,ll], remove_zero='True')
     cth = np.nanmax(cths,axis=1)  # cloud top height for all clouds
+    cth = cths.max(dim='layer', skipna=True)
         
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
     cbh_new = avg_time_1d(arscltime, cbh, time_new, arraytype='xarray')
-    cth_new = avg_time_1d(arscltime, cth, time_new)
+    cth_new = avg_time_1d(arscltime, cth, time_new, arraytype='xarray')
     cbhs_new = avg_time_2d(arscltime, cbhs, time_new, arraytype='xarray')
     cths_new = avg_time_2d(arscltime, cths, time_new, arraytype='xarray')
     
