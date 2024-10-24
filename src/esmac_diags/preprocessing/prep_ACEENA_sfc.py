@@ -676,7 +676,6 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=3600):
     ds = xr.Dataset({
                     'size_low': (['size'], dmin),
                     'size_high': (['size'], dmax),
-                    'size': (['size'], size),
                     'uhsas_all': (['time', 'size'], uhsas_new),
                     'uhsas100': (['time'], uhsas100_new),
                     },
