@@ -95,7 +95,7 @@ print('prepare surface data:')
 # sfc.prep_CNsize_UHSAS(uhsaspath, prep_data_path+'surface/', dt=surface_dt)   # aerosol size distribution from UHSAS
 # sfc.prep_cloud_2d(armbepath, arsclpath, prep_data_path+'surface/', height_out, dt=surface_dt)   # 2D cloud fraction
 # sfc.prep_cloudheight_ARSCL(arsclbndpath, prep_data_path+'surface/', dt=surface_dt)   # cloud height 
-sfc.prep_totcld(armbepath, prep_data_path+'surface/', dt=surface_dt)         # cloud fraction. from ARSCL, TSI and satellite sources
+sfc.prep_totcld(armbepath, arsclbndpath, tsipath, prep_data_path+'surface/', dt=surface_dt)         # cloud fraction. from ARSCL, TSI and satellite sources
 # sfc.prep_LWP(armbepath, mfrsrpath, prep_data_path+'surface/', dt=surface_dt) # cloud liquid water path
 # sfc.prep_Ndrop(ndroppath, prep_data_path+'surface/', dt=surface_dt)          # cloud droplet number retrieval from ARM Ndrop VAP
 # sfc.prep_Nd_WU(Wuetalpath, prep_data_path+'surface/', dt=surface_dt)           # cloud droplet number retrieval from Wu et al. algorithm
