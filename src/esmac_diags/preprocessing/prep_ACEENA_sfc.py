@@ -1309,6 +1309,7 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, dt=3600):
 
         lst = glob.glob(os.path.join(tsipath, '*.cdf'))
         tsidata = xr.open_mfdataset(lst, combine='by_coords')
+        tsitime = tsidata['time']
         cf_opaque_tsi = tsidata['percent_opaque']
         qc_cf_opaque_tsi = tsidata['qc_percent_opaque']
         cf_thin_tsi = tsidata['percent_thin']
