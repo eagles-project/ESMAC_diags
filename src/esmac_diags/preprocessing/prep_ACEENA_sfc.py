@@ -1307,7 +1307,7 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, dt=3600):
         cloud_base = arscldata['cloud_layer_base_height'][:,0] #first cloud layer base
         arscldata.close()
 
-        lst = glob.glob(os.path.join(tsipath, '*.nc'))
+        lst = glob.glob(os.path.join(tsipath, '*.cdf'))
         tsidata = xr.open_mfdataset(lst, combine='by_coords')
         cf_opaque_tsi = obsdata['percent_opaque']
         qc_cf_opaque_tsi = obsdata['qc_percent_opaque']
