@@ -101,7 +101,7 @@ print('prepare surface data:')
 # sfc.prep_LWP(armbepath, mwrpath, prep_data_path+'surface/', dt=surface_dt) # cloud liquid water path
 # sfc.prep_Ndrop(ndroppath, prep_data_path+'surface/', dt=surface_dt)          # cloud droplet number retrieval from ARM Ndrop VAP
 #sfc.prep_Nd_WU(Wuetalpath, prep_data_path+'surface/', dt=surface_dt)           # cloud droplet number retrieval from Wu et al. algorithm
-sfc.prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=surface_dt)    #cloud droplet number retrievals following ARM Ndrop method
+sfc.prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, prep_data_path, dt=surface_dt)    #cloud droplet number retrievals following ARM Ndrop method
 # sfc.prep_mfrsr_cod(mfrsrpath,  prep_data_path+'surface/', dt=surface_dt)     # cloud optical depth from MFRSR
 # sfc.prep_mfrsr_Reff(mfrsrpath,  prep_data_path+'surface/', dt=surface_dt)    # cloud effective radius from MFRSR
 # sfc.prep_radiation(armbepath, prep_data_path+'surface/', dt=surface_dt)      # surface radiation
