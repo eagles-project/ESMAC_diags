@@ -1605,7 +1605,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=3600)
         mfrsrdata.close()
 
     lst3 = glob.glob(os.path.join(mwrpath, '*.nc'))
-    mwrdata = xr.open_mfdataset(files, combine='by_coords')
+    mwrdata = xr.open_mfdataset(lst3, combine='by_coords')
     
     mwrtime = mwrdata['time']
     lwp = mwrdata['phys_lwp']*1e-3 #kg/m**2
@@ -1654,7 +1654,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=3600)
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    nd_new = median_time_1d(time, nd, time_new, arraytype='xarray')
+    nd_new = median_time_1d(time_5min, nd, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'Nd_ARMretrieval_HISCALE.nc'
