@@ -1503,7 +1503,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=3600)
         mfrsrdata.close()
 
     lst3 = glob.glob(os.path.join(mwrpath, '*.nc'))
-    mwrdata = xr.open_mfdataset(files, combine='by_coords')
+    mwrdata = xr.open_mfdataset(lst3, combine='by_coords')
     
     mwrtime = mwrdata['time']
     lwp = mwrdata['phys_lwp']*1e-3 #kg/m**2
@@ -1544,7 +1544,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=3600)
     H_5min = avg_time_1d(arscltime, H, time_5min, arraytype='xarray')
     cod_5min = avg_time_1d(mfrsrtime, cod, time_5min, arraytype='xarray')
     lwp_5min = avg_time_1d(mwrtime, lwp, time_5min, arraytype='xarray')
-    nd = calc_cdnc_ARM(lwp_5min, cod_5min, H_5min, arraytype='xarray')
+    nd = calc_cdnc_ARM(lwp_5min, cod_5min, H_5min)
     
     # exclude small values (AV removed this filter 6/24/2024)
     # nd[nd < 10] = np.nan
