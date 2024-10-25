@@ -106,7 +106,7 @@ print('prepare surface data:')
 # sfc.prep_mfrsr_Reff(mfrsrpath,  prep_data_path+'surface/', dt=surface_dt)    # cloud effective radius from MFRSR
 # sfc.prep_radiation(armbepath, radfluxpath, prep_data_path+'surface/', dt=surface_dt)      # surface radiation
 # sfc.prep_LTS(armbepath, prep_data_path+'surface/', dt=surface_dt)            # lower tropospheric stability
-sfc.prep_precip(armbepath, prep_data_path+'surface/', dt=surface_dt)         # surface precipitation
+sfc.prep_precip(armbepath, metpath, parspath, prep_data_path+'surface/', dt=surface_dt)         # surface precipitation
 
 # # prepare satellite data. output time in satellite_dt resolution
 # print('prepare satellite data:')
