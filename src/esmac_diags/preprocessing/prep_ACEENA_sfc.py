@@ -778,6 +778,7 @@ def prep_LWP(armbepath, mwrpath, predatapath, dt=3600):
     mwrdata.close()
 
     lwp2.load()
+    qc_lwp2.load()
     lwp2 = qc_mask_qcflag(lwp2, qc_lwp2)
     
     #%% re-shape the data into coarser resolution
