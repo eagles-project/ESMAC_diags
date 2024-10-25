@@ -1309,10 +1309,10 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, dt=3600):
 
         lst = glob.glob(os.path.join(tsipath, '*.cdf'))
         tsidata = xr.open_mfdataset(lst, combine='by_coords')
-        cf_opaque_tsi = obsdata['percent_opaque']
-        qc_cf_opaque_tsi = obsdata['qc_percent_opaque']
-        cf_thin_tsi = obsdata['percent_thin']
-        qc_cf_thin_tsi = obsdata['qc_percent_thin']
+        cf_opaque_tsi = tsidata['percent_opaque']
+        qc_cf_opaque_tsi = tsidata['qc_percent_opaque']
+        cf_thin_tsi = tsidata['percent_thin']
+        qc_cf_thin_tsi = tsidata['qc_percent_thin']
         tsidata.close()
 
         # compute ARSCL cloud fraction over dt
