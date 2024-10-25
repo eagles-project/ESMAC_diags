@@ -50,9 +50,9 @@ aerosolmaskpath = obs_input_path+'ENA/ENA_AerosolMask/'
 uhsaspath = obs_input_path+'ACEENA/surface/arm_uhsas/'
 mfrsrpath = obs_input_path+'ACEENA/surface/arm_mfrsr/'
 mwrpath = obs_input_path+'ACEENA/surface/arm_mwr/'
-metpath = obs_input_path+'ACEENA/obs/surface/arm_met/'
-parspath =  obs_input_path+'ACEENA/obs/surface/arm_pars/'
-radfluxpath =  obs_input_path+'ACEENA/obs/surface/arm_radflux/'
+metpath = obs_input_path+'ACEENA/surface/arm_met/'
+parspath =  obs_input_path+'ACEENA/surface/arm_pars/'
+radfluxpath =  obs_input_path+'ACEENA/surface/arm_radflux/'
 ndroppath = obs_input_path+'ACEENA/surface/enandrop/'
 Wuetalpath = obs_input_path+'ACEENA/surface/Wu_etal_retrieval/'
 tsipath = obs_input_path+'ACEENA/surface/arm_tsi/'
@@ -104,7 +104,6 @@ print('prepare surface data:')
 # sfc.prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, prep_data_path, dt=surface_dt)    #cloud droplet number retrievals following ARM Ndrop method
 # sfc.prep_mfrsr_cod(mfrsrpath,  prep_data_path+'surface/', dt=surface_dt)     # cloud optical depth from MFRSR
 # sfc.prep_mfrsr_Reff(mfrsrpath,  prep_data_path+'surface/', dt=surface_dt)    # cloud effective radius from MFRSR
-print(radfluxpath)
 sfc.prep_radiation(armbepath, radfluxpath, prep_data_path+'surface/', dt=surface_dt)      # surface radiation
 # sfc.prep_LTS(armbepath, prep_data_path+'surface/', dt=surface_dt)            # lower tropospheric stability
 # sfc.prep_precip(armbepath, prep_data_path+'surface/', dt=surface_dt)         # surface precipitation
