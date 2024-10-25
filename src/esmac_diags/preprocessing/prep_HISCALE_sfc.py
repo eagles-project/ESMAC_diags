@@ -1199,7 +1199,7 @@ def prep_precip(armbepath, metpath, parspath, predatapath, dt=3600):
     # ORG rates could be added in the future
     lst = glob.glob(os.path.join(metpath, '*.cdf'))
     obsdata = xr.open_mfdataset(lst, combine='by_coords')
-    time = obsdata['time']
+    mettime = obsdata['time']
     precip_tbrg = obsdata['tbrg_precip_total_corr'].load()*60. #convert from 1-min mm accumulation to mm/h
     qc_precip_tbrg = obsdata['qc_tbrg_precip_total_corr'].load()
     precip_pwd = obsdata['pwd_precip_rate_mean_1min'].load()
@@ -1211,9 +1211,9 @@ def prep_precip(armbepath, metpath, parspath, predatapath, dt=3600):
 
     lst = glob.glob(os.path.join(parspath, '*.cdf'))
     parsdata = xr.open_mfdataset(lst, combine='by_coords')
-    time = obsdata['time']
-    precip_pars = obsdata['rain_rate'].load()
-    qc_precip_pars = obsdata['qc_rain_rate'].load()
+    parstime = parsdata['time']
+    precip_pars = parsdata['rain_rate'].load()
+    qc_precip_pars = parsdata['qc_rain_rate'].load()
     parsdata.close()
 
     precip_pars = qc_mask_qcflag(precip_pars, qc_precip_pars)
@@ -1224,9 +1224,9 @@ def prep_precip(armbepath, metpath, parspath, predatapath, dt=3600):
     # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    precip_tbrg_new = avg_time_1d(time, precip_tbrg, time_new, arraytype='xarray')
-    precip_pwd_new = avg_time_1d(time, precip_pwd, time_new, arraytype='xarray')
-    precip_pars_new = avg_time_1d(time, precip_pars, time_new, arraytype='xarray')
+    precip_tbrg_new = avg_time_1d(mettime, precip_tbrg, time_new, arraytype='xarray')
+    precip_pwd_new = avg_time_1d(mettime, precip_pwd, time_new, arraytype='xarray')
+    precip_pars_new = avg_time_1d(parstime, precip_pars, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'precip_HISCALE.nc'
