@@ -1318,9 +1318,11 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, dt=3600):
 
         # compute ARSCL cloud fraction over dt
         cloud_base.load()
-        arscl_dt = np.abs(arscltime[1].dt.second - arscltime[0].dt.second) # arscl time step
-        arscl_nt = dt/arscl_dt # number of arscl timesteps in the time windoe
-        cf_arscl = np.size(np.where(cloud_base > 0))/arscl_nt # fraction of times in window with cloud bases present
+        cloud_flag = xr.where(cloud_base > 0, 1, 0) #sets cloud to 1 and no cloud to 0
+        dt_new = time_new[1]-time_new[0]
+        cf_arscl = cloud_flag.resample(time = dt_new, offset = dt_new/2).sum()/cloud_flag.resample(time = dt_new, offset = dt_new/2).count()
+        cf_arscl['time'] = cf_arscl['time'] + dt_new/2
+        cf_arscl = cf_arscl.sel(time=slice(time_new[0], time_new[-1])) #limit data to within the new times
         # change unit from 1 to %
         cf_arscl_new = cf_arscl*100
       
