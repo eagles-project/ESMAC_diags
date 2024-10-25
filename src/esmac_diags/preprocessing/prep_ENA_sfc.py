@@ -1624,7 +1624,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, year, dt
         mfrsrdata.close()
 
     lst3 = glob.glob(os.path.join(mwrpath, '*.nc'))
-    mwrdata = xr.open_mfdataset(files, combine='by_coords')
+    mwrdata = xr.open_mfdataset(lst3, combine='by_coords')
     
     mwrtime = mwrdata['time']
     lwp = mwrdata['phys_lwp']*1e-3 #kg/m**2
@@ -1673,7 +1673,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, year, dt
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    nd_new = median_time_1d(time, nd, time_new, arraytype='xarray')
+    nd_new = median_time_1d(time_5min, nd, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'Nd_ARMretrieval_ENA_'+year+'.nc'
