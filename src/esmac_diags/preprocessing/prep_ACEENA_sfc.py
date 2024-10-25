@@ -1122,8 +1122,8 @@ def prep_precip(armbepath, metpath, parspath, predatapath, dt=3600):
 
     lst = glob.glob(os.path.join(parspath, '*.nc'))
     parsdata = xr.open_mfdataset(lst, combine='by_coords')
-    time = obsdata['time']
-    precip_pars = obsdata['rain_rate'].load()
+    time = parsdata['time']
+    precip_pars = parsdata['rain_rate'].load()
     parsdata.close()
   
     #%% re-shape the data into coarser resolution
