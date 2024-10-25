@@ -975,14 +975,21 @@ def prep_LTS(armbepath, arsclpath, predatapath, year, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
 
+    tmpLTS700 = xr.DataArray(data=np.array(LTS700_valid), dims=["time"], coords=dict(time=time700_valid))
+    tmpLTS850 = xr.DataArray(data=np.array(LTS850_valid), dims=["time"], coords=dict(time=time850_valid))
+    tmpthetadiff = xr.DataArray(data=np.array(thetadiff_cb), dims=["time"], coords=dict(time=time))
+    
     if dt >= 3600:
         LTS700_new = avg_time_1d(time700_valid, LTS700_valid, time_new)
         LTS850_new = avg_time_1d(time850_valid, LTS850_valid, time_new)
         thetadiff_new = avg_time_1d(time, thetadiff_cb, time_new)
     if dt < 3600:
-        LTS700_new = interp_time_1d(time700_valid, LTS700_valid, time_new)
-        LTS850_new = interp_time_1d(time850_valid, LTS850_valid, time_new)
-        thetadiff_new = interp_time_1d(time, thetadiff_cb, time_new)
+        # LTS700_new = interp_time_1d(time700_valid.astype("float"), LTS700_valid, time_new.astype("float"))
+        # LTS850_new = interp_time_1d(time850_valid.astype("float"), LTS850_valid, time_new.astype("float"))
+        # thetadiff_new = interp_time_1d(time.astype("float"), thetadiff_cb, time_new.astype("float"))
+        LTS700_new = interp_time_1d(time700_valid, tmpLTS700, time_new, arraytype='xarray')
+        LTS850_new = interp_time_1d(time850_valid, tmpLTS850, time_new, arraytype='xarray')
+        thetadiff_new = interp_time_1d(time, tmpthetadiff, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'LTS_ENA_'+year+'.nc'
