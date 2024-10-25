@@ -836,15 +836,20 @@ def prep_LWP(armbepath, mwrpath, predatapath, year, dt=3600):
     qc_lwp2 = mwrdata['qc_phys_lwp']
     mwrdata.close()
 
-    mwr_lwp.load()
-    mwr_lwp[qc_mwr_lwp > 0] = np.nan
+    lwp2.load()
+    qc_lwp2.load()
+    lwp2 = qc_mask_qcflag(lwp2, qc_lwp2)
   
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
     lwp_new = avg_time_1d(time1, lwp, time_new, arraytype='xarray')
     lwp2_new = avg_time_1d(time2, lwp2, time_new, arraytype='xarray')
-    
+
+    #%% sometimes, there can be negative LWP values when LWP is noise, so set those to 0
+    lwp_new = qc_remove_neg(lwp_new)
+    lwp2_new = qc_remove_neg(lwp2_new)
+  
     #%% output file
     outfile = predatapath + 'LWP_ENA_'+year+'.nc'
     print('output file '+outfile)
