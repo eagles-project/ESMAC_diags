@@ -1319,9 +1319,9 @@ def prep_totcld(armbepath, arsclbndpath, tsipath, predatapath, dt=3600):
         cloud_base.load()
         arscl_dt = np.abs(arscltime[1].dt.second - arscltime[0].dt.second) # arscl time step
         arscl_nt = dt/arscl_dt # number of arscl timesteps in the time windoe
-        cf_arscl_new = np.size(np.where(cloud_base > 0))/arscl_nt # fraction of times in window with cloud bases present
+        cf_arscl = np.size(np.where(cloud_base > 0))/arscl_nt # fraction of times in window with cloud bases present
         # change unit from 1 to %
-        cf_arscl = cf_arscl*100
+        cf_arscl_new = cf_arscl*100
       
         # average TSI cloud fraction over dt
         cf_opaque_tsi.load()
