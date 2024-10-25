@@ -1220,7 +1220,7 @@ def prep_precip(armbepath, metpath, parspath, predatapath, year, dt=3600):
     #%% read in data (new way uses the optical rain gauge (ORG) and Parsivel disdrometer rates that are better for light)
     lst = glob.glob(os.path.join(metpath, '*.cdf'))
     obsdata = xr.open_mfdataset(lst, combine='by_coords')
-    time = obsdata['time']
+    mettime = obsdata['time']
     precip_org = obsdata['org_precip_rate_mean'].load()
     qc_precip_org = obsdata['qc_org_precip_rate_mean'].load()
     precip_pwd = obsdata['pwd_precip_rate_mean_1min'].load()
@@ -1232,16 +1232,16 @@ def prep_precip(armbepath, metpath, parspath, predatapath, year, dt=3600):
 
     lst = glob.glob(os.path.join(parspath, '*.nc'))
     parsdata = xr.open_mfdataset(lst, combine='by_coords')
-    time = obsdata['time']
-    precip_pars = obsdata['rain_rate'].load()
+    parstime = parsdata['time']
+    precip_pars = parsdata['rain_rate'].load()
     parsdata.close()
   
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    precip_org_new = avg_time_1d(time, precip_org, time_new, arraytype='xarray')
-    precip_pwd_new = avg_time_1d(time, precip_pwd, time_new, arraytype='xarray')
-    precip_pars_new = avg_time_1d(time, precip_pars, time_new, arraytype='xarray')
+    precip_org_new = avg_time_1d(mettime, precip_org, time_new, arraytype='xarray')
+    precip_pwd_new = avg_time_1d(mettime, precip_pwd, time_new, arraytype='xarray')
+    precip_pars_new = avg_time_1d(parstime, precip_pars, time_new, arraytype='xarray')
         
     #%% output file
     outfile = predatapath + 'precip_ENA_'+year+'.nc'
