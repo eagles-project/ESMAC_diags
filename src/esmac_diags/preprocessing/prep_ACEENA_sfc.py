@@ -789,7 +789,7 @@ def prep_LWP(armbepath, mwrpath, predatapath, dt=3600):
 
     #%% sometimes, there can be negative LWP values when LWP is noise, so set those to 0
     lwp_new = qc_remove_neg(lwp_new)
-    lwp_new2 = qc_remove_neg(lwp_new2)
+    lwp2_new = qc_remove_neg(lwp2_new)
 
     #%% output file
     outfile = predatapath + 'LWP_ACEENA.nc'
