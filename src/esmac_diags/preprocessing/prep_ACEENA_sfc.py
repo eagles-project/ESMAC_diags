@@ -778,7 +778,7 @@ def prep_LWP(armbepath, mwrpath, predatapath, dt=3600):
     mwrdata.close()
 
     lwp2.load()
-    lwp2[qc_lwp2 > 0] = np.nan
+    lwp2 = qc_mask_qcflag(lwp2, qc_lwp2)
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
@@ -787,8 +787,8 @@ def prep_LWP(armbepath, mwrpath, predatapath, dt=3600):
     lwp2_new = avg_time_1d(time2, lwp2, time_new, arraytype='xarray')
 
     #%% sometimes, there can be negative LWP values when LWP is noise, so set those to 0
-    lwp_new[lwp_new < 0] = 0
-    lwp2_new[lwp2_new < 0] = 0
+    lwp_new = qc_remove_neg(lwp_new)
+    lwp_new2 = qc_remove_neg(lwp_new2)
 
     #%% output file
     outfile = predatapath + 'LWP_ACEENA.nc'
