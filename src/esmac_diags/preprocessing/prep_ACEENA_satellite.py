@@ -135,13 +135,13 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     bb_sw_all = ins * (1 - bb_sw_albedo_all*0.01)
     
     #%% retrieve CDNC
-    lwp = lwp.data   
-    ctt = ctt_liq.data
-    cod = cod_liq_linavg.data
-    H = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=0.8)   # LWP convert from g/m2 to kg/m2
-    H_ad = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=1.0)
-    Nd = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=0.8)
-    Nd_ad = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=1.0)
+    # lwp = lwp.data   
+    # ctt = ctt_liq.data
+    # cod = cod_liq_linavg.data
+    H = calc_clouddepth_VISST(lwp.data*0.001, ctt_liq.data, adiabaticity=0.8)   # LWP convert from g/m2 to kg/m2
+    H_ad = calc_clouddepth_VISST(lwp.data*0.001, ctt_liq.data, adiabaticity=1.0)
+    Nd = calc_cdnc_VISST(lwp.data*0.001, ctt_liq.data, cod_liq_linavg.data, adiabaticity=0.8)
+    Nd_ad = calc_cdnc_VISST(lwp.data*0.001, ctt_liq.data, cod_liq_linavg.data, adiabaticity=1.0)
     
     #filter out columns with ice and bad retrievals
     H_array = np.array(H)
@@ -501,13 +501,13 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     bb_sw = ins * (1 - bb_sw_albedo*0.01)
     
     #%% retrieve CDNC
-    lwp = wp.data
-    ctt = ctt.data
-    cod = cod.data
-    H = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=0.8)
-    H_ad = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=1.0)
-    Nd = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=0.8)
-    Nd_ad = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=1.0)
+    # lwp = wp.data
+    # ctt = ctt.data
+    # cod = cod.data
+    H = calc_clouddepth_VISST(lwp.data*0.001, ctt.data, adiabaticity=0.8)
+    H_ad = calc_clouddepth_VISST(lwp.data*0.001, ctt.data, adiabaticity=1.0)
+    Nd = calc_cdnc_VISST(lwp.data*0.001, ctt.data, cod.data, adiabaticity=0.8)
+    Nd_ad = calc_cdnc_VISST(lwp.data*0.001, ctt.data, cod.data, adiabaticity=1.0)
     
     #filter out columns with ice and bad retrievals
     H_array = np.array(H)
