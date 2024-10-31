@@ -164,8 +164,8 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
-    Nd_new = avg_time_1d(vissttime, Nd_array, time_new, arraytype='xarray')
-    H_new = avg_time_1d(vissttime, H, time_new, arraytype='xarray')
+    Nd_new = avg_time_1d(vissttime, Nd_array, time_new, arraytype='numpy')
+    H_new = avg_time_1d(vissttime, H, time_new, arraytype='numpy')
     lwp_new = avg_time_1d(vissttime, lwp, time_new, arraytype='xarray')
     iwp_new = avg_time_1d(vissttime, iwp, time_new, arraytype='xarray')
     swnetsfc_new = avg_time_1d(vissttime, sfc_net_sw, time_new, arraytype='xarray')
@@ -551,8 +551,8 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
-    Nd_new = avg_time_1d(vissttime, Nd_array, time_new, arraytype='xarray')
-    H_new = avg_time_1d(vissttime, H, time_new, arraytype='xarray')
+    Nd_new = avg_time_1d(vissttime, Nd_array, time_new, arraytype='numpy')
+    H_new = avg_time_1d(vissttime, H, time_new, arraytype='mumpy')
     lwp_new = avg_time_1d(vissttime, lwp, time_new, arraytype='xarray')
     iwp_new = avg_time_1d(vissttime, iwp, time_new, arraytype='xarray')
     reff_new = avg_time_1d(vissttime, reff, time_new, arraytype='xarray')
