@@ -89,7 +89,7 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 # air.prep_WCM(wcmpath, iwgpath, prep_data_path+'flight/', dt=aircraft_dt)       # cloud liquid water content
 
 # prepare surface data. output time in surface_dt resolution
-print('prepare surface data:')
+# print('prepare surface data:')
 # sfc.prep_ACSM(acsmpath, prep_data_path+'surface/', dt=surface_dt)            # aerosol composition
 # sfc.prep_ccn(ccnsfcpath, prep_data_path+'surface/', dt=surface_dt)              # CCN number concentration
 # sfc.prep_CPC(cpcpath, prep_data_path+'surface/', dt=surface_dt)    # aerosol number concentration (>3 or 10nm)
@@ -106,9 +106,9 @@ print('prepare surface data:')
 # sfc.prep_mfrsr_Reff(mfrsrpath,  prep_data_path+'surface/', dt=surface_dt)    # cloud effective radius from MFRSR
 # sfc.prep_radiation(armbepath, radfluxpath, prep_data_path+'surface/', dt=surface_dt)      # surface radiation
 # sfc.prep_LTS(armbepath, prep_data_path+'surface/', dt=surface_dt)            # lower tropospheric stability
-sfc.prep_precip(armbepath, metpath, parspath, prep_data_path+'surface/', dt=surface_dt)         # surface precipitation
+# sfc.prep_precip(armbepath, metpath, parspath, prep_data_path+'surface/', dt=surface_dt)         # surface precipitation
 
-# # prepare satellite data. output time in satellite_dt resolution
-# print('prepare satellite data:')
-# sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/', dt=satellite_dt)     # VISST 0.5x0.5 degree gridded data
-# sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/', dt=satellite_dt)     # VISST 4km pixel-level data
+# prepare satellite data. output time in satellite_dt resolution
+print('prepare satellite data:')
+sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/', dt=satellite_dt)     # VISST 0.5x0.5 degree gridded data
+sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/', dt=satellite_dt)     # VISST 4km pixel-level data
