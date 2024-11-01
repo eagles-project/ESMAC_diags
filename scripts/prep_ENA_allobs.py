@@ -38,9 +38,9 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 # prepare surface data. output time in 1hr (dt=3600s) resolution
-for year in range(2018,2019):
-    print('prepare surface data:')
-    sfc.prep_ACSM(acsmpath, prep_data_path+'surface/',year, dt=3600)            # aerosol composition
+for year in range(2018,2018):
+    # print('prepare surface data:')
+    # sfc.prep_ACSM(acsmpath, prep_data_path+'surface/',year, dt=3600)            # aerosol composition
     # sfc.prep_ccn(ccnsfcpath, prep_data_path+'surface/',year, dt=3600)              # CCN number concentration
     # sfc.prep_CPC(cpcpath, prep_data_path+'surface/',year, dt=3600)    # aerosol number concentration (>10nm)
     # sfc.prep_CPC_withENAmask(aerosolmaskpath, prep_data_path+'surface/',year, dt=3600)# aerosol number concentration with mask
@@ -58,5 +58,5 @@ for year in range(2018,2019):
     # sfc.prep_Nd_WU(WUpath, prep_data_path+'surface/',year, dt=3600)          # cloud droplet number retrieval from Wu's retrieval
     # # prepare satellite data. output time in 1hr (dt=3600s) resolution
     print('prepare satellite data:')
-    # sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/',year, dt=3600)     # VISST 0.5x0.5 degree gridded data
-    # sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/',year, dt=3600)     # VISST 4km pixel-level data
+    sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/',year, dt=3600)     # VISST 0.5x0.5 degree gridded data
+    sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/',year, dt=3600)     # VISST 4km pixel-level data
