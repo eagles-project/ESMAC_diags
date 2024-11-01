@@ -54,13 +54,18 @@ def prep_VISST_grid(visstgridpath, predatapath, year, dt=3600):
     
     #%% read in data
     lst = glob.glob(os.path.join(visstgridpath, '*visstgrid*.c1.'+year+'*.cdf'))
-    filetime = [a.split('.c1.')[1] for a in lst]
-    sortidx = np.argsort(filetime)
+    # filetime = [a.split('.c1.')[1] for a in lst]
+    # sortidx = np.argsort(filetime)
+    sortidx = np.argsort(tmplst)
+    lst = [tmplst[i] for i in sortidx]
+    
     # first data
-    visstdata = xr.open_dataset(lst[sortidx[0]])
+    # visstdata = xr.open_dataset(lst[sortidx[0]])
+    visstdata = xr.open_dataset(lst[0])
     vissttime = visstdata['time']
     lat = visstdata['latitude'][y_idx]
     lon = visstdata['longitude'][x_idx]
+    
     # check in case the index is incorrect
     if np.abs(lat-39.09527)>0.5 or np.abs(lon+28.0339)>0.5:
         print(lat, lon)
@@ -94,7 +99,8 @@ def prep_VISST_grid(visstgridpath, predatapath, year, dt=3600):
     bb_sw_albedo_clr = visstdata['broadband_shortwave_albedo'][:,y_idx,x_idx,1]
     visstdata.close()
     for ii in range(1,len(lst)):
-        file = lst[sortidx[ii]]
+        # file = lst[sortidx[ii]]
+        file = lst[ii]
         print(file)
         visstdata = xr.open_dataset(file)
         vissttime = xr.concat([vissttime, visstdata['time']], dim="time")
@@ -447,10 +453,14 @@ def prep_VISST_grid_allgrids(visstgridpath, predatapath, year, dt=3600):
     
     #%% read in data
     lst = glob.glob(os.path.join(visstgridpath, '*visstgrid*.c1.'+year+'*.cdf'))
-    filetime = [a.split('.c1.')[1] for a in lst]
-    sortidx = np.argsort(filetime)
+    # filetime = [a.split('.c1.')[1] for a in lst]
+    # sortidx = np.argsort(filetime)
+    sortidx = np.argsort(tmplst)
+    lst = [tmplst[i] for i in sortidx]
+    
     # first data
-    visstdata = xr.open_dataset(lst[sortidx[0]])
+    # visstdata = xr.open_dataset(lst[sortidx[0]])
+    visstdata = xr.open_dataset(lst[0])
     vissttime = visstdata['time']
     lat = visstdata['latitude']
     lon = visstdata['longitude']
@@ -483,7 +493,8 @@ def prep_VISST_grid_allgrids(visstgridpath, predatapath, year, dt=3600):
     bb_sw_albedo_clr = visstdata['broadband_shortwave_albedo'][:,:,:,1]
     visstdata.close()
     for ii in range(1,len(lst)):
-        file = lst[sortidx[ii]]
+        # file = lst[sortidx[ii]]
+        file = lst[ii]
         print(file)
         visstdata = xr.open_dataset(file)
         vissttime = xr.concat([vissttime, visstdata['time']], dim="time")
@@ -894,17 +905,23 @@ def prep_VISST_pixel(visstpixpath, predatapath, year, dt=3600):
     #%% read in data
     lst = glob.glob(os.path.join(visstpixpath, '*visstpx2d*.c1.'+year+'*.cdf'))
     # lst = glob.glob(os.path.join(visstpixpath, 'enavisstpx2*.c1.201802*.cdf'))
-    filetime = [a.split('.c1.')[1] for a in lst]
-    sortidx = np.argsort(filetime)
+    # filetime = [a.split('.c1.')[1] for a in lst]
+    # sortidx = np.argsort(filetime)
+    sortidx = np.argsort(tmplst)
+    lst = [tmplst[i] for i in sortidx]
+    
     # first data
-    visstdata = xr.open_dataset(lst[sortidx[0]])
+    # visstdata = xr.open_dataset(lst[sortidx[0]])
+    visstdata = xr.open_dataset(lst[0])
     vissttime = visstdata['time_offset']
     lat = visstdata['latitude'][x_idx, y_idx]
     lon = visstdata['longitude'][x_idx, y_idx]
+    
     # check in case the index is incorrect
     if np.abs(lat-39.09527)>0.5 or np.abs(lon+28.0339)>0.5:
         print(lat, lon)
         raise ValueError('index at ENA may not right, check x_idx and y_idx')
+        
     vis_reflectance = visstdata['reflectance_vis'][x_idx, y_idx]
     wp = visstdata['cloud_lwp_iwp'][x_idx, y_idx]
     phase = visstdata['cloud_phase'][x_idx, y_idx] #0:snow, 1:water, 2:ice, 3:no retrieval, 4:clear, 5:bad data, 6:suspected water, 7:suspected ice, 13:cleaned data
@@ -917,7 +934,8 @@ def prep_VISST_pixel(visstpixpath, predatapath, year, dt=3600):
     bb_sw_albedo = visstdata['broadband_shortwave_albedo'][x_idx, y_idx]
     visstdata.close()
     for ii in range(1,len(lst)):
-        file = lst[sortidx[ii]]
+        # file = lst[sortidx[ii]]
+        file = lst[ii]
         print(file)
         visstdata = xr.open_dataset(file)
         lat = visstdata['latitude'][x_idx, y_idx]
