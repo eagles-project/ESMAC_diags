@@ -506,14 +506,24 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
         bb_lw = xr.concat([bb_lw, visstdata['broadband_longwave_flux'][x_idx, y_idx]], dim="time")
         bb_sw_albedo = xr.concat([bb_sw_albedo, visstdata['broadband_shortwave_albedo'][x_idx, y_idx]], dim="time")
         visstdata.close()
-        
-    #%% calculate TOA SW flux from albedo
+
+    #%% add time values to arrays
+    vis_reflectance["time"] = vissttime
+    wp["time"] = vissttime
+    phase["time"] = vissttime
+    particle_size["time"] = vissttime
+    cod["time"] = vissttime
+    ctt["time"] = vissttime
+    ctp["time"] = vissttime
+    cth["time"] = vissttime
+    bb_lw["time"] = vissttime
+    bb_sw_albedo["time"] = vissttime
     
+    #%% calculate TOA SW flux from albedo    
     # change time to calendar day
     calday = datetime2cday(vissttime.data)
     # calculate insolation
-    ins = insolation(calday, lon.data, lat.data, leap_year='leap')
-    
+    ins = insolation(calday, lon.data, lat.data, leap_year='leap')    
     # calculate net SW flux
     bb_sw = ins * (1 - bb_sw_albedo*0.01)
     
@@ -556,8 +566,9 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     Nd_ad_array[ind] = np.nan
     
     # effective radius
-    reff = particle_size.data
-    reff[ind] = np.nan
+    # reff = particle_size.data
+    # reff[ind] = np.nan
+    particle_size[ind] = np.nan
     
     # lwp and iwp
     lwp = np.array(wp.data)
@@ -572,7 +583,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     H_new = avg_time_1d(vissttime, H, time_new, arraytype='numpy')
     lwp_new = avg_time_1d(vissttime, lwp, time_new, arraytype='numpy')
     iwp_new = avg_time_1d(vissttime, iwp, time_new, arraytype='numpy')
-    reff_new = avg_time_1d(vissttime, reff, time_new, arraytype='numpy')
+    reff_new = avg_time_1d(vissttime, reff, time_new, arraytype='xarray')
     cod_new = avg_time_1d(vissttime, cod, time_new, arraytype='xarray')
     ctt_new = avg_time_1d(vissttime, ctt, time_new, arraytype='xarray')
     ctp_new = avg_time_1d(vissttime, ctp, time_new, arraytype='xarray')
