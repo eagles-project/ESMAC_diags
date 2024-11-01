@@ -52,15 +52,16 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     
     #%% read in data
     tmplst = glob.glob(os.path.join(visstgridpath, '*visstgridm10*.cdf'))
-    filetime = [a.split('.c1.')[1] for a in tmplst]
-    sortidx = np.argsort(filetime)
-    
-    lst1 = [tmplst[i] for i in sortidx]
-    tmplst = glob.glob(os.path.join(visstgridpath, '*visstgridm11*.cdf'))
-    filetime = [a.split('.c1.')[1] for a in tmplst]
-    sortidx = np.argsort(filetime)
-    lst2 = [tmplst[i] for i in sortidx]
-    lst = np.concatenate([np.array(lst1), np.array(lst2)])
+    # filetime = [a.split('.c1.')[1] for a in tmplst]
+    # sortidx = np.argsort(filetime)
+    # lst1 = [tmplst[i] for i in sortidx]
+    # tmplst = glob.glob(os.path.join(visstgridpath, '*visstgridm11*.cdf'))
+    # filetime = [a.split('.c1.')[1] for a in tmplst]
+    # sortidx = np.argsort(filetime)
+    # lst2 = [tmplst[i] for i in sortidx]
+    # lst = np.concatenate([np.array(lst1), np.array(lst2)])
+    sortidx = np.argsort(tmplst)
+    lst = [tmplst[i] for i in sortidx]
 
     # first data
     visstdata = xr.open_dataset(lst[0])
@@ -454,15 +455,16 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     
     #%% read in data
     tmplst = glob.glob(os.path.join(visstpixpath, '*visstpx2dm10*.cdf'))
-    filetime = [a.split('.c1.')[1] for a in tmplst]
-    sortidx = np.argsort(filetime)    
-    lst1 = [tmplst[i] for i in sortidx]
-    
-    tmplst = glob.glob(os.path.join(visstpixpath, '*visstpx2dm11*.cdf'))
-    filetime = [a.split('.c1.')[1] for a in tmplst]
-    sortidx = np.argsort(filetime)
-    lst2 = [tmplst[i] for i in sortidx]
-    lst = np.concatenate([np.array(lst1), np.array(lst2)])
+    # filetime = [a.split('.c1.')[1] for a in tmplst]
+    # sortidx = np.argsort(filetime)    
+    # lst1 = [tmplst[i] for i in sortidx]
+    # tmplst = glob.glob(os.path.join(visstpixpath, '*visstpx2dm11*.cdf'))
+    # filetime = [a.split('.c1.')[1] for a in tmplst]
+    # sortidx = np.argsort(filetime)
+    # lst2 = [tmplst[i] for i in sortidx]
+    # lst = np.concatenate([np.array(lst1), np.array(lst2)])
+    sortidx = np.argsort(tmplst)
+    lst = [tmplst[i] for i in sortidx]
 
     # first data
     visstdata = xr.open_dataset(lst[0])
