@@ -56,7 +56,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     sortidx = np.argsort(filetime)
     
     lst1 = [tmplst[i] for i in sortidx]
-    tmplst = glob.glob(os.path.join(satpath, '*visstgridm11*.cdf'))
+    tmplst = glob.glob(os.path.join(visstgridpath, '*visstgridm11*.cdf'))
     filetime = [a.split('.c1.')[1] for a in tmplst]
     sortidx = np.argsort(filetime)
     lst2 = [tmplst[i] for i in sortidx]
@@ -458,7 +458,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     sortidx = np.argsort(filetime)    
     lst1 = [tmplst[i] for i in sortidx]
     
-    tmplst = glob.glob(os.path.join(satpath, '*visstpx2dm11*.cdf'))
+    tmplst = glob.glob(os.path.join(visstpixpath, '*visstpx2dm11*.cdf'))
     filetime = [a.split('.c1.')[1] for a in tmplst]
     sortidx = np.argsort(filetime)
     lst2 = [tmplst[i] for i in sortidx]
