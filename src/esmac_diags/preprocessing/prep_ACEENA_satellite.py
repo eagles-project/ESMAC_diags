@@ -63,7 +63,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     lst = np.concatenate([np.array(lst1), np.array(lst2)])
 
     # first data
-    visstdata = xr.open_dataset(lst[sortidx[0]])
+    visstdata = xr.open_dataset(lst[0])
     vissttime = visstdata['time']
     lat = visstdata['latitude'][y_idx]
     lon = visstdata['longitude'][x_idx]
@@ -101,7 +101,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     bb_sw_albedo_clr = visstdata['broadband_shortwave_albedo'][:,y_idx,x_idx,1]
     visstdata.close()
     for ii in range(1,len(lst)):
-        file = lst[sortidx[ii]]
+        file = lst[ii]
         print(file)
         visstdata = xr.open_dataset(file)
         vissttime = xr.concat([vissttime, visstdata['time']], dim="time")
@@ -453,12 +453,19 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     y_idx = 1
     
     #%% read in data
-    lst = glob.glob(os.path.join(visstpixpath, '*visstpx2d*.cdf'))
-    # lst = glob.glob(os.path.join(visstpixpath, 'enavisstpx2*.c1.201802*.cdf'))
-    filetime = [a.split('.c1.')[1] for a in lst]
+    tmplst = glob.glob(os.path.join(visstpixpath, '*visstpx2dm10*.cdf'))
+    filetime = [a.split('.c1.')[1] for a in tmplst]
+    sortidx = np.argsort(filetime)    
+    lst1 = [tmplst[i] for i in sortidx]
+    
+    tmplst = glob.glob(os.path.join(satpath, '*visstpx2dm11*.cdf'))
+    filetime = [a.split('.c1.')[1] for a in tmplst]
     sortidx = np.argsort(filetime)
+    lst2 = [tmplst[i] for i in sortidx]
+    lst = np.concatenate([np.array(lst1), np.array(lst2)])
+
     # first data
-    visstdata = xr.open_dataset(lst[sortidx[0]])
+    visstdata = xr.open_dataset(lst[0])
     vissttime = visstdata['time_offset']
     lat = visstdata['latitude'][x_idx, y_idx]
     lon = visstdata['longitude'][x_idx, y_idx]
