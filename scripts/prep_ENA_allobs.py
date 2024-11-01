@@ -53,7 +53,7 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 # prepare surface data. output time in 1hr (dt=3600s) resolution
-for year in range(2018,2018):
+for year in range(2018,2019):
     # print('prepare surface data:')
     # sfc.prep_ACSM(acsmpath, prep_data_path+'surface/',year, dt=surface_dt)            # aerosol composition
     # sfc.prep_ccn(ccnsfcpath, prep_data_path+'surface/',year, dt=surface_dt)              # CCN number concentration
