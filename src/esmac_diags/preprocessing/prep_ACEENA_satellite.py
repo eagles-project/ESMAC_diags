@@ -521,10 +521,10 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     # lwp = wp.data
     # ctt = ctt.data
     # cod = cod.data
-    H = calc_clouddepth_VISST(lwp.data*0.001, ctt.data, adiabaticity=0.8)
-    H_ad = calc_clouddepth_VISST(lwp.data*0.001, ctt.data, adiabaticity=1.0)
-    Nd = calc_cdnc_VISST(lwp.data*0.001, ctt.data, cod.data, adiabaticity=0.8)
-    Nd_ad = calc_cdnc_VISST(lwp.data*0.001, ctt.data, cod.data, adiabaticity=1.0)
+    H = calc_clouddepth_VISST(wp.data*0.001, ctt.data, adiabaticity=0.8)
+    H_ad = calc_clouddepth_VISST(wp.data*0.001, ctt.data, adiabaticity=1.0)
+    Nd = calc_cdnc_VISST(wp.data*0.001, ctt.data, cod.data, adiabaticity=0.8)
+    Nd_ad = calc_cdnc_VISST(wp.data*0.001, ctt.data, cod.data, adiabaticity=1.0)
     
     #filter out columns with ice and bad retrievals
     H_array = np.array(H)
