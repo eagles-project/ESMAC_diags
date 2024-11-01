@@ -583,7 +583,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     H_new = avg_time_1d(vissttime, H, time_new, arraytype='numpy')
     lwp_new = avg_time_1d(vissttime, lwp, time_new, arraytype='numpy')
     iwp_new = avg_time_1d(vissttime, iwp, time_new, arraytype='numpy')
-    reff_new = avg_time_1d(vissttime, reff, time_new, arraytype='xarray')
+    reff_new = avg_time_1d(vissttime, particle_size, time_new, arraytype='xarray')
     cod_new = avg_time_1d(vissttime, cod, time_new, arraytype='xarray')
     ctt_new = avg_time_1d(vissttime, ctt, time_new, arraytype='xarray')
     ctp_new = avg_time_1d(vissttime, ctp, time_new, arraytype='xarray')
