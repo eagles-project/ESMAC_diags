@@ -143,13 +143,13 @@ def prep_VISST_grid(visstgridpath, predatapath, year, dt=3600):
     bb_sw_all = ins * (1 - bb_sw_albedo_all*0.01)
     
     #%% retrieve CDNC
-    lwp = lwp.data   
-    ctt = ctt_liq.data
-    cod = cod_liq_linavg.data
-    H = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=0.8)   # LWP convert from g/m2 to kg/m2
-    H_ad = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=1.0)
-    Nd = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=0.8)
-    Nd_ad = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=1.0)
+    # lwp = lwp.data   
+    # ctt = ctt_liq.data
+    # cod = cod_liq_linavg.data
+    H = calc_clouddepth_VISST(lwp.data *0.001, ctt_liq.data , adiabaticity=0.8)   # LWP convert from g/m2 to kg/m2
+    H_ad = calc_clouddepth_VISST(lwp.data *0.001, ctt_liq.data , adiabaticity=1.0)
+    Nd = calc_cdnc_VISST(lwp.data *0.001, ctt_liq.data , cod_liq_linavg.data , adiabaticity=0.8)
+    Nd_ad = calc_cdnc_VISST(lwp.data *0.001, ctt_liq.data , cod_liq_linavg.data , adiabaticity=1.0)
     
     #filter out columns with ice and bad retrievals
     H_array = np.array(H)
@@ -172,28 +172,28 @@ def prep_VISST_grid(visstgridpath, predatapath, year, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    Nd_new = avg_time_1d(vissttime, Nd_array, time_new)
-    H_new = avg_time_1d(vissttime, H, time_new)
-    lwp_new = avg_time_1d(vissttime, lwp, time_new)
-    iwp_new = avg_time_1d(vissttime, iwp, time_new)
-    swnetsfc_new = avg_time_1d(vissttime, sfc_net_sw, time_new)
-    lwnetsfc_new = avg_time_1d(vissttime, sfc_net_lw, time_new)
-    swdnsfc_new = avg_time_1d(vissttime, sfc_down_sw, time_new)
-    lwdnsfc_new = avg_time_1d(vissttime, sfc_down_lw, time_new)
-    reff_new = avg_time_1d(vissttime, reff_liq, time_new)
-    cod_new = avg_time_1d(vissttime, cod_liq_linavg, time_new)
-    codlog_new = avg_time_1d(vissttime, cod_liq_logavg, time_new)
-    cf_all_new = avg_time_1d(vissttime, cf_allz, time_new)
-    cf_low_new = avg_time_1d(vissttime, cf_low, time_new)
-    cf_mid_new = avg_time_1d(vissttime, cf_mid, time_new)
-    cf_high_new = avg_time_1d(vissttime, cf_high, time_new)
-    ctt_new = avg_time_1d(vissttime, ctt_liq, time_new)
-    ctp_new = avg_time_1d(vissttime, ctp_liq, time_new)
-    cth_new = avg_time_1d(vissttime, cth_liq, time_new)
-    lw_new = avg_time_1d(vissttime, bb_lw_all, time_new)
-    sw_new = avg_time_1d(vissttime, bb_sw_all, time_new)
-    albedo_new = avg_time_1d(vissttime, bb_sw_albedo_all, time_new)
-    solar_zenith_new = avg_time_1d(vissttime, solar_zenith, time_new)
+    Nd_new = avg_time_1d(vissttime, Nd_array, time_new, arraytype='numpy')
+    H_new = avg_time_1d(vissttime, H, time_new, arraytype='numpy')
+    lwp_new = avg_time_1d(vissttime, lwp, time_new, arraytype='xarray')
+    iwp_new = avg_time_1d(vissttime, iwp, time_new, arraytype='xarray')
+    swnetsfc_new = avg_time_1d(vissttime, sfc_net_sw, time_new, arraytype='xarray')
+    lwnetsfc_new = avg_time_1d(vissttime, sfc_net_lw, time_new, arraytype='xarray')
+    swdnsfc_new = avg_time_1d(vissttime, sfc_down_sw, time_new, arraytype='xarray')
+    lwdnsfc_new = avg_time_1d(vissttime, sfc_down_lw, time_new, arraytype='xarray')
+    reff_new = avg_time_1d(vissttime, reff_liq, time_new, arraytype='xarray')
+    cod_new = avg_time_1d(vissttime, cod_liq_linavg, time_new, arraytype='xarray')
+    codlog_new = avg_time_1d(vissttime, cod_liq_logavg, time_new, arraytype='xarray')
+    cf_all_new = avg_time_1d(vissttime, cf_allz, time_new, arraytype='xarray')
+    cf_low_new = avg_time_1d(vissttime, cf_low, time_new, arraytype='xarray')
+    cf_mid_new = avg_time_1d(vissttime, cf_mid, time_new, arraytype='xarray')
+    cf_high_new = avg_time_1d(vissttime, cf_high, time_new, arraytype='xarray')
+    ctt_new = avg_time_1d(vissttime, ctt_liq, time_new, arraytype='xarray')
+    ctp_new = avg_time_1d(vissttime, ctp_liq, time_new, arraytype='xarray')
+    cth_new = avg_time_1d(vissttime, cth_liq, time_new, arraytype='xarray')
+    lw_new = avg_time_1d(vissttime, bb_lw_all, time_new, arraytype='xarray')
+    sw_new = avg_time_1d(vissttime, bb_sw_all, time_new, arraytype='xarray')
+    albedo_new = avg_time_1d(vissttime, bb_sw_albedo_all, time_new, arraytype='xarray')
+    solar_zenith_new = avg_time_1d(vissttime, solar_zenith, time_new, arraytype='xarray')
     
     
     #%% output file
@@ -540,13 +540,13 @@ def prep_VISST_grid_allgrids(visstgridpath, predatapath, year, dt=3600):
     bb_sw_all = ins * (1 - bb_sw_albedo_all*0.01)
     
     #%% retrieve CDNC
-    lwp = lwp.data   
-    ctt = ctt_liq.data
-    cod = cod_liq_linavg.data
-    H = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=0.8)   # LWP convert from g/m2 to kg/m2
-    H_ad = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=1.0)
-    Nd = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=0.8)
-    Nd_ad = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=1.0)
+    # lwp = lwp.data   
+    # ctt = ctt_liq.data
+    # cod = cod_liq_linavg.data
+    H = calc_clouddepth_VISST(lwp.data *0.001, ctt_liq.data , adiabaticity=0.8)   # LWP convert from g/m2 to kg/m2
+    H_ad = calc_clouddepth_VISST(lwp.data *0.001, ctt_liq.data , adiabaticity=1.0)
+    Nd = calc_cdnc_VISST(lwp.data *0.001, ctt_liq.data , cod_liq_linavg.data , adiabaticity=0.8)
+    Nd_ad = calc_cdnc_VISST(lwp.data *0.001, ctt_liq.data , cod_liq_linavg.data , adiabaticity=1.0)
     
     #filter out columns with ice and bad retrievals
     H_array = np.array(H)
@@ -571,28 +571,28 @@ def prep_VISST_grid_allgrids(visstgridpath, predatapath, year, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    Nd_new = avg_time_3d(vissttime, Nd_array, time_new)
-    H_new = avg_time_3d(vissttime, H, time_new)
-    lwp_new = avg_time_3d(vissttime, lwp, time_new)
-    iwp_new = avg_time_3d(vissttime, iwp, time_new)
-    swnetsfc_new = avg_time_3d(vissttime, sfc_net_sw, time_new)
-    lwnetsfc_new = avg_time_3d(vissttime, sfc_net_lw, time_new)
-    swdnsfc_new = avg_time_3d(vissttime, sfc_down_sw, time_new)
-    lwdnsfc_new = avg_time_3d(vissttime, sfc_down_lw, time_new)
-    reff_new = avg_time_3d(vissttime, reff_liq, time_new)
-    cod_new = avg_time_3d(vissttime, cod_liq_linavg, time_new)
-    codlog_new = avg_time_3d(vissttime, cod_liq_logavg, time_new)
-    cf_all_new = avg_time_3d(vissttime, cf_allz, time_new)
-    cf_low_new = avg_time_3d(vissttime, cf_low, time_new)
-    cf_mid_new = avg_time_3d(vissttime, cf_mid, time_new)
-    cf_high_new = avg_time_3d(vissttime, cf_high, time_new)
-    ctt_new = avg_time_3d(vissttime, ctt_liq, time_new)
-    ctp_new = avg_time_3d(vissttime, ctp_liq, time_new)
-    cth_new = avg_time_3d(vissttime, cth_liq, time_new)
-    lw_new = avg_time_3d(vissttime, bb_lw_all, time_new)
-    sw_new = avg_time_3d(vissttime, bb_sw_all, time_new)
-    albedo_new = avg_time_3d(vissttime, bb_sw_albedo_all, time_new)
-    solar_zenith_new = avg_time_3d(vissttime, solar_zenith, time_new)
+    Nd_new = avg_time_3d(vissttime, Nd_array, time_new, arraytype='numpy')
+    H_new = avg_time_3d(vissttime, H, time_new, arraytype='numpy')
+    lwp_new = avg_time_3d(vissttime, lwp, time_new, arraytype='xarray')
+    iwp_new = avg_time_3d(vissttime, iwp, time_new, arraytype='xarray')
+    swnetsfc_new = avg_time_3d(vissttime, sfc_net_sw, time_new, arraytype='xarray')
+    lwnetsfc_new = avg_time_3d(vissttime, sfc_net_lw, time_new, arraytype='xarray')
+    swdnsfc_new = avg_time_3d(vissttime, sfc_down_sw, time_new, arraytype='xarray')
+    lwdnsfc_new = avg_time_3d(vissttime, sfc_down_lw, time_new, arraytype='xarray')
+    reff_new = avg_time_3d(vissttime, reff_liq, time_new, arraytype='xarray')
+    cod_new = avg_time_3d(vissttime, cod_liq_linavg, time_new, arraytype='xarray')
+    codlog_new = avg_time_3d(vissttime, cod_liq_logavg, time_new, arraytype='xarray')
+    cf_all_new = avg_time_3d(vissttime, cf_allz, time_new, arraytype='xarray')
+    cf_low_new = avg_time_3d(vissttime, cf_low, time_new, arraytype='xarray')
+    cf_mid_new = avg_time_3d(vissttime, cf_mid, time_new, arraytype='xarray')
+    cf_high_new = avg_time_3d(vissttime, cf_high, time_new, arraytype='xarray')
+    ctt_new = avg_time_3d(vissttime, ctt_liq, time_new, arraytype='xarray')
+    ctp_new = avg_time_3d(vissttime, ctp_liq, time_new, arraytype='xarray')
+    cth_new = avg_time_3d(vissttime, cth_liq, time_new, arraytype='xarray')
+    lw_new = avg_time_3d(vissttime, bb_lw_all, time_new, arraytype='xarray')
+    sw_new = avg_time_3d(vissttime, bb_sw_all, time_new, arraytype='xarray')
+    albedo_new = avg_time_3d(vissttime, bb_sw_albedo_all, time_new, arraytype='xarray')
+    solar_zenith_new = avg_time_3d(vissttime, solar_zenith, time_new, arraytype='xarray')
     
     
     #%% output file
@@ -956,25 +956,35 @@ def prep_VISST_pixel(visstpixpath, predatapath, year, dt=3600):
         bb_lw = xr.concat([bb_lw, visstdata['broadband_longwave_flux'][x_idx, y_idx]], dim="time")
         bb_sw_albedo = xr.concat([bb_sw_albedo, visstdata['broadband_shortwave_albedo'][x_idx, y_idx]], dim="time")
         visstdata.close()
-        
-    #%% calculate TOA SW flux from albedo
+
+    #%% add time values to arrays
+    vis_reflectance["time"] = vissttime
+    wp["time"] = vissttime
+    phase["time"] = vissttime
+    particle_size["time"] = vissttime
+    cod["time"] = vissttime
+    ctt["time"] = vissttime
+    ctp["time"] = vissttime
+    cth["time"] = vissttime
+    bb_lw["time"] = vissttime
+    bb_sw_albedo["time"] = vissttime
     
+    #%% calculate TOA SW flux from albedo
     # change time to calendar day
     calday = datetime2cday(vissttime.data)
     # calculate insolation
     ins = insolation(calday, lon.data, lat.data, leap_year='leap')
-    
     # calculate net SW flux
     bb_sw = ins * (1 - bb_sw_albedo*0.01)
     
     #%% retrieve CDNC
-    lwp = wp.data
-    ctt = ctt.data
-    cod = cod.data
-    H = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=0.8)
-    H_ad = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=1.0)
-    Nd = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=0.8)
-    Nd_ad = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=1.0)
+    # lwp = wp.data
+    # ctt = ctt.data
+    # cod = cod.data
+    H = calc_clouddepth_VISST(wp.data*0.001, ctt.data, adiabaticity=0.8)
+    H_ad = calc_clouddepth_VISST(wp.data*0.001, ctt.data, adiabaticity=1.0)
+    Nd = calc_cdnc_VISST(wp.data*0.001, ctt.data, cod.data, adiabaticity=0.8)
+    Nd_ad = calc_cdnc_VISST(wp.data*0.001, ctt.data, cod.data, adiabaticity=1.0)
     
     #filter out columns with ice and bad retrievals
     H_array = np.array(H)
@@ -1006,8 +1016,9 @@ def prep_VISST_pixel(visstpixpath, predatapath, year, dt=3600):
     Nd_ad_array[ind] = np.nan
     
     # effective radius
-    reff = particle_size.data
-    reff[ind] = np.nan
+    # reff = particle_size.data
+    # reff[ind] = np.nan
+    particle_size[ind] = np.nan
     
     # lwp and iwp
     lwp = np.array(wp.data)
@@ -1018,18 +1029,18 @@ def prep_VISST_pixel(visstpixpath, predatapath, year, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     
-    Nd_new = avg_time_1d(vissttime, Nd_array, time_new)
-    H_new = avg_time_1d(vissttime, H, time_new)
-    lwp_new = avg_time_1d(vissttime, lwp, time_new)
-    iwp_new = avg_time_1d(vissttime, iwp, time_new)
-    reff_new = avg_time_1d(vissttime, reff, time_new)
-    cod_new = avg_time_1d(vissttime, cod, time_new)
-    ctt_new = avg_time_1d(vissttime, ctt, time_new)
-    ctp_new = avg_time_1d(vissttime, ctp, time_new)
-    cth_new = avg_time_1d(vissttime, cth, time_new)
-    lw_new = avg_time_1d(vissttime, bb_lw, time_new)
-    sw_new = avg_time_1d(vissttime, bb_sw, time_new)
-    albedo_new = avg_time_1d(vissttime, bb_sw_albedo, time_new)
+    Nd_new = avg_time_1d(vissttime, Nd_array, time_new, arraytype='numpy')
+    H_new = avg_time_1d(vissttime, H, time_new, arraytype='numpy')
+    lwp_new = avg_time_1d(vissttime, lwp, time_new, arraytype='numpy')
+    iwp_new = avg_time_1d(vissttime, iwp, time_new, arraytype='numpy')
+    reff_new = avg_time_1d(vissttime, reff, time_new, arraytype='xarray')
+    cod_new = avg_time_1d(vissttime, cod, time_new, arraytype='xarray')
+    ctt_new = avg_time_1d(vissttime, ctt, time_new, arraytype='xarray')
+    ctp_new = avg_time_1d(vissttime, ctp, time_new, arraytype='xarray')
+    cth_new = avg_time_1d(vissttime, cth, time_new, arraytype='xarray')
+    lw_new = avg_time_1d(vissttime, bb_lw, time_new, arraytype='xarray')
+    sw_new = avg_time_1d(vissttime, bb_sw, time_new, arraytype='xarray')
+    albedo_new = avg_time_1d(vissttime, bb_sw_albedo, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'Nd_VISSTpix_ENA_'+year+'.nc'
