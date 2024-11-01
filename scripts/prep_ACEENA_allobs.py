@@ -110,5 +110,5 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 
 # prepare satellite data. output time in satellite_dt resolution
 print('prepare satellite data:')
-sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/', dt=satellite_dt)     # VISST 0.5x0.5 degree gridded data
+# sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/', dt=satellite_dt)     # VISST 0.5x0.5 degree gridded data
 sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/', dt=satellite_dt)     # VISST 4km pixel-level data
