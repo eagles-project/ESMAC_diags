@@ -53,8 +53,8 @@ def prep_VISST_grid(visstgridpath, predatapath, year, dt=3600):
     y_idx = 7
     
     #%% read in data
-    lst = glob.glob(os.path.join(visstgridpath, '*visstgrid*.c1.'+year+'*.cdf'))
-    # filetime = [a.split('.c1.')[1] for a in lst]
+    tmplst = glob.glob(os.path.join(visstgridpath, '*visstgrid*.c1.'+year+'*.cdf'))
+    # filetime = [a.split('.c1.')[1] for a in tmplst]
     # sortidx = np.argsort(filetime)
     sortidx = np.argsort(tmplst)
     lst = [tmplst[i] for i in sortidx]
@@ -452,8 +452,8 @@ def prep_VISST_grid_allgrids(visstgridpath, predatapath, year, dt=3600):
 
     
     #%% read in data
-    lst = glob.glob(os.path.join(visstgridpath, '*visstgrid*.c1.'+year+'*.cdf'))
-    # filetime = [a.split('.c1.')[1] for a in lst]
+    tmplst = glob.glob(os.path.join(visstgridpath, '*visstgrid*.c1.'+year+'*.cdf'))
+    # filetime = [a.split('.c1.')[1] for a in tmplst]
     # sortidx = np.argsort(filetime)
     sortidx = np.argsort(tmplst)
     lst = [tmplst[i] for i in sortidx]
@@ -903,9 +903,9 @@ def prep_VISST_pixel(visstpixpath, predatapath, year, dt=3600):
     y_idx = 1
     
     #%% read in data
-    lst = glob.glob(os.path.join(visstpixpath, '*visstpx2d*.c1.'+year+'*.cdf'))
+    tmplst = glob.glob(os.path.join(visstpixpath, '*visstpx2d*.c1.'+year+'*.cdf'))
     # lst = glob.glob(os.path.join(visstpixpath, 'enavisstpx2*.c1.201802*.cdf'))
-    # filetime = [a.split('.c1.')[1] for a in lst]
+    # filetime = [a.split('.c1.')[1] for a in tmplst]
     # sortidx = np.argsort(filetime)
     sortidx = np.argsort(tmplst)
     lst = [tmplst[i] for i in sortidx]
