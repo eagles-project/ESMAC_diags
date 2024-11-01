@@ -51,14 +51,23 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     y_idx = 7
     
     #%% read in data
-    lst = glob.glob(os.path.join(visstgridpath, '*visstgrid*.cdf'))
-    filetime = [a.split('.c1.')[1] for a in lst]
+    tmplst = glob.glob(os.path.join(visstgridpath, '*visstgridm10*.cdf'))
+    filetime = [a.split('.c1.')[1] for a in tmplst]
     sortidx = np.argsort(filetime)
+    
+    lst1 = [tmplst[i] for i in sortidx]
+    tmplst = glob.glob(os.path.join(satpath, '*visstgridm11*.cdf'))
+    filetime = [a.split('.c1.')[1] for a in tmplst]
+    sortidx = np.argsort(filetime)
+    lst2 = [tmplst[i] for i in sortidx]
+    lst = np.concatenate([np.array(lst1), np.array(lst2)])
+
     # first data
     visstdata = xr.open_dataset(lst[sortidx[0]])
     vissttime = visstdata['time']
     lat = visstdata['latitude'][y_idx]
     lon = visstdata['longitude'][x_idx]
+    
     # check in case the index is incorrect
     if np.abs(lat-39.09527)>0.5 or np.abs(lon+28.0339)>0.5:
         print(lat, lon)
@@ -453,6 +462,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     vissttime = visstdata['time_offset']
     lat = visstdata['latitude'][x_idx, y_idx]
     lon = visstdata['longitude'][x_idx, y_idx]
+    
     # check in case the index is incorrect
     if np.abs(lat-39.09527)>0.5 or np.abs(lon+28.0339)>0.5:
         print(lat, lon)
