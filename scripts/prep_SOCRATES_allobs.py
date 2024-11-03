@@ -22,7 +22,7 @@ config = yaml.full_load(stream)
 obs_input_path = config['obs_input_path']
 
 # flight data path
-iwgpath = '/global/cscratch1/sd/sqtang/EAGLES/ESMAC_Diags_v2/raw_data/obs/SOCRATES/aircraft/mei-iwg1/'
+iwgpath = obs_input_path+'SOCRATES/aircraft/mei-iwg1/'
 RFpath = obs_input_path+'SOCRATES/aircraft/aircraft_lowrate/'
 ccnpath = obs_input_path+'SOCRATES/aircraft/CCN/'
 
