@@ -89,13 +89,13 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
-    lon1 = median_time_1d(time, lon, time_new)
-    lat1 = median_time_1d(time, lat, time_new)
-    ccn1 = median_time_1d(time2, ccn_1s, time_new)
-    ccn2 = median_time_1d(time2, ccn_2s, time_new)
-    ccn3 = median_time_1d(time2, ccn_3s, time_new)
-    ccn5 = median_time_1d(time2, ccn_5s, time_new)
-    ccn6 = median_time_1d(time2, ccn_6s, time_new)
+    lon1 = median_time_1d(time, lon, time_new, arraytype='nunpy')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='nunpy')
+    ccn1 = median_time_1d(time2, ccn_1s, time_new, arraytype='nunpy')
+    ccn2 = median_time_1d(time2, ccn_2s, time_new, arraytype='nunpy')
+    ccn3 = median_time_1d(time2, ccn_3s, time_new, arraytype='nunpy')
+    ccn5 = median_time_1d(time2, ccn_5s, time_new, arraytype='nunpy')
+    ccn6 = median_time_1d(time2, ccn_6s, time_new, arraytype='nunpy')
     
     #%% output file
     outfile = prep_data_path + 'CCN_MARCUS.nc'
@@ -191,36 +191,11 @@ exhaustfreepath : str
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
-    lon1 = median_time_1d(time, lon, time_new)
-    lat1 = median_time_1d(time, lat, time_new)
-    ccn1 = median_time_1d(time2, ccn1s, time_new)
-    ccn2 = median_time_1d(time2, ccn2s, time_new)
-    ccn5 = median_time_1d(time2, ccn5s, time_new)
-    
-    #%% 
-    # import matplotlib.pyplot as plt
-    
-    # fig = plt.figure(figsize=(8,6))
-    # ax1 = fig.add_subplot(3, 1, 1)
-    # ax1.plot(time2, ccn1s)
-    # ax1.plot(time_new, ccn1, color='r', marker='.',linewidth=2)
-    # # ax1.set_ylim(.5, .7)
-    # ax2 = fig.add_subplot(3, 1, 2)
-    # ax2.plot(time2, ccn5s)
-    # ax2.plot(time_new, ccn5, color='r', marker='.',linewidth=2)
-    # # ax2.set_ylim(-50, 2000)
-    # ax3= fig.add_subplot(3, 1, 3)
-    # ax3.plot(time2, ccn2s)
-    # ax3.plot(time_new, ccn2, color='r', marker='.',linewidth=2)
-    # # ax2.set_ylim(-50, 2000)
-    
-    # # fig = plt.figure(figsize=(8,3))
-    # # ax1 = fig.add_subplot(1, 1, 1)
-    # # h1=ax1.contourf(time_new, size.data, uhsas1.T, np.arange(0,200,20))
-    # # fig.colorbar(h1)
-    # # ax1.set_yscale('log')
-    # # import matplotlib.dates as mdates
-    # # ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+    lon1 = median_time_1d(time, lon, time_new, arraytype='nunpy')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='nunpy')
+    ccn1 = median_time_1d(time2, ccn1s, time_new, arraytype='nunpy')
+    ccn2 = median_time_1d(time2, ccn2s, time_new, arraytype='nunpy')
+    ccn5 = median_time_1d(time2, ccn5s, time_new, arraytype='nunpy')
 
     #%% output file
     outfile = prep_data_path + 'CCN_MARCUS_exhaustfree.nc'
@@ -322,11 +297,14 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
+
+    tmpcpc = xr.DataArray(data=np.array(cpc), dims=["time"], coords=dict(time=time1))
+    tmpuhsas100 = xr.DataArray(data=np.array(uhsas100), dims=["time"], coords=dict(time=time2))
     
-    lon1 = median_time_1d(time, lon, time_new)
-    lat1 = median_time_1d(time, lat, time_new)
-    cpc1 = median_time_1d(time1, cpc, time_new)
-    uhsas1 = median_time_1d(time2, uhsas100, time_new)
+    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    cpc1 = median_time_1d(time1, tmpcpc, time_new, arraytype='xarray')
+    uhsas1 = median_time_1d(time2, tmpuhsas100, time_new, arraytype='xarray')
     
     #%% output file
     outfile = prep_data_path + 'CN_MARCUS.nc'
@@ -410,11 +388,14 @@ def prep_CN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=3600):
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
+
+    tmpcpc = xr.DataArray(data=np.array(cpc), dims=["time"], coords=dict(time=time2))
+    tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time2))
     
-    lon1 = median_time_1d(time, lon, time_new)
-    lat1 = median_time_1d(time, lat, time_new)
-    cpc1 = median_time_1d(time2, cpc, time_new)
-    uhsas1 = median_time_1d(time2, uhsas, time_new)
+    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    cpc1 = median_time_1d(time1, tmpcpc, time_new, arraytype='xarray')
+    uhsas1 = median_time_1d(time2, tmpuhsas, time_new, arraytype='xarray')
     
     #%% output file
     outfile = prep_data_path + 'CN_MARCUS_exhaustfree.nc'
@@ -500,9 +481,11 @@ def prep_CNsize_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=360
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
-    lon1 = median_time_1d(time, lon, time_new)
-    lat1 = median_time_1d(time, lat, time_new)
-    uhsas1 = median_time_2d(time2, uhsas, time_new)
+    tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time2))
+    
+    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    uhsas1 = median_time_2d(time2, tmpuhsas, time_new, arraytype='xarray')
     
     #%% output file
     outfile = prep_data_path + 'CNsize_UHSAS_MARCUS_exhaustfree.nc'
@@ -594,9 +577,11 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
-    lon1 = median_time_1d(time, lon, time_new)
-    lat1 = median_time_1d(time, lat, time_new)
-    uhsas1 = median_time_2d(time2, uhsas, time_new)
+    tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time2))
+    
+    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    uhsas1 = median_time_2d(time2, tmpuhsas, time_new, arraytype='xarray')
     
     #%% output file
     outfile = prep_data_path + 'CNsize_UHSAS_MARCUS.nc'
@@ -686,11 +671,11 @@ def prep_MET(shipmetpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
-    lon1 = median_time_1d(time, lon, time_new)
-    lat1 = median_time_1d(time, lat, time_new)
-    T1 = median_time_1d(time, T, time_new)
-    RH1 = median_time_1d(time, RH, time_new)
-    ps1 = median_time_1d(time, ps, time_new)
+    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    T1 = median_time_1d(time, T, time_new, arraytype='numpy')
+    RH1 = median_time_1d(time, RH, time_new, arraytype='numpy')
+    ps1 = median_time_1d(time, ps, time_new, arraytype='numpy')
     
     #%% output file
     outfile = prep_data_path + 'T_RH_Ps_MARCUS.nc'
@@ -803,9 +788,9 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
-    lon1 = avg_time_1d(time, lon, time_new)
-    lat1 = avg_time_1d(time, lat, time_new)
-    lwp1 = avg_time_1d(time2, lwp, time_new)
+    lon1 = avg_time_1d(time, lon, time_new, arraytype='numpy')
+    lat1 = avg_time_1d(time, lat, time_new, arraytype='numpy')
+    lwp1 = avg_time_1d(time2, lwp, time_new, arraytype='numpy')
     lwp1 = qc_remove_neg(lwp1)
     
     #%% calculate cloud fraction from LWP
