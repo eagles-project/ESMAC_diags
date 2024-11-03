@@ -33,5 +33,8 @@ output_filehead = 'E3SMv2_CSET'
 obs_input_path = config['obs_input_path']
 RFpath = obs_input_path + 'CSET/aircraft/aircraft_lowrate/'
 
+# time frequencies
+aircraft_dt = config['model_aircraft_dt']
+
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-prep.prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, RFpath, config, dt=60)
+prep.prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, RFpath, config, dt=aircraft_dt)
