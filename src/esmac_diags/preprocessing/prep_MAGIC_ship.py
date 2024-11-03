@@ -93,39 +93,13 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
     
-    lon1 = median_time_1d(time, lon, time_new)
-    lat1 = median_time_1d(time, lat, time_new)
-    ccn1 = median_time_1d(time2, ccn_1s, time_new)
-    ccn2 = median_time_1d(time2, ccn_2s, time_new)
-    ccn3 = median_time_1d(time2, ccn_3s, time_new)
-    ccn5 = median_time_1d(time2, ccn_5s, time_new)
-    ccn6 = median_time_1d(time2, ccn_6s, time_new)
-    
-    #%% 
-    # import matplotlib.pyplot as plt
-    
-    # fig = plt.figure(figsize=(8,6))
-    # ax1 = fig.add_subplot(3, 1, 1)
-    # ax1.plot(time2, ccn_1s)
-    # ax1.plot(time_new, ccn1, color='r', marker='.',linewidth=2)
-    # # ax1.set_ylim(.5, .7)
-    # ax2 = fig.add_subplot(3, 1, 2)
-    # ax2.plot(time2, ccn_6s)
-    # ax2.plot(time_new, ccn6, color='r', marker='.',linewidth=2)
-    # # ax2.set_ylim(-50, 2000)
-    # ax3= fig.add_subplot(3, 1, 3)
-    # ax3.plot(time2, ccn_2s)
-    # ax3.plot(time_new, ccn2, color='r', marker='.',linewidth=2)
-    # # ax2.set_ylim(-50, 2000)
-    
-    # # fig = plt.figure(figsize=(8,3))
-    # # ax1 = fig.add_subplot(1, 1, 1)
-    # # h1=ax1.contourf(time_new, size.data, uhsas1.T, np.arange(0,200,20))
-    # # fig.colorbar(h1)
-    # # ax1.set_yscale('log')
-    # # import matplotlib.dates as mdates
-    # # ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-    # r
+    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    ccn1 = median_time_1d(time2, ccn_1s, time_new, arraytype='numpy')
+    ccn2 = median_time_1d(time2, ccn_2s, time_new, arraytype='numpy')
+    ccn3 = median_time_1d(time2, ccn_3s, time_new, arraytype='numpy')
+    ccn5 = median_time_1d(time2, ccn_5s, time_new, arraytype='numpy')
+    ccn6 = median_time_1d(time2, ccn_6s, time_new, arraytype='numpy')
     
     #%% output file
     outfile = prep_data_path + 'CCN_MAGIC.nc'
@@ -237,11 +211,14 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
-    
-    lon1 = median_time_1d(time, lon, time_new)
-    lat1 = median_time_1d(time, lat, time_new)
-    cpc1 = median_time_1d(time1, cpc, time_new)
-    uhsas1 = median_time_1d(time2, uhsas100, time_new)
+
+    tmpcpc = xr.DataArray(data=np.array(cpc), dims=["time"], coords=dict(time=time1))
+    tmpuhsas100 = xr.DataArray(data=np.array(uhsas100), dims=["time"], coords=dict(time=time2))
+
+    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    cpc1 = median_time_1d(time1, tmpcpc, time_new, arraytype='xarray')
+    uhsas1 = median_time_1d(time2, tmpuhsas100, time_new, arraytype='xarray')
     
     #%% output file
     outfile = prep_data_path + 'CN_MAGIC.nc'
@@ -314,9 +291,7 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
     lat = qc_mask_qcflag(lat, qc_lat)
     lon = qc_mask_qcflag(lon, qc_lon)
     
-    
     #%% read in data
-    
     lst2 = glob.glob(uhsaspath+'magaosuhsasM1.a1.*')
     obsdata = xr.open_mfdataset(lst2, combine='by_coords')
     time2 = obsdata['time'].load()
@@ -335,13 +310,14 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
     uhsas = qc_remove_neg(uhsas)
     size = (dmin+dmax)/2
     
-    
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
+
+    tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time2))
     
-    lon1 = median_time_1d(time, lon, time_new)
-    lat1 = median_time_1d(time, lat, time_new)
-    uhsas1 = median_time_2d(time2, uhsas, time_new)
+    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    uhsas1 = median_time_2d(time2, tmpuhsas, time_new, arraytype='xarray')
     
     #%% output file
     outfile = prep_data_path + 'CNsize_UHSAS_MAGIC.nc'
@@ -431,11 +407,11 @@ def prep_MET(shipmetpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
     
-    lon1 = median_time_1d(time, lon, time_new)
-    lat1 = median_time_1d(time, lat, time_new)
-    T1 = median_time_1d(time, T, time_new)
-    RH1 = median_time_1d(time, RH, time_new)
-    ps1 = median_time_1d(time, ps, time_new)
+    lon1 = median_time_1d(time, lon, time_new, arraytype='nunpy')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='nunpy')
+    T1 = median_time_1d(time, T, time_new, arraytype='nunpy')
+    RH1 = median_time_1d(time, RH, time_new, arraytype='nunpy')
+    ps1 = median_time_1d(time, ps, time_new, arraytype='nunpy')
 
 
     #%% output file
@@ -523,9 +499,9 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
     
-    lon1 = avg_time_1d(time, lon, time_new)
-    lat1 = avg_time_1d(time, lat, time_new)
-    lwp1 = avg_time_1d(time2, lwp, time_new)
+    lon1 = avg_time_1d(time, lon, time_new, arraytype='nunpy')
+    lat1 = avg_time_1d(time, lat, time_new, arraytype='nunpy')
+    lwp1 = avg_time_1d(time2, lwp, time_new, arraytype='nunpy')
     lwp1 = qc_remove_neg(lwp1)
     
     #%% calculate cloud fraction from LWP
@@ -667,8 +643,8 @@ def prep_Nd_Wu_etal(Ndpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
     
-    nd_new = median_time_1d(time, ndall, time_new)
-    re_new = median_time_1d(time, reall, time_new)
+    nd_new = median_time_1d(time, ndall, time_new, arraytype='nunpy')
+    re_new = median_time_1d(time, reall, time_new, arraytype='nunpy')
     
     #%% output file
     outfile = prep_data_path + 'Nd_Reff_Wu_etal_MAGIC.nc'
