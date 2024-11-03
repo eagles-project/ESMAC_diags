@@ -4,6 +4,9 @@ inlcude:
     prep_SGP_E3SM in src/esmac_diags/preprocessing/
 """
 
+import os
+import sys
+import yaml
 import numpy as np
 import esmac_diags
 import esmac_diags.preprocessing.prep_SGP_E3SM as prep
@@ -12,10 +15,21 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% settings
-input_path = '../raw_data/model/'
+# Load configuration file
+config_file = sys.argv[1]
+stream = open(config_file, "r")
+config = yaml.full_load(stream)
+
+input_path = config['model_input_path']
+input_filehead = config['model_input_filehead']
+# input_path = '../raw_data/model/'
+# input_filehead = 'E3SMv1_SGP_ENA_2011_2020'
 output_path = '../prep_data/SGP/model/'
-input_filehead = 'E3SMv1_SGP_ENA_2011_2020'
 output_filehead = 'E3SMv1_SGP'
+
+# time frequencies
+surface_dt = config['model_surface_dt']
+profile_dt = config['model_profile_dt']
 
 # vertical coordinates for output
 lev_out=np.arange(25.,1001,25.)
@@ -26,6 +40,5 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # output time in 1hr (dt=3600s) for other data
-prep.prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3600)
-# prep.prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, height_out, lev_out=lev_out, dt=3600)
-
+prep.prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=surface_dt)
+# prep.prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, height_out, lev_out=lev_out, dt=profile_dt)
