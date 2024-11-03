@@ -5,6 +5,9 @@ inlcude:
     prep_SGP_satellite
 """
 
+import os
+import sys
+import yaml
 import numpy as np
 import esmac_diags
 import esmac_diags.preprocessing.prep_SGP_sfc as sfc
@@ -12,24 +15,37 @@ import esmac_diags.preprocessing.prep_SGP_satellite as sat
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% set input data path
+# Load configuration file
+config_file = sys.argv[1]
+stream = open(config_file, "r")
+config = yaml.full_load(stream)
+
+# data path for obs
+obs_input_path = config['obs_input_path']
+
 # surface data path
-acsmpath = '../raw_data/obs/SGP/sgpaosacsm/'
-armbepath = '../raw_data/obs/SGP/sgparmbe/'
-arsclpath = '../raw_data/obs/SGP/arscl/'
-ccnsfcpath = '../raw_data/obs/SGP/sgpccn/'
-cpcpath = '../raw_data/obs/SGP/sgpcpc/'
-uhsaspath = '../raw_data/obs/SGP/sgpaosuhsasE13.b1/'
-smpspath = '../raw_data/obs/SGP/sgpaossmpsE13.b1/'
-nanosmpspath = '../raw_data/obs/SGP/sgpaosnanosmpsE13.b1/'
-tdmapath = '../raw_data/obs/SGP/sgptdmasizeC1.b1/'
-mfrsrpath = '../raw_data/obs/SGP/sgpmfrsrcldod1minC1.c1/'
-ndroppath = '../raw_data/obs/SGP/sgpndrop/'
+acsmpath = obs_input_path+'SGP/sgpaosacsm/'
+armbepath = obs_input_path+'SGP/sgparmbe/'
+arsclpath = obs_input_path+'SGP/arscl/'
+ccnsfcpath = obs_input_path+'SGP/sgpccn/'
+cpcpath = obs_input_path+'SGP/sgpcpc/'
+uhsaspath = obs_input_path+'SGP/sgpaosuhsasE13.b1/'
+smpspath = obs_input_path+'SGP/sgpaossmpsE13.b1/'
+nanosmpspath = obs_input_path+'SGP/sgpaosnanosmpsE13.b1/'
+tdmapath = obs_input_path+'SGP/sgptdmasizeC1.b1/'
+mfrsrpath = obs_input_path+'SGP/sgpmfrsrcldod1minC1.c1/'
+ndroppath = obs_input_path+'SGP/sgpndrop/'
+
 # satellite data path
-visstgridpath = '../raw_data/obs/SGP/visst/grid/'
-visstpixpath = '../raw_data/obs/SGP/visst/pix_3x3/'
+visstgridpath = obs_input_path+'SGP/visst/grid/'
+visstpixpath = obs_input_path+'SGP/visst/pix_3x3/'
 
 # output data path
 prep_data_path = '../prep_data/SGP/'
+
+# time frequencies
+surface_dt = config['obs_surface_dt']
+satellite_dt = config['obs_satellite_dt']
 
 # other settings
 height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900,1000,\
@@ -42,23 +58,23 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 
 for year in range(2011,2021):
     # print('prepare surface data:')
-    # sfc.prep_ACSM(acsmpath, prep_data_path+'surface/',year, dt=3600)            # aerosol composition
-    # sfc.prep_ccn(ccnsfcpath, prep_data_path+'surface/',year, dt=3600)              # CCN number concentration
-    # sfc.prep_CPC(cpcpath, prep_data_path+'surface/',year, dt=3600)    # aerosol number concentration (>3 or 10nm)
-    # sfc.prep_CNsize_UHSAS(uhsaspath, prep_data_path+'surface/',year, dt=3600)   # aerosol size distribution from UHSAS
-    sfc.prep_CNsize_SMPS(smpspath, nanosmpspath, prep_data_path+'surface/',year, dt=3600)# aerosol size distribution from SMPS
-    # sfc.prep_CNsize_TDMA(tdmapath, prep_data_path+'surface/',year, dt=3600)# aerosol size distribution from TDMA
-    # sfc.prep_cloud_2d(armbepath, prep_data_path+'surface/', height_out,year, dt=3600)   # 2D cloud fraction
-    # sfc.prep_cloudheight_ARSCL(arsclpath, prep_data_path+'surface/',year, dt=3600)   # cloud height 
-    # sfc.prep_mfrsr_cod(mfrsrpath,  prep_data_path+'surface/',year, dt=3600)     # cloud optical depth from MFRSR
-    # sfc.prep_mfrsr_Reff(mfrsrpath,  prep_data_path+'surface/',year, dt=3600)    # cloud effective radius from MFRSR
-    # sfc.prep_LWP(armbepath, mfrsrpath, prep_data_path+'surface/',year, dt=3600) # cloud liquid water path
-    # sfc.prep_LTS(armbepath, arsclpath, prep_data_path+'surface/',year, dt=3600)            # lower tropospheric stability
-    # sfc.prep_precip(armbepath, prep_data_path+'surface/',year, dt=3600)         # surface precipitation
-    # sfc.prep_Ndrop(ndroppath, prep_data_path+'surface/',year, dt=3600)          # cloud droplet number retrieval from ARM Ndrop VAP
-    # sfc.prep_radiation(armbepath, prep_data_path+'surface/',year, dt=3600)      # surface radiation
-    # sfc.prep_totcld(armbepath, prep_data_path+'surface/',year, dt=3600)         # cloud fraction. from ARSCL, TSI and satellite sources
-    # # prepare satellite data. output time in 1hr (dt=3600s) resolution
-    # print('prepare satellite data:')
-    # sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/',year, dt=3600)     # VISST 0.5x0.5 degree gridded data
-    # sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/',year, dt=3600)     # VISST 4km pixel-level data
+    # sfc.prep_ACSM(acsmpath, prep_data_path+'surface/',year, dt=surface_dt)            # aerosol composition
+    # sfc.prep_ccn(ccnsfcpath, prep_data_path+'surface/',year, dt=surface_dt)              # CCN number concentration
+    # sfc.prep_CPC(cpcpath, prep_data_path+'surface/',year, dt=surface_dt)    # aerosol number concentration (>3 or 10nm)
+    # sfc.prep_CNsize_UHSAS(uhsaspath, prep_data_path+'surface/',year, dt=surface_dt)   # aerosol size distribution from UHSAS
+    # sfc.prep_CNsize_SMPS(smpspath, nanosmpspath, prep_data_path+'surface/',year, dt=surface_dt)# aerosol size distribution from SMPS
+    # sfc.prep_CNsize_TDMA(tdmapath, prep_data_path+'surface/',year, dt=surface_dt)# aerosol size distribution from TDMA
+    # sfc.prep_cloud_2d(armbepath, prep_data_path+'surface/', height_out,year, dt=surface_dt)   # 2D cloud fraction
+    # sfc.prep_cloudheight_ARSCL(arsclpath, prep_data_path+'surface/',year, dt=surface_dt)   # cloud height 
+    # sfc.prep_mfrsr_cod(mfrsrpath,  prep_data_path+'surface/',year, dt=surface_dt)     # cloud optical depth from MFRSR
+    # sfc.prep_mfrsr_Reff(mfrsrpath,  prep_data_path+'surface/',year, dt=surface_dt)    # cloud effective radius from MFRSR
+    # sfc.prep_LWP(armbepath, mfrsrpath, prep_data_path+'surface/',year, dt=surface_dt) # cloud liquid water path
+    # sfc.prep_LTS(armbepath, arsclpath, prep_data_path+'surface/',year, dt=surface_dt)            # lower tropospheric stability
+    # sfc.prep_precip(armbepath, prep_data_path+'surface/',year, dt=surface_dt)         # surface precipitation
+    # sfc.prep_Ndrop(ndroppath, prep_data_path+'surface/',year, dt=surface_dt)          # cloud droplet number retrieval from ARM Ndrop VAP
+    # sfc.prep_radiation(armbepath, prep_data_path+'surface/',year, dt=surface_dt)      # surface radiation
+    # sfc.prep_totcld(armbepath, prep_data_path+'surface/',year, dt=surface_dt)         # cloud fraction. from ARSCL, TSI and satellite sources
+    # prepare satellite data. output time in 1hr (dt=3600s) resolution
+    print('prepare satellite data:')
+    sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/',year, dt=satellite_dt)     # VISST 0.5x0.5 degree gridded data
+    sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/',year, dt=satellite_dt)     # VISST 4km pixel-level data
