@@ -9,7 +9,6 @@ inlcude:
 import os
 import sys
 import yaml
-import numpy as np
 import esmac_diags
 import esmac_diags.preprocessing.prep_MAGIC_ship as ship
 import esmac_diags.preprocessing.prep_MAGIC_satellite as sat
