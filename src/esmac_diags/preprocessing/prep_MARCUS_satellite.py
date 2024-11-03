@@ -322,13 +322,13 @@ ins = insolation(calday, lon_ship_all, lat_ship_all, leap_year='leap')
 bb_sw_all = ins * (1 - bb_sw_albedo_all*0.01)
 
 #%% retrieve CDNC
-lwp = lwp.data
-ctt = ctt_liq.data
-cod = cod_liq_linavg.data
-H = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=0.8)
-H_ad = calc_clouddepth_VISST(lwp*0.001, ctt, adiabaticity=1.0)
-Nd = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=0.8)
-Nd_ad = calc_cdnc_VISST(lwp*0.001, ctt, cod, adiabaticity=1.0)
+# lwp = lwp.data
+# ctt = ctt_liq.data
+# cod = cod_liq_linavg.data
+H = calc_clouddepth_VISST(lwp.data*0.001, ctt_liq.data, adiabaticity=0.8)
+H_ad = calc_clouddepth_VISST(lwp.data*0.001, ctt_liq.data, adiabaticity=1.0)
+Nd = calc_cdnc_VISST(lwp.data*0.001, ctt_liq.data, cod_liq_linavg.data, adiabaticity=0.8)
+Nd_ad = calc_cdnc_VISST(lwp.data*0.001, ctt_liq.data, cod_liq_linavg.data, adiabaticity=1.0)
 
 #filter out columns with ice and bad retrievals
 H_array = np.array(H)
@@ -351,30 +351,30 @@ Nd_ad_array[ind] = np.nan
 #%% re-shape the data into coarser resolution
 time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
 
-Nd_new = avg_time_1d(vissttime, Nd_array, time_new)
-H_new = avg_time_1d(vissttime, H, time_new)
-lwp_new = avg_time_1d(vissttime, lwp, time_new)
-iwp_new = avg_time_1d(vissttime, iwp.data, time_new)
-swnetsfc_new = avg_time_1d(vissttime, sfc_net_sw.data, time_new)
-lwnetsfc_new = avg_time_1d(vissttime, sfc_net_lw.data, time_new)
-swdnsfc_new = avg_time_1d(vissttime, sfc_down_sw.data, time_new)
-lwdnsfc_new = avg_time_1d(vissttime, sfc_down_lw.data, time_new)
-reff_new = avg_time_1d(vissttime, reff_liq.data, time_new)
-cod_new = avg_time_1d(vissttime, cod_linavg.data, time_new)
-codlog_new = avg_time_1d(vissttime, cod_logavg.data, time_new)
-cf_all_new = avg_time_1d(vissttime, cf_allz.data, time_new)
-cf_low_new = avg_time_1d(vissttime, cf_low.data, time_new)
-cf_mid_new = avg_time_1d(vissttime, cf_mid.data, time_new)
-cf_high_new = avg_time_1d(vissttime, cf_high.data, time_new)
-ctt_new = avg_time_1d(vissttime, ctt_all.data, time_new)
-ctp_new = avg_time_1d(vissttime, ctp_all.data, time_new)
-cth_new = avg_time_1d(vissttime, cth_all.data, time_new)
-ctt_liq_new = avg_time_1d(vissttime, ctt_liq.data, time_new)
-ctp_liq_new = avg_time_1d(vissttime, ctp_liq.data, time_new)
-cth_liq_new = avg_time_1d(vissttime, cth_liq.data, time_new)
-lw_new = avg_time_1d(vissttime, bb_lw_all.data, time_new)
-sw_new = avg_time_1d(vissttime, bb_sw_all.data, time_new)
-albedo_new = avg_time_1d(vissttime, bb_sw_albedo_all.data, time_new)
+Nd_new = avg_time_1d(vissttime, Nd_array, time_new, arraytype='numpy')
+H_new = avg_time_1d(vissttime, H, time_new, arraytype='numpy')
+lwp_new = avg_time_1d(vissttime, lwp, time_new, arraytype='xarray')
+iwp_new = avg_time_1d(vissttime, iwp.data, time_new, arraytype='xarray')
+swnetsfc_new = avg_time_1d(vissttime, sfc_net_sw.data, time_new, arraytype='xarray')
+lwnetsfc_new = avg_time_1d(vissttime, sfc_net_lw.data, time_new, arraytype='xarray')
+swdnsfc_new = avg_time_1d(vissttime, sfc_down_sw.data, time_new, arraytype='xarray')
+lwdnsfc_new = avg_time_1d(vissttime, sfc_down_lw.data, time_new, arraytype='xarray')
+reff_new = avg_time_1d(vissttime, reff_liq.data, time_new, arraytype='xarray')
+cod_new = avg_time_1d(vissttime, cod_linavg.data, time_new, arraytype='xarray')
+codlog_new = avg_time_1d(vissttime, cod_logavg.data, time_new, arraytype='xarray')
+cf_all_new = avg_time_1d(vissttime, cf_allz.data, time_new, arraytype='xarray')
+cf_low_new = avg_time_1d(vissttime, cf_low.data, time_new, arraytype='xarray')
+cf_mid_new = avg_time_1d(vissttime, cf_mid.data, time_new, arraytype='xarray')
+cf_high_new = avg_time_1d(vissttime, cf_high.data, time_new, arraytype='xarray')
+ctt_new = avg_time_1d(vissttime, ctt_all.data, time_new, arraytype='xarray')
+ctp_new = avg_time_1d(vissttime, ctp_all.data, time_new, arraytype='xarray')
+cth_new = avg_time_1d(vissttime, cth_all.data, time_new, arraytype='xarray')
+ctt_liq_new = avg_time_1d(vissttime, ctt_liq.data, time_new, arraytype='xarray')
+ctp_liq_new = avg_time_1d(vissttime, ctp_liq.data, time_new, arraytype='xarray')
+cth_liq_new = avg_time_1d(vissttime, cth_liq.data, time_new, arraytype='xarray')
+lw_new = avg_time_1d(vissttime, bb_lw_all.data, time_new, arraytype='xarray')
+sw_new = avg_time_1d(vissttime, bb_sw_all.data, time_new, arraytype='xarray')
+albedo_new = avg_time_1d(vissttime, bb_sw_albedo_all.data, time_new, arraytype='xarray')
 
 #%% output file
 outfile = predatapath + 'Nd_VISSTgrid_MARCUS.nc'
