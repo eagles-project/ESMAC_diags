@@ -483,7 +483,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     y_idx = 1
     
     #%% read in data
-    lst = glob.glob(os.path.join(visstpixpath, '*visstpx2d*.cdf'))
+    tmplst = glob.glob(os.path.join(visstpixpath, '*visstpx2d*.cdf'))
     # filetime = [a.split('.c1.')[1] for a in lst]
     # sortidx = np.argsort(filetime)
     sortidx = np.argsort(tmplst)
