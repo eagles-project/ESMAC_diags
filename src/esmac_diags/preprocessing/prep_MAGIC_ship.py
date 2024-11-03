@@ -407,11 +407,11 @@ def prep_MET(shipmetpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
     
-    lon1 = median_time_1d(time, lon, time_new, arraytype='nunpy')
-    lat1 = median_time_1d(time, lat, time_new, arraytype='nunpy')
-    T1 = median_time_1d(time, T, time_new, arraytype='nunpy')
-    RH1 = median_time_1d(time, RH, time_new, arraytype='nunpy')
-    ps1 = median_time_1d(time, ps, time_new, arraytype='nunpy')
+    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    T1 = median_time_1d(time, T, time_new, arraytype='numpy')
+    RH1 = median_time_1d(time, RH, time_new, arraytype='numpy')
+    ps1 = median_time_1d(time, ps, time_new, arraytype='numpy')
 
 
     #%% output file
@@ -499,9 +499,9 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
     
-    lon1 = avg_time_1d(time, lon, time_new, arraytype='nunpy')
-    lat1 = avg_time_1d(time, lat, time_new, arraytype='nunpy')
-    lwp1 = avg_time_1d(time2, lwp, time_new, arraytype='nunpy')
+    lon1 = avg_time_1d(time, lon, time_new, arraytype='numpy')
+    lat1 = avg_time_1d(time, lat, time_new, arraytype='numpy')
+    lwp1 = avg_time_1d(time2, lwp, time_new, arraytype='numpy')
     lwp1 = qc_remove_neg(lwp1)
     
     #%% calculate cloud fraction from LWP
@@ -643,8 +643,8 @@ def prep_Nd_Wu_etal(Ndpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
     
-    nd_new = median_time_1d(time, ndall, time_new, arraytype='nunpy')
-    re_new = median_time_1d(time, reall, time_new, arraytype='nunpy')
+    nd_new = median_time_1d(time, ndall, time_new, arraytype='numpy')
+    re_new = median_time_1d(time, reall, time_new, arraytype='numpy')
     
     #%% output file
     outfile = prep_data_path + 'Nd_Reff_Wu_etal_MAGIC.nc'
