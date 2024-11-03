@@ -236,19 +236,19 @@ def prep_VISST_pixel(shipmetpath, visstpixpath, predatapath, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
     
-    Nd_new = avg_time_1d(vissttime, Nd_array, time_new)
-    H_new = avg_time_1d(vissttime, H, time_new)
-    lwp_new = avg_time_1d(vissttime, lwp, time_new)
-    iwp_new = avg_time_1d(vissttime, iwp, time_new)
-    reff_new = avg_time_1d(vissttime, reff, time_new)
-    cod_new = avg_time_1d(vissttime, cod, time_new)
-    ctt_new = avg_time_1d(vissttime, ctt, time_new)
-    ctp_new = avg_time_1d(vissttime, ctp, time_new)
-    cth_new = avg_time_1d(vissttime, cth, time_new)
-    lw_new = avg_time_1d(vissttime, bb_lw, time_new)
-    sw_new = avg_time_1d(vissttime, bb_sw, time_new)
-    albedo_new = avg_time_1d(vissttime, bb_sw_albedo, time_new)
-    cldfrac_new = avg_time_1d(vissttime, cldfrac, time_new)
+    Nd_new = avg_time_1d(vissttime, Nd_array, time_new, arraytype='numpy')
+    H_new = avg_time_1d(vissttime, H, time_new, arraytype='numpy')
+    lwp_new = avg_time_1d(vissttime, lwp, time_new, arraytype='numpy')
+    iwp_new = avg_time_1d(vissttime, iwp, time_new, arraytype='numpy')
+    reff_new = avg_time_1d(vissttime, reff, time_new, arraytype='numpy')
+    cod_new = avg_time_1d(vissttime, cod, time_new, arraytype='numpy')
+    ctt_new = avg_time_1d(vissttime, ctt, time_new, arraytype='numpy')
+    ctp_new = avg_time_1d(vissttime, ctp, time_new, arraytype='numpy')
+    cth_new = avg_time_1d(vissttime, cth, time_new, arraytype='numpy')
+    lw_new = avg_time_1d(vissttime, bb_lw, time_new, arraytype='numpy')
+    sw_new = avg_time_1d(vissttime, bb_sw, time_new, arraytype='numpy')
+    albedo_new = avg_time_1d(vissttime, bb_sw_albedo, time_new, arraytype='numpy')
+    cldfrac_new = avg_time_1d(vissttime, cldfrac, time_new, arraytype='numpy')
     
     #%% output file
     outfile = predatapath + 'Nd_VISSTgrid_MAGIC.nc'
