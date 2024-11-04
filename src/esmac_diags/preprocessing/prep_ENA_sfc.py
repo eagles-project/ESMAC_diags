@@ -639,19 +639,22 @@ def prep_CPC_withENAmask(aerosolmaskpath, predatapath, year, dt=3600):
     mask_starttime = dateall[0] + ' ' + timeall[0]
     mask_endtime = dateall[-1] + ' ' + timeall[-1]
     mask_time = pd.date_range(start=mask_starttime,end=mask_endtime,freq="min")    
-    
-    #%% re-shape the data into coarser resolution
-    
-    time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
-    
+
     cpcvalue_masked = np.array(cpcvalue)
     cpcvalue_masked[maskflag!=0] = np.nan
     maskcount = np.zeros(len(cpcvalue))
     maskcount[maskflag==0] = 1.
-    
-    cpc_1hr_nomask = median_time_1d(mask_time, cpcvalue, time_new)
-    cpc_1hr_masked = median_time_1d(mask_time, cpcvalue_masked, time_new)
-    valid_fraction = avg_time_1d(mask_time, maskcount, time_new)
+
+    #%% re-shape the data into coarser resolution
+    time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
+
+    tmpcpcvalue = xr.DataArray(data=np.array(cpcvalue), dims=["time"], coords=dict(time=mask_time))
+    tmpcpcvalue_masked = xr.DataArray(data=np.array(cpcvalue_masked), dims=["time"], coords=dict(time=mask_time))
+    tmpmaskcount = xr.DataArray(data=np.array(maskcount), dims=["time"], coords=dict(time=mask_time))
+  
+    cpc_1hr_nomask = median_time_1d(mask_time, tmpcpcvalue, time_new, arraytype='xarray')
+    cpc_1hr_masked = median_time_1d(mask_time, tmpcpcvalue_masked, time_new, arraytype='xarray')
+    valid_fraction = avg_time_1d(mask_time, tmpmaskcount, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'sfc_CPC_ENA_withmask_'+year+'.nc'
