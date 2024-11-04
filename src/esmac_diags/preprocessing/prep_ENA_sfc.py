@@ -176,9 +176,9 @@ def prep_ccn(ccnpath, predatapath, year, dt=3600):
     # qc_ccns = np.array([qc_ccns[i, [idx1[i], idx2[i], idx5[i]]] for i in range(len(idx5))])
     ccndata.close()
 
-    ss1 = ss[:,1]
-    ss2 = ss[:,2]
-    ss5 = ss[:,3]
+    ss1 = ss_m[:,1]
+    ss2 = ss_m[:,2]
+    ss5 = ss_m[:,3]
     ccn1 = ccn[:,1]
     ccn2 = ccn[:,2]
     ccn5 = ccn[:,3]  
