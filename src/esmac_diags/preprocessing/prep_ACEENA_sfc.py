@@ -161,46 +161,45 @@ def prep_ccn(ccnpath, predatapath, dt=3600):
     
     #ccn = qc_mask_qcflag(ccn, qc_ccn)
     
-    # 0.1%
-    idx = np.logical_and(ss>0.05, ss<0.15)
-    ccn1 = ccn[idx]
-    time1 = time[idx]
-    ss1 = ss[idx]
-    # 0.2%
-    idx = np.logical_and(ss>0.15, ss<0.25)
-    ccn2 = ccn[idx]
-    time2 = time[idx]
-    ss2 = ss[idx]
-    # 0.5%
-    idx = np.logical_and(ss>0.45, ss<0.55)
-    ccn5 = ccn[idx]
-    time5 = time[idx]
-    ss5 = ss[idx]
-    # 0.6%
-    idx = np.logical_and(ss>0.55, ss<0.65)
-    ccn6 = ccn[idx]
-    time6 = time[idx]
-    ss6 = ss[idx]
+    # # 0.1%
+    # idx = np.logical_and(ss>0.05, ss<0.15)
+    # ccn1 = ccn[idx]
+    # time1 = time[idx]
+    # ss1 = ss[idx]
+    # # 0.2%
+    # idx = np.logical_and(ss>0.15, ss<0.25)
+    # ccn2 = ccn[idx]
+    # time2 = time[idx]
+    # ss2 = ss[idx]
+    # # 0.5%
+    # idx = np.logical_and(ss>0.45, ss<0.55)
+    # ccn5 = ccn[idx]
+    # time5 = time[idx]
+    # ss5 = ss[idx]
 
+    ss1 = ss[:,1]
+    ss2 = ss[:,2]
+    ss5 = ss[:,3]
+    ccn1 = ccn[:,1]
+    ccn2 = ccn[:,2]
+    ccn5 = ccn[:,3]  
+  
     #%% these are computed from CCN spectra polynomial fits
     #this accounts for fluctuations in supersaturation that are different than the target supersaturation
     #but the fits do not always work, so the the sample size is less than the measured CCN
     ccn1_fit = coefs[:,0] + coefs[:,1]*0.1 + coefs[:,2]*(0.1**2)
     ccn2_fit = coefs[:,0] + coefs[:,1]*0.2 + coefs[:,2]*(0.2**2)
     ccn5_fit = coefs[:,0] + coefs[:,1]*0.5 + coefs[:,2]*(0.5**2)
-    ccn6_fit = coefs[:,0] + coefs[:,1]*0.6 + coefs[:,2]*(0.6**2)
   
     #apply basic QC flags
     ccn1 = qc_mask_qcflag(ccn1, qc_ccns[:,0])
     ccn2 = qc_mask_qcflag(ccn2, qc_ccns[:,1])
     ccn5 = qc_mask_qcflag(ccn5, qc_ccns[:,2])
-    ccn6 = qc_mask_qcflag(ccn6, qc_ccns[:,3])
 
     #apply to ccn fits
     ccn1_fit = qc_mask_qcflag(ccn1_fit, qc_ccns[:,0])
     ccn2_fit = qc_mask_qcflag(ccn2_fit, qc_ccns[:,1])
     ccn5_fit = qc_mask_qcflag(ccn5_fit, qc_ccns[:,2])
-    ccn6_fit = qc_mask_qcflag(ccn6_fit, qc_ccns[:,3])
   
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
@@ -214,12 +213,9 @@ def prep_ccn(ccnpath, predatapath, dt=3600):
         ss2_i = median_time_1d(time2, ss2, time_new, arraytype='xarray')
         ccn5_measure = median_time_1d(time5, ccn5, time_new, arraytype='xarray')
         ss5_i = median_time_1d(time5, ss5, time_new, arraytype='xarray')
-        ccn6_measure = median_time_1d(time6, ccn6, time_new, arraytype='xarray')
-        ss6_i = median_time_1d(time6, ss6, time_new, arraytype='xarray')
         ccn1_fit_i = median_time_1d(time, ccn1_fit, time_new, arraytype='xarray')
         ccn2_fit_i = median_time_1d(time, ccn2_fit, time_new, arraytype='xarray')
         ccn5_fit_i = median_time_1d(time, ccn5_fit, time_new, arraytype='xarray')
-        ccn6_fit_i = median_time_1d(time, ccn6_fit, time_new, arraytype='xarray')
     if dt < 3600:
         ccn1_measure = interp_time_1d(time1, ccn1, time_new, arraytype='xarray')
         ss1_i = interp_time_1d(time1, ss1, time_new, arraytype='xarray')
@@ -227,12 +223,9 @@ def prep_ccn(ccnpath, predatapath, dt=3600):
         ss2_i = interp_time_1d(time2, ss2, time_new, arraytype='xarray')
         ccn5_measure = interp_time_1d(time5, ccn5, time_new, arraytype='xarray')
         ss5_i = interp_time_1d(time5, ss5, time_new, arraytype='xarray')
-        ccn6_measure = interp_time_1d(time6, ccn6, time_new, arraytype='xarray')
-        ss6_i = interp_time_1d(time6, ss6, time_new, arraytype='xarray')
         ccn1_fit_i = interp_time_1d(time, ccn1_fit, time_new, arraytype='xarray')
         ccn2_fit_i = interp_time_1d(time, ccn2_fit, time_new, arraytype='xarray')
         ccn5_fit_i = interp_time_1d(time, ccn5_fit, time_new, arraytype='xarray')
-        ccn6_fit_i = interp_time_1d(time, ccn6_fit, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'sfc_CCN_ACEENA.nc'
@@ -241,15 +234,12 @@ def prep_ccn(ccnpath, predatapath, dt=3600):
                      'CCN1_fit': ('time', np.float32(ccn1_fit_i)),
                      'CCN2_fit': ('time', np.float32(ccn2_fit_i)),
                      'CCN5_fit': ('time', np.float32(ccn5_fit_i)),
-                     'CCN6_fit': ('time', np.float32(ccn6_fit_i)),
                      'CCN1': ('time', np.float32(ccn1_measure)),
                      'CCN2': ('time', np.float32(ccn2_measure)),
                      'CCN5': ('time', np.float32(ccn5_measure)),
-                     'CCN6': ('time', np.float32(ccn6_measure)),
                      'ss1': ('time', np.float32(ss1_i)),
                      'ss2': ('time', np.float32(ss2_i)),
                      'ss5': ('time', np.float32(ss5_i)),
-                     'ss6': ('time', np.float32(ss6_i)),
                     },
                      coords={'time': ('time', time_new)})
     
@@ -265,9 +255,6 @@ def prep_ccn(ccnpath, predatapath, dt=3600):
     ds['CCN5_fit'].attrs["long_name"] = "0.5% Cloud Condensation Nuclei"
     ds['CCN5_fit'].attrs["units"] = "cm-3"
     ds['CCN5_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
-    ds['CCN6_fit'].attrs["long_name"] = "0.6% Cloud Condensation Nuclei"
-    ds['CCN6_fit'].attrs["units"] = "cm-3"
-    ds['CCN6_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
     ds['CCN1'].attrs["long_name"] = "0.1% Cloud Condensation Nuclei - measured"
     ds['CCN1'].attrs["units"] = "cm-3"
     ds['CCN1'].attrs["description"] = "ARM-measured CCN targeted to 0.1% SS. see SS1 for actual measured SS"
@@ -286,12 +273,6 @@ def prep_ccn(ccnpath, predatapath, dt=3600):
     ds['ss5'].attrs["long_name"] = "Actual Supersaturation targeted to 0.5%"
     ds['ss5'].attrs["units"] = "%"
     ds['ss5'].attrs["description"] = "measured SS that is closest to 0.5%. ccn5_m is measured at this SS"
-    ds['CCN6'].attrs["long_name"] = "0.6% Cloud Condensation Nuclei"
-    ds['CCN6'].attrs["units"] = "cm-3"
-    ds['CCN6'].attrs["description"] = "ARM-measured CCN targeted to 0.6% SS. see SS6 for actual measured SS"
-    ds['ss6'].attrs["long_name"] = "Actual Supersaturation targeted to 0.6%"
-    ds['ss6'].attrs["units"] = "%"
-    ds['ss6'].attrs["description"] = "measured SS that is closest to 0.6%. ccn6_m is measured at this SS"
     
     ds.attrs["title"] = 'Surface CCN number concentration'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
