@@ -684,6 +684,7 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=3600):
     uhsas = qc_remove_neg(uhsas)
     
     size = (dmin+dmax)/2
+    dlogDp = np.log10(dmax/dmin)
     idx100 = dmin>=100
     uhsas100 = np.nansum(uhsas[:,idx100], 1)
     uhsas100[uhsas100==0] = np.nan
@@ -703,6 +704,7 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=3600):
     ds = xr.Dataset({
                     'size_low': (['size'], dmin),
                     'size_high': (['size'], dmax),
+                    'dlogDp': (['size'], np.float32(dlogDp)),
                     'uhsas_all': (['time', 'size'], uhsas_new.data),
                     'uhsas100': (['time'], uhsas100_new.data),
                     },
@@ -721,6 +723,8 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, dt=3600):
     ds['uhsas_all'].attrs["units"] = '1/cm3'
     ds['uhsas100'].attrs["long_name"] = 'aerosol number concentration for size >100nm'
     ds['uhsas100'].attrs["units"] = '1/cm3'
+    ds['dlogDp'].attrs["units"] = "N/A"
+    ds['dlogDp'].attrs["description"] = "to calculate dN/dlogDp"
     
     ds.attrs["title"] = 'Aerosol number concentration and size distribution from UHSAS'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
