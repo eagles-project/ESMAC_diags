@@ -534,13 +534,13 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     ps = e3smdata['PS'+E3SMdomain_range][:,x_idx].load()
     Ts = e3smdata['TREFHT'+E3SMdomain_range][:,x_idx].load()
                         
-    z3 = e3smdata['Z3'+E3SMdomain_range][:,:,x_idx].load()
-    T = e3smdata['T'+E3SMdomain_range][:,:,x_idx].load()
-    Q = e3smdata['Q'+E3SMdomain_range][:,:,x_idx].load()
-    U = e3smdata['U'+E3SMdomain_range][:,:,x_idx].load()
-    V = e3smdata['V'+E3SMdomain_range][:,:,x_idx].load()
-    RH = e3smdata['RELHUM'+E3SMdomain_range][:,:,x_idx].load()
-    cloud = e3smdata['CLOUD'+E3SMdomain_range][:,:,x_idx].load()
+    z3 = e3smdata['Z3'+E3SMdomain_range][:,:,x_idx]#.load()
+    T = e3smdata['T'+E3SMdomain_range][:,:,x_idx]#.load()
+    Q = e3smdata['Q'+E3SMdomain_range][:,:,x_idx]#.load()
+    U = e3smdata['U'+E3SMdomain_range][:,:,x_idx]#.load()
+    V = e3smdata['V'+E3SMdomain_range][:,:,x_idx]#.load()
+    RH = e3smdata['RELHUM'+E3SMdomain_range][:,:,x_idx]#.load()
+    cloud = e3smdata['CLOUD'+E3SMdomain_range][:,:,x_idx]#.load()
                         
     e3smdata.close()
     
@@ -602,13 +602,13 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
         ps = e3smdata['PS'+E3SMdomain_range][:,x_idx].load()
         Ts = e3smdata['TREFHT'+E3SMdomain_range][:,x_idx].load()
       
-        z3 = e3smdata['Z3'+E3SMdomain_range][:,:,x_idx].load()
-        T = e3smdata['T'+E3SMdomain_range][:,:,x_idx].load()
-        Q = e3smdata['Q'+E3SMdomain_range][:,:,x_idx].load()
-        U = e3smdata['U'+E3SMdomain_range][:,:,x_idx].load()
-        V = e3smdata['V'+E3SMdomain_range][:,:,x_idx].load()
-        RH = e3smdata['RELHUM'+E3SMdomain_range][:,:,x_idx].load()
-        cloud = e3smdata['CLOUD'+E3SMdomain_range][:,:,x_idx].load()
+        z3 = e3smdata['Z3'+E3SMdomain_range][:,:,x_idx]#.load()
+        T = e3smdata['T'+E3SMdomain_range][:,:,x_idx]#.load()
+        Q = e3smdata['Q'+E3SMdomain_range][:,:,x_idx]#.load()
+        U = e3smdata['U'+E3SMdomain_range][:,:,x_idx]#.load()
+        V = e3smdata['V'+E3SMdomain_range][:,:,x_idx]#.load()
+        RH = e3smdata['RELHUM'+E3SMdomain_range][:,:,x_idx]#.load()
+        cloud = e3smdata['CLOUD'+E3SMdomain_range][:,:,x_idx]#.load()
       
         e3smdata.close()
         
