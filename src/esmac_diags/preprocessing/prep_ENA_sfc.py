@@ -731,18 +731,22 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, year, dt=3600):
     uhsas = qc_mask_qcflag(uhsas,qc_uhsas)
     uhsas = qc_remove_neg(uhsas)
     uhsas = uhsas*np.tile(dlogDp,[len(time),1])
-    
+
+    idx100 = dmin[0,:]>=100
+    uhsas100 = np.nansum(uhsas[:,idx100], 1)
+    uhsas100[uhsas100==0] = np.nan
+
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start=year+'-01-01', end=year+'-12-31 23:59:00', freq=str(int(dt))+"s")
     # startdate = np.datetime_as_string(np.datetime64(time[0]))[:10]
     # enddate = np.datetime_as_string(np.datetime64(time[-1]))[:10]
     # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
     
-    uhsas_new = median_time_2d(time, uhsas, time_new, arraytype='xarray')
-        
-    idx100 = dmin[0,:]>=100
-    uhsas100_new = np.nansum(uhsas_new[:,idx100], 1)
-    uhsas100_new[uhsas100_new==0] = np.nan
+    tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time", "size"], coords=dict(time=time, size=size))
+    tmpuhsas100 = xr.DataArray(data=np.array(uhsas100), dims=["time"], coords=dict(time=time))
+  
+    uhsas_new = median_time_2d(time, tmpuhsas, time_new, arraytype='xarray')
+    uhsas100_new = median_time_1d(time, tmpuhsas100, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'sfc_UHSAS_ENA_'+year+'.nc'
@@ -750,13 +754,19 @@ def prep_CNsize_UHSAS(uhsaspath, predatapath, year, dt=3600):
     ds = xr.Dataset({
                     'uhsas_all': (['time', 'size'], uhsas_new),
                     'uhsas100': (['time'], uhsas100_new),      
-                    'dlogDp': (['size'], np.float32(dlogDp)),   
+                    'dlogDp': (['size'], np.float32(dlogDp)),
+                    'size_low': (['size'], dmin[0,:]),
+                    'size_high': (['size'], dmax[0,:]),
                     },
                       coords={'time': ('time', time_new), 'size': ('size', size)})
     
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
     ds['time'].attrs["standard_name"] = "time"
+    ds['size_low'].attrs["long_name"] = "lower bound of size bin"
+    ds['size_low'].attrs["units"] = "nm"
+    ds['size_high'].attrs["long_name"] = "upper bound of size bin"
+    ds['size_high'].attrs["units"] = "nm"
     ds['size'].attrs["long_name"] = "aerosol size"
     ds['size'].attrs["units"] = "nm"
     ds['uhsas_all'].attrs["long_name"] = 'aerosol number size distribution'
