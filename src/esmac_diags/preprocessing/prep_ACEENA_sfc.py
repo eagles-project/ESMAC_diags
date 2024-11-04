@@ -153,12 +153,13 @@ def prep_ccn(ccnpath, predatapath, dt=3600):
     lst = glob.glob(os.path.join(ccnpath, '*.nc'))
     ccndata = xr.open_mfdataset(lst, combine='by_coords')
     time = ccndata['time'].load()
+    coefs = ccndata['N_CCN_fit_coefs'].load()
     ccn = ccndata['N_CCN'].load()
     qc_ccn = ccndata['qc_N_CCN'].load()
     ss = ccndata['supersaturation_calculated'].load()
     ccndata.close()
     
-    ccn = qc_mask_qcflag(ccn, qc_ccn)
+    #ccn = qc_mask_qcflag(ccn, qc_ccn)
     
     # 0.1%
     idx = np.logical_and(ss>0.05, ss<0.15)
@@ -180,40 +181,71 @@ def prep_ccn(ccnpath, predatapath, dt=3600):
     ccn6 = ccn[idx]
     time6 = time[idx]
     ss6 = ss[idx]
-          
+
+    #%% these are computed from CCN spectra polynomial fits
+    #this accounts for fluctuations in supersaturation that are different than the target supersaturation
+    #but the fits do not always work, so the the sample size is less than the measured CCN
+    ccn1_fit = coefs[:,0] + coefs[:,1]*0.1 + coefs[:,2]*(0.1**2)
+    ccn2_fit = coefs[:,0] + coefs[:,1]*0.2 + coefs[:,2]*(0.2**2)
+    ccn5_fit = coefs[:,0] + coefs[:,1]*0.5 + coefs[:,2]*(0.5**2)
+    ccn6_fit = coefs[:,0] + coefs[:,1]*0.6 + coefs[:,2]*(0.6**2)
+  
+    #apply basic QC flags
+    ccn1 = qc_mask_qcflag(ccn1, qc_ccns[:,0])
+    ccn2 = qc_mask_qcflag(ccn2, qc_ccns[:,1])
+    ccn5 = qc_mask_qcflag(ccn5, qc_ccns[:,2])
+    ccn6 = qc_mask_qcflag(ccn6, qc_ccns[:,3])
+
+    #apply to ccn fits
+    ccn1_fit = qc_mask_qcflag(ccn1_fit, qc_ccns[:,0])
+    ccn2_fit = qc_mask_qcflag(ccn2_fit, qc_ccns[:,1])
+    ccn5_fit = qc_mask_qcflag(ccn5_fit, qc_ccns[:,2])
+    ccn6_fit = qc_mask_qcflag(ccn6_fit, qc_ccns[:,3])
+  
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
 
     # data resolution is hourly, so interpolate for finer resolution
     # note that ENA code includes polynomial fits (should make consistent in future)
     if dt >= 3600:
-        ccn1_new = median_time_1d(time1, ccn1, time_new, arraytype='xarray')
+        ccn1_measure = median_time_1d(time1, ccn1, time_new, arraytype='xarray')
         ss1_i = median_time_1d(time1, ss1, time_new, arraytype='xarray')
-        ccn2_new = median_time_1d(time2, ccn2, time_new, arraytype='xarray')
+        ccn2_measure = median_time_1d(time2, ccn2, time_new, arraytype='xarray')
         ss2_i = median_time_1d(time2, ss2, time_new, arraytype='xarray')
-        ccn5_new = median_time_1d(time5, ccn5, time_new, arraytype='xarray')
+        ccn5_measure = median_time_1d(time5, ccn5, time_new, arraytype='xarray')
         ss5_i = median_time_1d(time5, ss5, time_new, arraytype='xarray')
-        ccn6_new = median_time_1d(time6, ccn6, time_new, arraytype='xarray')
+        ccn6_measure = median_time_1d(time6, ccn6, time_new, arraytype='xarray')
         ss6_i = median_time_1d(time6, ss6, time_new, arraytype='xarray')
+        ccn1_fit_i = median_time_1d(time, ccn1_fit, time_new, arraytype='xarray')
+        ccn2_fit_i = median_time_1d(time, ccn2_fit, time_new, arraytype='xarray')
+        ccn5_fit_i = median_time_1d(time, ccn5_fit, time_new, arraytype='xarray')
+        ccn6_fit_i = median_time_1d(time, ccn6_fit, time_new, arraytype='xarray')
     if dt < 3600:
-        ccn1_new = interp_time_1d(time1, ccn1, time_new, arraytype='xarray')
+        ccn1_measure = interp_time_1d(time1, ccn1, time_new, arraytype='xarray')
         ss1_i = interp_time_1d(time1, ss1, time_new, arraytype='xarray')
-        ccn2_new = interp_time_1d(time2, ccn2, time_new, arraytype='xarray')
+        ccn2_measure = interp_time_1d(time2, ccn2, time_new, arraytype='xarray')
         ss2_i = interp_time_1d(time2, ss2, time_new, arraytype='xarray')
-        ccn5_new = interp_time_1d(time5, ccn5, time_new, arraytype='xarray')
+        ccn5_measure = interp_time_1d(time5, ccn5, time_new, arraytype='xarray')
         ss5_i = interp_time_1d(time5, ss5, time_new, arraytype='xarray')
-        ccn6_new = interp_time_1d(time6, ccn6, time_new, arraytype='xarray')
+        ccn6_measure = interp_time_1d(time6, ccn6, time_new, arraytype='xarray')
         ss6_i = interp_time_1d(time6, ss6, time_new, arraytype='xarray')
-        
+        ccn1_fit_i = interp_time_1d(time, ccn1_fit, time_new, arraytype='xarray')
+        ccn2_fit_i = interp_time_1d(time, ccn2_fit, time_new, arraytype='xarray')
+        ccn5_fit_i = interp_time_1d(time, ccn5_fit, time_new, arraytype='xarray')
+        ccn6_fit_i = interp_time_1d(time, ccn6_fit, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'sfc_CCN_ACEENA.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                     'CCN1': ('time', np.float32(ccn1_new)),
-                     'CCN2': ('time', np.float32(ccn2_new)),
-                     'CCN5': ('time', np.float32(ccn5_new)),
-                     'CCN6': ('time', np.float32(ccn6_new)),
+                     'CCN1_fit': ('time', np.float32(ccn1_fit_i)),
+                     'CCN2_fit': ('time', np.float32(ccn2_fit_i)),
+                     'CCN5_fit': ('time', np.float32(ccn5_fit_i)),
+                     'CCN6_fit': ('time', np.float32(ccn6_fit_i)),
+                     'CCN1': ('time', np.float32(ccn1_measure)),
+                     'CCN2': ('time', np.float32(ccn2_measure)),
+                     'CCN5': ('time', np.float32(ccn5_measure)),
+                     'CCN6': ('time', np.float32(ccn6_measure)),
                      'ss1': ('time', np.float32(ss1_i)),
                      'ss2': ('time', np.float32(ss2_i)),
                      'ss5': ('time', np.float32(ss5_i)),
@@ -224,6 +256,18 @@ def prep_ccn(ccnpath, predatapath, dt=3600):
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
     ds['time'].attrs["standard_name"] = "time"
+    ds['CCN1_fit'].attrs["long_name"] = "0.1% Cloud Condensation Nuclei"
+    ds['CCN1_fit'].attrs["units"] = "cm-3"
+    ds['CCN1_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
+    ds['CCN2_fit'].attrs["long_name"] = "0.2% Cloud Condensation Nuclei"
+    ds['CCN2_fit'].attrs["units"] = "cm-3"
+    ds['CCN2_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
+    ds['CCN5_fit'].attrs["long_name"] = "0.5% Cloud Condensation Nuclei"
+    ds['CCN5_fit'].attrs["units"] = "cm-3"
+    ds['CCN5_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
+    ds['CCN6_fit'].attrs["long_name"] = "0.6% Cloud Condensation Nuclei"
+    ds['CCN6_fit'].attrs["units"] = "cm-3"
+    ds['CCN6_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
     ds['CCN1'].attrs["long_name"] = "0.1% Cloud Condensation Nuclei - measured"
     ds['CCN1'].attrs["units"] = "cm-3"
     ds['CCN1'].attrs["description"] = "ARM-measured CCN targeted to 0.1% SS. see SS1 for actual measured SS"
