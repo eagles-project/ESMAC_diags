@@ -176,21 +176,12 @@ def prep_ccn(ccnpath, predatapath, year, dt=3600):
     # qc_ccns = np.array([qc_ccns[i, [idx1[i], idx2[i], idx5[i]]] for i in range(len(idx5))])
     ccndata.close()
 
-    # 0.1%
-    idx = np.logical_and(ss>0.05, ss<0.15)
-    ccn1 = ccn[idx]
-    time1 = time[idx]
-    ss1 = ss[idx]
-    # 0.2%
-    idx = np.logical_and(ss>0.15, ss<0.25)
-    ccn2 = ccn[idx]
-    time2 = time[idx]
-    ss2 = ss[idx]
-    # 0.5%
-    idx = np.logical_and(ss>0.45, ss<0.55)
-    ccn5 = ccn[idx]
-    time5 = time[idx]
-    ss5 = ss[idx]
+    ss1 = ss[:,1]
+    ss2 = ss[:,2]
+    ss5 = ss[:,3]
+    ccn1 = ccn[:,1]
+    ccn2 = ccn[:,2]
+    ccn5 = ccn[:,3]  
   
     #%% these are computed from CCN spectra polynomial fits
     #this accounts for fluctuations in supersaturation that are different than the target supersaturation
@@ -250,22 +241,22 @@ def prep_ccn(ccnpath, predatapath, year, dt=3600):
         ccn1_fit_i = median_time_1d(ccntime, ccn1_fit, time_new, arraytype='xarray')
         ccn2_fit_i = median_time_1d(ccntime, ccn2_fit, time_new, arraytype='xarray')
         ccn5_fit_i = median_time_1d(ccntime, ccn5_fit, time_new, arraytype='xarray')
-        ccn1_measure = median_time_1d(time1, ccn1, time_new, arraytype='xarray')
-        ccn2_measure = median_time_1d(time2, ccn2, time_new, arraytype='xarray')
-        ccn5_measure = median_time_1d(time5, ccn5, time_new, arraytype='xarray')
-        ss1_i = median_time_1d(time1, ss1, time_new, arraytype='xarray')
-        ss2_i = median_time_1d(time2, ss2, time_new, arraytype='xarray')
-        ss5_i = median_time_1d(time5, ss5, time_new, arraytype='xarray')
+        ccn1_measure = median_time_1d(ccntime, ccn1, time_new, arraytype='xarray')
+        ccn2_measure = median_time_1d(ccntime, ccn2, time_new, arraytype='xarray')
+        ccn5_measure = median_time_1d(ccntime, ccn5, time_new, arraytype='xarray')
+        ss1_i = median_time_1d(ccntime, ss1, time_new, arraytype='xarray')
+        ss2_i = median_time_1d(ccntime, ss2, time_new, arraytype='xarray')
+        ss5_i = median_time_1d(ccntime, ss5, time_new, arraytype='xarray')
     if dt < 3600:
         ccn1_fit_i = interp_time_1d(ccntime, ccn1_fit, time_new, arraytype='xarray')
         ccn2_fit_i = interp_time_1d(ccntime, ccn2_fit, time_new, arraytype='xarray')
         ccn5_fit_i = interp_time_1d(ccntime, ccn5_fit, time_new, arraytype='xarray')
-        ccn1_measure = interp_time_1d(time1, ccn1, time_new, arraytype='xarray')
-        ccn2_measure = interp_time_1d(time2, ccn2, time_new, arraytype='xarray')
-        ccn5_measure = interp_time_1d(time5, ccn5, time_new, arraytype='xarray')
-        ss1_i = interp_time_1d(time1, ss1, time_new, arraytype='xarray')
-        ss2_i = interp_time_1d(time2, ss2, time_new, arraytype='xarray')
-        ss5_i = interp_time_1d(time5, ss5, time_new, arraytype='xarray')
+        ccn1_measure = interp_time_1d(ccntime, ccn1, time_new, arraytype='xarray')
+        ccn2_measure = interp_time_1d(ccntime, ccn2, time_new, arraytype='xarray')
+        ccn5_measure = interp_time_1d(ccntime, ccn5, time_new, arraytype='xarray')
+        ss1_i = interp_time_1d(ccntime, ss1, time_new, arraytype='xarray')
+        ss2_i = interp_time_1d(ccntime, ss2, time_new, arraytype='xarray')
+        ss5_i = interp_time_1d(ccntime, ss5, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'sfc_CCN_ENA_'+year+'.nc'
