@@ -18,7 +18,7 @@ obs_aircraft_dt: 60        #median or average
 obs_surface_dt: 300        #median or average
 obs_satellite_dt: 3600     #instantaneous
 
-# variable names
+# model variable names
 E3SMsubdomain: False
 E3SMdomain_range: '330e_to_335e_37n_to_42n' # '330e_to_335e_37n_to_42n' for ENA; what for SGP?
 
