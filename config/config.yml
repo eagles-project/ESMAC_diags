@@ -4,19 +4,6 @@ model_input_filehead: 'ena_ne32x32pg2'  # 'ena_ne32x32pg2', 'cus_emis_ne32x32pg2
 
 obs_input_path: '../raw_data/obs/'
 
-# variable names (in future, can expand this to contain each model variable name so that they aren't hard coded)
-E3SMsubdomain: False
-E3SMdomain_range: '330e_to_335e_37n_to_42n' # '330e_to_335e_37n_to_42n' for ENA; what for SGP?
-
-# flag for model aerosol variables output
-aerosol_output: True
-
-# flag for COSP MODIS simulator output
-cosp_output: True
-
-# model output variable names
-
-
 # # model longitude and latitude limits
 # latmin: 37
 # latmax: 42
@@ -30,3 +17,109 @@ model_profile_dt: 3600     #instantaneous
 obs_aircraft_dt: 60        #median or average    
 obs_surface_dt: 300        #median or average
 obs_satellite_dt: 3600     #instantaneous
+
+# variable names
+E3SMsubdomain: False
+E3SMdomain_range: '330e_to_335e_37n_to_42n' # '330e_to_335e_37n_to_42n' for ENA; what for SGP?
+
+# flag for model aerosol variables output
+aerosol_output: True
+
+# flag for COSP MODIS simulator output
+cosp_output: True
+
+# flag for pressure level output
+pres_output: False
+
+# flag for hydrometeor mass output
+mixingratio_output: False
+
+# flag for drop size distribution parameter output
+dsd_output: True
+
+# flag for column effective radius output
+reff_output: True
+
+# flag for whether model uses deep convective parameterization
+convectiveparam: True
+
+# flag for 3D visible optical depth output
+tau3d_output: True
+
+# flag for column-integrated cloud drop number concentration output
+colnc_output: True
+
+# model output variable names
+LON: 'lon'
+LAT: 'lat'
+PS: 'PS'
+P0: 'P0'        # if pres_output = False
+HYAM: 'hyam'    # if pres_output = False
+HYBM: 'hybm'    # if pres_output = False
+PRES: 'p_mid'   # if pres_output = True
+Z: 'Z3'         # z_mid
+T: 'T'          # T_mid
+Q: 'Q'          # qv
+U: 'U'          # u
+V: 'V'          # v
+CF: 'CLOUD'     # cldfrac_tot_for_analysis
+CFLIQ: 'FREQL'  # cldfrac_liq
+LWC: 'LWC'      # if mixingratio_output = False
+IWC: 'IWC'      # if mixingratio_output = False
+QC: 'qc'        # if mixingratio_output = True
+#QR: 'qr'        # if mixingratio_output = True
+QI: 'qi'        # if mixingratio_output = True
+NC: 'ICWNC'     # nc
+NI: 'ICINC'     # ni
+#NR: 'nr'
+LAMBDA_CLOUD: 'lambda_cloud' # if dsd_output = True
+MU_CLOUD: 'mu_cloud'         # if dsd_output = True
+REL: 'REL'      # if reff_output = True
+REI:  'REI'     # if reff_output = True
+
+TSFC: 'TREFHT'  # T_2m
+RH: 'RELHUM'    # RelativeHumidity
+
+LWP: 'TGCLDLWP'   # LiqWaterPath
+IWP: 'TGCLDIWP'   # IceWaterPath
+#RWP: 'RainWaterPath' # if mixingratio_output = True
+CLDHGH: 'CLDHGH'  # cldhgh
+CLDMED: 'CLDMED'  # cldmed
+CLDLOW: 'CLDLOW'  # cldlow
+CLDTOT: 'CLDTOT'  # cldtot
+PRECIPSFCCONV: 'PRECC'                    # if convectiveparam = True
+PRECIPSFCSTRAT: 'PRECL'                   # if convectiveparam = True
+PRECIPSFCLIQ: 'precip_liq_surf_mass_flux' # if convectiveparam = False
+PRECIPSFCICE: 'precip_ice_surf_mass_flux' # if convectiveparam = False
+SWDOWNTOA: 'SOLIN'  # SW_flux_dn_at_model_top
+SWUPTOA: 'FSUTOA'   # SW_flux_up_at_model_top
+SWNETTOA: 'FSNT'
+SWDOWNSFC: 'FSDS'   # SW_flux_dn_at_model_bot
+SWUPSFC: 'FSUS'     # SW_flux_up_at_model_bot
+SWNETSFC: 'FSNS'
+LWDOWNTOA: 'FLDT' 
+LWUPTOA: 'FLUT'     # LW_flux_up_at_model_top
+LWNETTOA: 'FLNT'
+LWDOWNSFC: 'FLDS'   # LW_flux_dn_at_model_bot
+LWUPSFC: 'FLUS'     # LW_flux_up_at_model_bot
+LWNETSFC: 'FLNS'
+SWUPTOACLR: ''
+LWUPTOACLR: ''      # LW_clrsky_flux_up_at_model_top
+SWDOWNSFCCLR: ''
+LWDOWNSFCLR: ''
+
+SWCF: 'SWCF'   #ShortwaveCloudForcing
+LWCF: 'LWCF'   #LongwaveCloudForcing
+LHFLX: 'LHFLX' # surface_upward_latent_heat_flux
+SHFLX: 'SHFLX' # surf_sens_flux
+PBLH: 'PBLH'   # pbl_height
+AOD: 'AODALL'  # AerosolOpticalDepth550nm
+
+TAU3D: 'TOT_CLD_VISTAU'  # if tau3d_output = True
+NC2D: 'CDNUMC'           # if colnc_output = True
+
+# variables below if aerosol_output = True
+
+
+# variables below if cosp_output = True
+
