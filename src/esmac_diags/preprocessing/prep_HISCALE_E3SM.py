@@ -83,7 +83,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         
     #%% settings specific for each site
     # HISCALE
-    E3SMdomain_range = '260e_to_265e_34n_to_39n'    # domain range in E3SM regional output
+    E3SMdomain_range = config['E3SMdomain_range']    # domain range in E3SM regional output
     
     #%% find all data
     lst0 = glob.glob(iwgpath + '*.a2.txt')
