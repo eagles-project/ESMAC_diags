@@ -31,8 +31,8 @@ cosp_output: True
 # flag for pressure level output
 pres_output: False
 
-# flag for hydrometeor mass output
-mixingratio_output: False
+# # flag for hydrometeor mass output
+# masscontent_output: False
 
 # flag for drop size distribution parameter output
 dsd_output: True
@@ -64,10 +64,10 @@ U: 'U'          # u
 V: 'V'          # v
 CF: 'CLOUD'     # cldfrac_tot_for_analysis
 CFLIQ: 'FREQL'  # cldfrac_liq
-LWC: 'LWC'      # if mixingratio_output = False
-IWC: 'IWC'      # if mixingratio_output = False
+# LWC: 'LWC'      # if masscontent_output = True
+# IWC: 'IWC'      # if masscontent_output = True
 QC: 'CLDLIQ'    # qc
-#QR: 'qr'        # if mixingratio_output = True
+#QR: 'qr'
 QI: 'CLDICE'    # qi
 NC: 'ICWNC'     # nc
 NI: 'ICINC'     # ni
@@ -82,7 +82,7 @@ RH: 'RELHUM'    # RelativeHumidity
 
 LWP: 'TGCLDLWP'   # LiqWaterPath
 IWP: 'TGCLDIWP'   # IceWaterPath
-#RWP: 'RainWaterPath' # if mixingratio_output = True
+#RWP: 'RainWaterPath'
 CLDHGH: 'CLDHGH'  # cldhgh
 CLDMED: 'CLDMED'  # cldmed
 CLDLOW: 'CLDLOW'  # cldlow
