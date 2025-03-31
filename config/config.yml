@@ -66,9 +66,9 @@ CF: 'CLOUD'     # cldfrac_tot_for_analysis
 CFLIQ: 'FREQL'  # cldfrac_liq
 LWC: 'LWC'      # if mixingratio_output = False
 IWC: 'IWC'      # if mixingratio_output = False
-QC: 'qc'        # if mixingratio_output = True
+QC: 'CLDLIQ'    # qc
 #QR: 'qr'        # if mixingratio_output = True
-QI: 'qi'        # if mixingratio_output = True
+QI: 'CLDICE'    # qi
 NC: 'ICWNC'     # nc
 NI: 'ICINC'     # ni
 #NR: 'nr'
