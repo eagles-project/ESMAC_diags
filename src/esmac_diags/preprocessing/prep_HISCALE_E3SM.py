@@ -49,7 +49,7 @@ from netCDF4 import Dataset
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, 
-                      iwgpath, dt=60):
+                      iwgpath, dt=60, config=config):
     """
     prepare E3SM output along flight tracks
     choose the nearest grid and level of the aircraft location
@@ -69,6 +69,8 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         data path of aircraft location
     dt : float
         time resolution (unit: sec) of output
+    config : yaml
+        settings including model output variable names
 
     Returns
     -------
@@ -468,7 +470,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, 
-                      height_out, lev_out=np.arange(25.,1001,25.), dt=3600):
+                      height_out, lev_out=np.arange(25.,1001,25.), dt=3600, config=config):
     """
     prepare vertical profile (to p or to z) variables from E3SM output
     choose the grid nearest to the ARM site
@@ -491,6 +493,8 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
         vertical coordinates of height, upside down
     dt : float
         time resolution (unit: sec) of output
+    config : yaml
+        settings including model output variable names
 
     Returns
     -------
@@ -789,7 +793,7 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
 
      
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3600):
+def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3600, config=config):
     """
     prepare surface (include TOA and vertical integrated) variables from E3SM output
     choose the grid nearest to the ARM site
@@ -807,6 +811,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         filehead of the preprocessed E3SM data
     dt : float
         time resolution (unit: sec) of output
+    config : yaml
+        settings including model output variable names
 
     Returns
     -------
