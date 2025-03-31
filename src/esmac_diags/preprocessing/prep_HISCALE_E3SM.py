@@ -131,13 +131,17 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         lon_new=lon_new+360   # make longitude consistent with E3SM from 0 to 360
     
         #%% read in E3SM data
-        variable3d_names = ['T', 'Q', 'U', 'V', 'Z3', 'REI', 'REL', 'CCN1', 'CCN3', 'CCN4', 'CCN5', 
-                            'CLDICE', 'CLDLIQ', 'CLOUD',  'FREQL',
-                            'IWC', 'LWC', 'ICWNC', 'ICINC', ]
+        variable3d_names = [config['T'], config['Q'], config['U'], config['V'], config['Z'], 
+                            config['QI'], config['QC'], config['CF'], config['CFLIQ'], config['NC'], config['NI']]
+      
         variables = list()
         variables_new = list()
         for varname in variable3d_names:
             variables_new.append([])
+        if config['reff_output'] == True:
+          variables_new.append([config['REL']])
+        if config['aerosol_output'] == True:
+          variables_new.append([config['CCN1'], config['CCN3'], config['CCN4'], config['CCN5']])
         NCNall = np.empty((3000,0))
         p = list()      # pressure
         bc_all  = list()
@@ -154,20 +158,23 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
             raise ValueError('Should only contain one file: '+lst)
         e3smdata = xr.open_dataset(lst[0])
         e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-        lonm = e3smdata['lon'+'_'+E3SMdomain_range].load()
-        latm = e3smdata['lat'+'_'+E3SMdomain_range].load()
-        z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
-        
-        P0 = e3smdata['P0'].load()
-        hyam = e3smdata['hyam'].load()
-        hybm = e3smdata['hybm'].load()
-        T = e3smdata['T'+'_'+E3SMdomain_range].load()
-        PS = e3smdata['PS'+'_'+E3SMdomain_range].load()
-        Pres = np.nan*T
-        zlen = T.shape[1]
-        for kk in range(zlen):
-            Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
-        
+        lonm = e3smdata[config['lon']+'_'+E3SMdomain_range].load()
+        latm = e3smdata[config['lat']+'_'+E3SMdomain_range].load()
+        z3 = e3smdata[config['Z']+'_'+E3SMdomain_range].load()
+
+        if config['pres_output'] == False:
+          P0 = e3smdata[config['P0']].load()
+          hyam = e3smdata[config['HYAM']].load()
+          hybm = e3smdata[config['HYBM']].load()
+          T = e3smdata[config['T']+'_'+E3SMdomain_range].load()
+          PS = e3smdata[config['PS']+'_'+E3SMdomain_range].load()
+          Pres = np.nan*T
+          zlen = T.shape[1]
+          for kk in range(zlen):
+              Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
+        else:
+          Pres = config['PRES']
+      
         # change time format into seconds of the day
         timem = np.float64((e3smtime - e3smtime[0]).seconds)
         
@@ -364,6 +371,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         idx = variable3d_names.index('IWC')
         variables_new[idx] = np.array(variables_new[idx])*1000
         variables[idx].attrs['units']='g/m3'
+      
         # droplet number
         idx = variable3d_names.index('ICWNC')
         variables_new[idx] = np.array(variables_new[idx])*1e-6
