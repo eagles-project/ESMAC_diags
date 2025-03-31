@@ -75,7 +75,7 @@ NI: 'ICINC'     # ni
 LAMBDA_CLOUD: 'lambda_cloud' # if dsd_output = True
 MU_CLOUD: 'mu_cloud'         # if dsd_output = True
 REL: 'REL'      # if reff_output = True
-REI:  'REI'     # if reff_output = True
+# REI: 'REI'     # if reff_output = True  (not currently used)
 
 TSFC: 'TREFHT'  # T_2m
 RH: 'RELHUM'    # RelativeHumidity
