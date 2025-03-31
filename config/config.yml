@@ -119,7 +119,39 @@ TAU3D: 'TOT_CLD_VISTAU'  # if tau3d_output = True
 NC2D: 'CDNUMC'           # if colnc_output = True
 
 # variables below if aerosol_output = True
-
+CCN1: 'CCN1'
+CCN3: 'CCN3'
+CCN4: 'CCN4'
+CCN5: 'CCN5'
+num_a1: 'num_a1'
+num_a2: 'num_a2'
+num_a3: 'num_a3'
+num_a4: 'num_a4'
+dgnd_a01: 'dgnd_a01'
+dgnd_a02: 'dgnd_a02'
+dgnd_a03: 'dgnd_a03'
+dgnd_a04: 'dgnd_a04'
+bc_a1: 'bc_a1'
+bc_a3: 'bc_a3'
+bc_a4: 'bc_a4'
+dst_a1: 'dst_a1'
+dst_a3: 'dst_a3'
+mom_a1: 'mom_a1'
+mom_a2: 'mom_a2'
+mom_a3: 'mom_a3'
+mom_a4: 'mom_a4'
+ncl_a1: 'ncl_a1'
+ncl_a2: 'ncl_a2'
+ncl_a3: 'ncl_a3'
+pom_a1: 'pom_a1'
+pom_a3: 'pom_a3'
+pom_a4: 'pom_a4'
+so4_a1: 'so4_a1'
+so4_a2: 'so4_a2'
+so4_a3: 'so4_a3'
+soa_a1: 'soa_a1'
+soa_a2: 'soa_a2'
+soa_a3: 'soa_a3'
 
 # variables below if cosp_output = True
 
