@@ -53,10 +53,12 @@ colnc_output: True
 LON: 'lon'
 LAT: 'lat'
 PS: 'PS'
+
 P0: 'P0'        # if pres_output = False
 HYAM: 'hyam'    # if pres_output = False
 HYBM: 'hybm'    # if pres_output = False
 PRES: 'p_mid'   # if pres_output = True
+
 Z: 'Z3'         # z_mid
 T: 'T'          # T_mid
 Q: 'Q'          # qv
@@ -72,14 +74,15 @@ QI: 'CLDICE'    # qi
 NC: 'ICWNC'     # nc
 NI: 'ICINC'     # ni
 #NR: 'nr'
+
 LAMBDA_CLOUD: 'lambda_cloud' # if dsd_output = True
 MU_CLOUD: 'mu_cloud'         # if dsd_output = True
+
 REL: 'REL'      # if reff_output = True
 # REI: 'REI'     # if reff_output = True  (not currently used)
 
 TSFC: 'TREFHT'  # T_2m
 RH: 'RELHUM'    # RelativeHumidity
-
 LWP: 'TGCLDLWP'   # LiqWaterPath
 IWP: 'TGCLDIWP'   # IceWaterPath
 #RWP: 'RainWaterPath'
@@ -87,10 +90,12 @@ CLDHGH: 'CLDHGH'  # cldhgh
 CLDMED: 'CLDMED'  # cldmed
 CLDLOW: 'CLDLOW'  # cldlow
 CLDTOT: 'CLDTOT'  # cldtot
+
 PRECIPSFCCONV: 'PRECC'                    # if convectiveparam = True
 PRECIPSFCSTRAT: 'PRECL'                   # if convectiveparam = True
 PRECIPSFCLIQ: 'precip_liq_surf_mass_flux' # if convectiveparam = False
 PRECIPSFCICE: 'precip_ice_surf_mass_flux' # if convectiveparam = False
+
 SWDOWNTOA: 'SOLIN'  # SW_flux_dn_at_model_top
 SWUPTOA: 'FSUTOA'   # SW_flux_up_at_model_top
 SWNETTOA: 'FSNT'
