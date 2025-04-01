@@ -133,15 +133,17 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         #%% read in E3SM data
         variable3d_names = [config['T'], config['Q'], config['U'], config['V'], config['Z'], 
                             config['QI'], config['QC'], config['CF'], config['CFLIQ'], config['NC'], config['NI']]
-      
+        
+        if config['reff_output'] == True:
+          variable3d_names.append([config['REL']])
+        if config['aerosol_output'] == True:
+          variable3d_names.append([config['CCN1'], config['CCN3'], config['CCN4'], config['CCN5']])
+          
         variables = list()
         variables_new = list()
         for varname in variable3d_names:
             variables_new.append([])
-        if config['reff_output'] == True:
-          variables_new.append([config['REL']])
-        if config['aerosol_output'] == True:
-          variables_new.append([config['CCN1'], config['CCN3'], config['CCN4'], config['CCN5']])
+
         NCNall = np.empty((3000,0))
         p = list()      # pressure
         bc_all  = list()
@@ -183,95 +185,97 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
         
         # variables for calculating aerosol size
-        req_vlist = ['num_a1', 'num_a2', 'num_a3', 'num_a4', 'dgnd_a01', 'dgnd_a02', \
-                     'dgnd_a03', 'dgnd_a04']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
-        matched_vlist = list(set(av_vars).intersection(req_vlist))
-        if len(matched_vlist) == len(req_vlist):
-            print('\nAnalyzing for aerosol size')
-            num_a1 = e3smdata['num_a1'+'_'+E3SMdomain_range].load()
-            num_a2 = e3smdata['num_a2'+'_'+E3SMdomain_range].load()
-            num_a3 = e3smdata['num_a3'+'_'+E3SMdomain_range].load()
-            num_a4 = e3smdata['num_a4'+'_'+E3SMdomain_range].load()
-            dn1 = e3smdata['dgnd_a01'+'_'+E3SMdomain_range].load()
-            dn2 = e3smdata['dgnd_a02'+'_'+E3SMdomain_range].load()
-            dn3 = e3smdata['dgnd_a03'+'_'+E3SMdomain_range].load()
-            dn4 = e3smdata['dgnd_a04'+'_'+E3SMdomain_range].load()
-        else:
-            num_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            num_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            num_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            num_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            dn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            dn2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            dn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            dn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+        if aerosol_output == True:
+          req_vlist = ['num_a1', 'num_a2', 'num_a3', 'num_a4', 'dgnd_a01', 'dgnd_a02', \
+                       'dgnd_a03', 'dgnd_a04']
+          req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+          matched_vlist = list(set(av_vars).intersection(req_vlist))
+          if len(matched_vlist) == len(req_vlist):
+              print('\nAnalyzing for aerosol size')
+              num_a1 = e3smdata['num_a1'+'_'+E3SMdomain_range].load()
+              num_a2 = e3smdata['num_a2'+'_'+E3SMdomain_range].load()
+              num_a3 = e3smdata['num_a3'+'_'+E3SMdomain_range].load()
+              num_a4 = e3smdata['num_a4'+'_'+E3SMdomain_range].load()
+              dn1 = e3smdata['dgnd_a01'+'_'+E3SMdomain_range].load()
+              dn2 = e3smdata['dgnd_a02'+'_'+E3SMdomain_range].load()
+              dn3 = e3smdata['dgnd_a03'+'_'+E3SMdomain_range].load()
+              dn4 = e3smdata['dgnd_a04'+'_'+E3SMdomain_range].load()
+          else:
+              num_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              num_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              num_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              num_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              dn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              dn2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              dn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              dn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
             
-        # aerosol composition
-        req_vlist = ['bc_a1', 'bc_a3', 'bc_a4', 'dst_a1', 'dst_a3', 'mom_a1', \
-                     'mom_a2', 'mom_a3', 'mom_a4', 'ncl_a1', 'ncl_a2', 'ncl_a3', \
-                     'pom_a1', 'pom_a3', 'pom_a4', 'so4_a1', 'so4_a2', 'so4_a3', \
-                     'soa_a1', 'soa_a2', 'soa_a3']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
-        matched_vlist = list(set(av_vars).intersection(req_vlist))
+          # aerosol composition
+          req_vlist = ['bc_a1', 'bc_a3', 'bc_a4', 'dst_a1', 'dst_a3', 'mom_a1', \
+                       'mom_a2', 'mom_a3', 'mom_a4', 'ncl_a1', 'ncl_a2', 'ncl_a3', \
+                       'pom_a1', 'pom_a3', 'pom_a4', 'so4_a1', 'so4_a2', 'so4_a3', \
+                       'soa_a1', 'soa_a2', 'soa_a3']
+          req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+          matched_vlist = list(set(av_vars).intersection(req_vlist))
         
-        if len(matched_vlist) == len(req_vlist):
-            bc_a1 = e3smdata['bc_a1'+'_'+E3SMdomain_range].load()
-            bc_a3 = e3smdata['bc_a3'+'_'+E3SMdomain_range].load()
-            bc_a4 = e3smdata['bc_a4'+'_'+E3SMdomain_range].load()
-            dst_a1 = e3smdata['dst_a1'+'_'+E3SMdomain_range].load()
-            dst_a3 = e3smdata['dst_a3'+'_'+E3SMdomain_range].load()
-            mom_a1 = e3smdata['mom_a1'+'_'+E3SMdomain_range].load()
-            mom_a2 = e3smdata['mom_a2'+'_'+E3SMdomain_range].load()
-            mom_a3 = e3smdata['mom_a3'+'_'+E3SMdomain_range].load()
-            mom_a4 = e3smdata['mom_a4'+'_'+E3SMdomain_range].load()
-            ncl_a1 = e3smdata['ncl_a1'+'_'+E3SMdomain_range].load()
-            ncl_a2 = e3smdata['ncl_a2'+'_'+E3SMdomain_range].load()
-            ncl_a3 = e3smdata['ncl_a3'+'_'+E3SMdomain_range].load()
-            pom_a1 = e3smdata['pom_a1'+'_'+E3SMdomain_range].load()
-            pom_a3 = e3smdata['pom_a3'+'_'+E3SMdomain_range].load()
-            pom_a4 = e3smdata['pom_a4'+'_'+E3SMdomain_range].load()
-            so4_a1 = e3smdata['so4_a1'+'_'+E3SMdomain_range].load()
-            so4_a2 = e3smdata['so4_a2'+'_'+E3SMdomain_range].load()
-            so4_a3 = e3smdata['so4_a3'+'_'+E3SMdomain_range].load()
-            soa_a1 = e3smdata['soa_a1'+'_'+E3SMdomain_range].load()
-            soa_a2 = e3smdata['soa_a2'+'_'+E3SMdomain_range].load()
-            soa_a3 = e3smdata['soa_a3'+'_'+E3SMdomain_range].load()
-        else:
-            bc_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            bc_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            bc_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            dst_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            dst_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            mom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            mom_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            mom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            mom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            ncl_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            ncl_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            ncl_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            pom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            pom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            pom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            so4_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            so4_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            so4_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            soa_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            soa_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            soa_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+          if len(matched_vlist) == len(req_vlist):
+              bc_a1 = e3smdata['bc_a1'+'_'+E3SMdomain_range].load()
+              bc_a3 = e3smdata['bc_a3'+'_'+E3SMdomain_range].load()
+              bc_a4 = e3smdata['bc_a4'+'_'+E3SMdomain_range].load()
+              dst_a1 = e3smdata['dst_a1'+'_'+E3SMdomain_range].load()
+              dst_a3 = e3smdata['dst_a3'+'_'+E3SMdomain_range].load()
+              mom_a1 = e3smdata['mom_a1'+'_'+E3SMdomain_range].load()
+              mom_a2 = e3smdata['mom_a2'+'_'+E3SMdomain_range].load()
+              mom_a3 = e3smdata['mom_a3'+'_'+E3SMdomain_range].load()
+              mom_a4 = e3smdata['mom_a4'+'_'+E3SMdomain_range].load()
+              ncl_a1 = e3smdata['ncl_a1'+'_'+E3SMdomain_range].load()
+              ncl_a2 = e3smdata['ncl_a2'+'_'+E3SMdomain_range].load()
+              ncl_a3 = e3smdata['ncl_a3'+'_'+E3SMdomain_range].load()
+              pom_a1 = e3smdata['pom_a1'+'_'+E3SMdomain_range].load()
+              pom_a3 = e3smdata['pom_a3'+'_'+E3SMdomain_range].load()
+              pom_a4 = e3smdata['pom_a4'+'_'+E3SMdomain_range].load()
+              so4_a1 = e3smdata['so4_a1'+'_'+E3SMdomain_range].load()
+              so4_a2 = e3smdata['so4_a2'+'_'+E3SMdomain_range].load()
+              so4_a3 = e3smdata['so4_a3'+'_'+E3SMdomain_range].load()
+              soa_a1 = e3smdata['soa_a1'+'_'+E3SMdomain_range].load()
+              soa_a2 = e3smdata['soa_a2'+'_'+E3SMdomain_range].load()
+              soa_a3 = e3smdata['soa_a3'+'_'+E3SMdomain_range].load()
+          else:
+              bc_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              bc_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              bc_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              dst_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              dst_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              mom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              mom_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              mom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              mom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              ncl_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              ncl_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              ncl_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              pom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              pom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              pom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              so4_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              so4_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              so4_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              soa_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              soa_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              soa_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
         
         # droplet size distribution
-        req_vlist = ['ICWNC', 'lambda_cloud', 'mu_cloud']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
-        matched_vlist = list(set(av_vars).intersection(req_vlist))
-        if len(matched_vlist) == len(req_vlist):
-            nd_cld = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
-            lmda = e3smdata['lambda_cloud'+'_'+E3SMdomain_range].load()
-            mu = e3smdata['mu_cloud'+'_'+E3SMdomain_range].load()
-        else:
-            nd_cld = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            lmda = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            mu = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+        if dsd_output == True:
+          req_vlist = ['ICWNC', 'lambda_cloud', 'mu_cloud']
+          req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
+          matched_vlist = list(set(av_vars).intersection(req_vlist))
+          if len(matched_vlist) == len(req_vlist):
+              nd_cld = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
+              lmda = e3smdata['lambda_cloud'+'_'+E3SMdomain_range].load()
+              mu = e3smdata['mu_cloud'+'_'+E3SMdomain_range].load()
+          else:
+              nd_cld = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              lmda = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              mu = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
         
         
         # other variables
