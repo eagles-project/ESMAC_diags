@@ -185,7 +185,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
         
         # variables for calculating aerosol size
-        if aerosol_output == True:
+        if config['aerosol_output'] == True:
           req_vlist = ['num_a1', 'num_a2', 'num_a3', 'num_a4', 'dgnd_a01', 'dgnd_a02', \
                        'dgnd_a03', 'dgnd_a04']
           req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
@@ -264,7 +264,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
               soa_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
         
         # droplet size distribution
-        if dsd_output == True:
+        if config['dsd_output'] == True:
           req_vlist = ['ICWNC', 'lambda_cloud', 'mu_cloud']
           req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
           matched_vlist = list(set(av_vars).intersection(req_vlist))
@@ -297,39 +297,42 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
             for vv in range(len(variable3d_names)):
                 variables_new[vv].append(float(variables[vv][t_idx, z_idx, x_idx]))
             p.append(Pres[t_idx, z_idx, x_idx].data)
-            # calculate aerosol size
-            numall = [num_a1[t_idx, z_idx, x_idx].data, num_a2[t_idx, z_idx, x_idx].data, 
-                      num_a3[t_idx, z_idx, x_idx].data, num_a4[t_idx, z_idx, x_idx].data]
-            dnall  = [dn1[t_idx, z_idx, x_idx].data,    dn2[t_idx, z_idx, x_idx].data,    
-                      dn3[t_idx, z_idx, x_idx].data,    dn4[t_idx, z_idx, x_idx].data]
-            NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[t_idx, z_idx, x_idx].data, Pres[t_idx, z_idx, x_idx].data)
-            NCNall = np.hstack((NCNall, np.reshape(NCN,(3000,1))))
-            # calculate aerosol composition
-            bc_all.append(bc_a1[t_idx, z_idx, x_idx].data +                       
-                    bc_a3[t_idx, z_idx, x_idx].data + bc_a4[t_idx, z_idx, x_idx].data)
-            dst_all.append(dst_a1[t_idx, z_idx, x_idx].data +                      
-                    dst_a3[t_idx, z_idx, x_idx].data)
-            mom_all.append(mom_a1[t_idx, z_idx, x_idx].data + mom_a2[t_idx, z_idx, x_idx].data + 
-                    mom_a3[t_idx, z_idx, x_idx].data + mom_a4[t_idx, z_idx, x_idx].data)
-            ncl_all.append(ncl_a1[t_idx, z_idx, x_idx].data + ncl_a2[t_idx, z_idx, x_idx].data + 
-                    ncl_a3[t_idx, z_idx, x_idx].data)
-            pom_all.append(pom_a1[t_idx, z_idx, x_idx].data +                    
-                    pom_a3[t_idx, z_idx, x_idx].data + pom_a4[t_idx, z_idx, x_idx].data)
-            so4_all.append(so4_a1[t_idx, z_idx, x_idx].data + so4_a2[t_idx, z_idx, x_idx].data + 
-                    so4_a3[t_idx, z_idx, x_idx].data)
-            soa_all.append(soa_a1[t_idx, z_idx, x_idx].data + soa_a2[t_idx, z_idx, x_idx].data + 
-                    soa_a3[t_idx, z_idx, x_idx].data)
-            # calculate droplet size distribution
-            N0 = nd_cld[t_idx, z_idx, x_idx].data * (lmda[t_idx, z_idx, x_idx].data ** (mu[t_idx, z_idx, x_idx].data+1)) / \
-                    gamma(mu[t_idx, z_idx, x_idx].data+1)    # parameter N0
-            D_cld = np.arange(1, 1000) * 1e-6  # in m
-            phi = N0 * (D_cld**mu[t_idx, z_idx, x_idx].data) * np.exp(- lmda[t_idx, z_idx, x_idx].data * D_cld)
-            phi_all = np.hstack((phi_all, np.reshape(phi,(len(D_cld),1))))
-            nd_bin = phi_all * (D_cld[1] - D_cld[0])   # droplet number concentration in each size bin
-            
-        NCN3 = np.nansum(NCNall[3:, :], 0)   # >3nm
-        NCN10 = np.nansum(NCNall[10:, :], 0)    # >10nm
-        NCN100 = np.nansum(NCNall[100:, :], 0)    # >100nm
+            if config['aerosol_output'] == True:
+              # calculate aerosol size
+              numall = [num_a1[t_idx, z_idx, x_idx].data, num_a2[t_idx, z_idx, x_idx].data, 
+                        num_a3[t_idx, z_idx, x_idx].data, num_a4[t_idx, z_idx, x_idx].data]
+              dnall  = [dn1[t_idx, z_idx, x_idx].data,    dn2[t_idx, z_idx, x_idx].data,    
+                        dn3[t_idx, z_idx, x_idx].data,    dn4[t_idx, z_idx, x_idx].data]
+              NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[t_idx, z_idx, x_idx].data, Pres[t_idx, z_idx, x_idx].data)
+              NCNall = np.hstack((NCNall, np.reshape(NCN,(3000,1))))
+              # calculate aerosol composition
+              bc_all.append(bc_a1[t_idx, z_idx, x_idx].data +                       
+                      bc_a3[t_idx, z_idx, x_idx].data + bc_a4[t_idx, z_idx, x_idx].data)
+              dst_all.append(dst_a1[t_idx, z_idx, x_idx].data +                      
+                      dst_a3[t_idx, z_idx, x_idx].data)
+              mom_all.append(mom_a1[t_idx, z_idx, x_idx].data + mom_a2[t_idx, z_idx, x_idx].data + 
+                      mom_a3[t_idx, z_idx, x_idx].data + mom_a4[t_idx, z_idx, x_idx].data)
+              ncl_all.append(ncl_a1[t_idx, z_idx, x_idx].data + ncl_a2[t_idx, z_idx, x_idx].data + 
+                      ncl_a3[t_idx, z_idx, x_idx].data)
+              pom_all.append(pom_a1[t_idx, z_idx, x_idx].data +                    
+                      pom_a3[t_idx, z_idx, x_idx].data + pom_a4[t_idx, z_idx, x_idx].data)
+              so4_all.append(so4_a1[t_idx, z_idx, x_idx].data + so4_a2[t_idx, z_idx, x_idx].data + 
+                      so4_a3[t_idx, z_idx, x_idx].data)
+              soa_all.append(soa_a1[t_idx, z_idx, x_idx].data + soa_a2[t_idx, z_idx, x_idx].data + 
+                      soa_a3[t_idx, z_idx, x_idx].data)
+            if config['dsd_output'] == True:
+              # calculate droplet size distribution
+              N0 = nd_cld[t_idx, z_idx, x_idx].data * (lmda[t_idx, z_idx, x_idx].data ** (mu[t_idx, z_idx, x_idx].data+1)) / \
+                      gamma(mu[t_idx, z_idx, x_idx].data+1)    # parameter N0
+              D_cld = np.arange(1, 1000) * 1e-6  # in m
+              phi = N0 * (D_cld**mu[t_idx, z_idx, x_idx].data) * np.exp(- lmda[t_idx, z_idx, x_idx].data * D_cld)
+              phi_all = np.hstack((phi_all, np.reshape(phi,(len(D_cld),1))))
+              nd_bin = phi_all * (D_cld[1] - D_cld[0])   # droplet number concentration in each size bin
+
+        if config['aerosol_output'] == True:
+          NCN3 = np.nansum(NCNall[3:, :], 0)   # >3nm
+          NCN10 = np.nansum(NCNall[10:, :], 0)    # >10nm
+          NCN100 = np.nansum(NCNall[100:, :], 0)    # >100nm
         
         # #%%
         # nd_bin[nd_bin<1e-6]=np.nan
