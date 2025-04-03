@@ -442,8 +442,10 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         
         # define dimensions
         t = f.createDimension('time', None)  # unlimited
-        s = f.createDimension('CNsize', 3000)  # unlimited
-        s = f.createDimension('Ndsize', 999)  # unlimited
+        if config['aerosol_output'] == True:
+          s = f.createDimension('CNsize', 3000)  # unlimited
+        if config['dsd_output'] == True:
+          s = f.createDimension('Ndsize', 999)  # unlimited
         
         # create variable list
         time_o = f.createVariable("time", "f8", ("time",))
@@ -452,18 +454,20 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         for vv in range(len(variable3d_names)):
             var_o.append (f.createVariable(variable3d_names[vv], 'f8', ("time", )))
         p_o = f.createVariable('pres', 'f8', ("time",))
-        bc_o = f.createVariable('bc', 'f8', ("time",))
-        dst_o = f.createVariable('dst', 'f8', ("time",))
-        pom_o = f.createVariable('pom', 'f8', ("time",))
-        mom_o = f.createVariable('mom', 'f8', ("time",))
-        ncl_o = f.createVariable('ncl', 'f8', ("time",))
-        so4_o = f.createVariable('so4', 'f8', ("time",))
-        soa_o = f.createVariable('soa', 'f8', ("time",))
-        ncn_o = f.createVariable('NCNall', 'f8', ("CNsize", "time",))
-        ncn3_o = f.createVariable('NCN3', 'f8', ("time",))
-        ncn10_o = f.createVariable('NCN10', 'f8', ("time",))
-        ncn100_o = f.createVariable('NCN100', 'f8', ("time",))
-        nd_o = f.createVariable('Nd_bin', 'f8', ("Ndsize", "time",))
+        if config['aerosol_output'] == True:
+          bc_o = f.createVariable('bc', 'f8', ("time",))
+          dst_o = f.createVariable('dst', 'f8', ("time",))
+          pom_o = f.createVariable('pom', 'f8', ("time",))
+          mom_o = f.createVariable('mom', 'f8', ("time",))
+          ncl_o = f.createVariable('ncl', 'f8', ("time",))
+          so4_o = f.createVariable('so4', 'f8', ("time",))
+          soa_o = f.createVariable('soa', 'f8', ("time",))
+          ncn_o = f.createVariable('NCNall', 'f8', ("CNsize", "time",))
+          ncn3_o = f.createVariable('NCN3', 'f8', ("time",))
+          ncn10_o = f.createVariable('NCN10', 'f8', ("time",))
+          ncn100_o = f.createVariable('NCN100', 'f8', ("time",))
+        if config['dsd_output'] == True:
+          nd_o = f.createVariable('Nd_bin', 'f8', ("Ndsize", "time",))
         
         # write data
         time_o[:] = time_new
@@ -471,18 +475,20 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         for vv in range(len(variable3d_names)):
             var_o[vv][:] = np.array(variables_new[vv])
         p_o[:] = np.array(p)
-        bc_o[:] = np.array(bc_all)
-        dst_o[:] = np.array(dst_all)
-        pom_o[:] = np.array(pom_all)
-        mom_o[:] = np.array(mom_all)
-        ncl_o[:] = np.array(ncl_all)
-        so4_o[:] = np.array(so4_all)
-        soa_o[:] = np.array(soa_all)
-        ncn_o[:,:] = NCNall
-        ncn3_o[:] = NCN3
-        ncn10_o[:] = NCN10
-        ncn100_o[:] = NCN100
-        nd_o[:,:] = nd_bin
+        if config['aerosol_output'] == True:
+          bc_o[:] = np.array(bc_all)
+          dst_o[:] = np.array(dst_all)
+          pom_o[:] = np.array(pom_all)
+          mom_o[:] = np.array(mom_all)
+          ncl_o[:] = np.array(ncl_all)
+          so4_o[:] = np.array(so4_all)
+          soa_o[:] = np.array(soa_all)
+          ncn_o[:,:] = NCNall
+          ncn3_o[:] = NCN3
+          ncn10_o[:] = NCN10
+          ncn100_o[:] = NCN100
+        if config['dsd_output'] == True:
+          nd_o[:,:] = nd_bin
         
         # attributes
         time_o.units = "Seconds since " + timestr[0] + ' 00:00 UTC'
@@ -492,32 +498,34 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
             var_o[vv].long_name = variables[vv].long_name
         p_o.units = 'Pa'
         p_o.long_name = 'Pressure'
-        bc_o.units = composition_units
-        bc_o.long_name = 'total black carbon aerosol concentration'
-        dst_o.units = composition_units
-        dst_o.long_name = 'total dust aerosol concentration'
-        ncl_o.units = composition_units
-        ncl_o.long_name = 'total sea salt aerosol concentration'
-        pom_o.units = composition_units
-        pom_o.long_name = 'total primary organic aerosol concentration'
-        mom_o.units = composition_units
-        mom_o.long_name = 'total marine organic aerosol concentration'
-        so4_o.units = composition_units
-        so4_o.long_name = 'total sulfate aerosol concentration'
-        soa_o.units = composition_units
-        soa_o.long_name = 'total secondary organic aerosol concentration'
-        ncn_o.units = ncn_units
-        ncn_o.long_name = 'Aerosol number size distribution'
-        ncn_o.description = 'calculated from modal information into 1nm increment'
-        ncn3_o.units = ncn_units
-        ncn3_o.long_name = 'Aerosol number concentration for size >3nm'
-        ncn10_o.units = ncn_units
-        ncn10_o.long_name = 'Aerosol number concentration for size >10nm'
-        ncn100_o.units = ncn_units
-        ncn100_o.long_name = 'Aerosol number concentration for size >100nm'
-        nd_o.units = nd_units
-        nd_o.long_name = 'cloud droplet number size distribution'
-        nd_o.description = 'calculated from MG2 cloud spectrum output into 1um increment from 1um to 1000um'
+        if config['aerosol_output'] == True:
+          bc_o.units = composition_units
+          bc_o.long_name = 'total black carbon aerosol concentration'
+          dst_o.units = composition_units
+          dst_o.long_name = 'total dust aerosol concentration'
+          ncl_o.units = composition_units
+          ncl_o.long_name = 'total sea salt aerosol concentration'
+          pom_o.units = composition_units
+          pom_o.long_name = 'total primary organic aerosol concentration'
+          mom_o.units = composition_units
+          mom_o.long_name = 'total marine organic aerosol concentration'
+          so4_o.units = composition_units
+          so4_o.long_name = 'total sulfate aerosol concentration'
+          soa_o.units = composition_units
+          soa_o.long_name = 'total secondary organic aerosol concentration'
+          ncn_o.units = ncn_units
+          ncn_o.long_name = 'Aerosol number size distribution'
+          ncn_o.description = 'calculated from modal information into 1nm increment'
+          ncn3_o.units = ncn_units
+          ncn3_o.long_name = 'Aerosol number concentration for size >3nm'
+          ncn10_o.units = ncn_units
+          ncn10_o.long_name = 'Aerosol number concentration for size >10nm'
+          ncn100_o.units = ncn_units
+          ncn100_o.long_name = 'Aerosol number concentration for size >100nm'
+        if config['dsd_output'] == True:
+          nd_o.units = nd_units
+          nd_o.long_name = 'cloud droplet number size distribution'
+          nd_o.description = 'calculated from MG2 cloud spectrum output into 1um increment from 1um to 1000um'
         
         # global attributes
         f.title = 'preprocessed E3SM data along aircraft track at the nearest time, grid, and vertical level'
