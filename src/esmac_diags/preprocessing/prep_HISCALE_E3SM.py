@@ -162,6 +162,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         if len(lst)!=1:
             raise ValueError('Should only contain one file: '+lst)
         e3smdata = xr.open_dataset(lst[0])
+        e3smdata.transpose('time','lev','ncol',...) # ensure ordering of time, height, and location
         e3smtime = e3smdata.indexes['time'].to_datetimeindex()
         lonm = e3smdata[config['LON']+E3SMdomain_range].load()
         latm = e3smdata[config['LAT']+E3SMdomain_range].load()
@@ -173,12 +174,15 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
           hybm = e3smdata[config['HYBM']].load()
           T = e3smdata[config['T']+E3SMdomain_range].load()
           PS = e3smdata[config['PS']+E3SMdomain_range].load()
-          Pres = np.nan*T
-          zlen = T.shape[1]  # this hardcodes based on dimension ordering - should change to use dimension names
+          # Pres = np.nan*T
+          # zlen = T.shape[1]
+          Pres = xr.full_like(T, np.nan)
+          Pres = Pres.assign_attrs(units='Pa',long_name='Pressure',standard_name='air_pressure')
+          zlen = T.sizes[config['vert_dim']]
           for kk in range(zlen):
               Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
         else:
-          Pres = config['PRES']
+          Pres = e3smdata[config['PRES']].load()
       
         # change time format into seconds of the day
         timem = np.float64((e3smtime - e3smtime[0]).seconds)
@@ -593,30 +597,35 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     # first data
     e3smdata = xr.open_dataset(lst[0])
     e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-    lonm = e3smdata['lon'+E3SMdomain_range].load()
-    latm = e3smdata['lat'+E3SMdomain_range].load()
-    z3 = e3smdata['Z3'+E3SMdomain_range].load()
-    hyam = e3smdata['hyam'].load()
-    hybm = e3smdata['hybm'].load()
-    p0 = e3smdata['P0'].load()
-    ps = e3smdata['PS'+E3SMdomain_range].load()
-    Ts = e3smdata['TREFHT'+E3SMdomain_range].load()
-    T = e3smdata['T'+E3SMdomain_range].load()
-    Q = e3smdata['Q'+E3SMdomain_range].load()
-    U = e3smdata['U'+E3SMdomain_range].load()
-    V = e3smdata['V'+E3SMdomain_range].load()
-    RH = e3smdata['RELHUM'+E3SMdomain_range].load()
-    cloud = e3smdata['CLOUD'+E3SMdomain_range].load()
+    lonm = e3smdata[config['LON']+E3SMdomain_range].load()
+    latm = e3smdata[config['LAT']+E3SMdomain_range].load()
+    z3 = e3smdata[config['Z']+E3SMdomain_range].load()
+    hyam = e3smdata[config['HYAM']].load()
+    hybm = e3smdata[config['HYBM']].load()
+    p0 = e3smdata[config['P0']].load()
+    ps = e3smdata[config['PS']+E3SMdomain_range].load()
+    Ts = e3smdata[config['TREFHT']+E3SMdomain_range].load()
+    T = e3smdata[config['T']+E3SMdomain_range].load()
+    Q = e3smdata[config['Q']+E3SMdomain_range].load()
+    U = e3smdata[config['U']+E3SMdomain_range].load()
+    V = e3smdata[config['V']+E3SMdomain_range].load()
+    RH = e3smdata[config['RELHUM']+E3SMdomain_range].load()
+    cloud = e3smdata[config['CLOUD']+E3SMdomain_range].load()
     e3smdata.close()
     # only extract the model column at the site
     if lon0<0:
         lon0=lon0+360   # make longitude consistent with E3SM from 0 to 360
     x_idx = find_nearest(lonm,latm,lon0,lat0)
-    
-    levm = 0.01* (ps[:,x_idx]*hybm + hyam*p0)  # hPa
+
+    if condig['pres_output'] == False:
+      # levm = 0.01* (ps[:,x_idx]*hybm + hyam*p0)  # hPa
+      levm = 0.01* (ps[**{config['latlon_dim']:x_idx}]*hybm + hyam*p0)  # hPa
+    else:
+      levm = e3smdata[config['PRES']+E3SMdomain_range].load()
     # calculate theta
     theta = T * (1000./levm)**0.286
-    theta_s = Ts[:, x_idx] * (100000./ps[:, x_idx])**0.286
+    # theta_s = Ts[**{config['latlon_dim']:x_idx}] * (100000./ps[**{config['latlon_dim']:x_idx}])**0.286
+    theta_s = Ts[**{config['latlon_dim']:x_idx}] * (100000./ps[**{config['latlon_dim']:x_idx}])**0.286       
     
     # interpolate data into pressure coordinate
     cloud_p = np.empty((cloud.shape[0],len(lev_out)))
