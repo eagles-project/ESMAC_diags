@@ -23,12 +23,12 @@ E3SMsubdomain: False
 E3SMdomain_range: '260e_to_265e_34n_to_39n' # '330e_to_335e_37n_to_42n' for ENA; '260e_to_265e_34n_to_39n' for SGP
 
 # model array dimension names
-time_dim = 'time'
-lon_dim = 'lon'   # if 12D lat-lon
-lat_dim = 'lat'   # if 2D lat-lon
-latlon_dim = 'ncol'      # if 1D lat-lon
-vert_dim = 'lev'
-vert_dim_bnd = 'ilev'
+time_dim: 'time'
+lon_dim: 'lon'   # if 12D lat-lon
+lat_dim: 'lat'   # if 2D lat-lon
+latlon_dim: 'ncol'      # if 1D lat-lon
+vert_dim: 'lev'
+vert_dim_bnd: 'ilev'
 
 latlon_dimensions = 2
 
@@ -169,13 +169,13 @@ soa_a2: 'soa_a2'
 soa_a3: 'soa_a3'
 
 # variables below if cosp_output = True
-'LWPMODIS': 'LWPMODIS'
-'IWPMODIS': 'IWPMODIS'
-'REFFLIQMODIS': 'REFCLWMODIS'
-'REFFICEMODIS': 'REFCLIMODIS'
-'TAULIQMODIS': 'TAUWMODIS'
-'TAUICEMODIS': 'TAUIMODIS'
-'TAUTOTMODIS': 'TAUTMODIS'
-'CFLIQMODIS': 'CLWMODIS'
-'CFICEMODIS': 'CLIMODIS'
-'CFTOTMODIS': 'CLTMODIS'
+LWPMODIS: 'LWPMODIS'
+IWPMODIS: 'IWPMODIS'
+REFFLIQMODIS: 'REFCLWMODIS'
+REFFICEMODIS: 'REFCLIMODIS'
+TAULIQMODIS: 'TAUWMODIS'
+TAUICEMODIS: 'TAUIMODIS'
+TAUTOTMODIS: 'TAUTMODIS'
+CFLIQMODIS: 'CLWMODIS'
+CFICEMODIS: 'CLIMODIS'
+CFTOTMODIS: 'CLTMODIS'
