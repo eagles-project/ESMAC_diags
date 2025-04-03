@@ -135,25 +135,28 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
                             config['QI'], config['QC'], config['CF'], config['CFLIQ'], config['NC'], config['NI']]
         
         if config['reff_output'] == True:
-          variable3d_names.append([config['REL']])
+            variable3d_names.append(config['REL'])
         if config['aerosol_output'] == True:
-          variable3d_names.append([config['CCN1'], config['CCN3'], config['CCN4'], config['CCN5']])
+            variable3d_names.append(config['CCN1'])
+            variable3d_names.append(config['CCN3'])
+            variable3d_names.append(config['CCN4'])
+            variable3d_names.append(config['CCN5'])
           
         variables = list()
         variables_new = list()
         for varname in variable3d_names:
             variables_new.append([])
-
-        NCNall = np.empty((3000,0))
-        p = list()      # pressure
-        bc_all  = list()
-        dst_all = list()
-        mom_all = list()
-        ncl_all = list()
-        pom_all = list()
-        so4_all = list()
-        soa_all = list()
-        phi_all = np.empty((999,0))
+        if config['aerosol_output'] == True:
+          NCNall = np.empty((3000,0))
+          p = list()      # pressure
+          bc_all  = list()
+          dst_all = list()
+          mom_all = list()
+          ncl_all = list()
+          pom_all = list()
+          so4_all = list()
+          soa_all = list()
+          phi_all = np.empty((999,0))
         
         lst = glob.glob(input_path + input_filehead+'.*'+timestr[0]+'-00000.nc')
         if len(lst)!=1:
@@ -351,26 +354,29 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         # ax2.set_yscale('log')
         # e
         #%% change some units
-        # composition
-        T = variables_new[variable3d_names.index('T')]
-        rho = np.array(p)/T/287.06
-        bc_all = np.array(bc_all)*1e9*rho
-        dst_all = np.array(dst_all)*1e9*rho
-        mom_all = np.array(mom_all)*1e9*rho
-        ncl_all = np.array(ncl_all)*1e9*rho
-        pom_all = np.array(pom_all)*1e9*rho
-        so4_all = np.array(so4_all)*1e9*rho
-        soa_all = np.array(soa_all)*1e9*rho
-        composition_units = 'ug/m3'
-        # aerosol number
-        NCNall = NCNall * 1e-6
-        NCN3 = NCN3 * 1e-6
-        NCN10 = NCN10 * 1e-6
-        NCN100 = NCN100 * 1e-6
-        ncn_units = '#/cm3'
-        # cloud number size distribution
-        nd_bin = nd_bin * 1e-6
-        nd_units = '#/cm3'
+        if config['aerosol_output'] == True:
+          # composition
+          T = variables_new[variable3d_names.index('T')]
+          rho = np.array(p)/T/287.06
+          bc_all = np.array(bc_all)*1e9*rho
+          dst_all = np.array(dst_all)*1e9*rho
+          mom_all = np.array(mom_all)*1e9*rho
+          ncl_all = np.array(ncl_all)*1e9*rho
+          pom_all = np.array(pom_all)*1e9*rho
+          so4_all = np.array(so4_all)*1e9*rho
+          soa_all = np.array(soa_all)*1e9*rho
+          composition_units = 'ug/m3'
+          # aerosol number
+          NCNall = NCNall * 1e-6
+          NCN3 = NCN3 * 1e-6
+          NCN10 = NCN10 * 1e-6
+          NCN100 = NCN100 * 1e-6
+          ncn_units = '#/cm3'
+        if config['dsd_output'] == True:
+          # cloud number size distribution
+          nd_bin = nd_bin * 1e-6
+          nd_units = '#/cm3'
+        
         # LWC and IWC
         idx = variable3d_names.index('LWC')
         variables_new[idx] = np.array(variables_new[idx])*1000
