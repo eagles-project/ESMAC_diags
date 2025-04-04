@@ -622,14 +622,12 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     x_idx = find_nearest(lonm,latm,lon0,lat0)
 
     if condig['pres_output'] == False:
-      # levm = 0.01* (ps[:,x_idx]*hybm + hyam*p0)  # hPa
-      levm = 0.01* (ps[**{config['latlon_dim']:x_idx}]*hybm + hyam*p0)  # hPa
+      levm = 0.01* (ps[:,x_idx]*hybm + hyam*p0)  # hPa
     else:
       levm = e3smdata[config['PRES']+E3SMdomain_range].load()
     # calculate theta
     theta = T * (1000./levm)**0.286
-    # theta_s = Ts[**{config['latlon_dim']:x_idx}] * (100000./ps[**{config['latlon_dim']:x_idx}])**0.286
-    theta_s = Ts[**{config['latlon_dim']:x_idx}] * (100000./ps[**{config['latlon_dim']:x_idx}])**0.286       
+    theta_s = Ts[:, x_idx] * (100000./ps[:, x_idx])**0.286
     
     # interpolate data into pressure coordinate
     cloud_p = np.empty((cloud.shape[0],len(lev_out)))
@@ -680,18 +678,21 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
         e3smtime_i = e3smdata.indexes['time'].to_datetimeindex()
         e3smtime = np.hstack((e3smtime, e3smtime_i))
         
-        z3 = e3smdata['Z3'+E3SMdomain_range].load()
-        ps = e3smdata['PS'+E3SMdomain_range].load()
-        Ts = e3smdata['TREFHT'+E3SMdomain_range].load()
-        T = e3smdata['T'+E3SMdomain_range].load()
-        Q = e3smdata['Q'+E3SMdomain_range].load()
-        U = e3smdata['U'+E3SMdomain_range].load()
-        V = e3smdata['V'+E3SMdomain_range].load()
-        RH = e3smdata['RELHUM'+E3SMdomain_range].load()
-        cloud = e3smdata['CLOUD'+E3SMdomain_range].load()
+        z3 = e3smdata[config['Z']+E3SMdomain_range].load()
+        ps = e3smdata[config['PS']+E3SMdomain_range].load()
+        Ts = e3smdata[config['TREFHT']+E3SMdomain_range].load()
+        T = e3smdata[config['T']+E3SMdomain_range].load()
+        Q = e3smdata[config['Q']+E3SMdomain_range].load()
+        U = e3smdata[config['U']+E3SMdomain_range].load()
+        V = e3smdata[config['V']+E3SMdomain_range].load()
+        RH = e3smdata[config['RELHUM']+E3SMdomain_range].load()
+        cloud = e3smdata[config['CLOUD']+E3SMdomain_range].load()
         e3smdata.close()
         
-        levm = 0.01* (ps[:,x_idx]*hybm + hyam*p0)  # hPa
+        if condig['pres_output'] == False:
+          levm = 0.01* (ps[:,x_idx]*hybm + hyam*p0)  # hPa
+        else:
+          levm = e3smdata[config['PRES']+E3SMdomain_range].load()
         # calculate theta
         theta = T * (1000./levm)**0.286
         theta_s2 = Ts[:, x_idx] * (100000./ps[:, x_idx])**0.286
