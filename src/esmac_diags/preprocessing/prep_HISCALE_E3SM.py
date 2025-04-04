@@ -1198,28 +1198,39 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
           cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
     
     # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
-    req_vlist = [config['LWP']]
-    req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-    matched_vlist = list(set(av_vars).intersection(req_vlist))
-    
-    if len(matched_vlist) == len(req_vlist):
-        print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop and Bennartz 2007')
-        lwp = e3smdata[config['LWP']+E3SMdomain_range][:,x_idx].data
-        e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
-        T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
-        nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
-        nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m, adiabaticity=0.8)
-        cdnc_arm = xr.DataArray(data=nd_arm*1e6,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
-            attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
-                        description='Retrieved using ARM Ndrop algorithm'),)
-        cdnc_sat = xr.DataArray(data=nd_sat*1e6,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
-            attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
-                        description='Retrieved using Bennartz(2007) algorithm, also used for VISST data'),)
-    else:
-        cdnc_arm = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        cdnc_sat = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+    if config['reff_output'] == True:
+      req_vlist = [config['LWP']]
+      req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+      matched_vlist = list(set(av_vars).intersection(req_vlist))
+      
+      if len(matched_vlist) == len(req_vlist):
+          print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop and Bennartz 2007')
+          lwp = e3smdata[config['LWP']+E3SMdomain_range][:,x_idx].data
+          e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+          nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
+          cdnc_arm = xr.DataArray(data=nd_arm*1e6,  dims=["time"],
+              coords=dict(time=(["time"], e3smtime)),
+              attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                          description='Retrieved using ARM Ndrop algorithm'),)
+      else:
+          cdnc_arm = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+
+    if config['cosp_output'] == True:
+      req_vlist = [config['LWP']]
+      req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+      matched_vlist = list(set(av_vars).intersection(req_vlist))
+      
+      if len(matched_vlist) == len(req_vlist):
+          print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop and Bennartz 2007')
+          lwp = e3smdata[config['LWP']+E3SMdomain_range][:,x_idx].data
+          T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+          nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m, adiabaticity=0.8)
+          cdnc_sat = xr.DataArray(data=nd_sat*1e6,  dims=["time"],
+              coords=dict(time=(["time"], e3smtime)),
+              attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                          description='Retrieved using Bennartz(2007) algorithm, also used for VISST data'),)
+      else:
+          cdnc_sat = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
     
     # all other 2D (surface and vertical integrated) variables
     variable2d_names = [config['AOD'], config['CLDHGH'], config['CLDMED'], config['CLDLOW'], config['CLDTOT'], 
@@ -1532,30 +1543,41 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
               cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_mean',attrs={'units':'dummy_unit','long_name':'Dummy'})
             
         # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
-        req_vlist = [config['LWP']]
-        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-        matched_vlist = list(set(av_vars).intersection(req_vlist))
-        
-        if len(matched_vlist) == len(req_vlist):
-            lwp = e3smdata[config['LWP']+E3SMdomain_range][:,x_idx].data
-            e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
-            T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
-            nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
-            nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m, adiabaticity=0.8)
-            nd_arm = xr.DataArray(data=nd_arm*1e6,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
-                attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
-                            description='Retrieved using ARM Ndrop algorithm'),)
-            nd_sat = xr.DataArray(data=nd_sat*1e6,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
-                attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
-                            description='Retrieved using Bennartz(2007) algorithm, also used for VISST data'),)
-            cdnc_arm = xr.concat([cdnc_arm, nd_arm], dim="time")
-            cdnc_sat = xr.concat([cdnc_sat, nd_sat], dim="time")
-        else:
-            cdnc_arm = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_arm',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            cdnc_sat = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_sat',attrs={'units':'dummy_unit','long_name':'Dummy'})
+        if config['reff_output'] == True:
+          req_vlist = [config['LWP']]
+          req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+          matched_vlist = list(set(av_vars).intersection(req_vlist))
+          
+          if len(matched_vlist) == len(req_vlist):
+              print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop and Bennartz 2007')
+              lwp = e3smdata[config['LWP']+E3SMdomain_range][:,x_idx].data
+              e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+              nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
+              nd_arm = xr.DataArray(data=nd_arm*1e6,  dims=["time"],
+                  coords=dict(time=(["time"], e3smtime_i)),
+                  attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                              description='Retrieved using ARM Ndrop algorithm'),)
+              cdnc_arm = xr.concat([cdnc_arm, nd_arm], dim="time")
+          else:
+              cdnc_arm = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_arm',attrs={'units':'dummy_unit','long_name':'Dummy'})
     
+        if config['cosp_output'] == True:
+          req_vlist = [config['LWP']]
+          req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+          matched_vlist = list(set(av_vars).intersection(req_vlist))
+          
+          if len(matched_vlist) == len(req_vlist):
+              print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop and Bennartz 2007')
+              lwp = e3smdata[config['LWP']+E3SMdomain_range][:,x_idx].data
+              T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+              nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m, adiabaticity=0.8)
+              nd_sat = xr.DataArray(data=nd_sat*1e6,  dims=["time"],
+                  coords=dict(time=(["time"], e3smtime_i)),
+                  attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                              description='Retrieved using Bennartz(2007) algorithm, also used for VISST data'),)
+              cdnc_sat = xr.concat([cdnc_sat, nd_sat], dim="time")
+          else:
+              cdnc_sat = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_sat',attrs={'units':'dummy_unit','long_name':'Dummy'})    
         
         # all other 2D (surface and vertical integrated) variables
         for varname in variable2d_names:
