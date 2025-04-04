@@ -1196,6 +1196,18 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
               attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
       else:
           cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+    else:
+      #compute cloud layer mean CDNC from 3D NC
+      nc3d = e3smdata[config['NC']+E3SMdomain_range].load()      
+      if e3smdata[config['NC']].attrs['units'] == '1/kg':
+        rho = np.array(Pres/T/287.06)
+        cdnc_rel = nc3d*rho/cloud/1e6
+      if e3smdata[config['NC']].attrs['units'] == 'm-3':
+        cdnc_rel = nc3d/cloud/1e6
+      cdnc_rel = cdnc_rel.where(cloud > 0, other = 0)
+      cf_column = cloud.sum(dim='lev')
+      cdnc_rel_avg = cdnc_rel.dot(cloud, dims='lev')
+      cdnc_mean = np.divide(cdnc_rel_avg, cf_column)
     
     # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
     if config['reff_output'] == True:
@@ -1541,6 +1553,18 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
               cdnc_mean = xr.concat([cdnc_mean, cdnc], dim="time")
           else:
               cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_mean',attrs={'units':'dummy_unit','long_name':'Dummy'})
+        else:
+          #compute cloud layer mean CDNC from 3D NC
+          nc3d = e3smdata[config['NC']+E3SMdomain_range].load()      
+          if e3smdata[config['NC']].attrs['units'] == '1/kg':
+            rho = np.array(Pres/T/287.06)
+            cdnc_rel = nc3d*rho/cloud/1e6
+          if e3smdata[config['NC']].attrs['units'] == 'm-3':
+            cdnc_rel = nc3d/cloud/1e6
+          cdnc_rel = cdnc_rel.where(cloud > 0, other = 0)
+          cf_column = cloud.sum(dim='lev')
+          cdnc_rel_avg = cdnc_rel.dot(cloud, dims='lev')
+          cdnc_mean = np.divide(cdnc_rel_avg, cf_column)
             
         # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
         if config['reff_output'] == True:
@@ -1604,6 +1628,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
             variables[vv] = xr.concat([variables[vv], var[:,-1,x_idx]],dim='time')
     
         e3smdata.close()
+      
     # put all variables into the list
     # aerosol composition    
     variable_names = variable_names + ['bc','dst','mom','ncl','pom','so4','soa']
@@ -1645,19 +1670,19 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data * 1e-6
         variables[variable_names.index(vv)].attrs['units']='#/cm3'
     # LWC and IWC
-    varbls = ['TGCLDIWP','TGCLDLWP']
+    varbls = [config['IWP'],config['LWP']]
     varbls = ["{}{}".format(i,E3SMdomain_range) for i in varbls]
     varbls = list(set(av_vars).intersection(varbls))
     if len(varbls) > 0:
-        for vv in ['TGCLDIWP','TGCLDLWP']:
+        for vv in [config['IWP'],config['LWP']]:
             variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *1000
             variables[variable_names.index(vv)].attrs['units']='g/m2'
     # cloud fraction
-    varbls = ['CLDTOT','CLDLOW','CLDMED','CLDHGH']
+    varbls = [config['CLDTOT'],config['CLDLOW'],config['CLDMED'],config['CLDHGH']]
     varbls = ["{}{}".format(i,E3SMdomain_range) for i in varbls]
     varbls = list(set(av_vars).intersection(varbls))
     if len(varbls) > 0:
-        for vv in ['CLDTOT','CLDLOW','CLDMED','CLDHGH']:
+        for vv in [config['CLDTOT'],config['CLDLOW'],config['CLDMED'],config['CLDHGH']]:
             variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *100
             variables[variable_names.index(vv)].attrs['units']='%'
     
