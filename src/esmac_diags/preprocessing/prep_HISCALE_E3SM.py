@@ -299,79 +299,81 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         #%% find the flight track grid
         for tt in range(len(time_new)):
             t_idx = np.abs(timem-time_new[tt]).argmin()
-            x_idx = find_nearest(lonm, latm, lon_new[tt], lat_new[tt])
-            # z_idx = np.abs(z3[t_idx, :, x_idx]-height_new[tt]).argmin()
-            z_idx = np.abs(z3.isel(**{config['time_dim']:t_idx}, **{config['latlon_dim']:x_idx})).argmin()  # this indexing is independing of dimension ordering but still depends on 1D ncol
+            x_idx = find_nearest(lonm, latm, lon_new[tt], lat_new[tt])  # depends on 1D ncol; need a check and new function if lat and lon are separate
+            z_idx = np.abs(z3[t_idx, :, x_idx]-height_new[tt]).argmin() 
+            # z_idx = np.abs(z3.isel(**{config['time_dim']:t_idx}, **{config['latlon_dim']:x_idx})).argmin()  # this indexing is independent of dimension ordering but still depends on 1D ncol
             for vv in range(len(variable3d_names)):
-                # variables_new[vv].append(float(variables[vv][t_idx, z_idx, x_idx]))
-                variables_new[vv].append(float(variables[vv].isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx})))
-            # p.append(Pres[t_idx, z_idx, x_idx].data)
-            p.append(Pres.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
+                variables_new[vv].append(float(variables[vv][t_idx, z_idx, x_idx]))
+                # variables_new[vv].append(float(variables[vv].isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx})))
+            p.append(Pres[t_idx, z_idx, x_idx].data)
+            # p.append(Pres.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
             if config['aerosol_output'] == True:
               # calculate aerosol size
-              # numall = [num_a1[t_idx, z_idx, x_idx].data, num_a2[t_idx, z_idx, x_idx].data, 
-              #           num_a3[t_idx, z_idx, x_idx].data, num_a4[t_idx, z_idx, x_idx].data]
-              # dnall  = [dn1[t_idx, z_idx, x_idx].data,    dn2[t_idx, z_idx, x_idx].data,    
-              #           dn3[t_idx, z_idx, x_idx].data,    dn4[t_idx, z_idx, x_idx].data]
-              # NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[t_idx, z_idx, x_idx].data, Pres[t_idx, z_idx, x_idx].data)
-              numall = [num_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data,
-                        num_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data, 
-                        num_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data,
-                        num_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data]
-              dnall  = [dn1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data,
-                        dn2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data,    
-                        dn3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data,
-                        dn4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data]
+              numall = [num_a1[t_idx, z_idx, x_idx].data, num_a2[t_idx, z_idx, x_idx].data, 
+                        num_a3[t_idx, z_idx, x_idx].data, num_a4[t_idx, z_idx, x_idx].data]
+              dnall  = [dn1[t_idx, z_idx, x_idx].data,    dn2[t_idx, z_idx, x_idx].data,    
+                        dn3[t_idx, z_idx, x_idx].data,    dn4[t_idx, z_idx, x_idx].data]
               NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[t_idx, z_idx, x_idx].data, Pres[t_idx, z_idx, x_idx].data)
+              # numall = [num_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data,
+              #           num_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data, 
+              #           num_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data,
+              #           num_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data]
+              # dnall  = [dn1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data,
+              #           dn2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data,    
+              #           dn3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data,
+              #           dn4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data]
+              # NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall,
+              #                                   T.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data,
+              #                                   Pres.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
               NCNall = np.hstack((NCNall, np.reshape(NCN,(3000,1))))
               # calculate aerosol composition
-              # bc_all.append(bc_a1[t_idx, z_idx, x_idx].data +                       
-              #         bc_a3[t_idx, z_idx, x_idx].data + bc_a4[t_idx, z_idx, x_idx].data)
-              # dst_all.append(dst_a1[t_idx, z_idx, x_idx].data +                      
-              #         dst_a3[t_idx, z_idx, x_idx].data)
-              # mom_all.append(mom_a1[t_idx, z_idx, x_idx].data + mom_a2[t_idx, z_idx, x_idx].data + 
-              #         mom_a3[t_idx, z_idx, x_idx].data + mom_a4[t_idx, z_idx, x_idx].data)
-              # ncl_all.append(ncl_a1[t_idx, z_idx, x_idx].data + ncl_a2[t_idx, z_idx, x_idx].data + 
-              #         ncl_a3[t_idx, z_idx, x_idx].data)
-              # pom_all.append(pom_a1[t_idx, z_idx, x_idx].data +                    
-              #         pom_a3[t_idx, z_idx, x_idx].data + pom_a4[t_idx, z_idx, x_idx].data)
-              # so4_all.append(so4_a1[t_idx, z_idx, x_idx].data + so4_a2[t_idx, z_idx, x_idx].data + 
-              #         so4_a3[t_idx, z_idx, x_idx].data)
-              # soa_all.append(soa_a1[t_idx, z_idx, x_idx].data + soa_a2[t_idx, z_idx, x_idx].data + 
-              #         soa_a3[t_idx, z_idx, x_idx].data)
-              bc_all.append(bc_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data +                       
-                            bc_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
-                            bc_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
-              dst_all.append(dst_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data +                      
-                            dst_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
-              mom_all.append(mom_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
-                            mom_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
-                            mom_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
-                            mom_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
-              ncl_all.append(ncl_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
-                            ncl_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
-                            ncl_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
-              pom_all.append(pom_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data +                    
-                            pom_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
-                            pom_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
-              so4_all.append(so4_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
-                            so4_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
-                            so4_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
-              soa_all.append(soa_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
-                            soa_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
-                            soa_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
+              bc_all.append(bc_a1[t_idx, z_idx, x_idx].data +                       
+                      bc_a3[t_idx, z_idx, x_idx].data + bc_a4[t_idx, z_idx, x_idx].data)
+              dst_all.append(dst_a1[t_idx, z_idx, x_idx].data +                      
+                      dst_a3[t_idx, z_idx, x_idx].data)
+              mom_all.append(mom_a1[t_idx, z_idx, x_idx].data + mom_a2[t_idx, z_idx, x_idx].data + 
+                      mom_a3[t_idx, z_idx, x_idx].data + mom_a4[t_idx, z_idx, x_idx].data)
+              ncl_all.append(ncl_a1[t_idx, z_idx, x_idx].data + ncl_a2[t_idx, z_idx, x_idx].data + 
+                      ncl_a3[t_idx, z_idx, x_idx].data)
+              pom_all.append(pom_a1[t_idx, z_idx, x_idx].data +                    
+                      pom_a3[t_idx, z_idx, x_idx].data + pom_a4[t_idx, z_idx, x_idx].data)
+              so4_all.append(so4_a1[t_idx, z_idx, x_idx].data + so4_a2[t_idx, z_idx, x_idx].data + 
+                      so4_a3[t_idx, z_idx, x_idx].data)
+              soa_all.append(soa_a1[t_idx, z_idx, x_idx].data + soa_a2[t_idx, z_idx, x_idx].data + 
+                      soa_a3[t_idx, z_idx, x_idx].data)
+              # bc_all.append(bc_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data +                       
+              #               bc_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
+              #               bc_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
+              # dst_all.append(dst_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data +                      
+              #               dst_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
+              # mom_all.append(mom_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
+              #               mom_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
+              #               mom_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
+              #               mom_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
+              # ncl_all.append(ncl_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
+              #               ncl_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
+              #               ncl_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
+              # pom_all.append(pom_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data +                    
+              #               pom_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
+              #               pom_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
+              # so4_all.append(so4_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
+              #               so4_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
+              #               so4_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
+              # soa_all.append(soa_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
+              #               soa_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data + 
+              #               soa_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data)
             if config['dsd_output'] == True:
               # calculate droplet size distribution
-              # N0 = nd_cld[t_idx, z_idx, x_idx].data * (lmda[t_idx, z_idx, x_idx].data ** (mu[t_idx, z_idx, x_idx].data+1)) / \
-              #         gamma(mu[t_idx, z_idx, x_idx].data+1)    # parameter N0
-              N0 = nd_cld.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data * 
-                    (lmda.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data ** 
-                    (mu.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data+1)) / \
-                    gamma(mu.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data+1)    # parameter N0
+              N0 = nd_cld[t_idx, z_idx, x_idx].data * (lmda[t_idx, z_idx, x_idx].data ** (mu[t_idx, z_idx, x_idx].data+1)) / \
+                      gamma(mu[t_idx, z_idx, x_idx].data+1)    # parameter N0
+              # N0 = nd_cld.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data * 
+              #       (lmda.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data ** 
+              #       (mu.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data+1)) / \
+              #       gamma(mu.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data+1)    # parameter N0
               D_cld = np.arange(1, 1000) * 1e-6  # in m
-              # phi = N0 * (D_cld**mu[t_idx, z_idx, x_idx].data) * np.exp(- lmda[t_idx, z_idx, x_idx].data * D_cld)
-              phi = N0 * (D_cld**mu.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data) * 
-                    np.exp(- lmda.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data * D_cld)
+              phi = N0 * (D_cld**mu[t_idx, z_idx, x_idx].data) * np.exp(- lmda[t_idx, z_idx, x_idx].data * D_cld)
+              # phi = N0 * (D_cld**mu.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data) * 
+              #       np.exp(- lmda.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']:x_idx}).data * D_cld)
               phi_all = np.hstack((phi_all, np.reshape(phi,(len(D_cld),1))))
               nd_bin = phi_all * (D_cld[1] - D_cld[0])   # droplet number concentration in each size bin
 
@@ -383,19 +385,6 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         # #%%
         # nd_bin[nd_bin<1e-6]=np.nan
         
-        # import matplotlib.pyplot as plt
-        # fig,(ax2) = plt.subplots(1,1,figsize=(8,4))
-        # ax2.plot(np.nanmean(nd_bin*1e-6,axis=1))
-        # ax2.set_xscale('log')
-        # ax2.set_yscale('log')
-        # ax2.set_ylim(1e-8, 1e-2)
-        
-        # fig,(ax2) = plt.subplots(1,1,figsize=(8,4))
-        # ax2.contourf(time_new, np.arange(1,1000), nd_bin*1e-6)
-        # # ax2.set_xscale('log')
-        # ax2.plot(time_new, height_new)
-        # ax2.set_yscale('log')
-        # e
         #%% change some units
         if config['aerosol_output'] == True:
           # composition
@@ -421,12 +410,15 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
           nd_units = '#/cm3'
         
         # LWC and IWC
-        idx = variable3d_names.index('LWC')
-        variables_new[idx] = np.array(variables_new[idx])*1000
-        variables[idx].attrs['units']='g/m3'
-        idx = variable3d_names.index('IWC')
-        variables_new[idx] = np.array(variables_new[idx])*1000
-        variables[idx].attrs['units']='g/m3'
+        # idx = variable3d_names.index('LWC')
+        # variables_new[idx] = np.array(variables_new[idx])*1000      
+        # variables[idx].attrs['units']='g/m3'
+        # idx = variable3d_names.index('IWC')
+        # variables_new[idx] = np.array(variables_new[idx])*1000
+        # variables[idx].attrs['units']='g/m3'
+        clwc = e3smdata[config['QC']+E3SMdomain_range].load() * rho * 1000
+        rwc = e3smdata[config['QR']+E3SMdomain_range].load() * rho * 1000
+        iwc = e3smdata[config['QI']+E3SMdomain_range].load() * rho * 1000
       
         # droplet number
         idx = variable3d_names.index('ICWNC')
@@ -436,8 +428,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         variables_new[idx] = np.array(variables_new[idx])*1e-6
         variables[idx].attrs['units']='#/cm3'
     
-        #%% output 
-        
+        #%% output       
         outfile = output_path + output_filehead + '_flight_'+date+'.nc'
         print('output file '+outfile)
         
@@ -458,6 +449,9 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         for vv in range(len(variable3d_names)):
             var_o.append (f.createVariable(variable3d_names[vv], 'f8', ("time", )))
         p_o = f.createVariable('pres', 'f8', ("time",))
+        clwc_o = f.createVariable('clwc', 'f8', ("time",))
+        iwc_o = f.createVariable('iwc', 'f8', ("time",))
+        rwc_o = f.createVariable('rwc', 'f8', ("time",))
         if config['aerosol_output'] == True:
           bc_o = f.createVariable('bc', 'f8', ("time",))
           dst_o = f.createVariable('dst', 'f8', ("time",))
@@ -479,6 +473,9 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         for vv in range(len(variable3d_names)):
             var_o[vv][:] = np.array(variables_new[vv])
         p_o[:] = np.array(p)
+        clwc_o[:] = np.array(clwc)
+        iwc_o[:] = np.array(iwc)
+        rwc_o[:] = np.array(rwc)
         if config['aerosol_output'] == True:
           bc_o[:] = np.array(bc_all)
           dst_o[:] = np.array(dst_all)
@@ -502,6 +499,12 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
             var_o[vv].long_name = variables[vv].long_name
         p_o.units = 'Pa'
         p_o.long_name = 'Pressure'
+        clwc_o.units = 'g/m3'
+        clwc_o.long_name = 'Cloud Liquid Water Content'
+        iwc_o.units = 'g/m3'
+        iwc_o.long_name = 'Ice Water Content'
+        rwc_o.units = 'g/m3'
+        rwc_o.long_name = 'Rain Water Content'
         if config['aerosol_output'] == True:
           bc_o.units = composition_units
           bc_o.long_name = 'total black carbon aerosol concentration'
