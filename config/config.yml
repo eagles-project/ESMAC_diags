@@ -104,6 +104,7 @@ CLDMED: 'CLDMED'  # cldmed
 CLDLOW: 'CLDLOW'  # cldlow
 CLDTOT: 'CLDTOT'  # cldtot
 
+PRECIPSFCTOT: 'PRECT'                     # if convectiveparam = True
 PRECIPSFCCONV: 'PRECC'                    # if convectiveparam = True
 PRECIPSFCSTRAT: 'PRECL'                   # if convectiveparam = True
 PRECIPSFCLIQ: 'precip_liq_surf_mass_flux' # if convectiveparam = False
