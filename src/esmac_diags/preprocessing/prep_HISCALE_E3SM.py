@@ -1122,52 +1122,62 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     
     # cloud optical depth and effective radius
     if config['reff_output'] == True:
-      
-    
-    if config['tau3d_output'] == True:
+      req_vlist = [config['REL'], config['CFLIQ'], config['NC']]
+      req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+      matched_vlist = list(set(av_vars).intersection(req_vlist))
 
-
-    if config['cosp_output'] == True:
-      
-    
-    req_vlist = [config['REL'], config['CFLIQ'], config['NC'], config['TAU3D'], config['TAULIQMODIS'], config['SWDOWNTOA']]
-    req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-    matched_vlist = list(set(av_vars).intersection(req_vlist))
-    
-    if len(matched_vlist) == len(req_vlist):
-        print('\nAnalyzing for cloud optical depth and effective radius')
+      if len(matched_vlist) == len(req_vlist):
+        print('\nAnalyzing for effective radius')
         rel = e3smdata[config['REL']+E3SMdomain_range].load()
         freql = e3smdata[config['CFLIQ']+E3SMdomain_range].load()
         icwnc = e3smdata[config['NC']+E3SMdomain_range].load()
-        cod_a = e3smdata[config['TAU3D']+E3SMdomain_range].load()
-        cod_m = e3smdata[config['TAULIQMODIS']+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
-        solin = e3smdata[config['SWDOWNTOA']+E3SMdomain_range].load()
         rel = rel[:,:,x_idx]
         freql = freql[:,:,x_idx]
         icwnc = icwnc[:,:,x_idx]
-        cod_a = cod_a[:,:,x_idx]
-        solin = solin[:,x_idx]
-      
+
         # calculate mean effective radius. 
         reff = calc_Reff_from_REL(rel.data, dz, freql.data, icwnc.data)
         reff[reff==0] = np.nan
-      
-        # calculate mean optical depth
-        cod = np.sum(cod_a.data,axis=1)
-        # cod[solin==0] = np.nan
-        # cod from MODIS simulator
-        cod_m = cod_m[:,x_idx]
-      
+  
         reff_mean = xr.DataArray(data=reff,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
-            attrs=dict(long_name="mean cloud liquid effective radius",units="um"),)
-        cod_mean = xr.DataArray(data=cod,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
-            attrs=dict(long_name="column-total cloud optical depth",units="N/A"),)
-    else:
-        cod_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cod',attrs={'units':'dummy_unit','long_name':'Dummy'})
-        reff_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='reff',attrs={'units':'dummy_unit','long_name':'Dummy'})
-        cod_m = xr.DataArray(np.zeros(len(e3smtime))*np.nan)
+              coords=dict(time=(["time"], e3smtime)),
+              attrs=dict(long_name="mean cloud liquid effective radius",units="um"),)
+      else:
+          reff_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='reff',attrs={'units':'dummy_unit','long_name':'Dummy'})
+    
+    if config['tau3d_output'] == True:
+      req_vlist = [config['TAU3D'], config['SWDOWNTOA']]
+      req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+      matched_vlist = list(set(av_vars).intersection(req_vlist))
+      
+      if len(matched_vlist) == len(req_vlist):
+          print('\nAnalyzing for cloud optical depth')
+          cod_a = e3smdata[config['TAU3D']+E3SMdomain_range].load()
+          solin = e3smdata[config['SWDOWNTOA']+E3SMdomain_range].load()
+          cod_a = cod_a[:,:,x_idx]
+          solin = solin[:,x_idx]
+        
+          # calculate mean optical depth
+          cod = np.sum(cod_a.data,axis=1)
+          # cod[solin==0] = np.nan        
+          
+          cod_mean = xr.DataArray(data=cod,  dims=["time"],
+              coords=dict(time=(["time"], e3smtime)),
+              attrs=dict(long_name="column-total cloud optical depth",units="N/A"),)
+      else:
+          cod_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cod',attrs={'units':'dummy_unit','long_name':'Dummy'})
+
+    if config['cosp_output'] == True:   
+      req_vlist = [config['TAULIQMODIS']]
+      req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+      matched_vlist = list(set(av_vars).intersection(req_vlist))
+      
+      if len(matched_vlist) == len(req_vlist):
+          print('\nAnalyzing for MODIS simulator cloud optical depth')
+          cod_m = e3smdata[config['TAULIQMODIS']+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
+          cod_m = cod_m[:,x_idx]        
+      else:
+          cod_m = xr.DataArray(np.zeros(len(e3smtime))*np.nan)
     
     # mean cloud droplet number concentration
     if config['colnc_output'] == True:
