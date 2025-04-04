@@ -59,6 +59,9 @@ tau3d_output: True
 # flag for column-integrated cloud drop number concentration output
 colnc_output: True
 
+# flag for absorbing AOD output
+aodabs_output: True
+
 # model output variable names
 LON: 'lon'
 LAT: 'lat'
@@ -129,6 +132,7 @@ LHFLX: 'LHFLX' # surface_upward_latent_heat_flux
 SHFLX: 'SHFLX' # surf_sens_flux
 PBLH: 'PBLH'   # pbl_height
 AOD: 'AODALL'  # AerosolOpticalDepth550nm
+AODABS: 'AODABS' #Absorbing Aerosol Optical Depth (if aodabs_output = True)
 
 TAU3D: 'TOT_CLD_VISTAU'  # if tau3d_output = True
 NC2D: 'CDNUMC'           # if colnc_output = True
