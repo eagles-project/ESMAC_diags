@@ -162,8 +162,8 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         if len(lst)!=1:
             raise ValueError('Should only contain one file: '+lst)
         e3smdata = xr.open_dataset(lst[0])
-        e3smdata.transpose('time','lev','ncol',...) # ensure ordering of time, height, and location
-        e3smtime = e3smdata.indexes['time'].to_datetimeindex()
+        e3smdata.transpose(config['time_dim'],config['vert_dim'],configu['latlon_dim'],...) # ensure ordering of time, height, and location
+        e3smtime = e3smdata.indexes[config['time_dim']].to_datetimeindex()
         lonm = e3smdata[config['LON']+E3SMdomain_range].load()
         latm = e3smdata[config['LAT']+E3SMdomain_range].load()
         z3 = e3smdata[config['Z']+E3SMdomain_range].load()
@@ -193,20 +193,20 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         
         # variables for calculating aerosol size
         if config['aerosol_output'] == True:
-          req_vlist = ['num_a1', 'num_a2', 'num_a3', 'num_a4', 'dgnd_a01', 'dgnd_a02', \
-                       'dgnd_a03', 'dgnd_a04']
+          req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], config['dgnd_a01'], config['dgnd_a02'], \
+                       config['dgnd_a03'], config['dgnd_a04']]
           req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
           matched_vlist = list(set(av_vars).intersection(req_vlist))
           if len(matched_vlist) == len(req_vlist):
               print('\nAnalyzing for aerosol size')
-              num_a1 = e3smdata['num_a1'+E3SMdomain_range].load()
-              num_a2 = e3smdata['num_a2'+E3SMdomain_range].load()
-              num_a3 = e3smdata['num_a3'+E3SMdomain_range].load()
-              num_a4 = e3smdata['num_a4'+E3SMdomain_range].load()
-              dn1 = e3smdata['dgnd_a01'+E3SMdomain_range].load()
-              dn2 = e3smdata['dgnd_a02'+E3SMdomain_range].load()
-              dn3 = e3smdata['dgnd_a03'+E3SMdomain_range].load()
-              dn4 = e3smdata['dgnd_a04'+E3SMdomain_range].load()
+              num_a1 = e3smdata[config['num_a1']+E3SMdomain_range].load()
+              num_a2 = e3smdata[config['num_a2']+E3SMdomain_range].load()
+              num_a3 = e3smdata[config['num_a3']+E3SMdomain_range].load()
+              num_a4 = e3smdata[config['num_a4']+E3SMdomain_range].load()
+              dn1 = e3smdata[config['dgnd_a01']+E3SMdomain_range].load()
+              dn2 = e3smdata[config['dgnd_a02']+E3SMdomain_range].load()
+              dn3 = e3smdata[config['dgnd_a03']+E3SMdomain_range].load()
+              dn4 = e3smdata[config['dgnd_a04']+E3SMdomain_range].load()
           else:
               num_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
               num_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -218,35 +218,35 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
               dn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
             
           # aerosol composition
-          req_vlist = ['bc_a1', 'bc_a3', 'bc_a4', 'dst_a1', 'dst_a3', 'mom_a1', \
-                       'mom_a2', 'mom_a3', 'mom_a4', 'ncl_a1', 'ncl_a2', 'ncl_a3', \
-                       'pom_a1', 'pom_a3', 'pom_a4', 'so4_a1', 'so4_a2', 'so4_a3', \
-                       'soa_a1', 'soa_a2', 'soa_a3']
+          req_vlist = [config['bc_a1'], config['bc_a3'], config['bc_a4'], config['dst_a1'], config['dst_a3'], config['mom_a1'], \
+                       config['mom_a2'], config['mom_a3'], config['mom_a4'], config['ncl_a1'], config['ncl_a2'], config['ncl_a3'], \
+                       config['pom_a1'], config['pom_a3'], config['pom_a4'], config['so4_a1'], config['so4_a2'], config['so4_a3'], \
+                       config['soa_a1'], config['soa_a2'], config['soa_a3']]
           req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
           matched_vlist = list(set(av_vars).intersection(req_vlist))
         
           if len(matched_vlist) == len(req_vlist):
-              bc_a1 = e3smdata['bc_a1'+E3SMdomain_range].load()
-              bc_a3 = e3smdata['bc_a3'+E3SMdomain_range].load()
-              bc_a4 = e3smdata['bc_a4'+E3SMdomain_range].load()
-              dst_a1 = e3smdata['dst_a1'+E3SMdomain_range].load()
-              dst_a3 = e3smdata['dst_a3'+E3SMdomain_range].load()
-              mom_a1 = e3smdata['mom_a1'+E3SMdomain_range].load()
-              mom_a2 = e3smdata['mom_a2'+E3SMdomain_range].load()
-              mom_a3 = e3smdata['mom_a3'+E3SMdomain_range].load()
-              mom_a4 = e3smdata['mom_a4'+E3SMdomain_range].load()
-              ncl_a1 = e3smdata['ncl_a1'+E3SMdomain_range].load()
-              ncl_a2 = e3smdata['ncl_a2'+E3SMdomain_range].load()
-              ncl_a3 = e3smdata['ncl_a3'+E3SMdomain_range].load()
-              pom_a1 = e3smdata['pom_a1'+E3SMdomain_range].load()
-              pom_a3 = e3smdata['pom_a3'+E3SMdomain_range].load()
-              pom_a4 = e3smdata['pom_a4'+E3SMdomain_range].load()
-              so4_a1 = e3smdata['so4_a1'+E3SMdomain_range].load()
-              so4_a2 = e3smdata['so4_a2'+E3SMdomain_range].load()
-              so4_a3 = e3smdata['so4_a3'+E3SMdomain_range].load()
-              soa_a1 = e3smdata['soa_a1'+E3SMdomain_range].load()
-              soa_a2 = e3smdata['soa_a2'+E3SMdomain_range].load()
-              soa_a3 = e3smdata['soa_a3'+E3SMdomain_range].load()
+              bc_a1 = e3smdata[config['bc_a1']+E3SMdomain_range].load()
+              bc_a3 = e3smdata[config['bc_a3']+E3SMdomain_range].load()
+              bc_a4 = e3smdata[config['bc_a4']+E3SMdomain_range].load()
+              dst_a1 = e3smdata[config['dst_a1']+E3SMdomain_range].load()
+              dst_a3 = e3smdata[config['dst_a3']+E3SMdomain_range].load()
+              mom_a1 = e3smdata[config['mom_a1']+E3SMdomain_range].load()
+              mom_a2 = e3smdata[config['mom_a2']+E3SMdomain_range].load()
+              mom_a3 = e3smdata[config['mom_a3']+E3SMdomain_range].load()
+              mom_a4 = e3smdata[config['mom_a4']+E3SMdomain_range].load()
+              ncl_a1 = e3smdata[config['ncl_a1']+E3SMdomain_range].load()
+              ncl_a2 = e3smdata[config['ncl_a2']+E3SMdomain_range].load()
+              ncl_a3 = e3smdata[config['ncl_a3']+E3SMdomain_range].load()
+              pom_a1 = e3smdata[config['pom_a1']+E3SMdomain_range].load()
+              pom_a3 = e3smdata[config['pom_a3']+E3SMdomain_range].load()
+              pom_a4 = e3smdata[config['pom_a4']+E3SMdomain_range].load()
+              so4_a1 = e3smdata[config['so4_a1']+E3SMdomain_range].load()
+              so4_a2 = e3smdata[config['so4_a2']+E3SMdomain_range].load()
+              so4_a3 = e3smdata[config['so4_a3']+E3SMdomain_range].load()
+              soa_a1 = e3smdata[config['soa_a1']+E3SMdomain_range].load()
+              soa_a2 = e3smdata[config['soa_a2']+E3SMdomain_range].load()
+              soa_a3 = e3smdata[config['soa_a3']+E3SMdomain_range].load()
           else:
               bc_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
               bc_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -276,9 +276,9 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
           req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
           matched_vlist = list(set(av_vars).intersection(req_vlist))
           if len(matched_vlist) == len(req_vlist):
-              nd_cld = e3smdata['ICWNC'+E3SMdomain_range].load()
-              lmda = e3smdata['lambda_cloud'+E3SMdomain_range].load()
-              mu = e3smdata['mu_cloud'+E3SMdomain_range].load()
+              nd_cld = e3smdata[config['NC']+E3SMdomain_range].load()
+              lmda = e3smdata[config['LAMBDA_CLOUD']+E3SMdomain_range].load()
+              mu = e3smdata[config['MU_CLOUD']+E3SMdomain_range].load()
           else:
               nd_cld = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
               lmda = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -291,7 +291,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
                 var = e3smdata[varname + E3SMdomain_range].load()
             except:
                 var = xr.DataArray(np.zeros(z3.shape)*np.nan,name=varname,\
-                                   dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata['lev'],"ncol"+E3SMdomain_range:e3smdata['ncol'+E3SMdomain_range]},\
+                                   dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata[config['vert_dim']],"ncol"+E3SMdomain_range:e3smdata[config['latlon_dim']+E3SMdomain_range]},\
                                    attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             variables.append(var)
         e3smdata.close()
@@ -532,7 +532,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         if config['dsd_output'] == True:
           nd_o.units = nd_units
           nd_o.long_name = 'cloud droplet number size distribution'
-          nd_o.description = 'calculated from MG2 cloud spectrum output into 1um increment from 1um to 1000um'
+          nd_o.description = 'calculated from microphysics scheme output into 1um increment from 1um to 1000um'
         
         # global attributes
         f.title = 'preprocessed E3SM data along aircraft track at the nearest time, grid, and vertical level'
@@ -599,8 +599,8 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     lst.sort()
     # first data
     e3smdata = xr.open_dataset(lst[0])
-    e3smdata.transpose('time','lev','ncol',...) # ensure ordering of time, height, and location
-    e3smtime = e3smdata.indexes['time'].to_datetimeindex()
+    e3smdata.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim'],...) # ensure ordering of time, height, and location
+    e3smtime = e3smdata.indexes[config['time_dim']].to_datetimeindex()
     lonm = e3smdata[config['LON']+E3SMdomain_range].load()
     latm = e3smdata[config['LAT']+E3SMdomain_range].load()
     z3 = e3smdata[config['Z']+E3SMdomain_range].load()
@@ -929,14 +929,14 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     e3smdata = xr.open_dataset(lst[0])
     e3smdata.transpose('time','lev','ncol',...) # ensure ordering of time, height, and location
     e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-    lonm = e3smdata['LON'+E3SMdomain_range].load()
-    latm = e3smdata['LAT'+E3SMdomain_range].load()
+    lonm = e3smdata[config['LON']+E3SMdomain_range].load()
+    latm = e3smdata[config['LAT']+E3SMdomain_range].load()
     if config['pres_output'] == False:
-      P0 = e3smdata['P0'].load()
-      hyam = e3smdata['HYAM'].load()
-      hybm = e3smdata['HYBM'].load()
-      T = e3smdata['T'+E3SMdomain_range].load()
-      PS = e3smdata['PS'+E3SMdomain_range].load()
+      P0 = e3smdata[config['P0']].load()
+      hyam = e3smdata[config['HYAM']].load()
+      hybm = e3smdata[config['HYBM']].load()
+      T = e3smdata[config['T']+E3SMdomain_range].load()
+      PS = e3smdata[config['PS']+E3SMdomain_range].load()
       Pres = np.nan*T
       zlen = T.shape[1]
       for kk in range(zlen):
@@ -944,8 +944,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     else:
       Pres = e3smdata[config['PRES']]
     # getting column and levels
-    len_ncol = len(e3smdata['ncol'+E3SMdomain_range])
-    len_lev = len(e3smdata['lev'])
+    len_ncol = len(e3smdata[config['latlon_dim']+E3SMdomain_range])
+    len_lev = len(e3smdata[config['vert_dim']])
     # only extract the model column at the site
     if lon0<0:
         lon0=lon0+360   # make longitude consistent with E3SM from 0 to 360
@@ -966,27 +966,27 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     
       if len(matched_vlist) == len(req_vlist):
           print('\nAnalyzing for aerosol composition')
-          bc_a1 = e3smdata['bc_a1'+E3SMdomain_range].load()
-          bc_a3 = e3smdata['bc_a3'+E3SMdomain_range].load()
-          bc_a4 = e3smdata['bc_a4'+E3SMdomain_range].load()
-          dst_a1 = e3smdata['dst_a1'+E3SMdomain_range].load()
-          dst_a3 = e3smdata['dst_a3'+E3SMdomain_range].load()
-          mom_a1 = e3smdata['mom_a1'+E3SMdomain_range].load()
-          mom_a2 = e3smdata['mom_a2'+E3SMdomain_range].load()
-          mom_a3 = e3smdata['mom_a3'+E3SMdomain_range].load()
-          mom_a4 = e3smdata['mom_a4'+E3SMdomain_range].load()
-          ncl_a1 = e3smdata['ncl_a1'+E3SMdomain_range].load()
-          ncl_a2 = e3smdata['ncl_a2'+E3SMdomain_range].load()
-          ncl_a3 = e3smdata['ncl_a3'+E3SMdomain_range].load()
-          pom_a1 = e3smdata['pom_a1'+E3SMdomain_range].load()
-          pom_a3 = e3smdata['pom_a3'+E3SMdomain_range].load()
-          pom_a4 = e3smdata['pom_a4'+E3SMdomain_range].load()
-          so4_a1 = e3smdata['so4_a1'+E3SMdomain_range].load()
-          so4_a2 = e3smdata['so4_a2'+E3SMdomain_range].load()
-          so4_a3 = e3smdata['so4_a3'+E3SMdomain_range].load()
-          soa_a1 = e3smdata['soa_a1'+E3SMdomain_range].load()
-          soa_a2 = e3smdata['soa_a2'+E3SMdomain_range].load()
-          soa_a3 = e3smdata['soa_a3'+E3SMdomain_range].load()
+          bc_a1 = e3smdata[config['bc_a1']+E3SMdomain_range].load()
+          bc_a3 = e3smdata[config['bc_a3']+E3SMdomain_range].load()
+          bc_a4 = e3smdata[config['bc_a4']+E3SMdomain_range].load()
+          dst_a1 = e3smdata[config['dst_a1']+E3SMdomain_range].load()
+          dst_a3 = e3smdata[config['dst_a3']+E3SMdomain_range].load()
+          mom_a1 = e3smdata[config['mom_a1']+E3SMdomain_range].load()
+          mom_a2 = e3smdata[config['mom_a2']+E3SMdomain_range].load()
+          mom_a3 = e3smdata[config['mom_a3']+E3SMdomain_range].load()
+          mom_a4 = e3smdata[config['mom_a4']+E3SMdomain_range].load()
+          ncl_a1 = e3smdata[config['ncl_a1']+E3SMdomain_range].load()
+          ncl_a2 = e3smdata[config['ncl_a2']+E3SMdomain_range].load()
+          ncl_a3 = e3smdata[config['ncl_a3']+E3SMdomain_range].load()
+          pom_a1 = e3smdata[config['pom_a1']+E3SMdomain_range].load()
+          pom_a3 = e3smdata[config['pom_a3']+E3SMdomain_range].load()
+          pom_a4 = e3smdata[config['pom_a4']+E3SMdomain_range].load()
+          so4_a1 = e3smdata[config['so4_a1']+E3SMdomain_range].load()
+          so4_a2 = e3smdata[config['so4_a2']+E3SMdomain_range].load()
+          so4_a3 = e3smdata[config['so4_a3']+E3SMdomain_range].load()
+          soa_a1 = e3smdata[config['soa_a1']+E3SMdomain_range].load()
+          soa_a2 = e3smdata[config['soa_a2']+E3SMdomain_range].load()
+          soa_a3 = e3smdata[config['soa_a3']+E3SMdomain_range].load()
           bc_all  = bc_a1[:,-1,x_idx] +                       bc_a3[:,-1,x_idx] + bc_a4[:,-1,x_idx]
           dst_all = dst_a1[:,-1,x_idx] +                      dst_a3[:,-1,x_idx]
           mom_all = mom_a1[:,-1,x_idx] + mom_a2[:,-1,x_idx] + mom_a3[:,-1,x_idx] + mom_a4[:,-1,x_idx]
@@ -1033,14 +1033,14 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     
       if len(matched_vlist) == len(req_vlist):
           print('\nAnalyzing for aerosol size')
-          num_a1 = e3smdata['num_a1'+E3SMdomain_range].load()
-          num_a2 = e3smdata['num_a2'+E3SMdomain_range].load()
-          num_a3 = e3smdata['num_a3'+E3SMdomain_range].load()
-          num_a4 = e3smdata['num_a4'+E3SMdomain_range].load()
-          dn1 = e3smdata['dgnd_a01'+E3SMdomain_range].load()
-          dn2 = e3smdata['dgnd_a02'+E3SMdomain_range].load()
-          dn3 = e3smdata['dgnd_a03'+E3SMdomain_range].load()
-          dn4 = e3smdata['dgnd_a04'+E3SMdomain_range].load()
+          num_a1 = e3smdata[config['num_a1']+E3SMdomain_range].load()
+          num_a2 = e3smdata[config['num_a2']+E3SMdomain_range].load()
+          num_a3 = e3smdata[config['num_a3']+E3SMdomain_range].load()
+          num_a4 = e3smdata[config['num_a4']+E3SMdomain_range].load()
+          dn1 = e3smdata[config['dgnd_a01']+E3SMdomain_range].load()
+          dn2 = e3smdata[config['dgnd_a02']+E3SMdomain_range].load()
+          dn3 = e3smdata[config['dgnd_a03']+E3SMdomain_range].load()
+          dn4 = e3smdata[config['dgnd_a04']+E3SMdomain_range].load()
           numall = [num_a1[:, -1, x_idx].data, num_a2[:, -1, x_idx].data, num_a3[:, -1, x_idx].data, num_a4[:, -1, x_idx].data]
           dnall  = [dn1[:, -1, x_idx].data,    dn2[:, -1, x_idx].data,    dn3[:, -1, x_idx].data,    dn4[:, -1, x_idx].data]
           NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1, x_idx].data, Pres[:, -1, x_idx].data)
