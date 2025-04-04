@@ -182,7 +182,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
           for kk in range(zlen):
               Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
         else:
-          Pres = e3smdata[config['PRES']].load()
+          Pres = e3smdata[config['PRES']+E3SMdomain_range].load()
       
         # change time format into seconds of the day
         timem = np.float64((e3smtime - e3smtime[0]).seconds)
@@ -942,7 +942,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
       for kk in range(zlen):
         Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
     else:
-      Pres = e3smdata[config['PRES']]
+      Pres = e3smdata[config['PRES']+E3SMdomain_range]
     # getting column and levels
     len_ncol = len(e3smdata[config['latlon_dim']+E3SMdomain_range])
     len_lev = len(e3smdata[config['vert_dim']])
@@ -1199,10 +1199,10 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     else:
       #compute cloud layer mean CDNC from 3D NC
       nc3d = e3smdata[config['NC']+E3SMdomain_range].load()      
-      if e3smdata[config['NC']].attrs['units'] == '1/kg':
+      if nc3d.attrs['units'] == '1/kg':
         rho = np.array(Pres/T/287.06)
         cdnc_rel = nc3d*rho/cloud/1e6
-      if e3smdata[config['NC']].attrs['units'] == 'm-3':
+      if nc3d.attrs['units'] == 'm-3':
         cdnc_rel = nc3d/cloud/1e6
       cdnc_rel = cdnc_rel.where(cloud > 0, other = 0)
       cf_column = cloud.sum(dim='lev')
@@ -1556,10 +1556,10 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         else:
           #compute cloud layer mean CDNC from 3D NC
           nc3d = e3smdata[config['NC']+E3SMdomain_range].load()      
-          if e3smdata[config['NC']].attrs['units'] == '1/kg':
+          if nc3d.attrs['units'] == '1/kg':
             rho = np.array(Pres/T/287.06)
             cdnc_rel = nc3d*rho/cloud/1e6
-          if e3smdata[config['NC']].attrs['units'] == 'm-3':
+          if nc3d.attrs['units'] == 'm-3':
             cdnc_rel = nc3d/cloud/1e6
           cdnc_rel = cdnc_rel.where(cloud > 0, other = 0)
           cf_column = cloud.sum(dim='lev')
@@ -1622,7 +1622,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
                 var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
             except:
                 var = xr.DataArray(np.zeros((len(e3smtime_i),len_lev,len_ncol))*np.nan,name=varname,\
-                               dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime_i,"lev":e3smdata['lev'],"ncol"+E3SMdomain_range:e3smdata['ncol'+E3SMdomain_range]},\
+                               dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime_i,"lev":e3smdata[config['vert_dim']],"ncol"+E3SMdomain_range:e3smdata[config['latlon_dim']+E3SMdomain_range]},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             vv = variable_names.index(varname)
             variables[vv] = xr.concat([variables[vv], var[:,-1,x_idx]],dim='time')
