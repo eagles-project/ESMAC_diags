@@ -599,6 +599,7 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     lst.sort()
     # first data
     e3smdata = xr.open_dataset(lst[0])
+    e3smdata.transpose('time','lev','ncol',...) # ensure ordering of time, height, and location
     e3smtime = e3smdata.indexes['time'].to_datetimeindex()
     lonm = e3smdata[config['LON']+E3SMdomain_range].load()
     latm = e3smdata[config['LAT']+E3SMdomain_range].load()
@@ -925,14 +926,22 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     lst.sort()
     # first data
     e3smdata = xr.open_dataset(lst[0])
+    e3smdata.transpose('time','lev','ncol',...) # ensure ordering of time, height, and location
     e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-    lonm = e3smdata['lon'+E3SMdomain_range].load()
-    latm = e3smdata['lat'+E3SMdomain_range].load()
-    P0 = e3smdata['P0'].load()
-    hyam = e3smdata['hyam'].load()
-    hybm = e3smdata['hybm'].load()
-    T = e3smdata['T'+E3SMdomain_range].load()
-    PS = e3smdata['PS'+E3SMdomain_range].load()
+    lonm = e3smdata['LON'+E3SMdomain_range].load()
+    latm = e3smdata['LAT'+E3SMdomain_range].load()
+    if config['pres_output'] == False:
+      P0 = e3smdata['P0'].load()
+      hyam = e3smdata['HYAM'].load()
+      hybm = e3smdata['HYBM'].load()
+      T = e3smdata['T'+E3SMdomain_range].load()
+      PS = e3smdata['PS'+E3SMdomain_range].load()
+      Pres = np.nan*T
+      zlen = T.shape[1]
+      for kk in range(zlen):
+        Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
+    else:
+      Pres = e3smdata[config['PRES']]
     # getting column and levels
     len_ncol = len(e3smdata['ncol'+E3SMdomain_range])
     len_lev = len(e3smdata['lev'])
@@ -946,102 +955,99 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
     
     # aerosol composition
-    req_vlist = ['bc_a1', 'bc_a3', 'bc_a4', 'dst_a1', 'dst_a3', 'mom_a1', \
-                 'mom_a2', 'mom_a3', 'mom_a4', 'ncl_a1', 'ncl_a2', 'ncl_a3', \
-                 'pom_a1', 'pom_a3', 'pom_a4', 'so4_a1', 'so4_a2', 'so4_a3', \
-                 'soa_a1', 'soa_a2', 'soa_a3']
-    req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-    matched_vlist = list(set(av_vars).intersection(req_vlist))
+    if config['aerosol_output'] == True:
+      req_vlist = ['bc_a1', 'bc_a3', 'bc_a4', 'dst_a1', 'dst_a3', 'mom_a1', \
+                   'mom_a2', 'mom_a3', 'mom_a4', 'ncl_a1', 'ncl_a2', 'ncl_a3', \
+                   'pom_a1', 'pom_a3', 'pom_a4', 'so4_a1', 'so4_a2', 'so4_a3', \
+                   'soa_a1', 'soa_a2', 'soa_a3']
+      req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+      matched_vlist = list(set(av_vars).intersection(req_vlist))
     
-    if len(matched_vlist) == len(req_vlist):
-        print('\nAnalyzing for aerosol composition')
-        bc_a1 = e3smdata['bc_a1'+E3SMdomain_range].load()
-        bc_a3 = e3smdata['bc_a3'+E3SMdomain_range].load()
-        bc_a4 = e3smdata['bc_a4'+E3SMdomain_range].load()
-        dst_a1 = e3smdata['dst_a1'+E3SMdomain_range].load()
-        dst_a3 = e3smdata['dst_a3'+E3SMdomain_range].load()
-        mom_a1 = e3smdata['mom_a1'+E3SMdomain_range].load()
-        mom_a2 = e3smdata['mom_a2'+E3SMdomain_range].load()
-        mom_a3 = e3smdata['mom_a3'+E3SMdomain_range].load()
-        mom_a4 = e3smdata['mom_a4'+E3SMdomain_range].load()
-        ncl_a1 = e3smdata['ncl_a1'+E3SMdomain_range].load()
-        ncl_a2 = e3smdata['ncl_a2'+E3SMdomain_range].load()
-        ncl_a3 = e3smdata['ncl_a3'+E3SMdomain_range].load()
-        pom_a1 = e3smdata['pom_a1'+E3SMdomain_range].load()
-        pom_a3 = e3smdata['pom_a3'+E3SMdomain_range].load()
-        pom_a4 = e3smdata['pom_a4'+E3SMdomain_range].load()
-        so4_a1 = e3smdata['so4_a1'+E3SMdomain_range].load()
-        so4_a2 = e3smdata['so4_a2'+E3SMdomain_range].load()
-        so4_a3 = e3smdata['so4_a3'+E3SMdomain_range].load()
-        soa_a1 = e3smdata['soa_a1'+E3SMdomain_range].load()
-        soa_a2 = e3smdata['soa_a2'+E3SMdomain_range].load()
-        soa_a3 = e3smdata['soa_a3'+E3SMdomain_range].load()
-        bc_all  = bc_a1[:,-1,x_idx] +                       bc_a3[:,-1,x_idx] + bc_a4[:,-1,x_idx]
-        dst_all = dst_a1[:,-1,x_idx] +                      dst_a3[:,-1,x_idx]
-        mom_all = mom_a1[:,-1,x_idx] + mom_a2[:,-1,x_idx] + mom_a3[:,-1,x_idx] + mom_a4[:,-1,x_idx]
-        ncl_all = ncl_a1[:,-1,x_idx] + ncl_a2[:,-1,x_idx] + ncl_a3[:,-1,x_idx]
-        pom_all = pom_a1[:,-1,x_idx] +                    + pom_a3[:,-1,x_idx] + pom_a4[:,-1,x_idx]
-        so4_all = so4_a1[:,-1,x_idx] + so4_a2[:,-1,x_idx] + so4_a3[:,-1,x_idx]
-        soa_all = soa_a1[:,-1,x_idx] + soa_a2[:,-1,x_idx] + soa_a3[:,-1,x_idx]
-        bc_all.attrs['units'] = bc_a1.units
-        bc_all.attrs['long_name'] = 'black carbon concentration'
-        dst_all.attrs['units'] = dst_a1.units
-        dst_all.attrs['long_name'] = 'dust concentration'
-        mom_all.attrs['units'] = mom_a1.units
-        mom_all.attrs['long_name'] = 'marine organic matter concentration'
-        ncl_all.attrs['units'] = ncl_a1.units
-        ncl_all.attrs['long_name'] = 'sea salt concentration'
-        pom_all.attrs['units'] = pom_a1.units
-        pom_all.attrs['long_name'] = 'primary organic matter concentration'
-        so4_all.attrs['units'] = so4_a1.units
-        so4_all.attrs['long_name'] = 'sulfate concentration'
-        soa_all.attrs['units'] = soa_a1.units
-        soa_all.attrs['long_name'] = 'secondary organic aerosol concentration'
-        # change time to standard datetime64 format
-        bc_all.coords['time'] = bc_all.indexes['time'].to_datetimeindex()
-        dst_all.coords['time'] = dst_all.indexes['time'].to_datetimeindex()
-        mom_all.coords['time'] = mom_all.indexes['time'].to_datetimeindex()
-        ncl_all.coords['time'] = ncl_all.indexes['time'].to_datetimeindex()
-        pom_all.coords['time'] = pom_all.indexes['time'].to_datetimeindex()
-        so4_all.coords['time'] = so4_all.indexes['time'].to_datetimeindex()
-        soa_all.coords['time'] = soa_all.indexes['time'].to_datetimeindex()
-    else:
-        bc_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        dst_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        mom_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        ncl_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        pom_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        so4_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        soa_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+      if len(matched_vlist) == len(req_vlist):
+          print('\nAnalyzing for aerosol composition')
+          bc_a1 = e3smdata['bc_a1'+E3SMdomain_range].load()
+          bc_a3 = e3smdata['bc_a3'+E3SMdomain_range].load()
+          bc_a4 = e3smdata['bc_a4'+E3SMdomain_range].load()
+          dst_a1 = e3smdata['dst_a1'+E3SMdomain_range].load()
+          dst_a3 = e3smdata['dst_a3'+E3SMdomain_range].load()
+          mom_a1 = e3smdata['mom_a1'+E3SMdomain_range].load()
+          mom_a2 = e3smdata['mom_a2'+E3SMdomain_range].load()
+          mom_a3 = e3smdata['mom_a3'+E3SMdomain_range].load()
+          mom_a4 = e3smdata['mom_a4'+E3SMdomain_range].load()
+          ncl_a1 = e3smdata['ncl_a1'+E3SMdomain_range].load()
+          ncl_a2 = e3smdata['ncl_a2'+E3SMdomain_range].load()
+          ncl_a3 = e3smdata['ncl_a3'+E3SMdomain_range].load()
+          pom_a1 = e3smdata['pom_a1'+E3SMdomain_range].load()
+          pom_a3 = e3smdata['pom_a3'+E3SMdomain_range].load()
+          pom_a4 = e3smdata['pom_a4'+E3SMdomain_range].load()
+          so4_a1 = e3smdata['so4_a1'+E3SMdomain_range].load()
+          so4_a2 = e3smdata['so4_a2'+E3SMdomain_range].load()
+          so4_a3 = e3smdata['so4_a3'+E3SMdomain_range].load()
+          soa_a1 = e3smdata['soa_a1'+E3SMdomain_range].load()
+          soa_a2 = e3smdata['soa_a2'+E3SMdomain_range].load()
+          soa_a3 = e3smdata['soa_a3'+E3SMdomain_range].load()
+          bc_all  = bc_a1[:,-1,x_idx] +                       bc_a3[:,-1,x_idx] + bc_a4[:,-1,x_idx]
+          dst_all = dst_a1[:,-1,x_idx] +                      dst_a3[:,-1,x_idx]
+          mom_all = mom_a1[:,-1,x_idx] + mom_a2[:,-1,x_idx] + mom_a3[:,-1,x_idx] + mom_a4[:,-1,x_idx]
+          ncl_all = ncl_a1[:,-1,x_idx] + ncl_a2[:,-1,x_idx] + ncl_a3[:,-1,x_idx]
+          pom_all = pom_a1[:,-1,x_idx] +                    + pom_a3[:,-1,x_idx] + pom_a4[:,-1,x_idx]
+          so4_all = so4_a1[:,-1,x_idx] + so4_a2[:,-1,x_idx] + so4_a3[:,-1,x_idx]
+          soa_all = soa_a1[:,-1,x_idx] + soa_a2[:,-1,x_idx] + soa_a3[:,-1,x_idx]
+          bc_all.attrs['units'] = bc_a1.units
+          bc_all.attrs['long_name'] = 'black carbon concentration'
+          dst_all.attrs['units'] = dst_a1.units
+          dst_all.attrs['long_name'] = 'dust concentration'
+          mom_all.attrs['units'] = mom_a1.units
+          mom_all.attrs['long_name'] = 'marine organic matter concentration'
+          ncl_all.attrs['units'] = ncl_a1.units
+          ncl_all.attrs['long_name'] = 'sea salt concentration'
+          pom_all.attrs['units'] = pom_a1.units
+          pom_all.attrs['long_name'] = 'primary organic matter concentration'
+          so4_all.attrs['units'] = so4_a1.units
+          so4_all.attrs['long_name'] = 'sulfate concentration'
+          soa_all.attrs['units'] = soa_a1.units
+          soa_all.attrs['long_name'] = 'secondary organic aerosol concentration'
+          # change time to standard datetime64 format
+          bc_all.coords['time'] = bc_all.indexes['time'].to_datetimeindex()
+          dst_all.coords['time'] = dst_all.indexes['time'].to_datetimeindex()
+          mom_all.coords['time'] = mom_all.indexes['time'].to_datetimeindex()
+          ncl_all.coords['time'] = ncl_all.indexes['time'].to_datetimeindex()
+          pom_all.coords['time'] = pom_all.indexes['time'].to_datetimeindex()
+          so4_all.coords['time'] = so4_all.indexes['time'].to_datetimeindex()
+          soa_all.coords['time'] = soa_all.indexes['time'].to_datetimeindex()
+      else:
+          bc_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+          dst_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+          mom_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+          ncl_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+          pom_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+          so4_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+          soa_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
     
-    # aerosol size
-    req_vlist = ['num_a1', 'num_a2', 'num_a3', 'num_a4', 'dgnd_a01', 'dgnd_a02', \
-                 'dgnd_a03', 'dgnd_a04']
-    req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-    matched_vlist = list(set(av_vars).intersection(req_vlist))
+      # aerosol size
+      req_vlist = ['num_a1', 'num_a2', 'num_a3', 'num_a4', 'dgnd_a01', 'dgnd_a02', \
+                   'dgnd_a03', 'dgnd_a04']
+      req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+      matched_vlist = list(set(av_vars).intersection(req_vlist))
     
-    if len(matched_vlist) == len(req_vlist):
-        print('\nAnalyzing for aerosol size')
-        num_a1 = e3smdata['num_a1'+E3SMdomain_range].load()
-        num_a2 = e3smdata['num_a2'+E3SMdomain_range].load()
-        num_a3 = e3smdata['num_a3'+E3SMdomain_range].load()
-        num_a4 = e3smdata['num_a4'+E3SMdomain_range].load()
-        dn1 = e3smdata['dgnd_a01'+E3SMdomain_range].load()
-        dn2 = e3smdata['dgnd_a02'+E3SMdomain_range].load()
-        dn3 = e3smdata['dgnd_a03'+E3SMdomain_range].load()
-        dn4 = e3smdata['dgnd_a04'+E3SMdomain_range].load()
-        Pres = np.nan*T
-        zlen = T.shape[1]
-        for kk in range(zlen):
-            Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
-        numall = [num_a1[:, -1, x_idx].data, num_a2[:, -1, x_idx].data, num_a3[:, -1, x_idx].data, num_a4[:, -1, x_idx].data]
-        dnall  = [dn1[:, -1, x_idx].data,    dn2[:, -1, x_idx].data,    dn3[:, -1, x_idx].data,    dn4[:, -1, x_idx].data]
-        NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1, x_idx].data, Pres[:, -1, x_idx].data)
-        NCNall = xr.DataArray(data=NCN,  dims=["size", "time"],
-            coords=dict(time=(["time"], e3smtime),size=(["size"], np.arange(1,3001))),
-            attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
-    else:
-        NCNall = xr.DataArray(np.zeros((3000,len(e3smtime)))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+      if len(matched_vlist) == len(req_vlist):
+          print('\nAnalyzing for aerosol size')
+          num_a1 = e3smdata['num_a1'+E3SMdomain_range].load()
+          num_a2 = e3smdata['num_a2'+E3SMdomain_range].load()
+          num_a3 = e3smdata['num_a3'+E3SMdomain_range].load()
+          num_a4 = e3smdata['num_a4'+E3SMdomain_range].load()
+          dn1 = e3smdata['dgnd_a01'+E3SMdomain_range].load()
+          dn2 = e3smdata['dgnd_a02'+E3SMdomain_range].load()
+          dn3 = e3smdata['dgnd_a03'+E3SMdomain_range].load()
+          dn4 = e3smdata['dgnd_a04'+E3SMdomain_range].load()
+          numall = [num_a1[:, -1, x_idx].data, num_a2[:, -1, x_idx].data, num_a3[:, -1, x_idx].data, num_a4[:, -1, x_idx].data]
+          dnall  = [dn1[:, -1, x_idx].data,    dn2[:, -1, x_idx].data,    dn3[:, -1, x_idx].data,    dn4[:, -1, x_idx].data]
+          NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1, x_idx].data, Pres[:, -1, x_idx].data)
+          NCNall = xr.DataArray(data=NCN,  dims=["size", "time"],
+              coords=dict(time=(["time"], e3smtime),size=(["size"], np.arange(1,3001))),
+              attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
+      else:
+          NCNall = xr.DataArray(np.zeros((3000,len(e3smtime)))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
     
     # variables to calculate Reff and Nd
     req_vlist = ['Z3', 'CLOUD']
