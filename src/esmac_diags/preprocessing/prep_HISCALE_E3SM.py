@@ -1197,17 +1197,24 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
       else:
           cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
     else:
-      #compute cloud layer mean CDNC from 3D NC
-      nc3d = e3smdata[config['NC']+E3SMdomain_range].load()      
-      if nc3d.attrs['units'] == '1/kg':
-        rho = np.array(Pres/T/287.06)
-        cdnc_rel = nc3d*rho/cloud/1e6
-      if nc3d.attrs['units'] == 'm-3':
-        cdnc_rel = nc3d/cloud/1e6
-      cdnc_rel = cdnc_rel.where(cloud > 0, other = 0)
-      cf_column = cloud.sum(dim='lev')
-      cdnc_rel_avg = cdnc_rel.dot(cloud, dims='lev')
-      cdnc_mean = np.divide(cdnc_rel_avg, cf_column)
+      if len(matched_vlist) == len(req_vlist):
+          print('\nAnalyzing for mean cloud droplet number concentration')
+        #compute cloud layer mean CDNC from 3D NC
+        nc3d = e3smdata[config['NC']+E3SMdomain_range].load()      
+        if nc3d.attrs['units'] == '1/kg':
+          rho = np.array(Pres/T/287.06)
+          cdnc_rel = nc3d*rho/cloud/1e6
+        if nc3d.attrs['units'] == 'm-3':
+          cdnc_rel = nc3d/cloud/1e6
+        cdnc_rel = cdnc_rel.where(cloud > 0, other = 0)
+        cf_column = cloud.sum(dim='lev')
+        cdnc_rel_avg = cdnc_rel.dot(cloud, dims='lev')
+        cdnc_mean = np.divide(cdnc_rel_avg, cf_column)
+        cdnc_mean = xr.DataArray(data=cdnc_mean,  dims=["time"],
+                coords=dict(time=(["time"], e3smtime)),
+                attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
+        else:
+            cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
     
     # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
     if config['reff_output'] == True:
