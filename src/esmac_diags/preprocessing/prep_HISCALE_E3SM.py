@@ -1199,13 +1199,13 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     else:
       if len(matched_vlist) == len(req_vlist):
           print('\nAnalyzing for mean cloud droplet number concentration')
-        #compute cloud layer mean CDNC from 3D NC
+        #compute cloud layer mean CDNC from 3D NC (note that if NC is not in-cloud only, one needs to divide by cloud fraction)
         nc3d = e3smdata[config['NC']+E3SMdomain_range].load()      
         if nc3d.attrs['units'] == '1/kg':
           rho = np.array(Pres/T/287.06)
-          cdnc_rel = nc3d*rho/cloud/1e6
+          cdnc_rel = nc3d*rho
         if nc3d.attrs['units'] == 'm-3':
-          cdnc_rel = nc3d/cloud/1e6
+          cdnc_rel = nc3d
         cdnc_rel = cdnc_rel.where(cloud > 0, other = 0)
         cf_column = cloud.sum(dim='lev')
         cdnc_rel_avg = cdnc_rel.dot(cloud, dims='lev')
