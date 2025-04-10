@@ -1203,13 +1203,13 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         nc3d = e3smdata[config['NC']+E3SMdomain_range].load()      
         if nc3d.attrs['units'] == '1/kg':
           rho = np.array(Pres/T/287.06)
-          cdnc_rel = nc3d*rho
+          cdnc_rel = nc3d*rho/cloud
         if nc3d.attrs['units'] == 'm-3':
-          cdnc_rel = nc3d
+          cdnc_rel = nc3d/cloud
         cdnc_rel = cdnc_rel.where(cloud > 0, other = 0)
-        cf_column = cloud.sum(dim='lev')
-        cdnc_rel_avg = cdnc_rel.dot(cloud, dims='lev')
-        cdnc_mean = np.divide(cdnc_rel_avg, cf_column)
+        weight_column = weight.sum(dim='lev')
+        cdnc_rel_avg = cdnc_rel.dot(weight, dims=config['vert_dim'])
+        cdnc_mean = np.divide(cdnc_rel_avg, weight_column)
         cdnc_mean = xr.DataArray(data=cdnc_mean,  dims=["time"],
                 coords=dict(time=(["time"], e3smtime)),
                 attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
