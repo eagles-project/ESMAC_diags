@@ -53,6 +53,9 @@ reff_output: True
 # flag for whether model uses deep convective parameterization
 convectiveparam: True
 
+# flag for whether rain mass and number concentrations are outputted
+rain_output: False
+
 # flag for 3D visible optical depth output
 tau3d_output: True
 
@@ -82,11 +85,11 @@ CFLIQ: 'FREQL'  # cldfrac_liq
 # LWC: 'LWC'      # if masscontent_output = True
 # IWC: 'IWC'      # if masscontent_output = True
 QC: 'CLDLIQ'    # qc
-#QR: 'qr'
 QI: 'CLDICE'    # qi
 NC: 'NUMLIQ'    # nc, NUMLIQ, ICWNC (in cloud)
 NI: 'NUMICE'    # ni, NUMICE, ICINC (in cloud)
-#NR: 'nr'
+QR: 'qr'        # if rain_output = True
+NR: 'nr'        # if rain_output = True
 
 LAMBDA_CLOUD: 'lambda_cloud' # if dsd_output = True
 MU_CLOUD: 'mu_cloud'         # if dsd_output = True
