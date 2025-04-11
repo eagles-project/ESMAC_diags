@@ -277,10 +277,30 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
               soa_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
               soa_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
               soa_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        
+
+        # condensate mass and number
+        req_vlist = [config['QC'], config['QI']]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+        matched_vlist = list(set(av_vars).intersection(req_vlist))
+        if len(matched_vlist) == len(req_vlist):
+            qc = e3smdata[config['QC']+E3SMdomain_range].load()
+            qi = e3smdata[config['QI']+E3SMdomain_range].load()
+        else:
+            qc = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+            qi = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+
+        if config['rain_output'] == True:
+            req_vlist = [config['QR']]
+            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+            matched_vlist = list(set(av_vars).intersection(req_vlist))
+            if len(matched_vlist) == len(req_vlist):
+                qr = e3smdata[config['QC']+E3SMdomain_range].load()
+            else:
+                qr = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+          
         # droplet size distribution
         if config['dsd_output'] == True:
-          req_vlist = [config['NC'], config['LAMBDA_CLOUD'], config['MU_CLOUD']]
+          req_vlist = [config['LAMBDA_CLOUD'], config['MU_CLOUD']]
           req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
           matched_vlist = list(set(av_vars).intersection(req_vlist))
           if len(matched_vlist) == len(req_vlist):
@@ -291,7 +311,6 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
               nd_cld = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
               lmda = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
               mu = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        
         
         # other variables
         for varname in variable3d_names:
@@ -426,46 +445,23 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         # variables[idx].attrs['units']='g/m3'
         T = variables_new[variable3d_names.index('T')]
         rho = np.array(p)/T/287.06
-        idx = variable3d_names.index(config['QC'])
-        if variables_new[idx].attrs['units'] == 'kg/kg':
-            variables_new[idx] = np.array(variables_new[idx]) * rho * 1000
-        if variables_new[idx].attrs['units'] == 'kg/m3':
-            variables_new[idx] = np.array(variables_new[idx]) * 1000
-        variables[idx].attrs['units']='g/m3'
-        idx = variable3d_names.index(config['QI'])
-        if variables_new[idx].attrs['units'] == 'kg/kg':
-            variables_new[idx] = np.array(variables_new[idx]) * rho * 1000
-        if variables_new[idx].attrs['units'] == 'kg/m3':
-            variables_new[idx] = np.array(variables_new[idx]) * 1000          
-        variables[idx].attrs['units']='g/m3'
-      
-        # droplet number
-        idx = variable3d_names.index(config['NC'])
-        if variables_new[idx].attrs['units'] == '1/kg':
-            variables_new[idx] = np.array(variables_new[idx]) * rho * 1e-6
-        if variables_new[idx].attrs['units'] == 'm-3':
-            variables_new[idx] = np.array(variables_new[idx]) * 1e-6
-        variables[idx].attrs['units']='#/cm3'
-        idx = variable3d_names.index(config['NI'])
-        if variables_new[idx].attrs['units'] == '1/kg':
-            variables_new[idx] = np.array(variables_new[idx]) * rho * 1e-6
-        if variables_new[idx].attrs['units'] == 'm-3':
-            variables_new[idx] = np.array(variables_new[idx]) * 1e-6
-        variables[idx].attrs['units']='#/cm3'
+        if qc.attrs['units'] == 'kg/kg':
+            cwc = np.array(qc) * rho * 1000
+        if qc.attrs['units'] == 'kg/m3':
+            cwc = np.array(qc) * 1000
+        cwc.attrs['units']='g/m3'
+        if qi.attrs['units'] == 'kg/kg':
+            iwc = np.array(qi) * rho * 1000
+        if qi.attrs['units'] == 'kg/m3':
+            iwc = np.array(qi) * 1000          
+        iwc.attrs['units']='g/m3'
 
         if config['rain_output'] == True:
-            idx = variable3d_names.index(config['QR'])
-            if variables_new[idx].attrs['units'] == 'kg/kg':
-                variables_new[idx] = np.array(variables_new[idx]) * rho * 1000
-            if variables_new[idx].attrs['units'] == 'kg/m3':
-                variables_new[idx] = np.array(variables_new[idx]) * 1000
-            variables[idx].attrs['units']='g/m3'
-            idx = variable3d_names.index(config['NR'])
-            if variables_new[idx].attrs['units'] == '1/kg':
-                variables_new[idx] = np.array(variables_new[idx]) * rho * 1e-6
-            if variables_new[idx].attrs['units'] == 'm-3':
-                variables_new[idx] = np.array(variables_new[idx]) * 1e-6
-            variables[idx].attrs['units']='#/cm3'
+            if qr.attrs['units'] == 'kg/kg':
+                rwc = np.array(qr) * rho * 1000
+            if qr.attrs['units'] == 'kg/m3':
+                rwc = np.array(qr) * 1000
+            rwc.attrs['units']='g/m3'
     
         #%% output       
         outfile = output_path + output_filehead + '_flight_'+date+'.nc'
@@ -488,6 +484,10 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         for vv in range(len(variable3d_names)):
             var_o.append (f.createVariable(variable3d_names[vv], 'f8', ("time", )))
         p_o = f.createVariable('pres', 'f8', ("time",))
+        cwc_o = f.createVariable('pres', 'f8', ("time",))
+        iwc_o = f.createVariable('pres', 'f8', ("time",))
+        if config['rain_output'] == True:
+          rwc_o = f.createVariable('pres', 'f8', ("time",))
         if config['aerosol_output'] == True:
           bc_o = f.createVariable('bc', 'f8', ("time",))
           dst_o = f.createVariable('dst', 'f8', ("time",))
@@ -509,6 +509,10 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         for vv in range(len(variable3d_names)):
             var_o[vv][:] = np.array(variables_new[vv])
         p_o[:] = np.array(p)
+        cwc_o[:] = cwc
+        iwc_o[:] = iwc
+        if config['rain_output'] == True:
+          rwc_o[:] = rwc
         if config['aerosol_output'] == True:
           bc_o[:] = np.array(bc_all)
           dst_o[:] = np.array(dst_all)
@@ -532,6 +536,13 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
             var_o[vv].long_name = variables[vv].long_name
         p_o.units = 'Pa'
         p_o.long_name = 'Pressure'
+        cwc_o.units = 'g/m3'
+        cwc_o.long_name = 'Cloud Water Cotent'
+        iwc_o.units = 'g/m3'
+        iwc_o.long_name = 'Ice Water Cotent'
+        if config['rain_output'] == True:
+          rwc_o.units = 'g/m3'
+          rwc_o.long_name = 'Rain Water Cotent'
         if config['aerosol_output'] == True:
           bc_o.units = composition_units
           bc_o.long_name = 'total black carbon aerosol concentration'
