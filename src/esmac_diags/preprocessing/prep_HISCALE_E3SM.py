@@ -167,7 +167,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         if len(lst)!=1:
             raise ValueError('Should only contain one file: '+lst)
         e3smdata = xr.open_dataset(lst[0])
-        e3smdata.transpose(config['time_dim'],config['vert_dim'],configu['latlon_dim'],...) # ensure ordering of time, height, and location
+        e3smdata.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim'],...) # ensure ordering of time, height, and location
         e3smtime = e3smdata.indexes[config['time_dim']].to_datetimeindex()
         lonm = e3smdata[config['LON']+E3SMdomain_range].load()
         latm = e3smdata[config['LAT']+E3SMdomain_range].load()
