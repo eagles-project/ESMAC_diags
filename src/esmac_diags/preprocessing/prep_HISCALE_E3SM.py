@@ -154,9 +154,13 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         variables_new = list()
         for varname in variable3d_names:
             variables_new.append([])
+        p = list()      # pressure
+        cwc = list()
+        iwc = list()
+        if config['rain_output'] == True:
+          rwc = list()
         if config['aerosol_output'] == True:
           NCNall = np.empty((3000,0))
-          p = list()      # pressure
           bc_all  = list()
           dst_all = list()
           mom_all = list()
@@ -334,6 +338,26 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
                 # variables_new[vv].append(float(variables[vv].isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx})))
             p.append(Pres[t_idx, z_idx, x_idx].data)
             # p.append(Pres.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
+
+            #Cloud LWC and IWC
+            T = variables_new[variable3d_names.index('T')]
+            rho = np.array(p[t_idx, z_idx, x_idx].data)/T[t_idx, z_idx, x_idx].data/287.06
+            if qc.attrs['units'] == 'kg/kg':
+                cwc.append(qc[t_idx, z_idx, x_idx].data * rho * 1000
+            if qc.attrs['units'] == 'kg/m3':
+                cwc.append(qc[t_idx, z_idx, x_idx].data * 1000
+            if qi.attrs['units'] == 'kg/kg':
+                iwc.append(qi[t_idx, z_idx, x_idx].data * rho * 1000
+            if qi.attrs['units'] == 'kg/m3':
+                iwc.append(qi[t_idx, z_idx, x_idx].data * 1000       
+
+            #Rain Water Content
+            if config['rain_output'] == True:
+              if qr.attrs['units'] == 'kg/kg':
+                  rwc.append(qr[t_idx, z_idx, x_idx].data * rho * 1000
+              if qr.attrs['units'] == 'kg/m3':
+                  rwc.append(qr[t_idx, z_idx, x_idx].data * 1000
+          
             if config['aerosol_output'] == True:
               # calculate aerosol size
               numall = [num_a1[t_idx, z_idx, x_idx].data, num_a2[t_idx, z_idx, x_idx].data, 
@@ -443,25 +467,6 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         # idx = variable3d_names.index('IWC')
         # variables_new[idx] = np.array(variables_new[idx])*1000
         # variables[idx].attrs['units']='g/m3'
-        T = variables_new[variable3d_names.index('T')]
-        rho = np.array(p)/T/287.06
-        if qc.attrs['units'] == 'kg/kg':
-            cwc = np.array(qc) * rho * 1000
-        if qc.attrs['units'] == 'kg/m3':
-            cwc = np.array(qc) * 1000
-        cwc.attrs['units']='g/m3'
-        if qi.attrs['units'] == 'kg/kg':
-            iwc = np.array(qi) * rho * 1000
-        if qi.attrs['units'] == 'kg/m3':
-            iwc = np.array(qi) * 1000          
-        iwc.attrs['units']='g/m3'
-
-        if config['rain_output'] == True:
-            if qr.attrs['units'] == 'kg/kg':
-                rwc = np.array(qr) * rho * 1000
-            if qr.attrs['units'] == 'kg/m3':
-                rwc = np.array(qr) * 1000
-            rwc.attrs['units']='g/m3'
     
         #%% output       
         outfile = output_path + output_filehead + '_flight_'+date+'.nc'
