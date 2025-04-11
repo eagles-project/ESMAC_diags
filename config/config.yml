@@ -30,7 +30,7 @@ latlon_dim: 'ncol_260e_to_265e_34n_to_39n'      # if 1D lat-lon
 vert_dim: 'lev'
 vert_dim_bnd: 'ilev'
 
-latlon_dimensions = 2
+latlon_dimensions: 1
 
 # flag for model aerosol variables output
 aerosol_output: True
