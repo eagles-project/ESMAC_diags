@@ -1213,8 +1213,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         cdnc_mean = xr.DataArray(data=cdnc_mean,  dims=["time"],
                 coords=dict(time=(["time"], e3smtime)),
                 attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
-        else:
-            cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+      else:
+        cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
     
     # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
     if config['reff_output'] == True:
