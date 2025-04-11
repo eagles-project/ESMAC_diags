@@ -488,10 +488,10 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         for vv in range(len(variable3d_names)):
             var_o.append (f.createVariable(variable3d_names[vv], 'f8', ("time", )))
         p_o = f.createVariable('pres', 'f8', ("time",))
-        cwc_o = f.createVariable('pres', 'f8', ("time",))
-        iwc_o = f.createVariable('pres', 'f8', ("time",))
+        cwc_o = f.createVariable('cwc', 'f8', ("time",))
+        iwc_o = f.createVariable('iwc', 'f8', ("time",))
         if config['rain_output'] == True:
-          rwc_o = f.createVariable('pres', 'f8', ("time",))
+          rwc_o = f.createVariable('rwc', 'f8', ("time",))
         if config['aerosol_output'] == True:
           bc_o = f.createVariable('bc', 'f8', ("time",))
           dst_o = f.createVariable('dst', 'f8', ("time",))
