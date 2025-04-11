@@ -1673,45 +1673,57 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         e3smdata.close()
       
     # put all variables into the list
-    # aerosol composition    
-    variable_names = variable_names + ['bc','dst','mom','ncl','pom','so4','soa']
-    variables = variables + [bc_all,dst_all,mom_all,ncl_all,pom_all,so4_all,soa_all]
-    # aerosol size and number
-    NCN3 = xr.DataArray(data=np.nansum(NCNall[3:, :], 0),  dims=["time"],
-        coords=dict(time=(["time"], e3smtime)),
-        attrs=dict(long_name="Aerosol number concentration for size >3nm",units="#/m3"),)    # >3nm
-    NCN10 = xr.DataArray(data=np.nansum(NCNall[10:, :], 0),  dims=["time"],
-        coords=dict(time=(["time"], e3smtime)),
-        attrs=dict(long_name="Aerosol number concentration for size >10nm",units="#/m3"),)     # >10nm
-    NCN100 = xr.DataArray(data=np.nansum(NCNall[100:, :], 0),  dims=["time"],
-        coords=dict(time=(["time"], e3smtime)),
-        attrs=dict(long_name="Aerosol number concentration for size >100nm",units="#/m3"),)     # >100nm
-    variable_names = variable_names + [ 'NCN3', 'NCN10', 'NCN100']
-    variables = variables + [NCN3, NCN10, NCN100]  # size distribution data will be added later
+    if config['aerosol_output'] == True:
+      # aerosol composition    
+      variable_names = variable_names + ['bc','dst','mom','ncl','pom','so4','soa']
+      variables = variables + [bc_all,dst_all,mom_all,ncl_all,pom_all,so4_all,soa_all]
+      # aerosol size and number
+      NCN3 = xr.DataArray(data=np.nansum(NCNall[3:, :], 0),  dims=["time"],
+          coords=dict(time=(["time"], e3smtime)),
+          attrs=dict(long_name="Aerosol number concentration for size >3nm",units="#/m3"),)    # >3nm
+      NCN10 = xr.DataArray(data=np.nansum(NCNall[10:, :], 0),  dims=["time"],
+          coords=dict(time=(["time"], e3smtime)),
+          attrs=dict(long_name="Aerosol number concentration for size >10nm",units="#/m3"),)     # >10nm
+      NCN100 = xr.DataArray(data=np.nansum(NCNall[100:, :], 0),  dims=["time"],
+          coords=dict(time=(["time"], e3smtime)),
+          attrs=dict(long_name="Aerosol number concentration for size >100nm",units="#/m3"),)     # >100nm
+      variable_names = variable_names + [ 'NCN3', 'NCN10', 'NCN100']
+      variables = variables + [NCN3, NCN10, NCN100]  # size distribution data will be added later
     # mean cloud droplet number concentration
-    variable_names = variable_names + ['Nd_mean', 'Nd_ARM', 'Nd_VISST']
-    variables = variables + [cdnc_mean, cdnc_arm, cdnc_sat]
+    variable_names = variable_names + ['Nd_mean']
+    variables = variables + [cdnc_mean]
+    if config['reff_output'] == True:
+      variable_names = variable_names + ['Nd_VISST']
+      variables = variables + [cdnc_sat]
+    if config['cosp_output'] == True:
+      variable_names = variable_names + ['Nd_VISST']
+      variables = variables + [cdnc_sat]
     # mean cloud optical depth and effective radius
-    variable_names = variable_names + ['reff','cod']
-    variables = variables + [reff_mean, cod_mean]
+    if config['reff_output'] == True:
+      variable_names = variable_names + ['reff']
+      variables = variables + [reff_mean]
+    if config['tau3d_output'] == True:
+      variable_names = variable_names + ['cod']
+      variables = variables + [cod_mean]
     # cloud depth
     variable_names = variable_names + ['cbt','ctt','cbh','cth','clddepth']
     variables = variables + [cbt, ctt, cbh, cth, cloud_depth]
     
     #%% change some units
-    # composition
-    T = variables[variable_names.index('T')]
-    ps = variables[variable_names.index('PS')]
-    rho = np.array(ps/T/287.06)
-    for vv in ['bc','dst','mom','ncl','pom','so4','soa']:
-        variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *1e9*rho
-        variables[variable_names.index(vv)].attrs['units']='ug/m3'
-    # aerosol number
-    NCNall.data = NCNall.data * 1e-6
-    NCNall.attrs['units']='#/cm3'
-    for vv in ['NCN3', 'NCN10', 'NCN100', 'Nd_mean', 'Nd_ARM', 'Nd_VISST']:
-        variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data * 1e-6
-        variables[variable_names.index(vv)].attrs['units']='#/cm3'
+    if config['aerosol_output'] == True:
+      # composition
+      T = variables[variable_names.index('T')]
+      ps = variables[variable_names.index('PS')]
+      rho = np.array(ps/T/287.06)
+      for vv in ['bc','dst','mom','ncl','pom','so4','soa']:
+          variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *1e9*rho
+          variables[variable_names.index(vv)].attrs['units']='ug/m3'
+      # aerosol number
+      NCNall.data = NCNall.data * 1e-6
+      NCNall.attrs['units']='#/cm3'
+      for vv in ['NCN3', 'NCN10', 'NCN100', 'Nd_mean', 'Nd_ARM', 'Nd_VISST']:
+          variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data * 1e-6
+          variables[variable_names.index(vv)].attrs['units']='#/cm3'
     # LWC and IWC
     varbls = [config['IWP'],config['LWP']]
     varbls = ["{}{}".format(i,E3SMdomain_range) for i in varbls]
@@ -1735,18 +1747,20 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     for var in variables:
         var_new = np.interp(np.int64(time_new), np.int64(e3smtime), var, left=np.nan, right=np.nan)
         variables_new.append(var_new)
-    # treat variables with other dimensions (e.g., size distribution)    
-    f = interp1d(np.int64(e3smtime), NCNall, bounds_error=False)
-    NCNall_new = f(np.int64(time_new))
+    # treat variables with other dimensions (e.g., size distribution)
+    if config['aerosol_output'] == True:
+        f = interp1d(np.int64(e3smtime), NCNall, bounds_error=False)
+        NCNall_new = f(np.int64(time_new))
     
     # %% output extacted file
     varall_1d = {
             variable_names[vv]: ('time', np.float32(variables_new[vv])) for vv in range(len(variable_names))
     }
-    varall_2d = {
-            'NCNall': (['size','time',], np.float32(NCNall_new))
-    }
-    varall_1d.update(varall_2d)
+    if config['aerosol_output'] == True:
+        varall_2d = {
+                'NCNall': (['size','time',], np.float32(NCNall_new))
+        }
+        varall_1d.update(varall_2d)
     outfile = output_path + output_filehead + '_sfc.nc'
     print('output file '+outfile)
     ds = xr.Dataset( varall_1d,
@@ -1758,9 +1772,10 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         ds[variable_names[vv]].attrs["long_name"] = variables[vv].long_name
         ds[variable_names[vv]].attrs["units"] = variables[vv].units
         ds[variable_names[vv]].attrs["description"] = "variables at surface, TOA or the lowest model level"
-    ds['NCNall'].attrs["long_name"] = NCNall.long_name
-    ds['NCNall'].attrs["units"] = NCNall.units
-    ds['NCNall'].attrs["description"] = 'calculated from modal information into 1nm increment'
+    if config['aerosol_output'] == True:
+        ds['NCNall'].attrs["long_name"] = NCNall.long_name
+        ds['NCNall'].attrs["units"] = NCNall.units
+        ds['NCNall'].attrs["description"] = 'calculated from modal information into 1nm increment'
     
     ds.attrs["title"] = 'preprocessed E3SM data at surface, TOA or the lowest model level'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
