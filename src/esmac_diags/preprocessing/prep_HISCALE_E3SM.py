@@ -340,8 +340,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
             # p.append(Pres.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
 
             #Cloud LWC and IWC
-            T = variables_new[variable3d_names.index('T')]
-            rho = np.array(p[t_idx, z_idx, x_idx].data)/T[t_idx, z_idx, x_idx].data/287.06
+            rho = np.array(Pres[t_idx, z_idx, x_idx].data)/T[t_idx, z_idx, x_idx].data/287.06
             if qc.attrs['units'] == 'kg/kg':
                 cwc.append(qc[t_idx, z_idx, x_idx].data * rho * 1000)
             if qc.attrs['units'] == 'kg/m3':
