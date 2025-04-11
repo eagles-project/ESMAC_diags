@@ -1,6 +1,6 @@
 # data paths and filenames
-model_input_path: '../raw_data/rrm/ena_rrm/'  # '../raw_data/rrm/ena_rrm/', '../raw_data/rrm/emis_rrm/', '../raw_data/rrm/nep_rrm/', '../raw_data/rrm/so_rrm/', or '../raw_data/model/'
-model_input_filehead: 'ena_ne32x32pg2'  # 'ena_ne32x32pg2', 'cus_emis_ne32x32pg2', 'nep_ne32x32pg2', 'so_ne32x32pg2', or 'E3SMv2_SGP_ENA_2011_2020'
+model_input_path: '../raw_data/rrm/ena_model/'  # '../raw_data/rrm/ena_rrm/', '../raw_data/rrm/emis_rrm/', '../raw_data/rrm/nep_rrm/', '../raw_data/rrm/so_rrm/', or '../raw_data/model/'
+model_input_filehead: 'E3SMv2_SGP_ENA_2011_2020'  # 'ena_ne32x32pg2', 'cus_emis_ne32x32pg2', 'nep_ne32x32pg2', 'so_ne32x32pg2', or 'E3SMv2_SGP_ENA_2011_2020'
 
 obs_input_path: '../raw_data/obs/'
 
@@ -26,7 +26,7 @@ E3SMdomain_range: '_260e_to_265e_34n_to_39n' # '_330e_to_335e_37n_to_42n' for EN
 time_dim: 'time'
 lon_dim: 'lon'   # if 12D lat-lon
 lat_dim: 'lat'   # if 2D lat-lon
-latlon_dim: 'ncol'      # if 1D lat-lon
+latlon_dim: 'ncol_260e_to_265e_34n_to_39n'      # if 1D lat-lon
 vert_dim: 'lev'
 vert_dim_bnd: 'ilev'
 
@@ -84,8 +84,8 @@ CFLIQ: 'FREQL'  # cldfrac_liq
 QC: 'CLDLIQ'    # qc
 #QR: 'qr'
 QI: 'CLDICE'    # qi
-NC: 'ICWNC'     # nc
-NI: 'ICINC'     # ni
+NC: 'NUMLIQ'    # nc, NUMLIQ, ICWNC (in cloud)
+NI: 'NUMICE'    # ni, NUMICE, ICINC (in cloud)
 #NR: 'nr'
 
 LAMBDA_CLOUD: 'lambda_cloud' # if dsd_output = True
