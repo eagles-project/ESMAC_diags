@@ -626,7 +626,7 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
         lon0=lon0+360   # make longitude consistent with E3SM from 0 to 360
     x_idx = find_nearest(lonm,latm,lon0,lat0)
 
-    if condig['pres_output'] == False:
+    if config['pres_output'] == False:
       levm = 0.01* (ps[:,x_idx]*hybm + hyam*p0)  # hPa
     else:
       levm = e3smdata[config['PRES']+E3SMdomain_range].load()
