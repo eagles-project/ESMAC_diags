@@ -1099,10 +1099,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     
     if len(matched_vlist) == len(req_vlist):
         print('\nAnalyzing for variables to calculate Reff and Nd')
-        z3 = e3smdata[config['Z']+E3SMdomain_range].load()
-        cloud = e3smdata[config['CF']+E3SMdomain_range].load()
-        z3 = z3[:,:,x_idx]
-        cloud = cloud[:,:,x_idx]
+        z3 = e3smdata[config['Z']+E3SMdomain_range][:,:,x_idx].load()
+        cloud = e3smdata[config['CF']+E3SMdomain_range][:,:,x_idx].load()
         dz = (z3[:,:-2].data - z3[:,2:].data)/2
         dz = np.append(dz, (z3[:,-2:-1].data+z3[:,-1:].data)/2, axis=1)
         dz = np.insert(dz,0,dz[:,0],axis=1)
@@ -1170,12 +1168,9 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
 
       if len(matched_vlist) == len(req_vlist):
         print('\nAnalyzing for effective radius')
-        rel = e3smdata[config['REL']+E3SMdomain_range].load()
-        freql = e3smdata[config['CFLIQ']+E3SMdomain_range].load()
-        icwnc = e3smdata[config['NC']+E3SMdomain_range].load()
-        rel = rel[:,:,x_idx]
-        freql = freql[:,:,x_idx]
-        icwnc = icwnc[:,:,x_idx]
+        rel = e3smdata[config['REL']+E3SMdomain_range][:,:,x_idx].load()
+        freql = e3smdata[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load()
+        icwnc = e3smdata[config['NC']+E3SMdomain_range][:,:,x_idx].load()
 
         # calculate mean effective radius. 
         reff = calc_Reff_from_REL(rel.data, dz, freql.data, icwnc.data)
@@ -1194,10 +1189,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
       
       if len(matched_vlist) == len(req_vlist):
           print('\nAnalyzing for cloud optical depth')
-          cod_a = e3smdata[config['TAU3D']+E3SMdomain_range].load()
-          solin = e3smdata[config['SWDOWNTOA']+E3SMdomain_range].load()
-          cod_a = cod_a[:,:,x_idx]
-          solin = solin[:,x_idx]
+          cod_a = e3smdata[config['TAU3D']+E3SMdomain_range][:,:,x_idx].load()
+          solin = e3smdata[config['SWDOWNTOA']+E3SMdomain_range][:,x_idx].load()
         
           # calculate mean optical depth
           cod = np.sum(cod_a.data,axis=1)
@@ -1216,8 +1209,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
       
       if len(matched_vlist) == len(req_vlist):
           print('\nAnalyzing for MODIS simulator cloud optical depth')
-          cod_m = e3smdata[config['TAULIQMODIS']+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
-          cod_m = cod_m[:,x_idx]        
+          cod_m = e3smdata[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()*0.01   # cloud fraction is treated as 1 but is 100
       else:
           cod_m = xr.DataArray(np.zeros(len(e3smtime))*np.nan)
     
@@ -1229,8 +1221,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
       
       if len(matched_vlist) == len(req_vlist):
           print('\nAnalyzing for mean cloud droplet number concentration')
-          cdnc_col = e3smdata[config['NC2D']+E3SMdomain_range].load()
-          cdnc_col = cdnc_col[:,x_idx]
+          cdnc_col = e3smdata[config['NC2D']+E3SMdomain_range][:,x_idx].load()
           weight = cloud*dz
           cdnc_mean = cdnc_col/weight.sum(dim=config['vert_dim'])
           cdnc_mean[cdnc_mean >2e9] = np.nan
@@ -1243,7 +1234,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
       if len(matched_vlist) == len(req_vlist):
         print('\nAnalyzing for mean cloud droplet number concentration')
         #compute cloud layer mean CDNC from 3D NC (note that if NC is not in-cloud only, one needs to divide by cloud fraction)
-        nc3d = e3smdata[config['NC']+E3SMdomain_range].load()      
+        nc3d = e3smdata[config['NC']+E3SMdomain_range][:,:,x_idx].load()      
         if nc3d.attrs['units'] == '1/kg':
           rho = np.array(Pres/T/287.06)
           cdnc_rel = nc3d*rho/cloud
@@ -1326,7 +1317,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
 
     for varname in variable2d_names:
         try:
-            var = e3smdata[varname + E3SMdomain_range].load()
+            var = e3smdata[varname + E3SMdomain_range][:,x_idx].load()
             var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
         except:
             var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
@@ -1335,7 +1326,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         if varname==config['AODABS'] or varname==config['AOD']:
             var.attrs['units']='N/A'
         variable_names.append(varname)
-        variables.append(var[:,x_idx])
+        variables.append(var)
     
     # all other 3D (with vertical level) variables at the lowest model level
     variable3d_names = [config['Q'], config['T'], config['RH'], config['U'], config['V']] 
@@ -1347,13 +1338,13 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
 
     for varname in variable3d_names:
         try:
-            var = e3smdata[varname + E3SMdomain_range].load()
+            var = e3smdata[varname + E3SMdomain_range][:,-1,x_idx].load()
             var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
         except:
             var = xr.DataArray(np.zeros((len(e3smtime),len_lev,len_ncol))*np.nan,name=varname,\
                                dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata[config['vert_dim']],"ncol"+E3SMdomain_range:e3smdata[config['latlon_dim']+E3SMdomain_range]},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
-        variables.append(var[:,-1,x_idx])
+        variables.append(var)
         variable_names.append(varname)
     
     e3smdata.close()
@@ -1468,14 +1459,12 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
-            z3 = e3smdata[config['Z']+E3SMdomain_range].load()
-            cloud = e3smdata[config['CF']+E3SMdomain_range].load()
-            z3 = z3[:,:,x_idx]
-            cloud = cloud[:,:,x_idx]
+            z3 = e3smdata[config['Z']+E3SMdomain_range][:,:,x_idx].load()
+            cloud = e3smdata[config['CF']+E3SMdomain_range][:,:,x_idx].load()
             dz = (z3[:,:-2].data - z3[:,2:].data)/2
             dz = np.append(dz, (z3[:,-2:-1].data+z3[:,-1:].data)/2, axis=1)
             dz = np.insert(dz,0,dz[:,0],axis=1)
-            weight = cloud.data*dz
+            
             # mid-level T, P, z
             Tmid = 0.5*(T[:,0:-1,x_idx].data + T[:,1:,x_idx].data)
             Pmid = 0.5*(Pres[:,0:-1,x_idx].data + Pres[:,1:,x_idx].data)
@@ -1534,12 +1523,9 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     
           if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing for effective radius')
-            rel = e3smdata[config['REL']+E3SMdomain_range].load()
-            freql = e3smdata[config['CFLIQ']+E3SMdomain_range].load()
-            icwnc = e3smdata[config['NC']+E3SMdomain_range].load()
-            rel = rel[:,:,x_idx]
-            freql = freql[:,:,x_idx]
-            icwnc = icwnc[:,:,x_idx]
+            rel = e3smdata[config['REL']+E3SMdomain_range][:,:,x_idx].load()
+            freql = e3smdata[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load()
+            icwnc = e3smdata[config['NC']+E3SMdomain_range][:,:,x_idx].load()
     
             # calculate mean effective radius. 
             reff = calc_Reff_from_REL(rel.data, dz, freql.data, icwnc.data)
@@ -1559,10 +1545,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
           
           if len(matched_vlist) == len(req_vlist):
               print('\nAnalyzing for cloud optical depth')
-              cod_a = e3smdata[config['TAU3D']+E3SMdomain_range].load()
-              solin = e3smdata[config['SWDOWNTOA']+E3SMdomain_range].load()
-              cod_a = cod_a[:,:,x_idx]
-              solin = solin[:,x_idx]
+              cod_a = e3smdata[config['TAU3D']+E3SMdomain_range][:,:,x_idx].load()
+              solin = e3smdata[config['SWDOWNTOA']+E3SMdomain_range][:,x_idx].load()
             
               # calculate mean optical depth
               cod = np.sum(cod_a.data,axis=1)
@@ -1582,8 +1566,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
           
           if len(matched_vlist) == len(req_vlist):
               print('\nAnalyzing for MODIS simulator cloud optical depth')
-              cod_m = e3smdata[config['TAULIQMODIS']+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
-              cod_m = cod_m[:,x_idx]        
+              cod_m = e3smdata[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx]  .load()*0.01   # cloud fraction is treated as 1 but is 100
           else:
               cod_m = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
 
@@ -1594,8 +1577,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
           matched_vlist = list(set(av_vars).intersection(req_vlist))
           
           if len(matched_vlist) == len(req_vlist):
-              cdnc_col = e3smdata[config['NC2D']+E3SMdomain_range].load()
-              cdnc_col = cdnc_col[:,x_idx]
+              cdnc_col = e3smdata[config['NC2D']+E3SMdomain_range][:,x_idx].load()
+              weight = cloud*dz
               cdnc = cdnc_col/np.sum(weight,axis=1)
               cdnc[cdnc >2e9] = np.nan
               cdnc = xr.DataArray(data=cdnc,  dims=["time"],
@@ -1605,17 +1588,26 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
           else:
               cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_mean',attrs={'units':'dummy_unit','long_name':'Dummy'})
         else:
-          #compute cloud layer mean CDNC from 3D NC
-          nc3d = e3smdata[config['NC']+E3SMdomain_range].load()      
-          if nc3d.attrs['units'] == '1/kg':
-            rho = np.array(Pres/T/287.06)
-            cdnc_rel = nc3d*rho/cloud/1e6
-          if nc3d.attrs['units'] == 'm-3':
-            cdnc_rel = nc3d/cloud/1e6
-          cdnc_rel = cdnc_rel.where(cloud > 0, other = 0)
-          cf_column = cloud.sum(dim='lev')
-          cdnc_rel_avg = cdnc_rel.dot(cloud, dims='lev')
-          cdnc_mean = np.divide(cdnc_rel_avg, cf_column)
+          if len(matched_vlist) == len(req_vlist):
+            print('\nAnalyzing for mean cloud droplet number concentration')
+            #compute cloud layer mean CDNC from 3D NC (note that if NC is not in-cloud only, one needs to divide by cloud fraction)
+            nc3d = e3smdata[config['NC']+E3SMdomain_range][:,:,x_idx].load()   
+            if nc3d.attrs['units'] == '1/kg':
+              rho = np.array(Pres/T/287.06)
+              cdnc_rel = nc3d*rho/cloud/1e6
+            if nc3d.attrs['units'] == 'm-3':
+              cdnc_rel = nc3d/cloud/1e6
+            cdnc_rel = cdnc_rel.where(cloud > 0, other = 0)
+            weight = cloud*dz
+            weight_column = weight.sum(dim=config['vert_dim'])
+            cdnc_rel_avg = cdnc_rel.dot(weight, dims=config['vert_dim'])
+            cdnc = np.divide(cdnc_rel_avg, weight_column)
+            cdnc = xr.DataArray(data=cdnc,  dims=["time"],
+                    coords=dict(time=(["time"], e3smtime_i)),
+                    attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
+            cdnc_mean = xr.concat([cdnc_mean, cdnc], dim="time")
+          else:
+            cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
             
         # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
         if config['reff_output'] == True:
@@ -1657,26 +1649,26 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         # all other 2D (surface and vertical integrated) variables
         for varname in variable2d_names:
             try:
-                var = e3smdata[varname + E3SMdomain_range].load()
+                var = e3smdata[varname + E3SMdomain_range][:,x_idx].load()
                 var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
             except:
                 var = xr.DataArray(np.zeros((len(e3smtime_i),len_ncol))*np.nan,name=varname,\
                                dims=["time","ncol"+E3SMdomain_range],coords={"time":e3smtime_i,"ncol"+E3SMdomain_range:np.arange(len_ncol)},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             vv = variable_names.index(varname)
-            variables[vv] = xr.concat([variables[vv], var[:,x_idx]],dim='time')
+            variables[vv] = xr.concat([variables[vv], var],dim='time')
         
         # all other 3D (with vertical level) variables at the lowest model level
         for varname in variable3d_names:
             try:
-                var = e3smdata[varname + E3SMdomain_range].load()
+                var = e3smdata[varname + E3SMdomain_range][:,-1,x_idx].load()
                 var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
             except:
                 var = xr.DataArray(np.zeros((len(e3smtime_i),len_lev,len_ncol))*np.nan,name=varname,\
                                dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime_i,"lev":e3smdata[config['vert_dim']],"ncol"+E3SMdomain_range:e3smdata[config['latlon_dim']+E3SMdomain_range]},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             vv = variable_names.index(varname)
-            variables[vv] = xr.concat([variables[vv], var[:,-1,x_idx]],dim='time')
+            variables[vv] = xr.concat([variables[vv], var],dim='time')
     
         e3smdata.close()
       
