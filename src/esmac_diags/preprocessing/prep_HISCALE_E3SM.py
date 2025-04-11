@@ -1106,7 +1106,7 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         dz = (z3[:,:-2].data - z3[:,2:].data)/2
         dz = np.append(dz, (z3[:,-2:-1].data+z3[:,-1:].data)/2, axis=1)
         dz = np.insert(dz,0,dz[:,0],axis=1)
-        weight = cloud.data*dz
+        
         # mid-level T, P, z
         Tmid = 0.5*(T[:,0:-1,x_idx].data + T[:,1:,x_idx].data)
         Pmid = 0.5*(Pres[:,0:-1,x_idx].data + Pres[:,1:,x_idx].data)
@@ -1231,7 +1231,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
           print('\nAnalyzing for mean cloud droplet number concentration')
           cdnc_col = e3smdata[config['NC2D']+E3SMdomain_range].load()
           cdnc_col = cdnc_col[:,x_idx]
-          cdnc_mean = cdnc_col/np.sum(weight, axis=1)
+          weight = cloud*dz
+          cdnc_mean = cdnc_col/weight.sum(dim=config['vert_dim'])
           cdnc_mean[cdnc_mean >2e9] = np.nan
           cdnc_mean = xr.DataArray(data=cdnc_mean,  dims=["time"],
               coords=dict(time=(["time"], e3smtime)),
@@ -1249,7 +1250,8 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         if nc3d.attrs['units'] == 'm-3':
           cdnc_rel = nc3d/cloud
         cdnc_rel = cdnc_rel.where(cloud > 0, other = 0)
-        weight_column = np.sum(weight, axis=1)
+        weight = cloud*dz
+        weight_column = weight.sum(dim=config['vert_dim'])
         cdnc_rel_avg = cdnc_rel.dot(weight, dims=config['vert_dim'])
         cdnc_mean = np.divide(cdnc_rel_avg, weight_column)
         cdnc_mean = xr.DataArray(data=cdnc_mean,  dims=["time"],
