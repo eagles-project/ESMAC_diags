@@ -426,13 +426,13 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         # variables[idx].attrs['units']='g/m3'
         T = variables_new[variable3d_names.index('T')]
         rho = np.array(p)/T/287.06
-        idx = variable3d_names.index('QC')
+        idx = variable3d_names.index(config['QC'])
         if variables_new[idx].attrs['units'] == 'kg/kg':
             variables_new[idx] = np.array(variables_new[idx]) * rho * 1000
         if variables_new[idx].attrs['units'] == 'kg/m3':
             variables_new[idx] = np.array(variables_new[idx]) * 1000
         variables[idx].attrs['units']='g/m3'
-        idx = variable3d_names.index('QI')
+        idx = variable3d_names.index(config['QI'])
         if variables_new[idx].attrs['units'] == 'kg/kg':
             variables_new[idx] = np.array(variables_new[idx]) * rho * 1000
         if variables_new[idx].attrs['units'] == 'kg/m3':
@@ -454,13 +454,13 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         variables[idx].attrs['units']='#/cm3'
 
         if config['rain_output'] == True:
-            idx = variable3d_names.index('QR')
+            idx = variable3d_names.index(config['QR'])
             if variables_new[idx].attrs['units'] == 'kg/kg':
                 variables_new[idx] = np.array(variables_new[idx]) * rho * 1000
             if variables_new[idx].attrs['units'] == 'kg/m3':
                 variables_new[idx] = np.array(variables_new[idx]) * 1000
             variables[idx].attrs['units']='g/m3'
-            idx = variable3d_names.index('NR')
+            idx = variable3d_names.index(config['NR'])
             if variables_new[idx].attrs['units'] == '1/kg':
                 variables_new[idx] = np.array(variables_new[idx]) * rho * 1e-6
             if variables_new[idx].attrs['units'] == 'm-3':
