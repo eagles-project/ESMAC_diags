@@ -33,10 +33,10 @@ vert_dim_bnd: 'ilev'
 latlon_dimensions: 1
 
 # flag for model aerosol variables output
-aerosol_output: False
+aerosol_output: True
 
 # flag for COSP MODIS simulator output
-cosp_output: False
+cosp_output: True
 
 # flag for pressure level output
 pres_output: False
@@ -45,10 +45,10 @@ pres_output: False
 # masscontent_output: False
 
 # flag for drop size distribution parameter output
-dsd_output: False
+dsd_output: True
 
 # flag for column effective radius output
-reff_output: False
+reff_output: True
 
 # flag for whether model uses deep convective parameterization
 convectiveparam: True
@@ -57,7 +57,7 @@ convectiveparam: True
 rain_output: False
 
 # flag for 3D visible optical depth output
-tau3d_output: False
+tau3d_output: True
 
 # flag for column-integrated cloud drop number concentration output
 colnc_output: False
