@@ -599,7 +599,6 @@ def prep_CPC(cpcpath, cpcupath, predatapath, dt=3600):
         os.makedirs(predatapath)
         
     #%% read in data
-    print('read')
     lst1 = glob.glob(os.path.join(cpcpath, '*.nc'))
     lst1.sort()
     obsdata = xr.open_mfdataset(lst1, combine='by_coords')
@@ -633,14 +632,17 @@ def prep_CPC(cpcpath, cpcupath, predatapath, dt=3600):
     outfile = predatapath + 'sfc_CPC_HISCALE.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'cpc10': (['time'], np.float32(cpc10_new)),
-                    'cpc3': (['time'], np.float32(cpc3_new)),
+                    'cpc10': (['time10'], np.float32(cpc10_new)),
+                    'cpc3': (['time3'], np.float32(cpc3_new)),
                     },
-                     coords={'time': ('time', time_new)})
+                     coords={'time10': ('time10', cpc10_new['time']),
+                            'time3': ('time3', cpc3_new['time']})
     
     #assign attributes
-    ds['time'].attrs["long_name"] = "Time"
-    ds['time'].attrs["standard_name"] = "time"
+    ds['time10'].attrs["long_name"] = "Time (>10nm)"
+    ds['time10'].attrs["standard_name"] = "time"
+    ds['time10'].attrs["long_name"] = "Time (>3nm)"
+    ds['time10'].attrs["standard_name"] = "time"
     ds['cpc10'].attrs["long_name"] = 'CPC aerosol number concentration (>10nm)'
     ds['cpc10'].attrs["units"] = '1/cm3'
     ds['cpc3'].attrs["long_name"] = 'CPC aerosol number concentration (>3nm)'
