@@ -815,7 +815,7 @@ def prep_CNsize_SMPS_IOP1(smpspath, nanosmpspath, predatapath, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-05-22', freq=str(int(dt))+"s")  # HISCALE IOP1
     
-    smps_new = median_time_2d(time1, smps, time_new, arraytype='xarray')
+    smps_new = median_time_2d(time1, smps, time_new)
     smps100_new = median_time_1d(time1, smps100, time_new)
     
     #%% output file
