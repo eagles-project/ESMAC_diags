@@ -636,7 +636,7 @@ def prep_CPC(cpcpath, cpcupath, predatapath, dt=3600):
                     'cpc3': (['time3'], np.float32(cpc3_new)),
                     },
                      coords={'time10': ('time10', cpc10_new['time']),
-                            'time3': ('time3', cpc3_new['time']})
+                            'time3': ('time3', cpc3_new['time'])})
     
     #assign attributes
     ds['time10'].attrs["long_name"] = "Time (>10nm)"
