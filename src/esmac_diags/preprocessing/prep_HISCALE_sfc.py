@@ -599,6 +599,7 @@ def prep_CPC(cpcpath, cpcupath, predatapath, dt=3600):
         os.makedirs(predatapath)
         
     #%% read in data
+    print('read')
     lst1 = glob.glob(os.path.join(cpcpath, '*.nc'))
     lst1.sort()
     obsdata = xr.open_mfdataset(lst1, combine='by_coords')
@@ -616,11 +617,13 @@ def prep_CPC(cpcpath, cpcupath, predatapath, dt=3600):
     obsdata.close()
     
     # quality controls
+    print('qc')
     cpc10 = qc_mask_qcflag_cpc(cpc10, qc_cpc10.astype(int).data)
     cpc3 = qc_mask_qcflag_cpcu(cpc3, qc_cpc3.astype(int).data)
     
     
     #%% re-shape the data into coarser resolution
+    print('time resolution')
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
     cpc10_new = median_time_1d(time10, cpc10, time_new, arraytype='xarray')
