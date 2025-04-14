@@ -41,6 +41,7 @@ mergeSDpath = obs_input_path+'HISCALE/aircraft/mergedSD/'
 acsmpath = obs_input_path+'HISCALE/surface/arm_acsm/'
 armbepath = obs_input_path+'HISCALE/profile/armbe/'
 arsclpath = obs_input_path+'HISCALE/profile/arscl/'
+arsclbndpath = obs_input_path+'HISCALE/profile/arsclbnd/'
 ccnsfcpath = obs_input_path+'HISCALE/surface/arm-ccn/'
 cpcpath = obs_input_path+'HISCALE/surface/arm-cpc/'
 cpcupath = obs_input_path+'HISCALE/surface/arm-cpcu/'
@@ -88,7 +89,7 @@ print('prepare surface data:')
 # sfc.prep_CNsize_SMPS_IOP1(smpspath, nanosmpspath, prep_data_path+'surface/', dt=surface_dt)# aerosol size distribution from SMPS for IOP1
 # sfc.prep_CNsize_SMPS_IOP2(smps_pnnl_path, prep_data_path+'surface/', dt=surface_dt)# aerosol size distribution from SMPS for IOP2
 # sfc.prep_cloud_2d(armbepath, arsclpath, prep_data_path+'surface/', height_out, dt=surface_dt)   # 2D cloud fraction
-sfc.prep_cloudheight_ARSCL(arsclpath, prep_data_path+'surface/', dt=surface_dt)   # cloud height 
+sfc.prep_cloudheight_ARSCL(arsclbndpath, prep_data_path+'surface/', dt=surface_dt)   # cloud height 
 sfc.prep_totcld(armbepath, prep_data_path+'surface/', dt=surface_dt)         # cloud fraction. from ARSCL, TSI and satellite sources
 # sfc.prep_LWP(armbepath, mfrsrpath, prep_data_path+'surface/', dt=surface_dt) # cloud liquid water path
 # sfc.prep_Ndrop(ndroppath, prep_data_path+'surface/', dt=surface_dt)          # cloud droplet number retrieval from ARM Ndrop VAP
