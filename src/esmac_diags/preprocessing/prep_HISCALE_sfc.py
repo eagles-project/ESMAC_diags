@@ -166,17 +166,17 @@ def prep_ccn(ccnpath, predatapath, dt=3600):
         # 0.1%
         idx = np.logical_and(sssfc>0.05, sssfc<0.15)
         ccn1 = ccnsfc[idx]
-        time1 = time[idx]
+        time1 = pd.to_datetime(time[idx])
         ss1 = sssfc[idx]
         # 0.2%
         idx = np.logical_and(sssfc>0.15, sssfc<0.25)
         ccn2 = ccnsfc[idx]
-        time2 = time[idx]
+        time2 = pd.to_datetime(time[idx])
         ss2 = sssfc[idx]
         # 0.5%
         idx = np.logical_and(sssfc>0.45, sssfc<0.55)
         ccn5 = ccnsfc[idx]
-        time5 = time[idx]
+        time5 = pd.to_datetime(time[idx])
         ss5 = sssfc[idx]
               
         #%% re-shape the data into coarser resolution
