@@ -52,6 +52,7 @@ smps_pnnl_path = obs_input_path+'HISCALE/surface/pnnl-smps/'
 mfrsrpath = obs_input_path+'HISCALE/surface/arm_mfrsr/'
 ndroppath = obs_input_path+'HISCALE/surface/sgpndrop/'
 tsipath = obs_input_path+'HISCALE/surface/arm-tsi/'
+mwrpath = obs_input_path+'HISCALE/surface/arm-mwr/'
 
 # satellite data path
 visstgridpath = obs_input_path+'HISCALE/satellite/visst/grid/'
@@ -92,7 +93,7 @@ print('prepare surface data:')
 # sfc.prep_cloud_2d(armbepath, arsclpath, prep_data_path+'surface/', height_out, dt=surface_dt)   # 2D cloud fraction
 # sfc.prep_cloudheight_ARSCL(arsclbndpath, prep_data_path+'surface/', dt=surface_dt)   # cloud height 
 # sfc.prep_totcld(armbepath, arsclbndpath, tsipath, prep_data_path+'surface/', dt=surface_dt)         # cloud fraction. from ARSCL, TSI and satellite sources
-sfc.prep_LWP(armbepath, mfrsrpath, prep_data_path+'surface/', dt=surface_dt) # cloud liquid water path
+sfc.prep_LWP(armbepath, mwrpath, prep_data_path+'surface/', dt=surface_dt) # cloud liquid water path
 # sfc.prep_Ndrop(ndroppath, prep_data_path+'surface/', dt=surface_dt)          # cloud droplet number retrieval from ARM Ndrop VAP
 # sfc.prep_mfrsr_cod(mfrsrpath,  prep_data_path+'surface/', dt=surface_dt)     # cloud optical depth from MFRSR
 # sfc.prep_mfrsr_Reff(mfrsrpath,  prep_data_path+'surface/', dt=surface_dt)    # cloud effective radius from MFRSR
