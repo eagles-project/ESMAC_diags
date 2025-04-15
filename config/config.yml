@@ -68,7 +68,7 @@ aodabs_output: False
 
 # flags for whether net or clear sky radiation fluxes are outputted
 netradiation_output: False
-clrskyradiation_output: False
+clrskyradiation_output: True
 
 # flag for whether thermodynamic info is outputted at 850 and 700 hPa
 midlevel_thermo_output: True
