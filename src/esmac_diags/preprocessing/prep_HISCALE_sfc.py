@@ -515,7 +515,7 @@ def prep_cloudheight_ARSCL(arsclbndpath, predatapath, dt=3600):
         os.makedirs(predatapath)
             
     #%% read in data
-    lst1 = glob.glob(os.path.join(arsclpath, 'sgparsclkazrbnd1kolliasC1.c0*.nc'))
+    lst1 = glob.glob(os.path.join(arsclbndpath, 'sgparsclkazrbnd1kolliasC1.c0*.nc'))
     lst1.sort()
     arscldata = xr.open_mfdataset(lst1, combine='by_coords')
     arscltime = arscldata['time'].load()
