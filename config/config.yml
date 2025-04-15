@@ -1,6 +1,7 @@
 # data paths and filenames
-model_input_path: '../raw_data/model/'  # '../raw_data/rrm/ena_rrm/', '../raw_data/rrm/emis_rrm/', '../raw_data/rrm/nep_rrm/', '../raw_data/rrm/so_rrm/', or '../raw_data/model/'
-model_input_filehead: 'E3SMv2_SGP_ENA_2011_2020'  # 'ena_ne32x32pg2', 'cus_emis_ne32x32pg2', 'nep_ne32x32pg2', 'so_ne32x32pg2', or 'E3SMv2_SGP_ENA_2011_2020'
+model_input_path: '/pscratch/sd/a/avarble/eagles/scream/'  # '../raw_data/rrm/ena_rrm/', '../raw_data/rrm/emis_rrm/', '../raw_data/rrm/nep_rrm/', '../raw_data/rrm/so_rrm/', or '../raw_data/model/'
+model_2d_input_filehead: 'scream_output.test.1hourlyINST_2Dvars_ne256.h.AVERAGE.nhours_x1'  # 'ena_ne32x32pg2', 'cus_emis_ne32x32pg2', 'nep_ne32x32pg2', 'so_ne32x32pg2', or 'E3SMv2_SGP_ENA_2011_2020'
+model_3d_input_filehead: 'scream_output.test.1hourlyINST_3Dvars_ne256.h.AVERAGE.nhours_x1'
 
 obs_input_path: '../raw_data/obs/'
 
@@ -19,12 +20,12 @@ obs_surface_dt: 300        #median or average
 obs_satellite_dt: 3600     #instantaneous
 
 # model variable names
-E3SMsubdomain: True
-E3SMdomain_range: '_260e_to_265e_34n_to_39n' # '_330e_to_335e_37n_to_42n' for ENA; '_260e_to_265e_34n_to_39n' for SGP
+E3SMsubdomain: False
+E3SMdomain_range: '' # '_330e_to_335e_37n_to_42n' for ENA; '_260e_to_265e_34n_to_39n' for SGP
 
 # model array dimension names
 time_dim: 'time'
-lon_dim: 'lon'   # if 12D lat-lon
+lon_dim: 'lon'   # if 2D lat-lon
 lat_dim: 'lat'   # if 2D lat-lon
 latlon_dim: 'ncol'      # if 1D lat-lon
 vert_dim: 'lev'
@@ -33,37 +34,41 @@ vert_dim_bnd: 'ilev'
 latlon_dimensions: 1
 
 # flag for model aerosol variables output
-aerosol_output: True
+aerosol_output: False
 
 # flag for COSP MODIS simulator output
-cosp_output: True
+cosp_output: False
 
 # flag for pressure level output
-pres_output: False
+pres_output: True
 
 # # flag for hydrometeor mass output
 # masscontent_output: False
 
 # flag for drop size distribution parameter output
-dsd_output: True
+dsd_output: False
 
 # flag for column effective radius output
-reff_output: True
+reff_output: False
 
 # flag for whether model uses deep convective parameterization
-convectiveparam: True
+convectiveparam: False
 
 # flag for whether rain mass and number concentrations are outputted
-rain_output: False
+rain_output: True
 
 # flag for 3D visible optical depth output
-tau3d_output: True
+tau3d_output: False
 
 # flag for column-integrated cloud drop number concentration output
 colnc_output: False
 
 # flag for absorbing AOD output
 aodabs_output: False
+
+# flags for whether net or clear sky radiation fluxes are outputted
+netradiation_output: False
+clrskyradiation_output: False
 
 # model output variable names
 LON: 'lon'
@@ -84,10 +89,10 @@ CF: 'CLOUD'     # cldfrac_tot_for_analysis
 CFLIQ: 'FREQL'  # cldfrac_liq
 # LWC: 'LWC'      # if masscontent_output = True
 # IWC: 'IWC'      # if masscontent_output = True
-QC: 'CLDLIQ'    # qc
-QI: 'CLDICE'    # qi
-NC: 'NUMLIQ'    # nc, NUMLIQ, ICWNC (in cloud)
-NI: 'NUMICE'    # ni, NUMICE, ICINC (in cloud)
+QC: 'qc'    # qc, CLDLIQ
+QI: 'qi'    # qi, CLDICE
+NC: 'nc'    # nc, NUMLIQ, ICWNC (in cloud)
+NI: 'ni'    # ni, NUMICE, ICINC (in cloud)
 QR: 'qr'        # if rain_output = True
 NR: 'nr'        # if rain_output = True
 
@@ -95,17 +100,17 @@ LAMBDA_CLOUD: 'lambda_cloud' # if dsd_output = True
 MU_CLOUD: 'mu_cloud'         # if dsd_output = True
 
 REL: 'REL'      # if reff_output = True
-# REI: 'REI'     # if reff_output = True  (not currently used)
+REI: 'REI'     # if reff_output = True  (not currently used)
 
-TS: 'TREFHT'  # T_2m
-RH: 'RELHUM'    # RelativeHumidity
-LWP: 'TGCLDLWP'   # LiqWaterPath
-IWP: 'TGCLDIWP'   # IceWaterPath
-#RWP: 'RainWaterPath'
-CLDHGH: 'CLDHGH'  # cldhgh
-CLDMED: 'CLDMED'  # cldmed
-CLDLOW: 'CLDLOW'  # cldlow
-CLDTOT: 'CLDTOT'  # cldtot
+TS: 'T_2m'  # T_2m, TREFHT
+RH: 'RelativeHumidity'    # RelativeHumidity, RELHUM
+LWP: 'LiqWaterPath'   # LiqWaterPath, TGCLDLWP
+IWP: 'IceWaterPath'   # IceWaterPath, TGCLDIWP
+RWP: 'RainWaterPath'
+CLDHGH: 'cldhgh'  # cldhgh, CLDHGH
+CLDMED: 'cldmed'  # cldmed, CLDMED
+CLDLOW: 'cldlow'  # cldlow, CLDLOW
+CLDTOT: 'cldtot'  # cldtot, CLDTOT
 
 PRECIPSFCTOT: 'PRECT'                     # if convectiveparam = True
 PRECIPSFCCONV: 'PRECC'                    # if convectiveparam = True
@@ -113,29 +118,28 @@ PRECIPSFCSTRAT: 'PRECL'                   # if convectiveparam = True
 PRECIPSFCLIQ: 'precip_liq_surf_mass_flux' # if convectiveparam = False
 PRECIPSFCICE: 'precip_ice_surf_mass_flux' # if convectiveparam = False
 
-SWDOWNTOA: 'SOLIN'  # SW_flux_dn_at_model_top
-SWUPTOA: 'FSUTOA'   # SW_flux_up_at_model_top
-SWNETTOA: 'FSNT'
-SWDOWNSFC: 'FSDS'   # SW_flux_dn_at_model_bot
-SWUPSFC: 'FSUS'     # SW_flux_up_at_model_bot
-SWNETSFC: 'FSNS'
-LWDOWNTOA: 'FLDT' 
-LWUPTOA: 'FLUT'     # LW_flux_up_at_model_top
-LWNETTOA: 'FLNT'
-LWDOWNSFC: 'FLDS'   # LW_flux_dn_at_model_bot
-LWUPSFC: 'FLUS'     # LW_flux_up_at_model_bot
-LWNETSFC: 'FLNS'
-SWUPTOACLR: ''
-LWUPTOACLR: ''      # LW_clrsky_flux_up_at_model_top
-SWDOWNSFCCLR: ''
-LWDOWNSFCLR: ''
+SWDOWNTOA: 'SW_flux_dn_at_model_top'  # SW_flux_dn_at_model_top, SOLIN
+SWUPTOA: 'SW_flux_up_at_model_top'   # SW_flux_up_at_model_top, FSUTOA
+SWDOWNSFC: 'SW_flux_dn_at_model_bot'   # SW_flux_dn_at_model_bot, FSDS
+SWUPSFC: 'SW_flux_up_at_model_bot'     # if netradiation_output = False; SW_flux_up_at_model_bot
+LWUPTOA: 'LW_flux_up_at_model_top'     # LW_flux_up_at_model_top, FLUT
+LWDOWNSFC: 'LW_flux_dn_at_model_bot'   # LW_flux_dn_at_model_bot, FLDS
+LWUPSFC: 'LW_flux_up_at_model_bot'     # if netradiation_output = False; LW_flux_up_at_model_bot
+SWNETTOA: 'FSNT'    # if netradiation_output = True, FSNT
+SWNETSFC: 'FSNS'    # if netradiation_output = True, FSNS
+LWNETTOA: 'FLNT'    # if netradiation_output = True, FLNT
+LWNETSFC: 'FLNS'    # if netradiation_output = True, FLNS
+SWUPTOACLR: 'SW_clrsky_flux_up_at_model_top'      # if clrskyradiation_output = True; SW_clrsky_flux_up_at_model_top
+LWUPTOACLR: 'LW_clrsky_flux_up_at_model_top'      # if clrskyradiation_output = True; LW_clrsky_flux_up_at_model_top
+SWDOWNSFCCLR: 'SW_clrsky_flux_dn_at_model_bot'    # if clrskyradiation_output = True; SW_clrsky_flux_dn_at_model_bot
+LWDOWNSFCLR: 'LW_clrsky_flux_dn_at_model_bot'     # if clrskyradiation_output = True; LW_clrsky_flux_dn_at_model_bot
 
-SWCF: 'SWCF'   #ShortwaveCloudForcing
-LWCF: 'LWCF'   #LongwaveCloudForcing
-LHFLX: 'LHFLX' # surface_upward_latent_heat_flux
-SHFLX: 'SHFLX' # surf_sens_flux
-PBLH: 'PBLH'   # pbl_height
-AOD: 'AODALL'  # AerosolOpticalDepth550nm
+SWCF: 'ShortwaveCloudForcing'   #ShortwaveCloudForcing, SWCF
+LWCF: 'LongwaveCloudForcing'   #LongwaveCloudForcing, LWCF
+LHFLX: 'surface_upward_latent_heat_flux' # surface_upward_latent_heat_flux, LHFLX
+SHFLX: 'surf_sens_flux' # surf_sens_flux, SHFLX
+PBLH: 'pbl_height'   # pbl_height, PBLH
+AOD: 'AerosolOpticalDepth550nm'  # AerosolOpticalDepth550nm, AODALL
 AODABS: 'AODABS' #Absorbing Aerosol Optical Depth (if aodabs_output = True)
 
 TAU3D: 'TOT_CLD_VISTAU'  # if tau3d_output = True
