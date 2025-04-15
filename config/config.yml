@@ -80,13 +80,13 @@ HYAM: 'hyam'    # if pres_output = False
 HYBM: 'hybm'    # if pres_output = False
 PRES: 'p_mid'   # if pres_output = True
 
-Z: 'Z3'         # z_mid
-T: 'T'          # T_mid
-Q: 'Q'          # qv
-U: 'U'          # u
-V: 'V'          # v
-CF: 'CLOUD'     # cldfrac_tot_for_analysis
-CFLIQ: 'FREQL'  # cldfrac_liq
+Z: 'z_mid'      # z_mid, Z3
+T: 'T_mid'      # T_mid, T
+Q: 'qv'         # qv, Q
+U: 'u'          # u, U
+V: 'v'          # v, V
+CF: 'cldfrac_tot_for_analysis'     # cldfrac_tot_for_analysis, CLOUD
+CFLIQ: 'cldfrac_liq'  # cldfrac_liq, FREQL
 # LWC: 'LWC'      # if masscontent_output = True
 # IWC: 'IWC'      # if masscontent_output = True
 QC: 'qc'    # qc, CLDLIQ
@@ -99,13 +99,13 @@ NR: 'nr'        # if rain_output = True
 LAMBDA_CLOUD: 'lambda_cloud' # if dsd_output = True
 MU_CLOUD: 'mu_cloud'         # if dsd_output = True
 
-REL: 'REL'      # if reff_output = True
+REL: 'REL'     # if reff_output = True
 REI: 'REI'     # if reff_output = True  (not currently used)
 
 TS: 'T_2m'  # T_2m, TREFHT
-RH: 'RelativeHumidity'    # RelativeHumidity, RELHUM
-LWP: 'LiqWaterPath'   # LiqWaterPath, TGCLDLWP
-IWP: 'IceWaterPath'   # IceWaterPath, TGCLDIWP
+RH: 'RelativeHumidity'  # RelativeHumidity, RELHUM
+LWP: 'LiqWaterPath'     # LiqWaterPath, TGCLDLWP
+IWP: 'IceWaterPath'     # IceWaterPath, TGCLDIWP
 RWP: 'RainWaterPath'
 CLDHGH: 'cldhgh'  # cldhgh, CLDHGH
 CLDMED: 'cldmed'  # cldmed, CLDMED
@@ -118,8 +118,8 @@ PRECIPSFCSTRAT: 'PRECL'                   # if convectiveparam = True
 PRECIPSFCLIQ: 'precip_liq_surf_mass_flux' # if convectiveparam = False
 PRECIPSFCICE: 'precip_ice_surf_mass_flux' # if convectiveparam = False
 
-SWDOWNTOA: 'SW_flux_dn_at_model_top'  # SW_flux_dn_at_model_top, SOLIN
-SWUPTOA: 'SW_flux_up_at_model_top'   # SW_flux_up_at_model_top, FSUTOA
+SWDOWNTOA: 'SW_flux_dn_at_model_top'   # SW_flux_dn_at_model_top, SOLIN
+SWUPTOA: 'SW_flux_up_at_model_top'     # SW_flux_up_at_model_top, FSUTOA
 SWDOWNSFC: 'SW_flux_dn_at_model_bot'   # SW_flux_dn_at_model_bot, FSDS
 SWUPSFC: 'SW_flux_up_at_model_bot'     # if netradiation_output = False; SW_flux_up_at_model_bot
 LWUPTOA: 'LW_flux_up_at_model_top'     # LW_flux_up_at_model_top, FLUT
@@ -134,13 +134,13 @@ LWUPTOACLR: 'LW_clrsky_flux_up_at_model_top'      # if clrskyradiation_output = 
 SWDOWNSFCCLR: 'SW_clrsky_flux_dn_at_model_bot'    # if clrskyradiation_output = True; SW_clrsky_flux_dn_at_model_bot
 LWDOWNSFCLR: 'LW_clrsky_flux_dn_at_model_bot'     # if clrskyradiation_output = True; LW_clrsky_flux_dn_at_model_bot
 
-SWCF: 'ShortwaveCloudForcing'   #ShortwaveCloudForcing, SWCF
+SWCF: 'ShortwaveCloudForcing'  #ShortwaveCloudForcing, SWCF
 LWCF: 'LongwaveCloudForcing'   #LongwaveCloudForcing, LWCF
 LHFLX: 'surface_upward_latent_heat_flux' # surface_upward_latent_heat_flux, LHFLX
-SHFLX: 'surf_sens_flux' # surf_sens_flux, SHFLX
-PBLH: 'pbl_height'   # pbl_height, PBLH
+SHFLX: 'surf_sens_flux'  # surf_sens_flux, SHFLX
+PBLH: 'pbl_height'       # pbl_height, PBLH
 AOD: 'AerosolOpticalDepth550nm'  # AerosolOpticalDepth550nm, AODALL
-AODABS: 'AODABS' #Absorbing Aerosol Optical Depth (if aodabs_output = True)
+AODABS: 'AODABS'                 #Absorbing Aerosol Optical Depth (if aodabs_output = True)
 
 TAU3D: 'TOT_CLD_VISTAU'  # if tau3d_output = True
 NC2D: 'CDNUMC'           # if colnc_output = True
