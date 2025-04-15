@@ -70,6 +70,9 @@ aodabs_output: False
 netradiation_output: False
 clrskyradiation_output: False
 
+# flag for whether thermodynamic info is outputted at 850 and 700 hPa
+midlevel_thermo_output: True
+
 # model output variable names
 LON: 'lon'
 LAT: 'lat'
@@ -144,6 +147,10 @@ AODABS: 'AODABS'                 #Absorbing Aerosol Optical Depth (if aodabs_out
 
 TAU3D: 'TOT_CLD_VISTAU'  # if tau3d_output = True
 NC2D: 'CDNUMC'           # if colnc_output = True
+
+THETA850: 'PotentialTemperature_at_850hPa'  # if midlevel_thermo_output = True
+THETA700: 'PotentialTemperature_at_700hPa'  # if midlevel_thermo_output = True
+RH700: 'RelativeHumidity_at_700hPa'         # if midlevel_thermo_output = True
 
 # variables below if aerosol_output = True
 CCN1: 'CCN1'
