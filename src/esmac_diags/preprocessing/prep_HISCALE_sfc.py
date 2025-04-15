@@ -1463,7 +1463,7 @@ def prep_radiation(armbepath, radfluxpath, predatapath, dt=3600):
                     'lwup': (['time'], np.float32(lwup_new)),
                     'swup': (['time'], np.float32(swup_new)),
                     },
-                     coords={'time': ('time', time_new)})
+                     coords={'time': ('time', lwdn_new['time'].data)})
     
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
