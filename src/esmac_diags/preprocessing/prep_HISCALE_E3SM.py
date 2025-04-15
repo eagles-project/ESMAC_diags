@@ -53,7 +53,7 @@ config = yaml.full_load(stream)
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, 
+def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path, output_filehead, 
                       iwgpath, dt=60, config=config):
     """
     prepare E3SM output along flight tracks
@@ -586,7 +586,7 @@ def prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead,
         
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, 
+def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_path, output_filehead, 
                       height_out, lev_out=np.arange(25.,1001,25.), dt=3600, config=config):
     """
     prepare vertical profile (to p or to z) variables from E3SM output
@@ -917,7 +917,7 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
 
      
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3600, config=config):
+def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, output_filehead, dt=3600, config=config):
     """
     prepare surface (include TOA and vertical integrated) variables from E3SM output
     choose the grid nearest to the ARM site
