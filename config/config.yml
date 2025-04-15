@@ -1,7 +1,7 @@
 # data paths and filenames
 model_input_path: '/pscratch/sd/a/avarble/eagles/scream/'  # '../raw_data/rrm/ena_rrm/', '../raw_data/rrm/emis_rrm/', '../raw_data/rrm/nep_rrm/', '../raw_data/rrm/so_rrm/', or '../raw_data/model/'
-model_2d_input_filehead: 'scream_output.test.1hourlyINST_2Dvars_ne256.h.AVERAGE.nhours_x1'  # 'ena_ne32x32pg2', 'cus_emis_ne32x32pg2', 'nep_ne32x32pg2', 'so_ne32x32pg2', or 'E3SMv2_SGP_ENA_2011_2020'
-model_3d_input_filehead: 'scream_output.test.1hourlyINST_3Dvars_ne256.h.AVERAGE.nhours_x1'
+model_3d_input_filehead: 'scream_output.test.1hourlyINST_3Dvars_ne256.h.AVERAGE.nhours_x1'  # 'ena_ne32x32pg2', 'cus_emis_ne32x32pg2', 'nep_ne32x32pg2', 'so_ne32x32pg2', or 'E3SMv2_SGP_ENA_2011_2020'
+model_2d_input_filehead: 'scream_output.test.1hourlyINST_2Dvars_ne256.h.AVERAGE.nhours_x1'  # if 2D and 3D are in the same file, then set this to be the same as model_3d_input_filehead
 
 obs_input_path: '../raw_data/obs/'
 
