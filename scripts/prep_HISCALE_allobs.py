@@ -51,6 +51,7 @@ nanosmpspath = obs_input_path+'HISCALE/surface/bnl-nanosmps/'
 smps_pnnl_path = obs_input_path+'HISCALE/surface/pnnl-smps/'
 mfrsrpath = obs_input_path+'HISCALE/surface/arm_mfrsr/'
 ndroppath = obs_input_path+'HISCALE/surface/sgpndrop/'
+tsipath = obs_input_path+'HISCALE/surface/arm-tsi/'
 
 # satellite data path
 visstgridpath = obs_input_path+'HISCALE/satellite/visst/grid/'
