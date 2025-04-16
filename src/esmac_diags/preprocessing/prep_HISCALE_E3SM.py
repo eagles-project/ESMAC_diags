@@ -211,14 +211,14 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
           matched_vlist = list(set(av_vars).intersection(req_vlist))
           if len(matched_vlist) == len(req_vlist):
               print('\nAnalyzing for aerosol size')
-              num_a1 = e3smdata[config['num_a1']+E3SMdomain_range].load()
-              num_a2 = e3smdata[config['num_a2']+E3SMdomain_range].load()
-              num_a3 = e3smdata[config['num_a3']+E3SMdomain_range].load()
-              num_a4 = e3smdata[config['num_a4']+E3SMdomain_range].load()
-              dn1 = e3smdata[config['dgnd_a01']+E3SMdomain_range].load()
-              dn2 = e3smdata[config['dgnd_a02']+E3SMdomain_range].load()
-              dn3 = e3smdata[config['dgnd_a03']+E3SMdomain_range].load()
-              dn4 = e3smdata[config['dgnd_a04']+E3SMdomain_range].load()
+              num_a1 = e3smdata3d[config['num_a1']+E3SMdomain_range].load()
+              num_a2 = e3smdata3d[config['num_a2']+E3SMdomain_range].load()
+              num_a3 = e3smdata3d[config['num_a3']+E3SMdomain_range].load()
+              num_a4 = e3smdata3d[config['num_a4']+E3SMdomain_range].load()
+              dn1 = e3smdata3d[config['dgnd_a01']+E3SMdomain_range].load()
+              dn2 = e3smdata3d[config['dgnd_a02']+E3SMdomain_range].load()
+              dn3 = e3smdata3d[config['dgnd_a03']+E3SMdomain_range].load()
+              dn4 = e3smdata3d[config['dgnd_a04']+E3SMdomain_range].load()
           else:
               num_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
               num_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -238,27 +238,27 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
           matched_vlist = list(set(av_vars).intersection(req_vlist))
         
           if len(matched_vlist) == len(req_vlist):
-              bc_a1 = e3smdata[config['bc_a1']+E3SMdomain_range].load()
-              bc_a3 = e3smdata[config['bc_a3']+E3SMdomain_range].load()
-              bc_a4 = e3smdata[config['bc_a4']+E3SMdomain_range].load()
-              dst_a1 = e3smdata[config['dst_a1']+E3SMdomain_range].load()
-              dst_a3 = e3smdata[config['dst_a3']+E3SMdomain_range].load()
-              mom_a1 = e3smdata[config['mom_a1']+E3SMdomain_range].load()
-              mom_a2 = e3smdata[config['mom_a2']+E3SMdomain_range].load()
-              mom_a3 = e3smdata[config['mom_a3']+E3SMdomain_range].load()
-              mom_a4 = e3smdata[config['mom_a4']+E3SMdomain_range].load()
-              ncl_a1 = e3smdata[config['ncl_a1']+E3SMdomain_range].load()
-              ncl_a2 = e3smdata[config['ncl_a2']+E3SMdomain_range].load()
-              ncl_a3 = e3smdata[config['ncl_a3']+E3SMdomain_range].load()
-              pom_a1 = e3smdata[config['pom_a1']+E3SMdomain_range].load()
-              pom_a3 = e3smdata[config['pom_a3']+E3SMdomain_range].load()
-              pom_a4 = e3smdata[config['pom_a4']+E3SMdomain_range].load()
-              so4_a1 = e3smdata[config['so4_a1']+E3SMdomain_range].load()
-              so4_a2 = e3smdata[config['so4_a2']+E3SMdomain_range].load()
-              so4_a3 = e3smdata[config['so4_a3']+E3SMdomain_range].load()
-              soa_a1 = e3smdata[config['soa_a1']+E3SMdomain_range].load()
-              soa_a2 = e3smdata[config['soa_a2']+E3SMdomain_range].load()
-              soa_a3 = e3smdata[config['soa_a3']+E3SMdomain_range].load()
+              bc_a1 = e3smdata3d[config['bc_a1']+E3SMdomain_range].load()
+              bc_a3 = e3smdata3d[config['bc_a3']+E3SMdomain_range].load()
+              bc_a4 = e3smdata3d[config['bc_a4']+E3SMdomain_range].load()
+              dst_a1 = e3smdata3d[config['dst_a1']+E3SMdomain_range].load()
+              dst_a3 = e3smdata3d[config['dst_a3']+E3SMdomain_range].load()
+              mom_a1 = e3smdata3d[config['mom_a1']+E3SMdomain_range].load()
+              mom_a2 = e3smdata3d[config['mom_a2']+E3SMdomain_range].load()
+              mom_a3 = e3smdata3d[config['mom_a3']+E3SMdomain_range].load()
+              mom_a4 = e3smdata3d[config['mom_a4']+E3SMdomain_range].load()
+              ncl_a1 = e3smdata3d[config['ncl_a1']+E3SMdomain_range].load()
+              ncl_a2 = e3smdata3d[config['ncl_a2']+E3SMdomain_range].load()
+              ncl_a3 = e3smdata3d[config['ncl_a3']+E3SMdomain_range].load()
+              pom_a1 = e3smdata3d[config['pom_a1']+E3SMdomain_range].load()
+              pom_a3 = e3smdata3d[config['pom_a3']+E3SMdomain_range].load()
+              pom_a4 = e3smdata3d[config['pom_a4']+E3SMdomain_range].load()
+              so4_a1 = e3smdata3d[config['so4_a1']+E3SMdomain_range].load()
+              so4_a2 = e3smdata3d[config['so4_a2']+E3SMdomain_range].load()
+              so4_a3 = e3smdata3d[config['so4_a3']+E3SMdomain_range].load()
+              soa_a1 = e3smdata3d[config['soa_a1']+E3SMdomain_range].load()
+              soa_a2 = e3smdata3d[config['soa_a2']+E3SMdomain_range].load()
+              soa_a3 = e3smdata3d[config['soa_a3']+E3SMdomain_range].load()
           else:
               bc_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
               bc_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -322,7 +322,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
                 var = e3smdata3d[varname + E3SMdomain_range].load()
             except:
                 var = xr.DataArray(np.zeros(z3.shape)*np.nan,name=varname,\
-                                   dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata[config['vert_dim']],"ncol"+E3SMdomain_range:e3smdata[config['latlon_dim']+E3SMdomain_range]},\
+                                   dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata3d[config['vert_dim']],"ncol"+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
                                    attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             variables.append(var)
         e3smdata3d.close()
@@ -770,7 +770,8 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
         else:
           levm = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,x_idx].load()
 
-        e3smdata.close()
+        e3smdata3d.close()
+        e3smdata2d.close()
       
           
         # calculate theta
@@ -1261,7 +1262,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
       
       if len(matched_vlist) == len(req_vlist):
           print('\nAnalyzing for MODIS simulator cloud optical depth')
-          cod_m = e3smdata3d[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()*0.01   # cloud fraction is treated as 1 but is 100
+          cod_m = e3smdata2d[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()*0.01   # cloud fraction is treated as 1 but is 100
       else:
           cod_m = xr.DataArray(np.zeros(len(e3smtime))*np.nan)
     
@@ -1410,29 +1411,37 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
             var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
         except:
             var = xr.DataArray(np.zeros((len(e3smtime),len_lev,len_ncol))*np.nan,name=varname,\
-                               dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata[config['vert_dim']],"ncol"+E3SMdomain_range:e3smdata[config['latlon_dim']+E3SMdomain_range]},\
+                               dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata3d[config['vert_dim']],"ncol"+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
         variables.append(var)
         variable_names.append(varname)
     
-    e3smdata.close()
+    e3smdata3d.close()
+    e3smdata2d.close()
     
     #%%  add data for each day
-    for file in lst[1:]:
+    # for file in lst[1:]:
+    for ii in np.arange(lst3d[1:])+1:
         print(file)
-        e3smdata = xr.open_dataset(file)
-        e3smtime_i = e3smdata.indexes['time'].to_datetimeindex()
+        # e3smdata = xr.open_dataset(file)
+        e3smdata3d = xr.open_dataset(lst3d[ii])
+        e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+        e3smdata2d = xr.open_dataset(lst2d[ii])
+        e3smdata2d.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
+        
+        e3smtime_i = e3smdata3d.indexes['time'].to_datetimeindex()
         e3smtime = np.hstack((e3smtime, e3smtime_i))
 
+        T = e3smdata3d[config['T']+E3SMdomain_range][:,:,x_idx].load()
+
         if config['pres_output'] == False:
-          T = e3smdata[config['T']+E3SMdomain_range].load()
-          PS = e3smdata[config['PS']+E3SMdomain_range].load()
+          PS = e3smdata3d[config['PS']+E3SMdomain_range][:,x_idx].load()
           Pres = np.nan*T
           zlen = T.shape[1]
           for kk in range(zlen):
-            Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
+            Pres[:, kk] = hyam[kk]*P0  +  hybm[kk]*PS
         else:
-          Pres = e3smdata[config['PRES']]
+          Pres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,x_idx].load()
 
         if config['aerosol_output'] == True:
           # aerosol composition
@@ -1444,34 +1453,34 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           matched_vlist = list(set(av_vars).intersection(req_vlist))
           
           if len(matched_vlist) == len(req_vlist):
-              bc_a1 = e3smdata[config['bc_a1']+E3SMdomain_range].load()
-              bc_a3 = e3smdata[config['bc_a3']+E3SMdomain_range].load()
-              bc_a4 = e3smdata[config['bc_a4']+E3SMdomain_range].load()
-              dst_a1 = e3smdata[config['dst_a1']+E3SMdomain_range].load()
-              dst_a3 = e3smdata[config['dst_a3']+E3SMdomain_range].load()
-              mom_a1 = e3smdata[config['mom_a1']+E3SMdomain_range].load()
-              mom_a2 = e3smdata[config['mom_a2']+E3SMdomain_range].load()
-              mom_a3 = e3smdata[config['mom_a3']+E3SMdomain_range].load()
-              mom_a4 = e3smdata[config['mom_a4']+E3SMdomain_range].load()
-              ncl_a1 = e3smdata[config['ncl_a1']+E3SMdomain_range].load()
-              ncl_a2 = e3smdata[config['ncl_a2']+E3SMdomain_range].load()
-              ncl_a3 = e3smdata[config['ncl_a3']+E3SMdomain_range].load()
-              pom_a1 = e3smdata[config['pom_a1']+E3SMdomain_range].load()
-              pom_a3 = e3smdata[config['pom_a3']+E3SMdomain_range].load()
-              pom_a4 = e3smdata[config['pom_a4']+E3SMdomain_range].load()
-              so4_a1 = e3smdata[config['so4_a1']+E3SMdomain_range].load()
-              so4_a2 = e3smdata[config['so4_a2']+E3SMdomain_range].load()
-              so4_a3 = e3smdata[config['so4_a3']+E3SMdomain_range].load()
-              soa_a1 = e3smdata[config['soa_a1']+E3SMdomain_range].load()
-              soa_a2 = e3smdata[config['soa_a2']+E3SMdomain_range].load()
-              soa_a3 = e3smdata[config['soa_a3']+E3SMdomain_range].load()
-              bc  = bc_a1[:,-1,x_idx] +                       bc_a3[:,-1,x_idx] + bc_a4[:,-1,x_idx]
-              dst = dst_a1[:,-1,x_idx] +                      dst_a3[:,-1,x_idx]
-              mom = mom_a1[:,-1,x_idx] + mom_a2[:,-1,x_idx] + mom_a3[:,-1,x_idx] + mom_a4[:,-1,x_idx]
-              ncl = ncl_a1[:,-1,x_idx] + ncl_a2[:,-1,x_idx] + ncl_a3[:,-1,x_idx]
-              pom = pom_a1[:,-1,x_idx] +                    + pom_a3[:,-1,x_idx] + pom_a4[:,-1,x_idx]
-              so4 = so4_a1[:,-1,x_idx] + so4_a2[:,-1,x_idx] + so4_a3[:,-1,x_idx]
-              soa = soa_a1[:,-1,x_idx] + soa_a2[:,-1,x_idx] + soa_a3[:,-1,x_idx]
+              bc_a1 = e3smdata3d[config['bc_a1']+E3SMdomain_range][:,-1,x_idx].load()
+              bc_a3 = e3smdata3d[config['bc_a3']+E3SMdomain_range][:,-1,x_idx].load()
+              bc_a4 = e3smdata3d[config['bc_a4']+E3SMdomain_range][:,-1,x_idx].load()
+              dst_a1 = e3smdata3d[config['dst_a1']+E3SMdomain_range][:,-1,x_idx].load()
+              dst_a3 = e3smdata3d[config['dst_a3']+E3SMdomain_range][:,-1,x_idx].load()
+              mom_a1 = e3smdata3d[config['mom_a1']+E3SMdomain_range][:,-1,x_idx].load()
+              mom_a2 = e3smdata3d[config['mom_a2']+E3SMdomain_range][:,-1,x_idx].load()
+              mom_a3 = e3smdata3d[config['mom_a3']+E3SMdomain_range][:,-1,x_idx].load()
+              mom_a4 = e3smdata3d[config['mom_a4']+E3SMdomain_range][:,-1,x_idx].load()
+              ncl_a1 = e3smdata3d[config['ncl_a1']+E3SMdomain_range][:,-1,x_idx].load()
+              ncl_a2 = e3smdata3d[config['ncl_a2']+E3SMdomain_range][:,-1,x_idx].load()
+              ncl_a3 = e3smdata3d[config['ncl_a3']+E3SMdomain_range][:,-1,x_idx].load()
+              pom_a1 = e3smdata3d[config['pom_a1']+E3SMdomain_range][:,-1,x_idx].load()
+              pom_a3 = e3smdata3d[config['pom_a3']+E3SMdomain_range][:,-1,x_idx].load()
+              pom_a4 = e3smdata3d[config['pom_a4']+E3SMdomain_range][:,-1,x_idx].load()
+              so4_a1 = e3smdata3d[config['so4_a1']+E3SMdomain_range][:,-1,x_idx].load()
+              so4_a2 = e3smdata3d[config['so4_a2']+E3SMdomain_range][:,-1,x_idx].load()
+              so4_a3 = e3smdata3d[config['so4_a3']+E3SMdomain_range][:,-1,x_idx].load()
+              soa_a1 = e3smdata3d[config['soa_a1']+E3SMdomain_range][:,-1,x_idx].load()
+              soa_a2 = e3smdata3d[config['soa_a2']+E3SMdomain_range][:,-1,x_idx].load()
+              soa_a3 = e3smdata3d[config['soa_a3']+E3SMdomain_range][:,-1,x_idx].load()
+              bc  = bc_a1 + bc_a3 + bc_a4
+              dst = dst_a1 + dst_a3
+              mom = mom_a1 + mom_a2 + mom_a3 + mom_a4
+              ncl = ncl_a1 + ncl_a2 + ncl_a3
+              pom = pom_a1 + pom_a3 + pom_a4
+              so4 = so4_a1 + so4_a2 + so4_a3
+              soa = soa_a1 + soa_a2 + soa_a3
               # change time to standard datetime64 format
               bc.coords['time'] = bc.indexes['time'].to_datetimeindex()
               dst.coords['time'] = dst.indexes['time'].to_datetimeindex()
@@ -1503,17 +1512,17 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           matched_vlist = list(set(av_vars).intersection(req_vlist))
           
           if len(matched_vlist) == len(req_vlist):
-              num_a1 = e3smdata[config['num_a1']+E3SMdomain_range].load()
-              num_a2 = e3smdata[config['num_a2']+E3SMdomain_range].load()
-              num_a3 = e3smdata[config['num_a3']+E3SMdomain_range].load()
-              num_a4 = e3smdata[config['num_a4']+E3SMdomain_range].load()
-              dn1 = e3smdata[config['dgnd_a01']+E3SMdomain_range].load()
-              dn2 = e3smdata[config['dgnd_a02']+E3SMdomain_range].load()
-              dn3 = e3smdata[config['dgnd_a03']+E3SMdomain_range].load()
-              dn4 = e3smdata[config['dgnd_a04']+E3SMdomain_range].load()
-              numall = [num_a1[:, -1, x_idx].data, num_a2[:, -1, x_idx].data, num_a3[:, -1, x_idx].data, num_a4[:, -1, x_idx].data]
-              dnall  = [dn1[:, -1, x_idx].data,    dn2[:, -1, x_idx].data,    dn3[:, -1, x_idx].data,    dn4[:, -1, x_idx].data]
-              NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1, x_idx].data, Pres[:, -1, x_idx].data)
+              num_a1 = e3smdata3d[config['num_a1']+E3SMdomain_range][:, -1, x_idx].load()
+              num_a2 = e3smdata3d[config['num_a2']+E3SMdomain_range][:, -1, x_idx].load()
+              num_a3 = e3smdata3d[config['num_a3']+E3SMdomain_range][:, -1, x_idx].load()
+              num_a4 = e3smdata3d[config['num_a4']+E3SMdomain_range][:, -1, x_idx].load()
+              dn1 = e3smdata3d[config['dgnd_a01']+E3SMdomain_range][:, -1, x_idx].load()
+              dn2 = e3smdata3d[config['dgnd_a02']+E3SMdomain_range][:, -1, x_idx].load()
+              dn3 = e3smdata3d[config['dgnd_a03']+E3SMdomain_range][:, -1, x_idx].load()
+              dn4 = e3smdata3d[config['dgnd_a04']+E3SMdomain_range][:, -1, x_idx].load()
+              numall = [num_a1.data, num_a2.data, num_a3.data, num_a4.data]
+              dnall  = [dn1.data,    dn2.data,    dn3.data,    dn4.data]
+              NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1].data, Pres[:, -1].data)
               NCN2 = xr.DataArray(data=NCN,  dims=["size", "time"],
                   coords=dict(time=(["time"], e3smtime_i),size=(["size"], np.arange(1,3001))),
                   attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
@@ -1527,8 +1536,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
-            z3 = e3smdata[config['Z']+E3SMdomain_range][:,:,x_idx].load()
-            cloud = e3smdata[config['CF']+E3SMdomain_range][:,:,x_idx].load()
+            z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,x_idx].load()
+            cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
             dz = (z3[:,:-2].data - z3[:,2:].data)/2
             dz = np.append(dz, (z3[:,-2:-1].data+z3[:,-1:].data)/2, axis=1)
             dz = np.insert(dz,0,dz[:,0],axis=1)
@@ -1591,9 +1600,9 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
     
           if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing for effective radius')
-            rel = e3smdata[config['REL']+E3SMdomain_range][:,:,x_idx].load()
-            freql = e3smdata[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load()
-            icwnc = e3smdata[config['NC']+E3SMdomain_range][:,:,x_idx].load()
+            rel = e3smdata3d[config['REL']+E3SMdomain_range][:,:,x_idx].load()
+            freql = e3smdata3d[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load()
+            icwnc = e3smdata3d[config['NC']+E3SMdomain_range][:,:,x_idx].load()
     
             # calculate mean effective radius. 
             reff = calc_Reff_from_REL(rel.data, dz, freql.data, icwnc.data)
@@ -1613,8 +1622,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           
           if len(matched_vlist) == len(req_vlist):
               print('\nAnalyzing for cloud optical depth')
-              cod_a = e3smdata[config['TAU3D']+E3SMdomain_range][:,:,x_idx].load()
-              solin = e3smdata[config['SWDOWNTOA']+E3SMdomain_range][:,x_idx].load()
+              cod_a = e3smdata3d[config['TAU3D']+E3SMdomain_range][:,:,x_idx].load()
+              solin = e3smdata2d[config['SWDOWNTOA']+E3SMdomain_range][:,x_idx].load()
             
               # calculate mean optical depth
               cod = np.sum(cod_a.data,axis=1)
@@ -1634,7 +1643,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           
           if len(matched_vlist) == len(req_vlist):
               print('\nAnalyzing for MODIS simulator cloud optical depth')
-              cod_m = e3smdata[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx]  .load()*0.01   # cloud fraction is treated as 1 but is 100
+              cod_m = e3smdata2d[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx]  .load()*0.01   # cloud fraction is treated as 1 but is 100
           else:
               cod_m = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
 
@@ -1645,7 +1654,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           matched_vlist = list(set(av_vars).intersection(req_vlist))
           
           if len(matched_vlist) == len(req_vlist):
-              cdnc_col = e3smdata[config['NC2D']+E3SMdomain_range][:,x_idx].load()
+              cdnc_col = e3smdata3d[config['NC2D']+E3SMdomain_range][:,x_idx].load()
               weight = cloud*dz
               cdnc = cdnc_col/np.sum(weight,axis=1)
               cdnc[cdnc >2e9] = np.nan
@@ -1659,7 +1668,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing for mean cloud droplet number concentration')
             #compute cloud layer mean CDNC from 3D NC (note that if NC is not in-cloud only, one needs to divide by cloud fraction)
-            nc3d = e3smdata[config['NC']+E3SMdomain_range][:,:,x_idx].load()   
+            nc3d = e3smdata3d[config['NC']+E3SMdomain_range][:,:,x_idx].load()   
             if nc3d.attrs['units'] == '1/kg':
               rho = np.array(Pres[:,:,x_idx]/T[:,:,x_idx]/287.06)
               cdnc_rel = nc3d*rho/cloud/1e6
@@ -1685,7 +1694,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           
           if len(matched_vlist) == len(req_vlist):
               print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop and Bennartz 2007')
-              lwp = e3smdata[config['LWP']+E3SMdomain_range][:,x_idx].data
+              lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
               e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
               nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
               nd_arm = xr.DataArray(data=nd_arm*1e6,  dims=["time"],
@@ -1703,7 +1712,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           
           if len(matched_vlist) == len(req_vlist):
               print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop and Bennartz 2007')
-              lwp = e3smdata[config['LWP']+E3SMdomain_range][:,x_idx].data
+              lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
+              # lwp = e3smdata2d[config['LWPMODIS']+E3SMdomain_range][:,x_idx].data
               T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
               nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m, adiabaticity=0.8)
               nd_sat = xr.DataArray(data=nd_sat*1e6,  dims=["time"],
@@ -1717,7 +1727,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
         # all other 2D (surface and vertical integrated) variables
         for varname in variable2d_names:
             try:
-                var = e3smdata[varname + E3SMdomain_range][:,x_idx].load()
+                var = e3smdata2d[varname + E3SMdomain_range][:,x_idx].load()
                 var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
             except:
                 var = xr.DataArray(np.zeros((len(e3smtime_i),len_ncol))*np.nan,name=varname,\
@@ -1729,11 +1739,11 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
         # all other 3D (with vertical level) variables at the lowest model level
         for varname in variable3d_names:
             try:
-                var = e3smdata[varname + E3SMdomain_range][:,-1,x_idx].load()
+                var = e3smdata3d[varname + E3SMdomain_range][:,-1,x_idx].load()
                 var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
             except:
                 var = xr.DataArray(np.zeros((len(e3smtime_i),len_lev,len_ncol))*np.nan,name=varname,\
-                               dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime_i,"lev":e3smdata[config['vert_dim']],"ncol"+E3SMdomain_range:e3smdata[config['latlon_dim']+E3SMdomain_range]},\
+                               dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime_i,"lev":e3smdata3d[config['vert_dim']],"ncol"+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             vv = variable_names.index(varname)
             variables[vv] = xr.concat([variables[vv], var],dim='time')
