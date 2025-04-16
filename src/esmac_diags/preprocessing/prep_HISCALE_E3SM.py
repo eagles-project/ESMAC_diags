@@ -174,7 +174,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         # if len(lst)!=1:
         #     raise ValueError('Should only contain one file: '+lst)
         e3smdata3d = xr.open_dataset(lst3d[0])
-        e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+        e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim']+E3SMdomain_range,config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
         e3smtime = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
         lonm = e3smdata3d[config['LON']+E3SMdomain_range].load()
         latm = e3smdata3d[config['LAT']+E3SMdomain_range].load()
@@ -322,7 +322,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
                 var = e3smdata3d[varname + E3SMdomain_range].load()
             except:
                 var = xr.DataArray(np.zeros(z3.shape)*np.nan,name=varname,\
-                                   dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata3d[config['vert_dim']],"ncol"+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
+                                   dims=["time","lev"+E3SMdomain_range,"ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata3d[config['vert_dim']+E3SMdomain_range],"ncol"+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
                                    attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             variables.append(var)
         e3smdata3d.close()
@@ -651,9 +651,9 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     lst2d.sort()
     # first data
     e3smdata3d = xr.open_dataset(lst3d[0])
-    e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+    e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
     e3smdata2d = xr.open_dataset(lst2d[0])
-    e3smdata2d.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
+    e3smdata2d = e3smdata2d.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
                         
     e3smtime = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
     lonm = e3smdata3d[config['LON']+E3SMdomain_range].load()
@@ -1025,9 +1025,9 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
   
     # first data
     e3smdata3d = xr.open_dataset(lst3d[0])
-    e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+    e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
     e3smdata2d = xr.open_dataset(lst2d[0])
-    e3smdata2d.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
+    e3smdata2d = e3smdata2d.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
                         
     e3smtime = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
     lonm = e3smdata3d[config['LON']+E3SMdomain_range].load()
@@ -1425,9 +1425,9 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
         print(file)
         # e3smdata = xr.open_dataset(file)
         e3smdata3d = xr.open_dataset(lst3d[ii])
-        e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+        e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
         e3smdata2d = xr.open_dataset(lst2d[ii])
-        e3smdata2d.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
+        e3smdata2d = e3smdata2d.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
         
         e3smtime_i = e3smdata3d.indexes['time'].to_datetimeindex()
         e3smtime = np.hstack((e3smtime, e3smtime_i))
