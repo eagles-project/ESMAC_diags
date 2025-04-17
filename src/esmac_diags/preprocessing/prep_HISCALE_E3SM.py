@@ -171,6 +171,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
           phi_all = np.empty((999,0))
         
         lst3d = glob.glob(input_path + input3d_filehead+'.*'+timestr[0]+'-*.nc')
+        lst3d.sort()
         # if len(lst)!=1:
         #     raise ValueError('Should only contain one file: '+lst)
         e3smdata3d = xr.open_dataset(lst3d[0])
