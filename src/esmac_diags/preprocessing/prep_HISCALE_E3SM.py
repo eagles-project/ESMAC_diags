@@ -174,19 +174,37 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         lst3d.sort()
         # if len(lst)!=1:
         #     raise ValueError('Should only contain one file: '+lst)
+
+        #string split model file names to get sssss arrays
+        timesecstr_int = [int(filename.split('.')[-2].split('-')[-1]) for filename in lst3d]
+        #find last file time before first iwg flight time
+        firstfile_ind = np.where(timesecstr_int <= np.min(time_new_int))[-1][-1]
+        #Add any files to the list with times during the flight
+        lastfile_ind = np.where(np.logical_and(timesecstr_int > np.min(time_new_int), timesecstr_int <= np.max(time_new_int)))[0]
+        file_inds = np.concatenate([np.array(firstfile_ind).reshape(1), lastfile_ind])
+
+        #define model variable arrays with first model file
         e3smdata3d = xr.open_dataset(lst3d[0])
         e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim']+E3SMdomain_range,config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
         e3smtime = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
         lonm = e3smdata3d[config['LON']+E3SMdomain_range].load()
         latm = e3smdata3d[config['LAT']+E3SMdomain_range].load()
-        z3 = e3smdata3d[config['Z']+E3SMdomain_range].load()
+
+        #also only include portions of the domain that include the flight track by using the flight track min/max lat and lon +/- delta defined in config file
+        minlon = np.min(lon)+360 - config['model_grid_deg']
+        maxlon = np.max(lon)+360 + config['model_grid_deg']
+        minlat = np.min(lat) - config['model_grid_deg']
+        maxlat = np.max(lat) + config['model_grid_deg']
+        latlon_ind = np.where(np.logical_and(np.logical_and(np.logical_and(lonm >= minlon, lonm <= maxlon), latm >= minlat), latm <= maxlat))
+        
+        z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,latlon_ind[0],...].load()
 
         if config['pres_output'] == False:
           P0 = e3smdata3d[config['P0']].load()
           hyam = e3smdata3d[config['HYAM']].load()
           hybm = e3smdata3d[config['HYBM']].load()
-          T = e3smdata3d[config['T']+E3SMdomain_range].load()
-          PS = e3smdata3d[config['PS']+E3SMdomain_range].load()
+          T = e3smdata3d[config['T']+E3SMdomain_range][:,:,latlon_ind[0],...].load()
+          PS = e3smdata3d[config['PS']+E3SMdomain_range][:,latlon_ind[0],...].load()
           # Pres = np.nan*T
           # zlen = T.shape[1]
           Pres = xr.full_like(T, np.nan)
@@ -195,10 +213,11 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
           for kk in range(zlen):
               Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
         else:
-          Pres = e3smdata3d[config['PRES']+E3SMdomain_range].load()
+          Pres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,latlon_ind[0],...].load()
       
         # change time format into seconds of the day
-        timem = np.float64((e3smtime - e3smtime[0]).seconds)
+        # timem = np.float64((e3smtime - e3smtime[0]).seconds) # this only works for the first time being 0Z
+        timem = np.float64(e3smtime.hour + e3smtime.minute + e3smtime.second)*3600
         
         # Get all simulated variables
         vlist = list(e3smdata3d.variables.keys())
@@ -327,6 +346,34 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
                                    attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             variables.append(var)
         e3smdata3d.close()
+
+        #add model variable arrays at additional times if there are additional model output files within the flight period
+        for ii in np.arange(len(file_inds)-1):
+            e3smdata3d = xr.open_dataset(lst3d[ii+1])
+            e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim']+E3SMdomain_range,config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+            e3smtime = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
+            
+            newz3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,latlon_ind[0],...].load()
+            z3 = xr.concat([z3, newz3], dim=config['time_dim'])
+          
+            if config['pres_output'] == False:
+              T = e3smdata3d[config['T']+E3SMdomain_range][:,:,latlon_ind[0],...].load()
+              PS = e3smdata3d[config['PS']+E3SMdomain_range][:,latlon_ind[0],...].load()
+              newPres = xr.full_like(T, np.nan)
+              newPres = Pres.assign_attrs(units='Pa',long_name='Pressure',standard_name='air_pressure')
+              zlen = T.sizes[config['vert_dim']]
+              for kk in range(zlen):
+                  newPres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
+            else:
+              newPres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,latlon_ind[0],...].load()
+
+            Pres = xr.concat([Pres, newPres], dim=config['time_dim'])
+      
+            # change time format into seconds of the day
+            timem = np.concat[timem, np.float64(e3smtime.hour + e3smtime.minute + e3smtime.second)*3600]
+
+
+        
         
         #%% find the flight track grid
         for tt in range(len(time_new)):
