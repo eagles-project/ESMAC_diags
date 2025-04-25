@@ -24,8 +24,7 @@ E3SMsubdomain: False
 E3SMdomain_range: '' # '_330e_to_335e_37n_to_42n' for ENA; '_260e_to_265e_34n_to_39n' for SGP
 
 # model grid spacing (degrees)
-# used to subsample large lat-lon grids to small aircraft regions
-# default is 1 deg, ie, searching +/1 1 deg from the flight track; this can be reduced for finer resolution grids if wanted
+# used to load subsample of large model lat-lon grids around small aircraft regions
 model_grid_deg: 1
 
 # model array dimension names
