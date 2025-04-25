@@ -195,16 +195,16 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         maxlon = np.max(lon)+360 + config['model_grid_deg']
         minlat = np.min(lat) - config['model_grid_deg']
         maxlat = np.max(lat) + config['model_grid_deg']
-        latlon_ind = np.where(np.logical_and(np.logical_and(np.logical_and(lonm >= minlon, lonm <= maxlon), latm >= minlat), latm <= maxlat))
+        latlon_ind = np.where(np.logical_and(np.logical_and(np.logical_and(lonm >= minlon, lonm <= maxlon), latm >= minlat), latm <= maxlat))[0]
         
-        z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,latlon_ind[0],...].load()
+        z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,latlon_ind,...].load()
 
         if config['pres_output'] == False:
           P0 = e3smdata3d[config['P0']].load()
           hyam = e3smdata3d[config['HYAM']].load()
           hybm = e3smdata3d[config['HYBM']].load()
-          T = e3smdata3d[config['T']+E3SMdomain_range][:,:,latlon_ind[0],...].load()
-          PS = e3smdata3d[config['PS']+E3SMdomain_range][:,latlon_ind[0],...].load()
+          T = e3smdata3d[config['T']+E3SMdomain_range][:,:,latlon_ind,...].load()
+          PS = e3smdata3d[config['PS']+E3SMdomain_range][:,latlon_ind,...].load()
           # Pres = np.nan*T
           # zlen = T.shape[1]
           Pres = xr.full_like(T, np.nan)
@@ -213,7 +213,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
           for kk in range(zlen):
               Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
         else:
-          Pres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,latlon_ind[0],...].load()
+          Pres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,latlon_ind,...].load()
       
         # change time format into seconds of the day
         # timem = np.float64((e3smtime - e3smtime[0]).seconds) # this only works for the first time being 0Z
@@ -353,19 +353,19 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
             e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim']+E3SMdomain_range,config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
             e3smtime = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
             
-            newz3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,latlon_ind[0],...].load()
+            newz3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,latlon_ind,...].load()
             z3 = xr.concat([z3, newz3], dim=config['time_dim'])
           
             if config['pres_output'] == False:
-              T = e3smdata3d[config['T']+E3SMdomain_range][:,:,latlon_ind[0],...].load()
-              PS = e3smdata3d[config['PS']+E3SMdomain_range][:,latlon_ind[0],...].load()
+              T = e3smdata3d[config['T']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              PS = e3smdata3d[config['PS']+E3SMdomain_range][:,latlon_ind,...].load()
               newPres = xr.full_like(T, np.nan)
               newPres = Pres.assign_attrs(units='Pa',long_name='Pressure',standard_name='air_pressure')
               zlen = T.sizes[config['vert_dim']]
               for kk in range(zlen):
                   newPres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
             else:
-              newPres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,latlon_ind[0],...].load()
+              newPres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,latlon_ind,...].load()
 
             Pres = xr.concat([Pres, newPres], dim=config['time_dim'])
       
