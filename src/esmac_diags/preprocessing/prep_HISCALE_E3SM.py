@@ -188,16 +188,17 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         e3smdata3d = xr.open_dataset(lst3d[0])
         e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim']+E3SMdomain_range,config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
         e3smtime = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
-        lonm = e3smdata3d[config['LON']+E3SMdomain_range].load()
-        latm = e3smdata3d[config['LAT']+E3SMdomain_range].load()
+        tmplonm = e3smdata3d[config['LON']+E3SMdomain_range].load()
+        tmplatm = e3smdata3d[config['LAT']+E3SMdomain_range].load()
 
         #also only include portions of the domain that include the flight track by using the flight track min/max lat and lon +/- delta defined in config file
         minlon = np.min(lon)+360 - config['model_grid_deg']
         maxlon = np.max(lon)+360 + config['model_grid_deg']
         minlat = np.min(lat) - config['model_grid_deg']
         maxlat = np.max(lat) + config['model_grid_deg']
-        latlon_ind = np.where(np.logical_and(np.logical_and(np.logical_and(lonm >= minlon, lonm <= maxlon), latm >= minlat), latm <= maxlat))[0]
-        
+        latlon_ind = np.where(np.logical_and(np.logical_and(np.logical_and(tmplonm >= minlon, tmplonm <= maxlon), latm >= minlat), latm <= maxlat))[0]
+        lonm = tmplonm[:,:,latlon_ind,...]
+        latm = tmplatm[:,:,latlon_ind,...]
         z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,latlon_ind,...].load()
 
         if config['pres_output'] == False:
