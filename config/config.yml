@@ -90,8 +90,8 @@ PRES: 'p_mid'   # if pres_output = True
 Z: 'z_mid'      # z_mid, Z3
 T: 'T_mid'      # T_mid, T
 Q: 'qv'         # qv, Q
-U: 'u'          # u, U
-V: 'v'          # v, V
+U: 'U'          # u, U
+V: 'V'          # v, V
 CF: 'cldfrac_tot_for_analysis'     # cldfrac_tot_for_analysis, CLOUD
 CFLIQ: 'cldfrac_liq'  # cldfrac_liq, FREQL
 # LWC: 'LWC'      # if masscontent_output = True
