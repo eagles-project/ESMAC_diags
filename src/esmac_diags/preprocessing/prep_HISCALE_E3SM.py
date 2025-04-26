@@ -196,7 +196,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         maxlon = np.max(lon)+360 + config['model_grid_deg']
         minlat = np.min(lat) - config['model_grid_deg']
         maxlat = np.max(lat) + config['model_grid_deg']
-        latlon_ind = np.where(np.logical_and(np.logical_and(np.logical_and(tmplonm >= minlon, tmplonm <= maxlon), latm >= minlat), latm <= maxlat))[0]
+        latlon_ind = np.where(np.logical_and(np.logical_and(np.logical_and(tmplonm >= minlon, tmplonm <= maxlon), tmplatm >= minlat), tmplatm <= maxlat))[0]
         lonm = tmplonm[:,:,latlon_ind,...]
         latm = tmplatm[:,:,latlon_ind,...]
         z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,latlon_ind,...].load()
