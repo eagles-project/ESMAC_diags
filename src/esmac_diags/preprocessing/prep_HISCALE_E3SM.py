@@ -562,12 +562,12 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
             for varname in variable3d_names:
                 try:
                     new_var = e3smdata3d[varname + E3SMdomain_range][:,:,latlon_ind,...].load()
-                    var = xr.concat([var, new_var], dim=config['time_dim'])
+                    var = xr.concat([variables[varname], new_var], dim=config['time_dim'])
                 except:
                     new_var = xr.DataArray(np.zeros(z3.shape)*np.nan,name=varname,\
                                        dims=["time","lev"+E3SMdomain_range,"ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata3d[config['vert_dim']+E3SMdomain_range],"ncol"+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
                                        attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
-                    var = xr.concat([var, new_var], dim=config['time_dim'])
+                    var = xr.concat([variables[varname], new_var], dim=config['time_dim'])
                   
                 variables.append(var)
             e3smdata3d.close()   
