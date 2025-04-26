@@ -371,7 +371,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
             Pres = xr.concat([Pres, newPres], dim=config['time_dim'])
       
             # change time format into seconds of the day
-            timem = np.concatenate[timem, np.float64(e3smtime.hour + e3smtime.minute + e3smtime.second)*3600]
+            timem = np.concatenate([timem, np.float64(e3smtime.hour + e3smtime.minute + e3smtime.second)*3600])
             
             # variables for calculating aerosol size
             if config['aerosol_output'] == True:
