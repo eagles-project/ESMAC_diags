@@ -129,7 +129,8 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
             time[t] = hhmmss2sec(timestr[1])
         
         # re-shape the data into coarser resolution for output
-        time_new = np.arange(np.round(time[0]/dt), np.round(time[-1]/dt)) *dt
+        time_new = np.arange(np.round(time[0]/dt), np.round(time[-1]/dt))*dt
+        time_new_int = np.array([int(i) for i in time_new])
         lon_new = median_time_1d(time, lon, time_new)
         lat_new = median_time_1d(time, lat, time_new)
         height_new = median_time_1d(time, height, time_new)
