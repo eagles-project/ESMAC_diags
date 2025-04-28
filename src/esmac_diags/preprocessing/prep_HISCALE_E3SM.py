@@ -1764,13 +1764,13 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
               so4_all = xr.concat([so4_all, so4], dim=config['time_dim'])
               soa_all = xr.concat([soa_all, soa], dim=config['time_dim'])
           else:
-              bc_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='bc_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
-              dst_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='dst_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
-              mom_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='mom_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
-              ncl_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='ncl_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
-              pom_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='pom_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
-              so4_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='so4_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
-              soa_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='soa_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
+              bc_all  = xr.concat([bc_all, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='bc_all',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+              dst_all = xr.concat([dst_all, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='dst_all',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+              mom_all = xr.concat([mom_all, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='mom_all',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+              ncl_all = xr.concat([ncl_all, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='ncl_all',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+              pom_all = xr.concat([pom_all, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='pom_all',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+              so4_all = xr.concat([so4_all, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='so4_all',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+              soa_all = xr.concat([soa_all, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='soa_all',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
         
           # aerosol size
           req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], config['dgnd_a01'], config['dgnd_a02'], \
@@ -1795,7 +1795,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
                   attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
               NCNall = xr.concat([NCNall, NCN2], dim=config['time_dim'])
           else:
-              NCNall = xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name='NCNall',attrs={'units':'dummy_unit','long_name':'Dummy'})
+              NCNall = xr.concat([NCNall, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name='NCNall',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
     
         # variables to calculate cloud heights and depth
         print('\nAnalyzing cloud base, top, and depth')
@@ -1853,11 +1853,11 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
             ctt = xr.concat([ctt, ctt_2], dim=config['time_dim'])
             cloud_depth = xr.concat([cloud_depth, cloud_depth_2], dim=config['time_dim'])
         else:
-            cloud_depth = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cloud_depth',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            cbh = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cbh',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            cth = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cth',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            cbt = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cbt',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            ctt = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='ctt',attrs={'units':'dummy_unit','long_name':'Dummy'})
+            cloud_depth = xr.concat([cloud_depth, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cloud_depth',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+            cbh = xr.concat([cbh, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cbh',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+            cth = xr.concat([cth, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cth',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+            cbt = xr.concat([cbt, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cbt',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+            ctt = xr.concat([ctt, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='ctt',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
         
     
         # cloud optical depth and effective radius
@@ -1881,7 +1881,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
                 attrs=dict(long_name="mean cloud liquid effective radius",units="um"),)
             reff_mean = xr.concat([reff_mean, reff_2], dim=config['time_dim'])
         else:
-            reff_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='reff',attrs={'units':'dummy_unit','long_name':'Dummy'})
+            reff_mean = xr.concat([reff_mean, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='reff',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
         
         if config['tau3d_output'] == True:
           req_vlist = [config['TAU3D'], config['SWDOWNTOA']]
@@ -1902,7 +1902,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
                 attrs=dict(long_name="column-total cloud optical depth",units="N/A"),)
               cod_mean = xr.concat([cod_mean, cod_2], dim=config['time_dim'])
           else:
-              cod_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cod',attrs={'units':'dummy_unit','long_name':'Dummy'})
+              cod_mean = xr.concat([cod_mean, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cod',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
 
         if config['cosp_output'] == True:   
           req_vlist = [config['TAULIQMODIS']]
@@ -1911,9 +1911,10 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           
           if len(matched_vlist) == len(req_vlist):
               print('\nAnalyzing for MODIS simulator cloud optical depth')
-              cod_m = e3smdata2d[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx]  .load()*0.01   # cloud fraction is treated as 1 but is 100
+              cod_m2 = e3smdata2d[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()*0.01   # cloud fraction is treated as 1 but is 100
+              cod_m = xr.concat([cod_m, cod_m2], dim=config['time_dim'])
           else:
-              cod_m = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              cod_m = xr.concat([cod_m, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
 
         # mean cloud droplet number concentration
         if config['colnc_output'] == True:
@@ -1931,7 +1932,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
                   attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
               cdnc_mean = xr.concat([cdnc_mean, cdnc], dim=config['time_dim'])
           else:
-              cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_mean',attrs={'units':'dummy_unit','long_name':'Dummy'})
+              cdnc_mean = xr.concat([cdnc_mean, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cdnc_mean',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
         else:
           if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing for mean cloud droplet number concentration')
@@ -1952,7 +1953,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
                     attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
             cdnc_mean = xr.concat([cdnc_mean, cdnc], dim=config['time_dim'])
           else:
-            cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+            cdnc_mean = r.concat([cdnc_mean, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
             
         # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
         if config['reff_output'] == True:
@@ -1971,7 +1972,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
                               description='Retrieved using ARM Ndrop algorithm'),)
               cdnc_arm = xr.concat([cdnc_arm, nd_arm], dim=config['time_dim'])
           else:
-              cdnc_arm = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_arm',attrs={'units':'dummy_unit','long_name':'Dummy'})
+              cdnc_arm = xr.concat([cdnc_arm, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cdnc_arm',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
     
         if config['cosp_output'] == True:
           req_vlist = [config['LWP']]
@@ -1990,7 +1991,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
                               description='Retrieved using Bennartz(2007) algorithm, also used for VISST data'),)
               cdnc_sat = xr.concat([cdnc_sat, nd_sat], dim=config['time_dim'])
           else:
-              cdnc_sat = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_sat',attrs={'units':'dummy_unit','long_name':'Dummy'})    
+              cdnc_sat = xr.concat([cdnc_sat, xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_sat',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
         
         # all other 2D (surface and vertical integrated) variables
         for varname in variable2d_names:
