@@ -2008,7 +2008,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
             vv = variable_names.index(varname)
             variables[vv] = xr.concat([variables[vv], var],dim=config['time_dim'])
     
-        e3smdata.close()
+        e3smdata3d.close()
+        e3smdata2d.close()
       
     # put all variables into the list
     if config['aerosol_output'] == True:
