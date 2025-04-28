@@ -173,7 +173,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         
         lst3d = glob.glob(input_path + input3d_filehead+'.*'+timestr[0]+'-*.nc')
         lst3d.sort()
-        if len(lst)==0:
+        if len(lst3d)==0:
             raise ValueError('No model output files on flight day')
 
         #string split model file names to get sssss arrays
