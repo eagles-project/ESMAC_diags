@@ -1421,7 +1421,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
     matched_vlist = list(set(av_vars).intersection(req_vlist))
     
     if len(matched_vlist) == len(req_vlist):
-        print('\nAnalyzing for variables to calculate Reff and Nd')
+        print('\nAnalyzing cloud base, top, and depth')
         z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,x_idx].load()
         cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
         dz = (z3[:,:-2].data - z3[:,2:].data)/2
@@ -1649,8 +1649,11 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
             var = e3smdata2d[varname + E3SMdomain_range][:,x_idx].load()
             var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
         except:
-            var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
-                               dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime,config['latlon_dim']+E3SMdomain_range:np.arange(len_ncol)},\
+            # var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
+            #                    dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime,config['latlon_dim']+E3SMdomain_range:np.arange(len_ncol)},\
+            #                    attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+            var = xr.DataArray(np.zeros((len(e3smtime)))*np.nan,name=varname,\
+                               dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
         if varname==config['AODABS'] or varname==config['AOD']:
             var.attrs['units']='N/A'
@@ -1670,8 +1673,11 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
             var = e3smdata3d[varname + E3SMdomain_range][:,-1,x_idx].load()
             var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
         except:
-            var = xr.DataArray(np.zeros((len(e3smtime),len_lev,len_ncol))*np.nan,name=varname,\
-                               dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime,config['vert_dim']:e3smdata3d[config['vert_dim']],config['latlon_dim']+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
+            # var = xr.DataArray(np.zeros((len(e3smtime),len_lev,len_ncol))*np.nan,name=varname,\
+            #                    dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime,config['vert_dim']:e3smdata3d[config['vert_dim']],config['latlon_dim']+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
+            #                    attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+            var = xr.DataArray(np.zeros((len(e3smtime),len_lev))*np.nan,name=varname,\
+                               dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime,config['vert_dim']:e3smdata3d[config['vert_dim']]},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
         variables.append(var)
         variable_names.append(varname)
@@ -1792,6 +1798,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
               NCNall = xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name='NCNall',attrs={'units':'dummy_unit','long_name':'Dummy'})
     
         # variables to calculate cloud heights and depth
+        print('\nAnalyzing cloud base, top, and depth')
         req_vlist = [config['Z'], config['CF']]
         req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
@@ -1991,8 +1998,11 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
                 var = e3smdata2d[varname + E3SMdomain_range][:,x_idx].load()
                 var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
             except:
-                var = xr.DataArray(np.zeros((len(e3smtime_i),len_ncol))*np.nan,name=varname,\
-                               dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i,config['latlon_dim']+E3SMdomain_range:np.arange(len_ncol)},\
+                # var = xr.DataArray(np.zeros((len(e3smtime_i),len_ncol))*np.nan,name=varname,\
+                #                dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i,config['latlon_dim']+E3SMdomain_range:np.arange(len_ncol)},\
+                #                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+                var = xr.DataArray(np.zeros((len(e3smtime_i)))*np.nan,name=varname,\
+                               dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             vv = variable_names.index(varname)
             variables[vv] = xr.concat([variables[vv], var],dim=config['time_dim'])
@@ -2003,8 +2013,11 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
                 var = e3smdata3d[varname + E3SMdomain_range][:,-1,x_idx].load()
                 var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
             except:
-                var = xr.DataArray(np.zeros((len(e3smtime_i),len_lev,len_ncol))*np.nan,name=varname,\
-                               dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i,config['vert_dim']:e3smdata3d[config['vert_dim']],config['latlon_dim']+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
+                # var = xr.DataArray(np.zeros((len(e3smtime_i),len_lev,len_ncol))*np.nan,name=varname,\
+                #                dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i,config['vert_dim']:e3smdata3d[config['vert_dim']],config['latlon_dim']+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
+                #                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+                var = xr.DataArray(np.zeros((len(e3smtime_i),len_lev))*np.nan,name=varname,\
+                               dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i,config['vert_dim']:e3smdata3d[config['vert_dim']]},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             vv = variable_names.index(varname)
             variables[vv] = xr.concat([variables[vv], var],dim=config['time_dim'])
@@ -2085,7 +2098,6 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
     variables_new = list()
     #1d variable. only numpy.interp can keep some single-point values (see Nd_mean)
     for var in variables:
-        print(str(var), str(np.shape(var)))
         var_new = np.interp(np.int64(time_new), np.int64(e3smtime), var, left=np.nan, right=np.nan)
         variables_new.append(var_new)
     # treat variables with other dimensions (e.g., size distribution)
