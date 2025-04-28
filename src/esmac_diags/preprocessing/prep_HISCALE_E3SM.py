@@ -360,9 +360,11 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
             
             newz3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,latlon_ind,...].load()
             z3 = xr.concat([z3, newz3], dim=config['time_dim'])
-          
+
+            newT = e3smdata3d[config['T']+E3SMdomain_range][:,:,latlon_ind,...].load()
+            T = xr.concat([T, newT], dim=config['time_dim'])
+
             if config['pres_output'] == False:
-              T = e3smdata3d[config['T']+E3SMdomain_range][:,:,latlon_ind,...].load()
               PS = e3smdata3d[config['PS']+E3SMdomain_range][:,latlon_ind,...].load()
               newPres = xr.full_like(T, np.nan)
               newPres = Pres.assign_attrs(units='Pa',long_name='Pressure',standard_name='air_pressure')
