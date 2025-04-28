@@ -830,7 +830,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         # global attributes
         f.title = 'preprocessed E3SM data along aircraft track at the nearest time, grid, and vertical level'
         f.aircraftfile = filename.split('/')[-1]
-        f.modelfile = lst[0].split('/')[-1]
+        f.modelfile = lst3d[0].split('/')[-1]
         f.date = ttt.ctime(ttt.time())
         
         f.close()
