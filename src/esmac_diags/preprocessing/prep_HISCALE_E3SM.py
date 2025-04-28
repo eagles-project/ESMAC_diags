@@ -1436,14 +1436,14 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
         cf_sum_top = np.cumsum(cloud.data, axis=1)
         cf_sum_top[cf_sum_top > 1] = 1
         cf_sum_top_diff = cf_sum_top[:,1:] - cf_sum_top[:,0:-1]
-        z_cldtop = np.sum(Zmid[:,:]*cf_sum_top_diff[:,:], axis=1)
-        T_cldtop = np.sum(Tmid[:,:]*cf_sum_top_diff[:,:], axis=1)
+        z_cldtop = np.sum(Zmid*cf_sum_top_diff, axis=1)
+        T_cldtop = np.sum(Tmid*cf_sum_top_diff, axis=1)
         # cloud base
         cf_sum_base = np.cumsum(cloud[:, ::-1].data, axis=1)
         cf_sum_base[cf_sum_base > 1] = 1
         cf_sum_base_diff = cf_sum_base[:,1:] - cf_sum_base[:,0:-1]
-        z_cldbase = np.sum(Zmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
-        T_cldbase = np.sum(Tmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
+        z_cldbase = np.sum(Zmid[:,::-1]*cf_sum_base_diff, axis=1)
+        T_cldbase = np.sum(Tmid[:,::-1]*cf_sum_base_diff, axis=1)
         # normalize cloud fraction when not 100%
         z_cldtop = z_cldtop / cf_sum_top[:,-1]
         T_cldtop = T_cldtop / cf_sum_top[:,-1]
@@ -1810,14 +1810,14 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
             cf_sum_top = np.cumsum(cloud.data, axis=1)
             cf_sum_top[cf_sum_top > 1] = 1
             cf_sum_top_diff = cf_sum_top[:,1:] - cf_sum_top[:,0:-1]
-            z_cldtop = np.sum(Zmid[:,:]*cf_sum_top_diff[:,:], axis=1)
-            T_cldtop = np.sum(Tmid[:,:]*cf_sum_top_diff[:,:], axis=1)
+            z_cldtop = np.sum(Zmid*cf_sum_top_diff, axis=1)
+            T_cldtop = np.sum(Tmid*cf_sum_top_diff, axis=1)
             # cloud base
             cf_sum_base = np.cumsum(cloud[:, ::-1].data, axis=1)
             cf_sum_base[cf_sum_base > 1] = 1
             cf_sum_base_diff = cf_sum_base[:,1:] - cf_sum_base[:,0:-1]
-            z_cldbase = np.sum(Zmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
-            T_cldbase = np.sum(Tmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
+            z_cldbase = np.sum(Zmid[:,::-1]*cf_sum_base_diff, axis=1)
+            T_cldbase = np.sum(Tmid[:,::-1]*cf_sum_base_diff, axis=1)
             # normalize cloud fraction when not 100%
             z_cldtop = z_cldtop / cf_sum_top[:,-1]
             T_cldtop = T_cldtop / cf_sum_top[:,-1]
