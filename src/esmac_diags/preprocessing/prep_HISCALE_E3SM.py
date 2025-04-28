@@ -1283,6 +1283,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
     lst2d.sort()
   
     # first data
+    print(lst3d[0])
     e3smdata3d = xr.open_dataset(lst3d[0])
     e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
     e3smdata2d = xr.open_dataset(lst2d[0])
@@ -1680,8 +1681,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
     
     #%%  add data for each day
     # for file in lst[1:]:
-    for ii in np.arange(lst3d[1:])+1:
-        print(file)
+    for ii in np.arange(len(lst3d[1:]))+1:
+        print(lst3d[ii])
         # e3smdata = xr.open_dataset(file)
         e3smdata3d = xr.open_dataset(lst3d[ii])
         e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
