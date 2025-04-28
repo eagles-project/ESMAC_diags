@@ -1930,7 +1930,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
             #compute cloud layer mean CDNC from 3D NC (note that if NC is not in-cloud only, one needs to divide by cloud fraction)
             nc3d = e3smdata3d[config['NC']+E3SMdomain_range][:,:,x_idx].load()   
             if nc3d.attrs['units'] == '1/kg':
-              rho = np.array(Pres[:,:,x_idx]/T[:,:,x_idx]/287.06)
+              rho = np.array(Pres/T/287.06)
               cdnc_rel = nc3d*rho/cloud/1e6
             if nc3d.attrs['units'] == 'm-3':
               cdnc_rel = nc3d/cloud/1e6
