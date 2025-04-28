@@ -2132,7 +2132,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
         ds['NCNall'].attrs["description"] = 'calculated from modal information into 1nm increment'
     
     ds.attrs["title"] = 'preprocessed E3SM data at surface, TOA or the lowest model level'
-    ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
+    ds.attrs["inputfile_sample"] = lst3d[0].split('/')[-1]
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
