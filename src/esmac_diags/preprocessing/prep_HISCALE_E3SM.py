@@ -186,7 +186,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
 
         #define model variable arrays with first model file
         e3smdata3d = xr.open_dataset(lst3d[0])
-        e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim']+E3SMdomain_range,config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+        e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
         e3smtime = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
         tmplonm = e3smdata3d[config['LON']+E3SMdomain_range].load()
         tmplatm = e3smdata3d[config['LAT']+E3SMdomain_range].load()
@@ -342,18 +342,21 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         for varname in variable3d_names:
             try:
                 var = e3smdata3d[varname + E3SMdomain_range][:,:,latlon_ind,...].load()
+                var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
             except:
                 var = xr.DataArray(np.zeros(z3.shape)*np.nan,name=varname,\
-                                   dims=["time","lev"+E3SMdomain_range,"ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata3d[config['vert_dim']+E3SMdomain_range],"ncol"+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
+                                   dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime,config['vert_dim']:e3smdata3d[config['vert_dim']],config['latlon_dim']+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
                                    attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             variables.append(var)
+        
         e3smdata3d.close()
 
         #add model variable arrays at additional times if there are additional model output files within the flight period
         for ii in np.arange(len(file_inds)-1):
             e3smdata3d = xr.open_dataset(lst3d[ii+1])
-            e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim']+E3SMdomain_range,config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
-            e3smtime = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
+            e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+            e3smtime_i = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
+            e3smtime = np.hstack((e3smtime, e3smtime_i))
             
             newz3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,latlon_ind,...].load()
             z3 = xr.concat([z3, newz3], dim=config['time_dim'])
@@ -372,7 +375,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
             Pres = xr.concat([Pres, newPres], dim=config['time_dim'])
       
             # change time format into seconds of the day
-            timem = np.concatenate([timem, np.float64(e3smtime.hour + e3smtime.minute + e3smtime.second)*3600])
+            timem = np.concatenate([timem, np.float64(e3smtime_i.hour + e3smtime_i.minute + e3smtime_i.second)*3600])
             
             # variables for calculating aerosol size
             if config['aerosol_output'] == True:
@@ -561,15 +564,16 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
             # other variables
             for varname in variable3d_names:
                 try:
-                    new_var = e3smdata3d[varname + E3SMdomain_range][:,:,latlon_ind,...].load()
-                    var = xr.concat([variables[varname], new_var], dim=config['time_dim'])
+                    var = e3smdata3d[varname + E3SMdomain_range][:,:,latlon_ind,...].load()
+                    var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
                 except:
-                    new_var = xr.DataArray(np.zeros(z3.shape)*np.nan,name=varname,\
-                                       dims=["time","lev"+E3SMdomain_range,"ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata3d[config['vert_dim']+E3SMdomain_range],"ncol"+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
+                    var = xr.DataArray(np.zeros(z3.shape)*np.nan,name=varname,\
+                                       dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i,config['vert_dim']:e3smdata3d[config['vert_dim']],config['latlon_dim']+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
                                        attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
-                    var = xr.concat([variables[varname], new_var], dim=config['time_dim'])
-                  
-                variables.append(var)
+                
+                vv = variable_names.index(varname)
+                variables[vv] = xr.concat([variables[vv], var],dim=config['time_dim'])            
+          
             e3smdata3d.close()   
         
         #%% find the flight track grid
@@ -993,7 +997,7 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
         print(lst3d[ii])
         e3smdata3d = xr.open_dataset(lst3d[ii])
         e3smdata2d = xr.open_dataset(lst2d[ii])
-        e3smtime_i = e3smdata3d.indexes['time'].to_datetimeindex()
+        e3smtime_i = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
         e3smtime = np.hstack((e3smtime, e3smtime_i))
         
         z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,x_idx].load()
@@ -1112,79 +1116,79 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
         
     # put all variables into the list
     # p-level
-    cp = xr.DataArray(data=cloud_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    cp = xr.DataArray(data=cloud_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=cloud.long_name, units=cloud.units),)
-    tp = xr.DataArray(data=T_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    tp = xr.DataArray(data=T_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=T.long_name, units=T.units),)
-    qp = xr.DataArray(data=Q_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    qp = xr.DataArray(data=Q_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=Q.long_name, units=Q.units),)
-    rhp = xr.DataArray(data=RH_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    rhp = xr.DataArray(data=RH_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=RH.long_name, units=RH.units),)
-    thp = xr.DataArray(data=theta_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    thp = xr.DataArray(data=theta_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='Potential Temperature', units='K'),)
-    zp = xr.DataArray(data=z_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    zp = xr.DataArray(data=z_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=z3.long_name, units=z3.units),)
     varnames_p = [ 'cloud_p', 'T_p', 'Q_p', 'RH_p', 'theta_p', 'Z_p']
     variables_p = [   cp,      tp,     qp,    rhp,    thp,    zp]
     # z-level
-    cz = xr.DataArray(data=cloud_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    cz = xr.DataArray(data=cloud_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=cloud.long_name, units=cloud.units),)
-    tz = xr.DataArray(data=T_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    tz = xr.DataArray(data=T_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=T.long_name, units=T.units),)
-    qz = xr.DataArray(data=Q_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    qz = xr.DataArray(data=Q_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=Q.long_name, units=Q.units),)
-    rhz = xr.DataArray(data=RH_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    rhz = xr.DataArray(data=RH_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=RH.long_name, units=RH.units),)
-    thz = xr.DataArray(data=theta_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    thz = xr.DataArray(data=theta_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='Potential Temperature', units='K'),)
-    pz = xr.DataArray(data=p_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    pz = xr.DataArray(data=p_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='Pressure', units='hPa'),)
     varnames_z = [ 'cloud_z', 'T_z', 'Q_z', 'RH_z', 'theta_z', 'P_z']
     variables_z = [   cz,      tz,     qz,    rhz,    thz,    pz]
     #
-    l700 = xr.DataArray(data=LTS700_new,  dims=["time"],
-        coords=dict(time=(["time"], time_new), ),
+    l700 = xr.DataArray(data=LTS700_new,  dims=[config['time_dim']],
+        coords=dict(time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='lower troposphere stability (700hPa theta - surface theta)', units='K'),)
-    l850 = xr.DataArray(data=LTS850_new,  dims=["time"],
-        coords=dict(time=(["time"], time_new), ),
+    l850 = xr.DataArray(data=LTS850_new,  dims=[config['time_dim']],
+        coords=dict(time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='lower troposphere stability (850hPa theta - surface theta)', units='K'),)
     varnames_1d = [ 'LTS700', 'LTS850']
     variables_1d = [l700, l850]
     
     # %% output extacted file
     varall_p = {
-            varnames_p[vv]: (['time','lev',], np.float32(variables_p[vv])) for vv in range(len(varnames_p))
+            varnames_p[vv]: ([config['time_dim'],config['vert_dim'],], np.float32(variables_p[vv])) for vv in range(len(varnames_p))
     }
     varall_z = {
-            varnames_z[vv]: (['time','height',], np.float32(variables_z[vv])) for vv in range(len(varnames_z))
+            varnames_z[vv]: ([config['time_dim'],'height',], np.float32(variables_z[vv])) for vv in range(len(varnames_z))
     }
     varall_1d = {
-            varnames_1d[vv]: (['time',], np.float32(variables_1d[vv])) for vv in range(len(varnames_1d))
+            varnames_1d[vv]: ([config['time_dim'],], np.float32(variables_1d[vv])) for vv in range(len(varnames_1d))
     }
     varall_1d.update(varall_p)
     varall_1d.update(varall_z)
     outfile = output_path + output_filehead + '_profiles.nc'
     print('output file '+outfile)
     ds = xr.Dataset( varall_1d,
-                     coords={'time' : ('time', time_new), 
-                             'lev' : ('lev', lev_out), 
+                     coords={config['time_dim'] : (config['time_dim'], time_new), 
+                             config['vert_dim'] : (config['vert_dim'], lev_out), 
                              'height' : ('height', height_out),
                              })
     #assign attributes
-    ds['time'].attrs["long_name"] = "Time"
-    ds['time'].attrs["standard_name"] = "time"
+    ds[config['time_dim']].attrs["long_name"] = "Time"
+    ds[config['time_dim']].attrs["standard_name"] = "time"
     for vv in range(len(varnames_p)):
         ds[varnames_p[vv]].attrs["long_name"] = variables_p[vv].long_name
         ds[varnames_p[vv]].attrs["units"] = variables_p[vv].units
@@ -1359,13 +1363,13 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           soa_all.attrs['units'] = soa_a1.units
           soa_all.attrs['long_name'] = 'secondary organic aerosol concentration'
           # change time to standard datetime64 format
-          bc_all.coords['time'] = bc_all.indexes['time'].to_datetimeindex()
-          dst_all.coords['time'] = dst_all.indexes['time'].to_datetimeindex()
-          mom_all.coords['time'] = mom_all.indexes['time'].to_datetimeindex()
-          ncl_all.coords['time'] = ncl_all.indexes['time'].to_datetimeindex()
-          pom_all.coords['time'] = pom_all.indexes['time'].to_datetimeindex()
-          so4_all.coords['time'] = so4_all.indexes['time'].to_datetimeindex()
-          soa_all.coords['time'] = soa_all.indexes['time'].to_datetimeindex()
+          bc_all.coords[config['time_dim']] = bc_all.indexes[config['time_dim']].to_datetimeindex()
+          dst_all.coords[config['time_dim']] = dst_all.indexes[config['time_dim']].to_datetimeindex()
+          mom_all.coords[config['time_dim']] = mom_all.indexes[config['time_dim']].to_datetimeindex()
+          ncl_all.coords[config['time_dim']] = ncl_all.indexes[config['time_dim']].to_datetimeindex()
+          pom_all.coords[config['time_dim']] = pom_all.indexes[config['time_dim']].to_datetimeindex()
+          so4_all.coords[config['time_dim']] = so4_all.indexes[config['time_dim']].to_datetimeindex()
+          soa_all.coords[config['time_dim']] = soa_all.indexes[config['time_dim']].to_datetimeindex()
       else:
           bc_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
           dst_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -1395,7 +1399,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           dnall  = [dn1.data,    dn2.data,    dn3.data,    dn4.data]
           NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1].data, Pres[:, -1].data)
           NCNall = xr.DataArray(data=NCN,  dims=["size", "time"],
-              coords=dict(time=(["time"], e3smtime),size=(["size"], np.arange(1,3001))),
+              coords=dict(time=([config['time_dim']], e3smtime),size=(["size"], np.arange(1,3001))),
               attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
       else:
           NCNall = xr.DataArray(np.zeros((3000,len(e3smtime)))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -1436,20 +1440,20 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
         T_cldbase = T_cldbase / cf_sum_base[:,-1]
         e3sm_cloud_depth = z_cldtop - z_cldbase
 
-        cloud_depth = xr.DataArray(data=e3sm_cloud_depth,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
+        cloud_depth = xr.DataArray(data=e3sm_cloud_depth,  dims=[config['time_dim']],
+            coords=dict(time=([config['time_dim']], e3smtime)),
             attrs=dict(long_name="cloud depth",units="m"),)
-        cbh = xr.DataArray(data=z_cldbase,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
+        cbh = xr.DataArray(data=z_cldbase,  dims=[config['time_dim']],
+            coords=dict(time=([config['time_dim']], e3smtime)),
             attrs=dict(long_name="cloud base height",units="m"),)
-        cth = xr.DataArray(data=z_cldtop,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
+        cth = xr.DataArray(data=z_cldtop,  dims=[config['time_dim']],
+            coords=dict(time=([config['time_dim']], e3smtime)),
             attrs=dict(long_name="cloud top height",units="m"),)
-        cbt = xr.DataArray(data=T_cldbase,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
+        cbt = xr.DataArray(data=T_cldbase,  dims=[config['time_dim']],
+            coords=dict(time=([config['time_dim']], e3smtime)),
             attrs=dict(long_name="cloud base temperature",units="K"),)
-        ctt = xr.DataArray(data=T_cldtop,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
+        ctt = xr.DataArray(data=T_cldtop,  dims=[config['time_dim']],
+            coords=dict(time=([config['time_dim']], e3smtime)),
             attrs=dict(long_name="cloud top temperature",units="K"),)
     else:
         cloud_depth = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -1474,8 +1478,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
         reff = calc_Reff_from_REL(rel.data, dz, freql.data, icwnc.data)
         reff[reff==0] = np.nan
   
-        reff_mean = xr.DataArray(data=reff,  dims=["time"],
-              coords=dict(time=(["time"], e3smtime)),
+        reff_mean = xr.DataArray(data=reff,  dims=[config['time_dim']],
+              coords=dict(time=([config['time_dim']], e3smtime)),
               attrs=dict(long_name="mean cloud liquid effective radius",units="um"),)
       else:
           reff_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='reff',attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -1494,8 +1498,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           cod = np.sum(cod_a.data,axis=1)
           # cod[solin==0] = np.nan        
           
-          cod_mean = xr.DataArray(data=cod,  dims=["time"],
-              coords=dict(time=(["time"], e3smtime)),
+          cod_mean = xr.DataArray(data=cod,  dims=[config['time_dim']],
+              coords=dict(time=([config['time_dim']], e3smtime)),
               attrs=dict(long_name="column-total cloud optical depth",units="N/A"),)
       else:
           cod_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cod',attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -1523,8 +1527,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           weight = cloud*dz
           cdnc_mean = cdnc_col/weight.sum(dim=config['vert_dim'])
           cdnc_mean[cdnc_mean >2e9] = np.nan
-          cdnc_mean = xr.DataArray(data=cdnc_mean,  dims=["time"],
-              coords=dict(time=(["time"], e3smtime)),
+          cdnc_mean = xr.DataArray(data=cdnc_mean,  dims=[config['time_dim']],
+              coords=dict(time=([config['time_dim']], e3smtime)),
               attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
       else:
           cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -1544,8 +1548,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
         cdnc_rel_avg = cdnc_rel.dot(weight, dims=config['vert_dim'])
         cdnc_mean = np.divide(cdnc_rel_avg, weight_column)
         
-        cdnc_mean = xr.DataArray(data=cdnc_mean,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime)),
+        cdnc_mean = xr.DataArray(data=cdnc_mean,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime)),
                 attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
       else:
         cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -1562,8 +1566,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
           nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
         
-          cdnc_arm = xr.DataArray(data=nd_arm*1e6,  dims=["time"],
-              coords=dict(time=(["time"], e3smtime)),
+          cdnc_arm = xr.DataArray(data=nd_arm*1e6,  dims=[config['time_dim']],
+              coords=dict(time=([config['time_dim']], e3smtime)),
               attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
                           description='Retrieved using ARM Ndrop algorithm'),)
       else:
@@ -1581,8 +1585,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
           nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m, adiabaticity=0.8)
         
-          cdnc_sat = xr.DataArray(data=nd_sat*1e6,  dims=["time"],
-              coords=dict(time=(["time"], e3smtime)),
+          cdnc_sat = xr.DataArray(data=nd_sat*1e6,  dims=[config['time_dim']],
+              coords=dict(time=([config['time_dim']], e3smtime)),
               attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
                           description='Retrieved using Bennartz(2007) algorithm, also used for VISST data'),)
       else:
@@ -1632,10 +1636,10 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
     for varname in variable2d_names:
         try:
             var = e3smdata2d[varname + E3SMdomain_range][:,x_idx].load()
-            var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
+            var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
         except:
             var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
-                               dims=["time","ncol"+E3SMdomain_range],coords={"time":e3smtime,"ncol"+E3SMdomain_range:np.arange(len_ncol)},\
+                               dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime,config['latlon_dim']+E3SMdomain_range:np.arange(len_ncol)},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
         if varname==config['AODABS'] or varname==config['AOD']:
             var.attrs['units']='N/A'
@@ -1653,10 +1657,10 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
     for varname in variable3d_names:
         try:
             var = e3smdata3d[varname + E3SMdomain_range][:,-1,x_idx].load()
-            var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
+            var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
         except:
             var = xr.DataArray(np.zeros((len(e3smtime),len_lev,len_ncol))*np.nan,name=varname,\
-                               dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata3d[config['vert_dim']],"ncol"+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
+                               dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime,config['vert_dim']:e3smdata3d[config['vert_dim']],config['latlon_dim']+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
         variables.append(var)
         variable_names.append(varname)
@@ -1674,7 +1678,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
         e3smdata2d = xr.open_dataset(lst2d[ii])
         e3smdata2d = e3smdata2d.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
         
-        e3smtime_i = e3smdata3d.indexes['time'].to_datetimeindex()
+        e3smtime_i = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
         e3smtime = np.hstack((e3smtime, e3smtime_i))
 
         T = e3smdata3d[config['T']+E3SMdomain_range][:,:,x_idx].load()
@@ -1727,20 +1731,20 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
               so4 = so4_a1 + so4_a2 + so4_a3
               soa = soa_a1 + soa_a2 + soa_a3
               # change time to standard datetime64 format
-              bc.coords['time'] = bc.indexes['time'].to_datetimeindex()
-              dst.coords['time'] = dst.indexes['time'].to_datetimeindex()
-              mom.coords['time'] = mom.indexes['time'].to_datetimeindex()
-              ncl.coords['time'] = ncl.indexes['time'].to_datetimeindex()
-              pom.coords['time'] = pom.indexes['time'].to_datetimeindex()
-              so4.coords['time'] = so4.indexes['time'].to_datetimeindex()
-              soa.coords['time'] = soa.indexes['time'].to_datetimeindex()
-              bc_all = xr.concat([bc_all, bc], dim="time")
-              dst_all = xr.concat([dst_all, dst], dim="time")
-              mom_all = xr.concat([mom_all, mom], dim="time")
-              ncl_all = xr.concat([ncl_all, ncl], dim="time")
-              pom_all = xr.concat([pom_all, pom], dim="time")
-              so4_all = xr.concat([so4_all, so4], dim="time")
-              soa_all = xr.concat([soa_all, soa], dim="time")
+              bc.coords[config['time_dim']] = bc.indexes[config['time_dim']].to_datetimeindex()
+              dst.coords[config['time_dim']] = dst.indexes[config['time_dim']].to_datetimeindex()
+              mom.coords[config['time_dim']] = mom.indexes[config['time_dim']].to_datetimeindex()
+              ncl.coords[config['time_dim']] = ncl.indexes[config['time_dim']].to_datetimeindex()
+              pom.coords[config['time_dim']] = pom.indexes[config['time_dim']].to_datetimeindex()
+              so4.coords[config['time_dim']] = so4.indexes[config['time_dim']].to_datetimeindex()
+              soa.coords[config['time_dim']] = soa.indexes[config['time_dim']].to_datetimeindex()
+              bc_all = xr.concat([bc_all, bc], dim=config['time_dim'])
+              dst_all = xr.concat([dst_all, dst], dim=config['time_dim'])
+              mom_all = xr.concat([mom_all, mom], dim=config['time_dim'])
+              ncl_all = xr.concat([ncl_all, ncl], dim=config['time_dim'])
+              pom_all = xr.concat([pom_all, pom], dim=config['time_dim'])
+              so4_all = xr.concat([so4_all, so4], dim=config['time_dim'])
+              soa_all = xr.concat([soa_all, soa], dim=config['time_dim'])
           else:
               bc_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='bc_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
               dst_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='dst_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -1768,10 +1772,10 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
               numall = [num_a1.data, num_a2.data, num_a3.data, num_a4.data]
               dnall  = [dn1.data,    dn2.data,    dn3.data,    dn4.data]
               NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1].data, Pres[:, -1].data)
-              NCN2 = xr.DataArray(data=NCN,  dims=["size", "time"],
-                  coords=dict(time=(["time"], e3smtime_i),size=(["size"], np.arange(1,3001))),
+              NCN2 = xr.DataArray(data=NCN,  dims=["size", config['time_dim']],
+                  coords=dict(time=([config['time_dim']], e3smtime_i),size=(["size"], np.arange(1,3001))),
                   attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
-              NCNall = xr.concat([NCNall, NCN2], dim="time")
+              NCNall = xr.concat([NCNall, NCN2], dim=config['time_dim'])
           else:
               NCNall = xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name='NCNall',attrs={'units':'dummy_unit','long_name':'Dummy'})
     
@@ -1809,26 +1813,26 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
             z_cldbase = z_cldbase / cf_sum_base[:,-1]
             T_cldbase = T_cldbase / cf_sum_base[:,-1]
             e3sm_cloud_depth = z_cldtop - z_cldbase
-            cloud_depth_2 = xr.DataArray(data=e3sm_cloud_depth,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
+            cloud_depth_2 = xr.DataArray(data=e3sm_cloud_depth,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime_i)),
                 attrs=dict(long_name="cloud depth",units="m"),)
-            cbh_2 = xr.DataArray(data=z_cldbase,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
+            cbh_2 = xr.DataArray(data=z_cldbase,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime_i)),
                 attrs=dict(long_name="cloud base height",units="m"),)
-            cth_2 = xr.DataArray(data=z_cldtop,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
+            cth_2 = xr.DataArray(data=z_cldtop,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime_i)),
                 attrs=dict(long_name="cloud top height",units="m"),)
-            cbt_2 = xr.DataArray(data=T_cldbase,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
+            cbt_2 = xr.DataArray(data=T_cldbase,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime_i)),
                 attrs=dict(long_name="cloud base temperature",units="K"),)
-            ctt_2 = xr.DataArray(data=T_cldtop,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
+            ctt_2 = xr.DataArray(data=T_cldtop,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime_i)),
                 attrs=dict(long_name="cloud top temperature",units="K"),)
-            cbh = xr.concat([cbh, cbh_2], dim="time")
-            cth = xr.concat([cth, cth_2], dim="time")
-            cbt = xr.concat([cbt, cbt_2], dim="time")
-            ctt = xr.concat([ctt, ctt_2], dim="time")
-            cloud_depth = xr.concat([cloud_depth, cloud_depth_2], dim="time")
+            cbh = xr.concat([cbh, cbh_2], dim=config['time_dim'])
+            cth = xr.concat([cth, cth_2], dim=config['time_dim'])
+            cbt = xr.concat([cbt, cbt_2], dim=config['time_dim'])
+            ctt = xr.concat([ctt, ctt_2], dim=config['time_dim'])
+            cloud_depth = xr.concat([cloud_depth, cloud_depth_2], dim=config['time_dim'])
         else:
             cloud_depth = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cloud_depth',attrs={'units':'dummy_unit','long_name':'Dummy'})
             cbh = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cbh',attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -1853,10 +1857,10 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
             reff = calc_Reff_from_REL(rel.data, dz, freql.data, icwnc.data)
             reff[reff==0] = np.nan
       
-            reff_2 = xr.DataArray(data=reff,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
+            reff_2 = xr.DataArray(data=reff,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime_i)),
                 attrs=dict(long_name="mean cloud liquid effective radius",units="um"),)
-            reff_mean = xr.concat([reff_mean, reff_2], dim="time")
+            reff_mean = xr.concat([reff_mean, reff_2], dim=config['time_dim'])
         else:
             reff_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='reff',attrs={'units':'dummy_unit','long_name':'Dummy'})
         
@@ -1874,10 +1878,10 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
               cod = np.sum(cod_a.data,axis=1)
               # cod[solin==0] = np.nan        
               
-              cod_2 = xr.DataArray(data=cod,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
+              cod_2 = xr.DataArray(data=cod,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime_i)),
                 attrs=dict(long_name="column-total cloud optical depth",units="N/A"),)
-              cod_mean = xr.concat([cod_mean, cod_2], dim="time")
+              cod_mean = xr.concat([cod_mean, cod_2], dim=config['time_dim'])
           else:
               cod_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cod',attrs={'units':'dummy_unit','long_name':'Dummy'})
 
@@ -1903,10 +1907,10 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
               weight = cloud*dz
               cdnc = cdnc_col/np.sum(weight,axis=1)
               cdnc[cdnc >2e9] = np.nan
-              cdnc = xr.DataArray(data=cdnc,  dims=["time"],
-                  coords=dict(time=(["time"], e3smtime_i)),
+              cdnc = xr.DataArray(data=cdnc,  dims=[config['time_dim']],
+                  coords=dict(time=([config['time_dim']], e3smtime_i)),
                   attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
-              cdnc_mean = xr.concat([cdnc_mean, cdnc], dim="time")
+              cdnc_mean = xr.concat([cdnc_mean, cdnc], dim=config['time_dim'])
           else:
               cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_mean',attrs={'units':'dummy_unit','long_name':'Dummy'})
         else:
@@ -1924,10 +1928,10 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
             weight_column = weight.sum(dim=config['vert_dim'])
             cdnc_rel_avg = cdnc_rel.dot(weight, dims=config['vert_dim'])
             cdnc = np.divide(cdnc_rel_avg, weight_column)
-            cdnc = xr.DataArray(data=cdnc,  dims=["time"],
-                    coords=dict(time=(["time"], e3smtime_i)),
+            cdnc = xr.DataArray(data=cdnc,  dims=[config['time_dim']],
+                    coords=dict(time=([config['time_dim']], e3smtime_i)),
                     attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
-            cdnc_mean = xr.concat([cdnc_mean, cdnc], dim="time")
+            cdnc_mean = xr.concat([cdnc_mean, cdnc], dim=config['time_dim'])
           else:
             cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
             
@@ -1942,11 +1946,11 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
               lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
               e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
               nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
-              nd_arm = xr.DataArray(data=nd_arm*1e6,  dims=["time"],
-                  coords=dict(time=(["time"], e3smtime_i)),
+              nd_arm = xr.DataArray(data=nd_arm*1e6,  dims=[config['time_dim']],
+                  coords=dict(time=([config['time_dim']], e3smtime_i)),
                   attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
                               description='Retrieved using ARM Ndrop algorithm'),)
-              cdnc_arm = xr.concat([cdnc_arm, nd_arm], dim="time")
+              cdnc_arm = xr.concat([cdnc_arm, nd_arm], dim=config['time_dim'])
           else:
               cdnc_arm = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_arm',attrs={'units':'dummy_unit','long_name':'Dummy'})
     
@@ -1961,11 +1965,11 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
               # lwp = e3smdata2d[config['LWPMODIS']+E3SMdomain_range][:,x_idx].data
               T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
               nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m, adiabaticity=0.8)
-              nd_sat = xr.DataArray(data=nd_sat*1e6,  dims=["time"],
-                  coords=dict(time=(["time"], e3smtime_i)),
+              nd_sat = xr.DataArray(data=nd_sat*1e6,  dims=[config['time_dim']],
+                  coords=dict(time=([config['time_dim']], e3smtime_i)),
                   attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
                               description='Retrieved using Bennartz(2007) algorithm, also used for VISST data'),)
-              cdnc_sat = xr.concat([cdnc_sat, nd_sat], dim="time")
+              cdnc_sat = xr.concat([cdnc_sat, nd_sat], dim=config['time_dim'])
           else:
               cdnc_sat = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_sat',attrs={'units':'dummy_unit','long_name':'Dummy'})    
         
@@ -1973,25 +1977,25 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
         for varname in variable2d_names:
             try:
                 var = e3smdata2d[varname + E3SMdomain_range][:,x_idx].load()
-                var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
+                var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
             except:
                 var = xr.DataArray(np.zeros((len(e3smtime_i),len_ncol))*np.nan,name=varname,\
-                               dims=["time","ncol"+E3SMdomain_range],coords={"time":e3smtime_i,"ncol"+E3SMdomain_range:np.arange(len_ncol)},\
+                               dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i,config['latlon_dim']+E3SMdomain_range:np.arange(len_ncol)},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             vv = variable_names.index(varname)
-            variables[vv] = xr.concat([variables[vv], var],dim='time')
+            variables[vv] = xr.concat([variables[vv], var],dim=config['time_dim'])
         
         # all other 3D (with vertical level) variables at the lowest model level
         for varname in variable3d_names:
             try:
                 var = e3smdata3d[varname + E3SMdomain_range][:,-1,x_idx].load()
-                var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
+                var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
             except:
                 var = xr.DataArray(np.zeros((len(e3smtime_i),len_lev,len_ncol))*np.nan,name=varname,\
-                               dims=["time","lev","ncol"+E3SMdomain_range],coords={"time":e3smtime_i,"lev":e3smdata3d[config['vert_dim']],"ncol"+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
+                               dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i,config['vert_dim']:e3smdata3d[config['vert_dim']],config['latlon_dim']+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             vv = variable_names.index(varname)
-            variables[vv] = xr.concat([variables[vv], var],dim='time')
+            variables[vv] = xr.concat([variables[vv], var],dim=config['time_dim'])
     
         e3smdata.close()
       
@@ -2001,14 +2005,14 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
       variable_names = variable_names + ['bc','dst','mom','ncl','pom','so4','soa']
       variables = variables + [bc_all,dst_all,mom_all,ncl_all,pom_all,so4_all,soa_all]
       # aerosol size and number
-      NCN3 = xr.DataArray(data=np.nansum(NCNall[3:, :], 0),  dims=["time"],
-          coords=dict(time=(["time"], e3smtime)),
+      NCN3 = xr.DataArray(data=np.nansum(NCNall[3:, :], 0),  dims=[config['time_dim']],
+          coords=dict(time=([config['time_dim']], e3smtime)),
           attrs=dict(long_name="Aerosol number concentration for size >3nm",units="#/m3"),)    # >3nm
-      NCN10 = xr.DataArray(data=np.nansum(NCNall[10:, :], 0),  dims=["time"],
-          coords=dict(time=(["time"], e3smtime)),
+      NCN10 = xr.DataArray(data=np.nansum(NCNall[10:, :], 0),  dims=[config['time_dim']],
+          coords=dict(time=([config['time_dim']], e3smtime)),
           attrs=dict(long_name="Aerosol number concentration for size >10nm",units="#/m3"),)     # >10nm
-      NCN100 = xr.DataArray(data=np.nansum(NCNall[100:, :], 0),  dims=["time"],
-          coords=dict(time=(["time"], e3smtime)),
+      NCN100 = xr.DataArray(data=np.nansum(NCNall[100:, :], 0),  dims=[config['time_dim']],
+          coords=dict(time=([config['time_dim']], e3smtime)),
           attrs=dict(long_name="Aerosol number concentration for size >100nm",units="#/m3"),)     # >100nm
       variable_names = variable_names + [ 'NCN3', 'NCN10', 'NCN100']
       variables = variables + [NCN3, NCN10, NCN100]  # size distribution data will be added later
@@ -2077,20 +2081,20 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
     
     # %% output extacted file
     varall_1d = {
-            variable_names[vv]: ('time', np.float32(variables_new[vv])) for vv in range(len(variable_names))
+            variable_names[vv]: (config['time_dim'], np.float32(variables_new[vv])) for vv in range(len(variable_names))
     }
     if config['aerosol_output'] == True:
         varall_2d = {
-                'NCNall': (['size','time',], np.float32(NCNall_new))
+                'NCNall': (['size',config['time_dim'],], np.float32(NCNall_new))
         }
         varall_1d.update(varall_2d)
     outfile = output_path + output_filehead + '_sfc.nc'
     print('output file '+outfile)
     ds = xr.Dataset( varall_1d,
-                      coords={'time': ('time', time_new), 'size':('size', np.arange(1,3001))})
+                      coords={config['time_dim']: (config['time_dim'], time_new), 'size':('size', np.arange(1,3001))})
     #assign attributes
-    ds['time'].attrs["long_name"] = "Time"
-    ds['time'].attrs["standard_name"] = "time"
+    ds[config['time_dim']].attrs["long_name"] = "Time"
+    ds[config['time_dim']].attrs["standard_name"] = "time"
     for vv in range(len(variable_names)):
         ds[variable_names[vv]].attrs["long_name"] = variables[vv].long_name
         ds[variable_names[vv]].attrs["units"] = variables[vv].units
