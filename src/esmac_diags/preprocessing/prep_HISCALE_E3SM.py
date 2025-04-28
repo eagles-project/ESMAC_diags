@@ -571,7 +571,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
                                        dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i,config['vert_dim']:e3smdata3d[config['vert_dim']],config['latlon_dim']+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
                                        attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
                 
-                vv = variable_names.index(varname)
+                vv = variable3d_names.index(varname)
                 variables[vv] = xr.concat([variables[vv], var],dim=config['time_dim'])            
           
             e3smdata3d.close()   
