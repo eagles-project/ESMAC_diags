@@ -1681,7 +1681,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
     
     #%%  add data for each day
     # for file in lst[1:]:
-    for ii in np.arange(len(lst3d[1:]))+1:
+    # for ii in np.arange(len(lst3d[1:]))+1:
+    for ii in np.arange(25)+1:
         print(lst3d[ii])
         # e3smdata = xr.open_dataset(file)
         e3smdata3d = xr.open_dataset(lst3d[ii])
