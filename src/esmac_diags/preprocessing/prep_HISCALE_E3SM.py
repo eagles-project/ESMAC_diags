@@ -200,12 +200,12 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         lonm = tmplonm[latlon_ind]
         latm = tmplatm[latlon_ind]
         z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,latlon_ind,...].load()
+        T = e3smdata3d[config['T']+E3SMdomain_range][:,:,latlon_ind,...].load()
 
         if config['pres_output'] == False:
           P0 = e3smdata3d[config['P0']].load()
           hyam = e3smdata3d[config['HYAM']].load()
           hybm = e3smdata3d[config['HYBM']].load()
-          T = e3smdata3d[config['T']+E3SMdomain_range][:,:,latlon_ind,...].load()
           PS = e3smdata3d[config['PS']+E3SMdomain_range][:,latlon_ind,...].load()
           # Pres = np.nan*T
           # zlen = T.shape[1]
