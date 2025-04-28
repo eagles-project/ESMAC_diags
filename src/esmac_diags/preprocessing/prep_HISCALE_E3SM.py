@@ -193,10 +193,14 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         tmplatm = e3smdata3d[config['LAT']+E3SMdomain_range].load()
 
         #also only include portions of the domain that include the flight track by using the flight track min/max lat and lon +/- delta defined in config file
-        minlon = np.min(lon)+360 - config['model_grid_deg']
-        maxlon = np.max(lon)+360 + config['model_grid_deg']
-        minlat = np.min(lat) - config['model_grid_deg']
-        maxlat = np.max(lat) + config['model_grid_deg']
+        lon[lon < -180] = np.nan
+        lon[lon > 180] = np.nan
+        lat[lat < -90] = np.nan
+        lat[lat > 90] = np.nan
+        minlon = np.nanmin(lon)+360 - config['model_grid_deg']
+        maxlon = np.nanmax(lon)+360 + config['model_grid_deg']
+        minlat = np.nanmin(lat) - config['model_grid_deg']
+        maxlat = np.nanmax(lat) + config['model_grid_deg']
         print(str(minlon), str(maxlon), str(minlat),  str(maxlat))
         latlon_ind = np.where(np.logical_and(np.logical_and(np.logical_and(tmplonm >= minlon, tmplonm <= maxlon), tmplatm >= minlat), tmplatm <= maxlat))[0]
         lonm = tmplonm[latlon_ind]
