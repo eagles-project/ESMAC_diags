@@ -173,8 +173,8 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         
         lst3d = glob.glob(input_path + input3d_filehead+'.*'+timestr[0]+'-*.nc')
         lst3d.sort()
-        # if len(lst)!=1:
-        #     raise ValueError('Should only contain one file: '+lst)
+        if len(lst)==0:
+            raise ValueError('No model output files on flight day')
 
         #string split model file names to get sssss arrays
         timesecstr_int = [int(filename.split('.')[-2].split('-')[-1]) for filename in lst3d]
@@ -358,232 +358,233 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         e3smdata3d.close()
 
         #add model variable arrays at additional times if there are additional model output files within the flight period
-        for ii in np.arange(len(file_inds)-1):
-            print(lst3d[file_inds[ii+1]])
-            e3smdata3d = xr.open_dataset(lst3d[file_inds[ii+1]])
-            e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
-            e3smtime_i = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
-            e3smtime = np.hstack((e3smtime, e3smtime_i))
-            
-            newz3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,latlon_ind,...].load()
-            z3 = xr.concat([z3, newz3], dim=config['time_dim'])
-
-            newT = e3smdata3d[config['T']+E3SMdomain_range][:,:,latlon_ind,...].load()
-            T = xr.concat([T, newT], dim=config['time_dim'])
-
-            if config['pres_output'] == False:
-              PS = e3smdata3d[config['PS']+E3SMdomain_range][:,latlon_ind,...].load()
-              newPres = xr.full_like(T, np.nan)
-              newPres = Pres.assign_attrs(units='Pa',long_name='Pressure',standard_name='air_pressure')
-              zlen = T.sizes[config['vert_dim']]
-              for kk in range(zlen):
-                  newPres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
-            else:
-              newPres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,latlon_ind,...].load()
-
-            Pres = xr.concat([Pres, newPres], dim=config['time_dim'])
-      
-            # change time format into seconds of the day
-            timem = np.concatenate([timem, np.float64(e3smtime_i.hour + e3smtime_i.minute + e3smtime_i.second)*3600])
-            
-            # variables for calculating aerosol size
-            if config['aerosol_output'] == True:
-              req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], config['dgnd_a01'], config['dgnd_a02'], \
-                           config['dgnd_a03'], config['dgnd_a04']]
-              req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-              matched_vlist = list(set(av_vars).intersection(req_vlist))
-              if len(matched_vlist) == len(req_vlist):
-                  print('\nAnalyzing for aerosol size')
-                  new_num_a1 = e3smdata3d[config['num_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_num_a2 = e3smdata3d[config['num_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_num_a3 = e3smdata3d[config['num_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_num_a4 = e3smdata3d[config['num_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_dn1 = e3smdata3d[config['dgnd_a01']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_dn2 = e3smdata3d[config['dgnd_a02']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_dn3 = e3smdata3d[config['dgnd_a03']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_dn4 = e3smdata3d[config['dgnd_a04']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  num_a1 = xr.concat([num_a1, new_num_a1], dim=config['time_dim'])
-                  num_a2 = xr.concat([num_a2, new_num_a2], dim=config['time_dim'])
-                  num_a3 = xr.concat([num_a3, new_num_a3], dim=config['time_dim'])
-                  num_a4 = xr.concat([num_a4, new_num_a4], dim=config['time_dim'])
-                  num_dn1 = xr.concat([num_dn1, new_num_dn1], dim=config['time_dim'])
-                  num_dn2 = xr.concat([num_dn2, new_num_dn2], dim=config['time_dim'])
-                  num_dn3 = xr.concat([num_dn3, new_num_dn3], dim=config['time_dim'])
-                  num_dn4 = xr.concat([num_dn4, new_num_dn4], dim=config['time_dim'])
-              else:
-                  new_num_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_num_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_num_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_num_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_dn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_dn2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_dn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_dn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  num_a1 = xr.concat([num_a1, new_num_a1], dim=config['time_dim'])
-                  num_a2 = xr.concat([num_a2, new_num_a2], dim=config['time_dim'])
-                  num_a3 = xr.concat([num_a3, new_num_a3], dim=config['time_dim'])
-                  num_a4 = xr.concat([num_a4, new_num_a4], dim=config['time_dim'])
-                  num_dn1 = xr.concat([num_dn1, new_num_dn1], dim=config['time_dim'])
-                  num_dn2 = xr.concat([num_dn2, new_num_dn2], dim=config['time_dim'])
-                  num_dn3 = xr.concat([num_dn3, new_num_dn3], dim=config['time_dim'])
-                  num_dn4 = xr.concat([num_dn4, new_num_dn4], dim=config['time_dim'])
+        if len(file_inds) > 1:
+            for ii in np.arange(len(file_inds)-1):
+                print(lst3d[file_inds[ii+1]])
+                e3smdata3d = xr.open_dataset(lst3d[file_inds[ii+1]])
+                e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+                e3smtime_i = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
+                e3smtime = np.hstack((e3smtime, e3smtime_i))
                 
+                newz3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                z3 = xr.concat([z3, newz3], dim=config['time_dim'])
+    
+                newT = e3smdata3d[config['T']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                T = xr.concat([T, newT], dim=config['time_dim'])
+    
+                if config['pres_output'] == False:
+                  PS = e3smdata3d[config['PS']+E3SMdomain_range][:,latlon_ind,...].load()
+                  newPres = xr.full_like(T, np.nan)
+                  newPres = Pres.assign_attrs(units='Pa',long_name='Pressure',standard_name='air_pressure')
+                  zlen = T.sizes[config['vert_dim']]
+                  for kk in range(zlen):
+                      newPres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
+                else:
+                  newPres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,latlon_ind,...].load()
+    
+                Pres = xr.concat([Pres, newPres], dim=config['time_dim'])
+          
+                # change time format into seconds of the day
+                timem = np.concatenate([timem, np.float64(e3smtime_i.hour + e3smtime_i.minute + e3smtime_i.second)*3600])
                 
-              # aerosol composition
-              req_vlist = [config['bc_a1'], config['bc_a3'], config['bc_a4'], config['dst_a1'], config['dst_a3'], config['mom_a1'], \
-                           config['mom_a2'], config['mom_a3'], config['mom_a4'], config['ncl_a1'], config['ncl_a2'], config['ncl_a3'], \
-                           config['pom_a1'], config['pom_a3'], config['pom_a4'], config['so4_a1'], config['so4_a2'], config['so4_a3'], \
-                           config['soa_a1'], config['soa_a2'], config['soa_a3']]
-              req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-              matched_vlist = list(set(av_vars).intersection(req_vlist))
-            
-              if len(matched_vlist) == len(req_vlist):
-                  new_bc_a1 = e3smdata3d[config['bc_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_bc_a3 = e3smdata3d[config['bc_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_bc_a4 = e3smdata3d[config['bc_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_dst_a1 = e3smdata3d[config['dst_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_dst_a3 = e3smdata3d[config['dst_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_mom_a1 = e3smdata3d[config['mom_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_mom_a2 = e3smdata3d[config['mom_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_mom_a3 = e3smdata3d[config['mom_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_mom_a4 = e3smdata3d[config['mom_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_ncl_a1 = e3smdata3d[config['ncl_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_ncl_a2 = e3smdata3d[config['ncl_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_ncl_a3 = e3smdata3d[config['ncl_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_pom_a1 = e3smdata3d[config['pom_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_pom_a3 = e3smdata3d[config['pom_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_pom_a4 = e3smdata3d[config['pom_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_so4_a1 = e3smdata3d[config['so4_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_so4_a2 = e3smdata3d[config['so4_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_so4_a3 = e3smdata3d[config['so4_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_soa_a1 = e3smdata3d[config['soa_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_soa_a2 = e3smdata3d[config['soa_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_soa_a3 = e3smdata3d[config['soa_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  bc_a1 = xr.concat([bc_a1, new_bc_a1], dim=config['time_dim'])
-                  bc_a3 = xr.concat([bc_a3, new_bc_a3], dim=config['time_dim'])
-                  bc_a4 = xr.concat([bc_a4, new_bc_a4], dim=config['time_dim'])
-                  dst_a1 = xr.concat([dst_a1, new_dst_a1], dim=config['time_dim'])
-                  dst_a3 = xr.concat([dst_a3, new_dst_a3], dim=config['time_dim'])
-                  mom_a1 = xr.concat([mom_a1, new_mom_a1], dim=config['time_dim'])
-                  mom_a2 = xr.concat([mom_a2, new_mom_a2], dim=config['time_dim'])
-                  mom_a3 = xr.concat([mom_a3, new_mom_a3], dim=config['time_dim'])
-                  mom_a4 = xr.concat([mom_a4, new_mom_a4], dim=config['time_dim'])
-                  ncl_a1 = xr.concat([ncl_a1, new_ncl_a1], dim=config['time_dim'])
-                  ncl_a2 = xr.concat([ncl_a2, new_ncl_a2], dim=config['time_dim'])
-                  ncl_a3 = xr.concat([ncl_a3, new_ncl_a3], dim=config['time_dim'])
-                  pom_a1 = xr.concat([pom_a1, new_pom_a1], dim=config['time_dim'])
-                  pom_a3 = xr.concat([pom_a3, new_pom_a3], dim=config['time_dim'])
-                  pom_a4 = xr.concat([pom_a4, new_pom_a4], dim=config['time_dim'])
-                  so4_a1 = xr.concat([so4_a1, new_so4_a1], dim=config['time_dim'])
-                  so4_a2 = xr.concat([so4_a2, new_so4_a2], dim=config['time_dim'])
-                  so4_a3 = xr.concat([so4_a3, new_so4_a3], dim=config['time_dim'])
-                  soa_a1 = xr.concat([soa_a1, new_soa_a1], dim=config['time_dim'])
-                  soa_a2 = xr.concat([soa_a2, new_soa_a2], dim=config['time_dim'])
-                  soa_a3 = xr.concat([soa_a3, new_soa_a3], dim=config['time_dim'])
-              else:
-                  new_bc_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_bc_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_bc_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_dst_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_dst_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_mom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_mom_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_mom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_mom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_ncl_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_ncl_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_ncl_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_pom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_pom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_pom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_so4_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_so4_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_so4_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_soa_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_soa_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_soa_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  bc_a1 = xr.concat([bc_a1, new_bc_a1], dim=config['time_dim'])
-                  bc_a3 = xr.concat([bc_a3, new_bc_a3], dim=config['time_dim'])
-                  bc_a4 = xr.concat([bc_a4, new_bc_a4], dim=config['time_dim'])
-                  dst_a1 = xr.concat([dst_a1, new_dst_a1], dim=config['time_dim'])
-                  dst_a3 = xr.concat([dst_a3, new_dst_a3], dim=config['time_dim'])
-                  mom_a1 = xr.concat([mom_a1, new_mom_a1], dim=config['time_dim'])
-                  mom_a2 = xr.concat([mom_a2, new_mom_a2], dim=config['time_dim'])
-                  mom_a3 = xr.concat([mom_a3, new_mom_a3], dim=config['time_dim'])
-                  mom_a4 = xr.concat([mom_a4, new_mom_a4], dim=config['time_dim'])
-                  ncl_a1 = xr.concat([ncl_a1, new_ncl_a1], dim=config['time_dim'])
-                  ncl_a2 = xr.concat([ncl_a2, new_ncl_a2], dim=config['time_dim'])
-                  ncl_a3 = xr.concat([ncl_a3, new_ncl_a3], dim=config['time_dim'])
-                  pom_a1 = xr.concat([pom_a1, new_pom_a1], dim=config['time_dim'])
-                  pom_a3 = xr.concat([pom_a3, new_pom_a3], dim=config['time_dim'])
-                  pom_a4 = xr.concat([pom_a4, new_pom_a4], dim=config['time_dim'])
-                  so4_a1 = xr.concat([so4_a1, new_so4_a1], dim=config['time_dim'])
-                  so4_a2 = xr.concat([so4_a2, new_so4_a2], dim=config['time_dim'])
-                  so4_a3 = xr.concat([so4_a3, new_so4_a3], dim=config['time_dim'])
-                  soa_a1 = xr.concat([soa_a1, new_soa_a1], dim=config['time_dim'])
-                  soa_a2 = xr.concat([soa_a2, new_soa_a2], dim=config['time_dim'])
-                  soa_a3 = xr.concat([soa_a3, new_soa_a3], dim=config['time_dim'])
-    
-            # condensate mass and number
-            req_vlist = [config['QC'], config['QI']]
-            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-            matched_vlist = list(set(av_vars).intersection(req_vlist))
-            if len(matched_vlist) == len(req_vlist):
-                new_qc = e3smdata3d[config['QC']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                new_qi = e3smdata3d[config['QI']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                qc = xr.concat([qc, new_qc], dim=config['time_dim'])
-                qi = xr.concat([qi, new_qi], dim=config['time_dim'])
-            else:
-                new_qc = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                new_qi = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                qc = xr.concat([qc, new_qc], dim=config['time_dim'])
-                qi = xr.concat([qi, new_qi], dim=config['time_dim'])
-    
-            if config['rain_output'] == True:
-                req_vlist = [config['QR']]
+                # variables for calculating aerosol size
+                if config['aerosol_output'] == True:
+                  req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], config['dgnd_a01'], config['dgnd_a02'], \
+                               config['dgnd_a03'], config['dgnd_a04']]
+                  req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                  matched_vlist = list(set(av_vars).intersection(req_vlist))
+                  if len(matched_vlist) == len(req_vlist):
+                      print('\nAnalyzing for aerosol size')
+                      new_num_a1 = e3smdata3d[config['num_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_num_a2 = e3smdata3d[config['num_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_num_a3 = e3smdata3d[config['num_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_num_a4 = e3smdata3d[config['num_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_dn1 = e3smdata3d[config['dgnd_a01']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_dn2 = e3smdata3d[config['dgnd_a02']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_dn3 = e3smdata3d[config['dgnd_a03']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_dn4 = e3smdata3d[config['dgnd_a04']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      num_a1 = xr.concat([num_a1, new_num_a1], dim=config['time_dim'])
+                      num_a2 = xr.concat([num_a2, new_num_a2], dim=config['time_dim'])
+                      num_a3 = xr.concat([num_a3, new_num_a3], dim=config['time_dim'])
+                      num_a4 = xr.concat([num_a4, new_num_a4], dim=config['time_dim'])
+                      num_dn1 = xr.concat([num_dn1, new_num_dn1], dim=config['time_dim'])
+                      num_dn2 = xr.concat([num_dn2, new_num_dn2], dim=config['time_dim'])
+                      num_dn3 = xr.concat([num_dn3, new_num_dn3], dim=config['time_dim'])
+                      num_dn4 = xr.concat([num_dn4, new_num_dn4], dim=config['time_dim'])
+                  else:
+                      new_num_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_num_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_num_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_num_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_dn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_dn2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_dn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_dn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      num_a1 = xr.concat([num_a1, new_num_a1], dim=config['time_dim'])
+                      num_a2 = xr.concat([num_a2, new_num_a2], dim=config['time_dim'])
+                      num_a3 = xr.concat([num_a3, new_num_a3], dim=config['time_dim'])
+                      num_a4 = xr.concat([num_a4, new_num_a4], dim=config['time_dim'])
+                      num_dn1 = xr.concat([num_dn1, new_num_dn1], dim=config['time_dim'])
+                      num_dn2 = xr.concat([num_dn2, new_num_dn2], dim=config['time_dim'])
+                      num_dn3 = xr.concat([num_dn3, new_num_dn3], dim=config['time_dim'])
+                      num_dn4 = xr.concat([num_dn4, new_num_dn4], dim=config['time_dim'])
+                    
+                    
+                  # aerosol composition
+                  req_vlist = [config['bc_a1'], config['bc_a3'], config['bc_a4'], config['dst_a1'], config['dst_a3'], config['mom_a1'], \
+                               config['mom_a2'], config['mom_a3'], config['mom_a4'], config['ncl_a1'], config['ncl_a2'], config['ncl_a3'], \
+                               config['pom_a1'], config['pom_a3'], config['pom_a4'], config['so4_a1'], config['so4_a2'], config['so4_a3'], \
+                               config['soa_a1'], config['soa_a2'], config['soa_a3']]
+                  req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                  matched_vlist = list(set(av_vars).intersection(req_vlist))
+                
+                  if len(matched_vlist) == len(req_vlist):
+                      new_bc_a1 = e3smdata3d[config['bc_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_bc_a3 = e3smdata3d[config['bc_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_bc_a4 = e3smdata3d[config['bc_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_dst_a1 = e3smdata3d[config['dst_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_dst_a3 = e3smdata3d[config['dst_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_mom_a1 = e3smdata3d[config['mom_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_mom_a2 = e3smdata3d[config['mom_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_mom_a3 = e3smdata3d[config['mom_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_mom_a4 = e3smdata3d[config['mom_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_ncl_a1 = e3smdata3d[config['ncl_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_ncl_a2 = e3smdata3d[config['ncl_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_ncl_a3 = e3smdata3d[config['ncl_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_pom_a1 = e3smdata3d[config['pom_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_pom_a3 = e3smdata3d[config['pom_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_pom_a4 = e3smdata3d[config['pom_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_so4_a1 = e3smdata3d[config['so4_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_so4_a2 = e3smdata3d[config['so4_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_so4_a3 = e3smdata3d[config['so4_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_soa_a1 = e3smdata3d[config['soa_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_soa_a2 = e3smdata3d[config['soa_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_soa_a3 = e3smdata3d[config['soa_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      bc_a1 = xr.concat([bc_a1, new_bc_a1], dim=config['time_dim'])
+                      bc_a3 = xr.concat([bc_a3, new_bc_a3], dim=config['time_dim'])
+                      bc_a4 = xr.concat([bc_a4, new_bc_a4], dim=config['time_dim'])
+                      dst_a1 = xr.concat([dst_a1, new_dst_a1], dim=config['time_dim'])
+                      dst_a3 = xr.concat([dst_a3, new_dst_a3], dim=config['time_dim'])
+                      mom_a1 = xr.concat([mom_a1, new_mom_a1], dim=config['time_dim'])
+                      mom_a2 = xr.concat([mom_a2, new_mom_a2], dim=config['time_dim'])
+                      mom_a3 = xr.concat([mom_a3, new_mom_a3], dim=config['time_dim'])
+                      mom_a4 = xr.concat([mom_a4, new_mom_a4], dim=config['time_dim'])
+                      ncl_a1 = xr.concat([ncl_a1, new_ncl_a1], dim=config['time_dim'])
+                      ncl_a2 = xr.concat([ncl_a2, new_ncl_a2], dim=config['time_dim'])
+                      ncl_a3 = xr.concat([ncl_a3, new_ncl_a3], dim=config['time_dim'])
+                      pom_a1 = xr.concat([pom_a1, new_pom_a1], dim=config['time_dim'])
+                      pom_a3 = xr.concat([pom_a3, new_pom_a3], dim=config['time_dim'])
+                      pom_a4 = xr.concat([pom_a4, new_pom_a4], dim=config['time_dim'])
+                      so4_a1 = xr.concat([so4_a1, new_so4_a1], dim=config['time_dim'])
+                      so4_a2 = xr.concat([so4_a2, new_so4_a2], dim=config['time_dim'])
+                      so4_a3 = xr.concat([so4_a3, new_so4_a3], dim=config['time_dim'])
+                      soa_a1 = xr.concat([soa_a1, new_soa_a1], dim=config['time_dim'])
+                      soa_a2 = xr.concat([soa_a2, new_soa_a2], dim=config['time_dim'])
+                      soa_a3 = xr.concat([soa_a3, new_soa_a3], dim=config['time_dim'])
+                  else:
+                      new_bc_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_bc_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_bc_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_dst_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_dst_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_mom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_mom_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_mom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_mom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_ncl_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_ncl_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_ncl_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_pom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_pom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_pom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_so4_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_so4_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_so4_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_soa_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_soa_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_soa_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      bc_a1 = xr.concat([bc_a1, new_bc_a1], dim=config['time_dim'])
+                      bc_a3 = xr.concat([bc_a3, new_bc_a3], dim=config['time_dim'])
+                      bc_a4 = xr.concat([bc_a4, new_bc_a4], dim=config['time_dim'])
+                      dst_a1 = xr.concat([dst_a1, new_dst_a1], dim=config['time_dim'])
+                      dst_a3 = xr.concat([dst_a3, new_dst_a3], dim=config['time_dim'])
+                      mom_a1 = xr.concat([mom_a1, new_mom_a1], dim=config['time_dim'])
+                      mom_a2 = xr.concat([mom_a2, new_mom_a2], dim=config['time_dim'])
+                      mom_a3 = xr.concat([mom_a3, new_mom_a3], dim=config['time_dim'])
+                      mom_a4 = xr.concat([mom_a4, new_mom_a4], dim=config['time_dim'])
+                      ncl_a1 = xr.concat([ncl_a1, new_ncl_a1], dim=config['time_dim'])
+                      ncl_a2 = xr.concat([ncl_a2, new_ncl_a2], dim=config['time_dim'])
+                      ncl_a3 = xr.concat([ncl_a3, new_ncl_a3], dim=config['time_dim'])
+                      pom_a1 = xr.concat([pom_a1, new_pom_a1], dim=config['time_dim'])
+                      pom_a3 = xr.concat([pom_a3, new_pom_a3], dim=config['time_dim'])
+                      pom_a4 = xr.concat([pom_a4, new_pom_a4], dim=config['time_dim'])
+                      so4_a1 = xr.concat([so4_a1, new_so4_a1], dim=config['time_dim'])
+                      so4_a2 = xr.concat([so4_a2, new_so4_a2], dim=config['time_dim'])
+                      so4_a3 = xr.concat([so4_a3, new_so4_a3], dim=config['time_dim'])
+                      soa_a1 = xr.concat([soa_a1, new_soa_a1], dim=config['time_dim'])
+                      soa_a2 = xr.concat([soa_a2, new_soa_a2], dim=config['time_dim'])
+                      soa_a3 = xr.concat([soa_a3, new_soa_a3], dim=config['time_dim'])
+        
+                # condensate mass and number
+                req_vlist = [config['QC'], config['QI']]
                 req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
                 matched_vlist = list(set(av_vars).intersection(req_vlist))
                 if len(matched_vlist) == len(req_vlist):
-                    new_qr = e3smdata3d[config['QC']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                    qr = xr.concat([qr, new_qr], dim=config['time_dim'])
+                    new_qc = e3smdata3d[config['QC']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                    new_qi = e3smdata3d[config['QI']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                    qc = xr.concat([qc, new_qc], dim=config['time_dim'])
+                    qi = xr.concat([qi, new_qi], dim=config['time_dim'])
                 else:
-                    new_qr = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                    qr = xr.concat([qr, new_qr], dim=config['time_dim'])
-              
-            # droplet size distribution
-            if config['dsd_output'] == True:
-              req_vlist = [config['LAMBDA_CLOUD'], config['MU_CLOUD']]
-              req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-              matched_vlist = list(set(av_vars).intersection(req_vlist))
-              if len(matched_vlist) == len(req_vlist):
-                  new_nd_cld = e3smdata3d[config['NC']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_lmda = e3smdata3d[config['LAMBDA_CLOUD']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  new_mu = e3smdata3d[config['MU_CLOUD']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                  nd_cld = xr.concat([nd_cld, new_nd_cld], dim=config['time_dim'])
-                  lmda = xr.concat([lmda, new_lmda], dim=config['time_dim'])
-                  mu = xr.concat([mu, new_mu], dim=config['time_dim'])
-              else:
-                  new_nd_cld = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_lmda = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  new_mu = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                  nd_cld = xr.concat([nd_cld, new_nd_cld], dim=config['time_dim'])
-                  lmda = xr.concat([lmda, new_lmda], dim=config['time_dim'])
-                  mu = xr.concat([mu, new_mu], dim=config['time_dim'])
-            
-            # other variables
-            for varname in variable3d_names:
-                try:
-                    var = e3smdata3d[varname + E3SMdomain_range][:,:,latlon_ind,...].load()
-                    var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
-                except:
-                    var = xr.DataArray(np.zeros(z3.shape)*np.nan,name=varname,\
-                                       dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i,config['vert_dim']:e3smdata3d[config['vert_dim']],config['latlon_dim']+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
-                                       attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+                    new_qc = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                    new_qi = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                    qc = xr.concat([qc, new_qc], dim=config['time_dim'])
+                    qi = xr.concat([qi, new_qi], dim=config['time_dim'])
+        
+                if config['rain_output'] == True:
+                    req_vlist = [config['QR']]
+                    req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                    matched_vlist = list(set(av_vars).intersection(req_vlist))
+                    if len(matched_vlist) == len(req_vlist):
+                        new_qr = e3smdata3d[config['QC']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        qr = xr.concat([qr, new_qr], dim=config['time_dim'])
+                    else:
+                        new_qr = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        qr = xr.concat([qr, new_qr], dim=config['time_dim'])
+                  
+                # droplet size distribution
+                if config['dsd_output'] == True:
+                  req_vlist = [config['LAMBDA_CLOUD'], config['MU_CLOUD']]
+                  req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                  matched_vlist = list(set(av_vars).intersection(req_vlist))
+                  if len(matched_vlist) == len(req_vlist):
+                      new_nd_cld = e3smdata3d[config['NC']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_lmda = e3smdata3d[config['LAMBDA_CLOUD']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      new_mu = e3smdata3d[config['MU_CLOUD']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                      nd_cld = xr.concat([nd_cld, new_nd_cld], dim=config['time_dim'])
+                      lmda = xr.concat([lmda, new_lmda], dim=config['time_dim'])
+                      mu = xr.concat([mu, new_mu], dim=config['time_dim'])
+                  else:
+                      new_nd_cld = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_lmda = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      new_mu = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                      nd_cld = xr.concat([nd_cld, new_nd_cld], dim=config['time_dim'])
+                      lmda = xr.concat([lmda, new_lmda], dim=config['time_dim'])
+                      mu = xr.concat([mu, new_mu], dim=config['time_dim'])
                 
-                vv = variable3d_names.index(varname)
-                variables[vv] = xr.concat([variables[vv], var],dim=config['time_dim'])            
-          
-            e3smdata3d.close()   
+                # other variables
+                for varname in variable3d_names:
+                    try:
+                        var = e3smdata3d[varname + E3SMdomain_range][:,:,latlon_ind,...].load()
+                        var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
+                    except:
+                        var = xr.DataArray(np.zeros(z3.shape)*np.nan,name=varname,\
+                                           dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i,config['vert_dim']:e3smdata3d[config['vert_dim']],config['latlon_dim']+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
+                                           attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+                    
+                    vv = variable3d_names.index(varname)
+                    variables[vv] = xr.concat([variables[vv], var],dim=config['time_dim'])            
+              
+                e3smdata3d.close()   
         
         #%% find the flight track grid
         for tt in range(len(time_new)):
