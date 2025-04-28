@@ -1803,8 +1803,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
             dz = np.insert(dz,0,dz[:,0],axis=1)
             
             # mid-level T, P, z
-            Tmid = 0.5*(T[:,0:-1,x_idx].data + T[:,1:,x_idx].data)
-            Pmid = 0.5*(Pres[:,0:-1,x_idx].data + Pres[:,1:,x_idx].data)
+            Tmid = 0.5*(T[:,0:-1].data + T[:,1:].data)
+            Pmid = 0.5*(Pres[:,0:-1].data + Pres[:,1:].data)
             Zmid = 0.5*(z3[:,0:-1].data + z3[:,1:].data)
             # cloud top
             cf_sum_top = np.cumsum(cloud.data, axis=1)
