@@ -1867,21 +1867,21 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
           matched_vlist = list(set(av_vars).intersection(req_vlist))
     
           if len(matched_vlist) == len(req_vlist):
-            print('\nAnalyzing for effective radius')
-            rel = e3smdata3d[config['REL']+E3SMdomain_range][:,:,x_idx].load()
-            freql = e3smdata3d[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load()
-            icwnc = e3smdata3d[config['NC']+E3SMdomain_range][:,:,x_idx].load()
-    
-            # calculate mean effective radius. 
-            reff = calc_Reff_from_REL(rel.data, dz, freql.data, icwnc.data)
-            reff[reff==0] = np.nan
+              print('\nAnalyzing for effective radius')
+              rel = e3smdata3d[config['REL']+E3SMdomain_range][:,:,x_idx].load()
+              freql = e3smdata3d[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load()
+              icwnc = e3smdata3d[config['NC']+E3SMdomain_range][:,:,x_idx].load()
       
-            reff_2 = xr.DataArray(data=reff,  dims=[config['time_dim']],
-                coords=dict(time=([config['time_dim']], e3smtime_i)),
-                attrs=dict(long_name="mean cloud liquid effective radius",units="um"),)
-            reff_mean = xr.concat([reff_mean, reff_2], dim=config['time_dim'])
+              # calculate mean effective radius. 
+              reff = calc_Reff_from_REL(rel.data, dz, freql.data, icwnc.data)
+              reff[reff==0] = np.nan
+        
+              reff_2 = xr.DataArray(data=reff,  dims=[config['time_dim']],
+                  coords=dict(time=([config['time_dim']], e3smtime_i)),
+                  attrs=dict(long_name="mean cloud liquid effective radius",units="um"),)
+              reff_mean = xr.concat([reff_mean, reff_2], dim=config['time_dim'])
           else:
-            reff_mean = xr.concat([reff_mean, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='reff',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+              reff_mean = xr.concat([reff_mean, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='reff',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
         
         if config['tau3d_output'] == True:
           req_vlist = [config['TAU3D'], config['SWDOWNTOA']]
@@ -1901,7 +1901,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
                 coords=dict(time=([config['time_dim']], e3smtime_i)),
                 attrs=dict(long_name="column-total cloud optical depth",units="N/A"),)
               cod_mean = xr.concat([cod_mean, cod_2], dim=config['time_dim'])
-            else:
+          else:
               cod_mean = xr.concat([cod_mean, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cod',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
 
         if config['cosp_output'] == True:   
