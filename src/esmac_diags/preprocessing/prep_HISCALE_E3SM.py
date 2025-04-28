@@ -185,7 +185,8 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         file_inds = np.concatenate([np.array(firstfile_ind).reshape(1), lastfile_ind])
 
         #define model variable arrays with first model file
-        e3smdata3d = xr.open_dataset(lst3d[0])
+        print(lst3d[file_inds[0]])
+        e3smdata3d = xr.open_dataset(lst3d[file_inds[0]])
         e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
         e3smtime = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
         tmplonm = e3smdata3d[config['LON']+E3SMdomain_range].load()
@@ -353,7 +354,8 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
 
         #add model variable arrays at additional times if there are additional model output files within the flight period
         for ii in np.arange(len(file_inds)-1):
-            e3smdata3d = xr.open_dataset(lst3d[ii+1])
+            print(lst3d[file_inds[ii+1]])
+            e3smdata3d = xr.open_dataset(lst3d[file_inds[ii+1]])
             e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
             e3smtime_i = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
             e3smtime = np.hstack((e3smtime, e3smtime_i))
