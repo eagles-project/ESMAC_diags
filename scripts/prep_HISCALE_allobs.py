@@ -62,7 +62,7 @@ visstgridpath = obs_input_path+'HISCALE/satellite/visst/grid/'
 visstpixpath = obs_input_path+'HISCALE/satellite/visst/pix_3x3/'
 
 # output data path
-prep_data_path = '../prep_data/HISCALE/'
+prep_data_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/HISCALE/'
 
 # time frequencies
 aircraft_dt = config['obs_aircraft_dt']
