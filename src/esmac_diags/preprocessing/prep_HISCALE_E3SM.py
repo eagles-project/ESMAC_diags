@@ -1075,8 +1075,8 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
             LTS700_2 = theta_p2[:, idx700] - theta_s2   
             LTS850_2 = theta_p2[:, idx850] - theta_s2
         if config['midlevel_thermo_output'] == True:
-            LTS700_2 = theta_700_2 - theta_s2   
-            LTS850_2 = theta_850_2 - theta_s2
+            LTS700_2 = theta700_2 - theta_s2   
+            LTS850_2 = theta850_2 - theta_s2
            
         # combine data
         cloud_p = np.vstack((cloud_p,cloud_p2))
