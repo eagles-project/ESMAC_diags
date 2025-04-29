@@ -1006,7 +1006,10 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
         # e3smdata = xr.open_dataset(file)
         print(lst3d[ii])
         e3smdata3d = xr.open_dataset(lst3d[ii])
+        e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
         e3smdata2d = xr.open_dataset(lst2d[ii])
+        e3smdata2d = e3smdata2d.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
+        
         e3smtime_i = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
         e3smtime = np.hstack((e3smtime, e3smtime_i))
         
