@@ -53,7 +53,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     y_idx = 10
     
     #%% read in data
-    tmplst = glob.glob(os.path.join(visstgridpath, '*visstgrid*.c1.'+year+'*.cdf'))
+    tmplst = glob.glob(os.path.join(visstgridpath, '*visstgrid*.c1.2016*.cdf'))
     # filetime = [a.split('.c1.')[1] for a in tmplst]
     # sortidx = np.argsort(filetime)
     sortidx = np.argsort(tmplst)
