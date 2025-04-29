@@ -1001,7 +1001,8 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     
     #%%  add data for each day
     # for file in lst[1:]:
-    for ii in np.arange(len(lst3d[1:]))+1:
+    # for ii in np.arange(len(lst3d[1:]))+1:
+    for ii in np.arange(len(lst3d[1:25]))+1:
         # print(file)
         # e3smdata = xr.open_dataset(file)
         print(lst3d[ii])
@@ -1215,7 +1216,7 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
         ds[varnames_1d[vv]].attrs["units"] = variables_1d[vv].units
         
     ds.attrs["title"] = 'preprocessed E3SM vertical profiles at ARM site'
-    ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
+    ds.attrs["inputfile_sample"] = lst3d[0].split('/')[-1]
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
