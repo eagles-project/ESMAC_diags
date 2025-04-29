@@ -105,5 +105,5 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 # sfc.prep_precip(armbepath, metpath, parspath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)         # surface precipitation
 # prepare satellite data. output time in 1hr (dt=3600s) resolution
 print('prepare satellite data:')
-sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/'+str(satellite_dt)+'s/', dt=satellite_dt)     # VISST 0.5x0.5 degree gridded data
+# sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/'+str(satellite_dt)+'s/', dt=satellite_dt)     # VISST 0.5x0.5 degree gridded data
 sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/'+str(satellite_dt)+'s/', dt=satellite_dt)     # VISST 4km pixel-level data
