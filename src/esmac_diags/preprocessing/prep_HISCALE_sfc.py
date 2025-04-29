@@ -442,7 +442,7 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=3600):
             # interpolate into standard time
             cloud_i[:,kk] = np.interp(time_new, time, cl)
             
-        cloud_o = avg_height_2d(height,cloud_i.T,height_out).T
+        cloud_o = avg_height_2d(height,cloud_i,height_out)
 
     if dt < 3600:
         lst = glob.glob(os.path.join(arsclpath, 'sgparsclkazr1kolliasC1.c0*.nc'))
