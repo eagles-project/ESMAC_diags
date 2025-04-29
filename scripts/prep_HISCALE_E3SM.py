@@ -26,7 +26,7 @@ input3d_filehead = config['model_3d_input_filehead']
 # input_path = '../raw_data/model/'
 # input_filehead = 'E3SMv1_SGP_ENA_2011_2020'
 
-output_path = '../prep_data/HISCALE/model/'
+output_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/HISCALE/model/'
 output_filehead = 'HISCALE'
 
 # iwg data path for aircraft information
