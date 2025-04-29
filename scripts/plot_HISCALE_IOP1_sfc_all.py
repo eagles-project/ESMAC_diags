@@ -18,9 +18,9 @@ import matplotlib.dates as mdates
 # set site name.
 site = 'HISCALE'
 
-prep_model_path = '../prep_data/'+site+'/model/'
-prep_sfc_path = '../prep_data/'+site+'/surface/'
-prep_sat_path = '../prep_data/'+site+'/satellite/'
+prep_model_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/model/'
+prep_sfc_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/surface/'
+prep_sat_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data'+site+'/satellite/'
 
 time_hiscale = pd.date_range(start='2016-04-25', end='2016-05-21', freq="3600s")
 IOP = 'IOP1'
