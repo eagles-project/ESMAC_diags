@@ -18,8 +18,8 @@ import matplotlib.dates as mdates
 # set site name.
 site = 'HISCALE'
 
-prep_model_path = '../prep_data/'+site+'/model/'
-prep_obs_path = '../prep_data/'+site+'/flight/'
+prep_model_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/model/'
+prep_obs_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/flight/'
 
 height_bin = np.arange(300,3200,200)
 
