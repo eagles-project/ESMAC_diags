@@ -1001,8 +1001,7 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     
     #%%  add data for each day
     # for file in lst[1:]:
-    # for ii in np.arange(len(lst3d[1:]))+1:
-    for ii in np.arange(len(lst3d[1:25]))+1:
+    for ii in np.arange(len(lst3d[1:]))+1:
         # print(file)
         # e3smdata = xr.open_dataset(file)
         print(lst3d[ii])
