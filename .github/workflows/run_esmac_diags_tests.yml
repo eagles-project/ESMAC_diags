@@ -9,7 +9,7 @@ jobs:
       - name: Setup Environment
         uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: 3.7
+          python-version: 3.12
           mamba-version: "*"
           # miniforge-version: latest
           # use-mamba: true
