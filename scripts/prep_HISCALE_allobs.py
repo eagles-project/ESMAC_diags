@@ -86,7 +86,7 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 # air.prep_mergeSD(mergeSDpath, iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt) # merged cloud size distribution
 # air.prep_WCM(wcmpath, iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt)       # cloud liquid water content
 # prepare surface data. output time in 1hr (dt=3600s) resolution
-# print('prepare surface data:')
+print('prepare surface data:')
 # sfc.prep_ACSM(acsmpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)            # aerosol composition
 # sfc.prep_ccn(ccnsfcpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)              # CCN number concentration
 # sfc.prep_CPC(cpcpath, cpcupath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)    # aerosol number concentration (>3 or 10nm)
@@ -96,7 +96,7 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 # sfc.prep_cloud_2d(armbepath, arsclpath, prep_data_path+'surface/'+str(surface_dt)+'s/', height_out, dt=surface_dt)   # 2D cloud fraction
 # sfc.prep_cloudheight_ARSCL(arsclbndpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)   # cloud height 
 # sfc.prep_totcld(armbepath, arsclbndpath, tsipath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)         # cloud fraction. from ARSCL, TSI and satellite sources
-# sfc.prep_LWP(armbepath, mwrpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt) # cloud liquid water path
+sfc.prep_LWP(armbepath, mwrpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt) # cloud liquid water path
 # sfc.prep_Ndrop(ndroppath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)          # cloud droplet number retrieval from ARM Ndrop VAP
 # sfc.prep_mfrsr_cod(mfrsrpath,  prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)     # cloud optical depth from MFRSR
 # sfc.prep_mfrsr_Reff(mfrsrpath,  prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)    # cloud effective radius from MFRSR
@@ -104,6 +104,6 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 # sfc.prep_LTS(armbepath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)            # lower tropospheric stability
 # sfc.prep_precip(armbepath, metpath, parspath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)         # surface precipitation
 # prepare satellite data. output time in 1hr (dt=3600s) resolution
-print('prepare satellite data:')
+# print('prepare satellite data:')
 # sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/'+str(satellite_dt)+'s/', dt=satellite_dt)     # VISST 0.5x0.5 degree gridded data
-sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/'+str(satellite_dt)+'s/', dt=satellite_dt)     # VISST 4km pixel-level data
+# sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/'+str(satellite_dt)+'s/', dt=satellite_dt)     # VISST 4km pixel-level data
