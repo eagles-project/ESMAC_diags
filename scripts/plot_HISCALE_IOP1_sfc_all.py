@@ -221,13 +221,13 @@ if config['convectiveparam'] == True:
             precip_m = modeldata[config['PRECIPSFCTOT']].load()
 else:
             precip_m = modeldata[config['PRECIPSFCLIQ']].load()
-cld_m = modeldata['CLDTOT'].load()
+cld_m = modeldata[config['CLDTOT']].load()
 cbh_m = modeldata['cbh'].load()
 cth_m = modeldata['cth'].load()
 Hcld_m = modeldata['clddepth'].load()
-cldlow_m = modeldata['CLDLOW'].load()
-cldmid_m = modeldata['CLDMED'].load()
-cldhgh_m = modeldata['CLDHGH'].load()
+cldlow_m = modeldata[config['CLDLOW']].load()
+cldmid_m = modeldata[config['CLDMED']].load()
+cldhgh_m = modeldata[config['CLDHGH']].load()
 if config['netradiation_output'] == True:
             lwnetsfc_m = modeldata['FLNS'].load()
             lwnettoa_m = modeldata['FLNT'].load()
