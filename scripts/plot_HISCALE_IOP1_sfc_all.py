@@ -461,7 +461,7 @@ if config['aerosol_output'] == True:
                                     title='0.2%CCN '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
             ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-                        fig.savefig(figpath+'timeseries_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+            fig.savefig(figpath+'timeseries_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             
             # fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [cpc3_hiscale,ncn3_m_hiscale,ncn3_m2_hiscale], 
             #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
