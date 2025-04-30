@@ -960,50 +960,42 @@ if config['aerosol_output'] == True:
 if config['aerosol_output'] == True:
             # fig,ax = plot.jointhist([uhsas100_hiscale,ncn100_m_hiscale,ncn100_m2_hiscale], [ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], 
             #                     title=['Ground','E3SMv1','E3SMv2']),
-            fig,ax = plot.jointhist([uhsas100_hiscale,ncn100_m_hiscale], [ccn2_hiscale,ccn2_m_hiscale], 
-                                title=['Ground','Model']),
+            fig,ax = plot.jointhist([uhsas100_hiscale,ncn100_m_hiscale], [ccn2_hiscale,ccn2_m_hiscale], title=['Ground','Model'],
                                 xedges=np.arange(0,800,40),yedges=np.arange(0,800,40), normalize_x=True,
-                                xlabel='CN (>100nm) (cm$^{-3}$)', ylabel='CCN (SS=0.2%) (cm$^{-3}$)', vmax=0.5
+                                xlabel='CN (>100nm) (cm$^{-3}$)', ylabel='CCN (SS=0.2%) (cm$^{-3}$)', vmax=0.5)
             fig.savefig(figpath+'jointhist_CN100_CCN2_ship_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             
             # fig,ax = plot.jointhist([ccn2_hiscale,ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], 
             #                         [ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale,nd_m2_hiscale],
             #                     title=['Ground','Satellite','E3SMv1','E3SMv2']),
-            fig,ax = plot.jointhist([ccn2_hiscale,ccn2_hiscale,ccn2_m_hiscale], 
-                                    [ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale],
-                                title=['Ground','Satellite','Model']),
+            fig,ax = plot.jointhist([ccn2_hiscale,ccn2_hiscale,ccn2_m_hiscale], [ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale], title=['Ground','Satellite','Model'],
                                 xedges=np.arange(0,500,30),yedges=np.arange(0,300,20), normalize_x=True,
-                                xlabel='CCN (SS=0.2%) (cm$^{-3}$)', ylabel='Nd (cm$^{-3}$)', vmax=0.4
+                                xlabel='CCN (SS=0.2%) (cm$^{-3}$)', ylabel='Nd (cm$^{-3}$)', vmax=0.4)
             fig.savefig(figpath+'jointhist_CCN2_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 # fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale,nd_m2_hiscale],
 #                         [lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale], 
 #                     title=['Ground','Satellite','E3SMv1','E3SMv2']),
-fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale],
-                        [lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale], 
-                    title=['Ground','Satellite','Model']),
+fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale], [lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale], title=['Ground','Satellite','Model'],
                     xedges=np.arange(0,300,20),yedges=np.arange(0,300,20), normalize_x=True,
-                    xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', vmax=0.4
+                    xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', vmax=0.4)
 fig.savefig(figpath+'jointhist_LWP_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 if config['reff_output'] == True:
             # fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale,nd_m2_hiscale],
             #                         [reff_hiscale,reff_sat_hiscale,reff_m_hiscale,reff_m2_hiscale],
             #                     title=['Ground','Satellite','E3SMv1','E3SMv2']),
-            fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale],
-                                    [reff_hiscale,reff_sat_hiscale,reff_m_hiscale],
-                                title=['Ground','Satellite','Model']),
+            fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale], [reff_hiscale,reff_sat_hiscale,reff_m_hiscale], title=['Ground','Satellite','Model'],
                                 xedges=np.arange(0,300,20),yedges=np.arange(4,25,1), normalize_x=True,
-                                xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m)', vmax=0.25
+                                xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m)', vmax=0.25)
             fig.savefig(figpath+'jointhist_Reff_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 if config['tau3d_output'] == True:
             # fig,ax = plot.jointhist([cod_sat_hiscale,cod_sat_hiscale,cod_m_hiscale,cod_m2_hiscale],[lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale], 
             #                     title=['Ground','Satellite','E3SMv1','E3SMv2']),
-            fig,ax = plot.jointhist([cod_sat_hiscale,cod_sat_hiscale,cod_m_hiscale],[lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale], 
-                                title=['Ground','Satellite','Model']),
+            fig,ax = plot.jointhist([cod_sat_hiscale,cod_sat_hiscale,cod_m_hiscale],[lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale], title=['Ground','Satellite','Model'],
                                 xedges=np.arange(0,40,3),yedges=np.arange(0,300,20), normalize_x=True,
-                                xlabel='Cloud Optical Depth (N/A)', ylabel='LWP (g/m$^2$)', vmax=0.25
+                                xlabel='Cloud Optical Depth (N/A)', ylabel='LWP (g/m$^2$)', vmax=0.25)
             fig.savefig(figpath+'jointhist_COD_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 #%% scatter plot
@@ -1011,10 +1003,8 @@ if config['aerosol_output'] == True:
             # fig,ax = plot.scatter([ndrop_hiscale.data, nd_sat_hiscale.data,nd_m_hiscale.data,nd_m2_hiscale.data], 
             #                       [ccn2_hiscale.data,ccn2_hiscale.data,ccn2_m_hiscale.data,ccn2_m2_hiscale.data],
             #                     title=['Ground','Satellite','E3SMv1','E3SMv2'],
-            fig,ax = plot.scatter([ndrop_hiscale.data, nd_sat_hiscale.data,nd_m_hiscale.data], 
-                                  [ccn2_hiscale.data,ccn2_hiscale.data,ccn2_m_hiscale.data],
-                                title=['Ground','Satellite','Model'],
-                                    xlimit=(0,300), ylimit=(0,600),
+            fig,ax = plot.scatter([ndrop_hiscale.data, nd_sat_hiscale.data,nd_m_hiscale.data], [ccn2_hiscale.data,ccn2_hiscale.data,ccn2_m_hiscale.data],
+                                title=['Ground','Satellite','Model'], xlimit=(0,300), ylimit=(0,600),
                                 xlabel='Nd (cm$^{-3}$)', ylabel='Surface CCN (SS=0.2%) (cm$^{-3}$)', 
                             linear_fit=True, intercept=False)
             fig.savefig(figpath+'scatter_Nd_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
@@ -1022,10 +1012,8 @@ if config['aerosol_output'] == True:
             # fig,ax = plot.scatter([smps100_hiscale.data,ncn100_m_hiscale.data,ncn100_m2_hiscale.data], 
             #                       [ccn2_hiscale.data,ccn2_m_hiscale.data,ccn2_m2_hiscale.data],
             #                     title=['Ground','E3SMv1','E3SMv2'],
-            fig,ax = plot.scatter([smps100_hiscale.data,ncn100_m_hiscale.data], 
-                                  [ccn2_hiscale.data,ccn2_m_hiscale.data],
-                                title=['Ground','Model'],
-                                  xlimit=(0,800), ylimit=(0,800),
+            fig,ax = plot.scatter([smps100_hiscale.data,ncn100_m_hiscale.data], [ccn2_hiscale.data,ccn2_m_hiscale.data],
+                                title=['Ground','Model'], xlimit=(0,800), ylimit=(0,800),
                                 xlabel='Surface CN (>100nm) (cm$^{-3}$)', ylabel='Surface CCN (SS=0.2%) (cm$^{-3}$)', 
                             linear_fit=True, intercept=True)
             fig.savefig(figpath+'scatter_CN100_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
