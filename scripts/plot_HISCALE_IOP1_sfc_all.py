@@ -78,11 +78,9 @@ cod = obsdata['cod'].load()
 obsdata.close()
 cod_hiscale = cod.sel(time=time_hiscale)
 obsdata = xr.open_dataset(prep_sfc_path + 'LWP_'+site+'.nc')
-lwp_armbe = obsdata['lwp_armbe'].load()
-lwp_mfrsr = obsdata['lwp_mfrsr'].load()
+lwp = obsdata['lwp'].load()
 obsdata.close()
-lwp_armbe_hiscale = lwp_armbe.sel(time=time_hiscale)
-lwp_mfrsr_hiscale = lwp_mfrsr.sel(time=time_hiscale)
+lwp_hiscale = lwp.sel(time=time_hiscale)
 obsdata = xr.open_dataset(prep_sfc_path + 'Ndrop_'+site+'.nc')
 ndrop = obsdata['cdnc'].load()
 obsdata.close()
@@ -368,16 +366,16 @@ cloud_m_hiscale = cf_e3sm.sel(time=time_hiscale)
 # specific data treatments
 
 # divided by dlogDp in size distribution
-dlogDp_e3sm = np.log10(np.arange(2,3002)/np.arange(1,3001))
-CNsize_m_hiscale = CNsize_m_hiscale.T/dlogDp_e3sm
-# CNsize_m2_hiscale = CNsize_m2_hiscale.T/dlogDp_e3sm
+if config['aerosol_output'] == True:
+            dlogDp_e3sm = np.log10(np.arange(2,3002)/np.arange(1,3001))
+            CNsize_m_hiscale = CNsize_m_hiscale.T/dlogDp_e3sm
+            # CNsize_m2_hiscale = CNsize_m2_hiscale.T/dlogDp_e3sm
+            pdf_m_hiscale = np.nanmean(CNsize_m_hiscale,axis=0)
+            # pdf_m2_hiscale = np.nanmean(CNsize_m2_hiscale,axis=0)
 smpsall_hiscale = smpsall_hiscale / dlogDp_smps
 uhsasall_hiscale = uhsasall_hiscale / dlogDp_uhsas
-
 pdf_uhsas_hiscale = np.nanmean(uhsasall_hiscale,axis=0)
 pdf_smps_hiscale = np.nanmean(smpsall_hiscale,axis=0)
-pdf_m_hiscale = np.nanmean(CNsize_m_hiscale,axis=0)
-# pdf_m2_hiscale = np.nanmean(CNsize_m2_hiscale,axis=0)
 
 ndrop_hiscale[ndrop_hiscale<10] = np.nan
 nd_sat_hiscale[nd_sat_hiscale<10] = np.nan
@@ -388,8 +386,7 @@ nd_sat_hiscale[nd_sat_hiscale>500] = np.nan
 nd_m_hiscale[nd_m_hiscale>500] = np.nan
 # nd_m2_hiscale[nd_m2_hiscale>500] = np.nan
 
-lwp_armbe_hiscale[lwp_armbe_hiscale<20] = np.nan
-lwp_mfrsr_hiscale[lwp_mfrsr_hiscale<20] = np.nan
+lwp_hiscale[lwp_hiscale<20] = np.nan
 lwp_sat_hiscale[lwp_sat_hiscale<20] = np.nan
 lwp_m_hiscale[lwp_m_hiscale<20] = np.nan
 # lwp_m2_hiscale[lwp_m2_hiscale<20] = np.nan
@@ -496,10 +493,10 @@ ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
 ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 fig.savefig(figpath+'timeseries_cod_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [lwp_armbe_hiscale, lwp_sat_hiscale, lwp_m_hiscale, lwp_m2_hiscale], 
-#                         legend = ['ARMBE','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [lwp_armbe_hiscale, lwp_sat_hiscale, lwp_m_hiscale], 
-                        legend = ['ARMBE','Satellite','Model'], color=['k','gray','r'],
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [lwp_hiscale, lwp_sat_hiscale, lwp_m_hiscale, lwp_m2_hiscale], 
+#                         legend = ['MWR','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [lwp_hiscale, lwp_sat_hiscale, lwp_m_hiscale], 
+                        legend = ['MWR','Satellite','Model'], color=['k','gray','r'],
                         title='LWP '+site+' '+IOP,xlabel=None, ylabel="g/m$^2$")
 ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
 ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
@@ -648,10 +645,10 @@ fig,ax = plot.diurnalcycle( [cod_hiscale, cod_sat_hiscale, cod_m_hiscale],
                         title='Cloud optical depth '+site+' '+IOP, xlabel='Time (UTC)', ylabel=None)
 fig.savefig(figpath+'diurnalcycle_cod_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.diurnalcycle([lwp_armbe_hiscale,lwp_sat_hiscale, lwp_m_hiscale, lwp_m2_hiscale], 
-#                             legend = ['ARMBE','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-fig,ax = plot.diurnalcycle([lwp_armbe_hiscale,lwp_sat_hiscale, lwp_m_hiscale], 
-                            legend = ['ARMBE','Satellite','Model'], color=['k','gray','r'],
+# fig,ax = plot.diurnalcycle([lwp_hiscale,lwp_sat_hiscale, lwp_m_hiscale, lwp_m2_hiscale], 
+#                             legend = ['MWR','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+fig,ax = plot.diurnalcycle([lwp_hiscale,lwp_sat_hiscale, lwp_m_hiscale], 
+                            legend = ['MWR','Satellite','Model'], color=['k','gray','r'],
                         title='LWP '+site+' '+IOP,  xlabel='Time (UTC)',ylabel="g/m$^2$")
 fig.savefig(figpath+'diurnalcycle_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
@@ -789,15 +786,14 @@ fig,ax = plot.hist( [cod_hiscale, cod_sat_hiscale, cod_m_hiscale], weights=[w0,w
                     title='Cloud Optical Depth '+site+' '+IOP, bins=np.arange(0,61,3), ylabel='Fraction', xlabel='N/A')
 fig.savefig(figpath+'hist_cod_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-w0 = np.ones_like(lwp_armbe_hiscale)/sum(~np.isnan(lwp_armbe_hiscale.data))
-# w0 = np.ones_like(lwp_mfrsr)/sum(~np.isnan(lwp_mfrsr.data))
+w0 = np.ones_like(lwp_hiscale)/sum(~np.isnan(lwp_hiscale.data))
 w00 = np.ones_like(lwp_sat_hiscale)/sum(~np.isnan(lwp_sat_hiscale.data))
 w1 = np.ones_like(lwp_m_hiscale)/sum(~np.isnan(lwp_m_hiscale.data))
 # w2 = np.ones_like(lwp_m2_hiscale)/sum(~np.isnan(lwp_m2_hiscale.data))
-# fig,ax = plot.hist([lwp_mfrsr_hiscale, lwp_sat_hiscale, lwp_m_hiscale, lwp_m2_hiscale], weights=[w0,w00,w1,w2], 
-#                     legend = ['ARMBE','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-fig,ax = plot.hist([lwp_mfrsr_hiscale, lwp_sat_hiscale, lwp_m_hiscale], weights=[w0,w00,w1], 
-                    legend = ['ARMBE','Satellite','Model'], color=['k','gray','r'],
+# fig,ax = plot.hist([lwp_hiscale, lwp_sat_hiscale, lwp_m_hiscale, lwp_m2_hiscale], weights=[w0,w00,w1,w2], 
+#                     legend = ['MWR','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
+fig,ax = plot.hist([lwp_hiscale, lwp_sat_hiscale, lwp_m_hiscale], weights=[w0,w00,w1], 
+                    legend = ['MWR','Satellite','Model'], color=['k','gray','r'],
                     title='LWP '+site+' '+IOP, bins=np.arange(10,410,20), ylabel='Fraction', xlabel="g/m$^2$")
 fig.savefig(figpath+'hist_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
@@ -879,8 +875,8 @@ fig.savefig(figpath+'mean_aerosol_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_in
 #                           outfile=figpath+'statistics_1var_COD_'+site+'_'+IOP+'.txt')
 # calc.mean_std_percentiles([reff_hiscale,reff_sat_hiscale,reff_m_hiscale,reff_m2_hiscale],legend=['MFRSR','Satellite','E3SMv1','E3SMv2'],
 #                           outfile=figpath+'statistics_1var_Reff_'+site+'_'+IOP+'.txt')
-# calc.mean_std_percentiles([lwp_mfrsr_hiscale,lwp_armbe_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale],
-#                           legend=['MFRSR','ARMBE','Satellite','E3SMv1','E3SMv2'],
+# calc.mean_std_percentiles([lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale],
+#                           legend=['MWR','Satellite','E3SMv1','E3SMv2'],
 #                           outfile=figpath+'statistics_1var_LWP_'+site+'_'+IOP+'.txt')
 # calc.mean_std_percentiles([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale,nd_m2_hiscale],legend=['Ndrop','Nd_satellite','E3SMv1','E3SMv2'],
 #                           outfile=figpath+'statistics_1var_Nd_'+site+'_'+IOP+'.txt')
@@ -920,9 +916,9 @@ fig.savefig(figpath+'mean_aerosol_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_in
 # calc.bias_corrcoef_RMSE(smps100_hiscale, ncn100_m2_hiscale,label1='Obs',label2='E3SMv2', 
 #                         outfile=figpath+'statistics_CN100_E3SMv2vsOBS_'+site+'_'+IOP+'.txt')
 
-# calc.bias_corrcoef_RMSE(lwp_armbe_hiscale, lwp_m_hiscale,label1='ARMBE',label2='E3SMv1', 
+# calc.bias_corrcoef_RMSE(lwp_hiscale, lwp_m_hiscale,label1='ARMBE',label2='E3SMv1', 
 #                         outfile=figpath+'statistics_lwp_E3SMv1vsOBS_'+site+'_'+IOP+'.txt')
-# calc.bias_corrcoef_RMSE(lwp_armbe_hiscale, lwp_m2_hiscale,label1='ARMBE',label2='E3SMv2', 
+# calc.bias_corrcoef_RMSE(lwp_hiscale, lwp_m2_hiscale,label1='ARMBE',label2='E3SMv2', 
 #                         outfile=figpath+'statistics_lwp_E3SMv2vsOBS_'+site+'_'+IOP+'.txt')
 
 # calc.bias_corrcoef_RMSE(ndrop_hiscale, nd_m_hiscale,label1='Ndrop',label2='E3SMv1', 
@@ -965,10 +961,10 @@ fig,ax = plot.jointhist([ccn2_hiscale,ccn2_hiscale,ccn2_m_hiscale],
 fig.savefig(figpath+'jointhist_CCN2_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 # fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale,nd_m2_hiscale],
-#                         [lwp_sat_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale], 
+#                         [lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale], 
 #                     title=['Ground','Satellite','E3SMv1','E3SMv2']),
 fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale],
-                        [lwp_sat_hiscale,lwp_sat_hiscale,lwp_m_hiscale], 
+                        [lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale], 
                     title=['Ground','Satellite','Model']),
                     xedges=np.arange(0,300,20),yedges=np.arange(0,300,20), normalize_x=True,
                     xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', vmax=0.4
@@ -984,9 +980,9 @@ fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale],
                     xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m)', vmax=0.25
 fig.savefig(figpath+'jointhist_Reff_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.jointhist([cod_sat_hiscale,cod_sat_hiscale,cod_m_hiscale,cod_m2_hiscale],[lwp_armbe_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale], 
+# fig,ax = plot.jointhist([cod_sat_hiscale,cod_sat_hiscale,cod_m_hiscale,cod_m2_hiscale],[lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale], 
 #                     title=['Ground','Satellite','E3SMv1','E3SMv2']),
-fig,ax = plot.jointhist([cod_sat_hiscale,cod_sat_hiscale,cod_m_hiscale],[lwp_armbe_hiscale,lwp_sat_hiscale,lwp_m_hiscale], 
+fig,ax = plot.jointhist([cod_sat_hiscale,cod_sat_hiscale,cod_m_hiscale],[lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale], 
                     title=['Ground','Satellite','Model']),
                     xedges=np.arange(0,40,3),yedges=np.arange(0,300,20), normalize_x=True,
                     xlabel='Cloud Optical Depth (N/A)', ylabel='LWP (g/m$^2$)', vmax=0.25
@@ -1019,10 +1015,10 @@ fig.savefig(figpath+'scatter_CN100_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_i
 # xedges=np.exp(np.arange(np.log(10),6.5,0.5))
 # yedges=np.exp(np.arange(np.log(10),6.5,0.5))
 # fig,ax = plot.heatmap([ndrop_hiscale.data, nd_sat_hiscale.data,nd_m_hiscale.data,nd_m2_hiscale.data],
-#                       [lwp_sat_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale],
+#                       [lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale],
 #                       [albedo_hiscale,albedo_hiscale,albedo_m_hiscale,albedo_m2_hiscale],vmax=60,
 fig,ax = plot.heatmap([ndrop_hiscale.data, nd_sat_hiscale.data,nd_m_hiscale.data],
-                      [lwp_sat_hiscale,lwp_sat_hiscale,lwp_m_hiscale],
+                      [lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale],
                       [albedo_hiscale,albedo_hiscale,albedo_m_hiscale],vmax=60,
                     xedges=np.arange(0,300,20), yedges=np.arange(10,300,20),
                     # xedges=xedges, yedges=yedges, 
