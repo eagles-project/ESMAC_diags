@@ -1106,21 +1106,22 @@ def prep_LWP(armbepath, mwrpath, predatapath, dt=3600):
 
     if not os.path.exists(predatapath):
         os.makedirs(predatapath)
-    
-    #%% read in data
-    lst1 = glob.glob(os.path.join(armbepath, '*armbecldradC1*.nc'))
-    obsdata = xr.open_mfdataset(lst1, combine='by_coords')
-    
-    time1 = obsdata['time']
-    lwp = obsdata['lwp']
-    qc_lwp = obsdata['qc_lwp']
-    obsdata.close()
-    
-    lwp.load()
-    qc_lwp.load()
-    
-    # quality controls. For ARMBE lwp, remove data with <30% valid points within 1-hr window 
-    lwp[qc_lwp>=2] = np.nan
+
+    if dt >= 3600:
+        #%% read in data
+        lst1 = glob.glob(os.path.join(armbepath, '*armbecldradC1*.nc'))
+        obsdata = xr.open_mfdataset(lst1, combine='by_coords')
+        
+        time1 = obsdata['time']
+        lwp = obsdata['lwp']
+        qc_lwp = obsdata['qc_lwp']
+        obsdata.close()
+      
+        lwp.load()
+        qc_lwp.load()
+      
+        # quality controls. For ARMBE lwp, remove data with <30% valid points within 1-hr window 
+        lwp[qc_lwp>=2] = np.nan
     
     # #%% read in MFRSR LWP for comparison
     # lst2 = glob.glob(os.path.join(mfrsrpath, '*.cdf'))
@@ -1143,46 +1144,44 @@ def prep_LWP(armbepath, mwrpath, predatapath, dt=3600):
     # # lwp2 = qc_mask_qcflag(lwp2, qc_lwp2)
     # lwp2 = lwp2*1000. # change unit from kg/m2 (mm) to g/m2
 
-    #%% read in MWR LWP
-    lst2 = glob.glob(os.path.join(mwrpath, '*.nc'))
-    mwrdata = xr.open_mfdataset(lst2, combine='by_coords')
-    time2 = mwrdata['time']
-    lwp2 = mwrdata['phys_lwp'] #units are g/m2
-    qc_lwp2 = mwrdata['qc_phys_lwp']
-    mwrdata.close()
-
-    lwp2.load()
-    qc_lwp2.load()
-    lwp2 = qc_mask_qcflag(lwp2, qc_lwp2)
+    if dt < 3600:
+        #%% read in MWR LWP
+        lst2 = glob.glob(os.path.join(mwrpath, '*.nc'))
+        mwrdata = xr.open_mfdataset(lst2, combine='by_coords')
+        time = mwrdata['time']
+        lwp = mwrdata['phys_lwp'] #units are g/m2
+        qc_lwp = mwrdata['qc_phys_lwp']
+        mwrdata.close()
+    
+        lwp.load()
+        qc_lwp.load()
+        lwp = qc_mask_qcflag(lwp, qc_lwp2)
   
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
     lwp_new = avg_time_1d(time1, lwp, time_new, arraytype='xarray')
-    lwp2_new = avg_time_1d(time2, lwp2, time_new, arraytype='xarray')
 
     #%% sometimes, there can be negative LWP values when LWP is noise, so set those to 0
     lwp_new = qc_remove_neg(lwp_new)
-    lwp2_new = qc_remove_neg(lwp2_new)
   
     #%% output file
     outfile = predatapath + 'LWP_HISCALE.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lwp_armbe': ('time', np.float32(lwp_new)),
-                    'lwp_mwr': ('time', np.float32(lwp2_new))
+                    'lwp': ('time', np.float32(lwp_new)),
                     },
                      coords={'time': ('time', time_new)})
     
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
     ds['time'].attrs["standard_name"] = "time"
-    ds['lwp_armbe'].attrs["long_name"] = "liquid water path"
-    ds['lwp_armbe'].attrs["units"] = "g/m2"
-    ds['lwp_armbe'].attrs["description"] = "liquid water path from ARMBE data based on MWR measurements"
-    ds['lwp_mwr'].attrs["long_name"] = "liquid water path"
-    ds['lwp_mwr'].attrs["units"] = "g/m2"
-    ds['lwp_mwr'].attrs["description"] = "liquid water path from MWR retreivals"
+    ds['lwp'].attrs["long_name"] = "liquid water path"
+    ds['lwp'].attrs["units"] = "g/m2"
+    if dt >= 3600:
+        ds['lwp'].attrs["description"] = "liquid water path from ARMBE data based on MWR measurements"
+    if dt < 3600:
+        ds['lwp'].attrs["description"] = "liquid water path from MWR retrievals"
     
     ds.attrs["title"] = 'surface-retrieved cloud liquid water path'
     ds.attrs["inputfile_sample"] = [lst1[0].split('/')[-1], lst2[0].split('/')[-1]]
