@@ -843,7 +843,7 @@ wm1 = np.ones_like(prm)/sum(~np.isnan(prm.data))
 # wm2 = np.ones_like(prm2)/sum(~np.isnan(prm2.data))
 # fig,ax = plot.hist( [pr0,pr1,pr2,prm,prm2], weights=[w0,w1,w2,wm1,wm2], legend = ['Tipping Bucket','PWD','Disdrometer','E3SMv1','E3SMv2'], 
 #                     color=['k','gray','silver','r','b'],  bins=np.arange(0,5,.1), 
-fig,ax = plot.hist( [pr0,prm], weights=[w0,w1,w2,wm1], legend = ['Tipping Bucket','PWD','Disdrometer','Model'], 
+fig,ax = plot.hist( [pr0,pr1,pr2,prm], weights=[w0,w1,w2,wm1], legend = ['Tipping Bucket','PWD','Disdrometer','Model'], 
                     color=['k','gray','silver','r'],  bins=np.arange(0,5,.1), 
                     title = 'Precipitation '+site+' '+IOP, ylabel='Fraction', xlabel='mm/hr')
 fig.savefig(figpath+'hist_precip_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
