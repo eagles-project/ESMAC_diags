@@ -1618,6 +1618,9 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
       variable2d_names.append(config['LWNETTOA'])
       variable2d_names.append(config['SWNETSFC'])
       variable2d_names.append(config['SWNETTOA'])
+    else:
+      variable2d_names.append(config['LWUPSFC'])
+      variable2d_names.append(config['SWUPSFC'])
 
     if config['clrskyradiation_output'] == True:
       variable2d_names.append(config['SWUPTOACLR'])
