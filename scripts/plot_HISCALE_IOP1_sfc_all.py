@@ -726,11 +726,8 @@ if config['aerosol_output'] == True:
 # fig,ax = plot.diurnalcycle_2d([cloud_2d_hiscale, cloud_m_hiscale, cloud_m2_hiscale], 
 #                               y = [height_o, height_m, height_m2],
 #                           title= ['Obs', 'E3SMv1', 'E3SMv2',]),
-fig,ax = plot.diurnalcycle_2d([cloud_2d_hiscale, cloud_m_hiscale], 
-                              y = [height_o, height_m],
-                          title= ['Obs', 'Model',]),
-                        yticks=[0,3,6,9,12], ylimit=(0,12), ylabel='Height (km)',  cmap='jet',
-                        levellist=np.arange(0,45,1)
+fig,ax = plot.diurnalcycle_2d([cloud_2d_hiscale, cloud_m_hiscale], y = [height_o, height_m], title= ['Obs', 'Model',],
+                        yticks=[0,3,6,9,12], ylimit=(0,12), ylabel='Height (km)',  cmap='jet', levellist=np.arange(0,45,1))
 fig.savefig(figpath+'diurnalcycle_cloud2d_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 #%% 1d histogram
