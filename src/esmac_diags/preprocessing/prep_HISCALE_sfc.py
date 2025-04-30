@@ -1146,8 +1146,8 @@ def prep_LWP(armbepath, mwrpath, predatapath, dt=3600):
 
     if dt < 3600:
         #%% read in MWR LWP
-        lst2 = glob.glob(os.path.join(mwrpath, '*.nc'))
-        mwrdata = xr.open_mfdataset(lst2, combine='by_coords')
+        lst1 = glob.glob(os.path.join(mwrpath, '*.nc'))
+        mwrdata = xr.open_mfdataset(lst1, combine='by_coords')
         time = mwrdata['time']
         lwp = mwrdata['phys_lwp'] #units are g/m2
         qc_lwp = mwrdata['qc_phys_lwp']
@@ -1184,7 +1184,7 @@ def prep_LWP(armbepath, mwrpath, predatapath, dt=3600):
         ds['lwp'].attrs["description"] = "liquid water path from MWR retrievals"
     
     ds.attrs["title"] = 'surface-retrieved cloud liquid water path'
-    ds.attrs["inputfile_sample"] = [lst1[0].split('/')[-1], lst2[0].split('/')[-1]]
+    ds.attrs["inputfile_sample"] = [lst1[0].split('/')[-1]#, lst2[0].split('/')[-1]]
     ds.attrs["description"] = 'mean value of each time window'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
