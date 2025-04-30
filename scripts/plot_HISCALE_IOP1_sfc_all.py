@@ -104,10 +104,12 @@ swdnsfc = obsdata['swdn'].load()
 lwupsfc = obsdata['lwup'].load()
 swupsfc = obsdata['swup'].load()
 obsdata.close()
-lwnetsfc = lwupsfc - lwdnsfc
-swnetsfc = swdnsfc - swupsfc
-lwnetsfc_hiscale = lwnetsfc.sel(time=time_hiscale)
-swnetsfc_hiscale = swnetsfc.sel(time=time_hiscale)
+lwdnsfc_hiscale = lwdnsfc.sel(time=time_hiscale)
+swdnsfc_hiscale = swdnsfc.sel(time=time_hiscale)
+lwupsfc_hiscale = lwupsfc.sel(time=time_hiscale)
+swupsfc_hiscale = swupsfc.sel(time=time_hiscale)
+lwnetsfc_hiscale = lwupsfc_hiscale - lwdnsfc_hiscale
+swnetsfc_hiscale = swdnsfc_hiscale - swupsfc_hiscale
 
 obsdata = xr.open_dataset(prep_sfc_path + 'sfc_UHSAS_'+site+'.nc')
 size_uhsas = obsdata['size'].load()
