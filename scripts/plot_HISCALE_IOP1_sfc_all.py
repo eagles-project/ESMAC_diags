@@ -25,7 +25,7 @@ config = yaml.full_load(stream)
 
 prep_model_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/model/sfc_prof/3600s/'
 prep_sfc_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/surface/300s/'
-prep_sat_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data'+site+'/satellite/3600s/'
+prep_sat_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/satellite/3600s/'
 
 time_hiscale = pd.date_range(start='2016-04-25', end='2016-05-21', freq="3600s")
 IOP = 'IOP1'
