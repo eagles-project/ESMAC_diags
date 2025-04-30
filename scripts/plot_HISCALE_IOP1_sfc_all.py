@@ -4,6 +4,7 @@ script to generate all plots for HISCALE surface data
 """
 import os
 import glob
+import yaml
 import numpy as np
 import xarray as xr
 import pandas as pd
@@ -17,6 +18,10 @@ import matplotlib.dates as mdates
 
 # set site name.
 site = 'HISCALE'
+
+config_file = '../config/config.yml'
+stream = open(config_file, "r")
+config = yaml.full_load(stream)
 
 prep_model_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/model/sfc_prof/3600s/'
 prep_sfc_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/surface/300s/'
@@ -189,23 +194,29 @@ swnettoa_hiscale = swnettoa.sel(time=time_hiscale)
 filename = prep_model_path +site+'_sfc.nc'
 modeldata = xr.open_dataset(filename)
 time_m = modeldata['time'].load()
-bc_m = modeldata['bc'].load()
-dst_m = modeldata['dst'].load()
-mom_m = modeldata['mom'].load()
-pom_m = modeldata['pom'].load()
-ncl_m = modeldata['ncl'].load()
-so4_m = modeldata['so4'].load()
-soa_m = modeldata['soa'].load()
-ccn2_m = modeldata['CCN4'].load()
-ncn3_m = modeldata['NCN3'].load()
-ncn10_m = modeldata['NCN10'].load()
-ncn100_m = modeldata['NCN100'].load()
-CNsize_m = modeldata['NCNall'].load()
-cod_m = modeldata['cod'].load()
-reff_m = modeldata['reff'].load()
-lwp_m = modeldata['TGCLDLWP'].load()
+if config['aerosol_output'] == True:
+            bc_m = modeldata['bc'].load()
+            dst_m = modeldata['dst'].load()
+            mom_m = modeldata['mom'].load()
+            pom_m = modeldata['pom'].load()
+            ncl_m = modeldata['ncl'].load()
+            so4_m = modeldata['so4'].load()
+            soa_m = modeldata['soa'].load()
+            ccn2_m = modeldata['CCN4'].load()
+            ncn3_m = modeldata['NCN3'].load()
+            ncn10_m = modeldata['NCN10'].load()
+            ncn100_m = modeldata['NCN100'].load()
+            CNsize_m = modeldata['NCNall'].load()
+if config['cosp_output'] == True:
+            cod_m = modeldata['cod'].load()
+if config['reff_output'] == True:
+            reff_m = modeldata['reff'].load()
+lwp_m = modeldata[config['LWP']].load()
 nd_m = modeldata['Nd_mean'].load()
-precip_m = modeldata['PRECT'].load()
+if config['convectiveparam'] == True:
+            precip_m = modeldata[config['PRECIPSFCTOT']].load()
+else:
+            precip_m = modeldata[config['PRECIPSFCLIQ']].load()
 cld_m = modeldata['CLDTOT'].load()
 cbh_m = modeldata['cbh'].load()
 cth_m = modeldata['cth'].load()
@@ -213,32 +224,47 @@ Hcld_m = modeldata['clddepth'].load()
 cldlow_m = modeldata['CLDLOW'].load()
 cldmid_m = modeldata['CLDMED'].load()
 cldhgh_m = modeldata['CLDHGH'].load()
-lwdnsfc_m = modeldata['FLDS'].load()
-lwnetsfc_m = modeldata['FLNS'].load()
-lwnettoa_m = modeldata['FLNT'].load()
-lwuptoa_m = modeldata['FLUT'].load()
-swdnsfc_m = modeldata['FSDS'].load()
-swnetsfc_m = modeldata['FSNS'].load()
-swdntoa_m = modeldata['SOLIN'].load()
-swnettoa_m = modeldata['FSNT'].load()
-swuptoa_m = modeldata['FSUTOA'].load()
+if config['netradiation_output'] == True:
+            lwnetsfc_m = modeldata['FLNS'].load()
+            lwnettoa_m = modeldata['FLNT'].load()
+            swnetsfc_m = modeldata['FSNS'].load()
+            swnettoa_m = modeldata['FSNT'].load()
+else:
+            lwupsfc_m = modeldata['LWUPSFC'].load()
+            swupsfc_m = modeldata['SWUPSFC'].load()
+            # lwdntoa_m = 
+lwdnsfc_m = modeldata[config['LWDOWNSFC']].load()
+lwuptoa_m = modeldata[config['LWUPTOA']].load()
+swdnsfc_m = modeldata[config['SWDOWNSFC']].load()            
+swdntoa_m = modeldata[config['SWDOWNTOA']].load()
+swuptoa_m = modeldata[config['SWUPTOA']].load()
 modeldata.close()
-lwupsfc_m = lwnetsfc_m + lwdnsfc_m
-swupsfc_m = swdnsfc_m - swnetsfc_m
+
+if config['netradiation_output'] == True:
+            lwupsfc_m = lwnetsfc_m + lwdnsfc_m
+            swupsfc_m = swdnsfc_m - swnetsfc_m
+else:
+            lwnetsfc_m = lwupsfc_m - lwdnsfc_m
+            # lwnettoa_m = lwdntoa_m - lwuptoa_m
+            swnetsfc_m = swdnsfc_m - swupsfc_m
+            swnettoa_m = swdntoa_m - swuptoa_m
 albedo_m = swuptoa_m/swdntoa_m*100
-org_m = pom_m + mom_m + soa_m
-bc_m_hiscale = bc_m.sel(time=time_hiscale)
-dst_m_hiscale = dst_m.sel(time=time_hiscale)
-org_m_hiscale = org_m.sel(time=time_hiscale)
-so4_m_hiscale = so4_m.sel(time=time_hiscale)
-ncl_m_hiscale = ncl_m.sel(time=time_hiscale)
-ccn2_m_hiscale = ccn2_m.sel(time=time_hiscale)
-ncn3_m_hiscale = ncn3_m.sel(time=time_hiscale)
-ncn10_m_hiscale = ncn10_m.sel(time=time_hiscale)
-ncn100_m_hiscale = ncn100_m.sel(time=time_hiscale)
-CNsize_m_hiscale = CNsize_m.sel(time=time_hiscale)
-cod_m_hiscale = cod_m.sel(time=time_hiscale)
-reff_m_hiscale = reff_m.sel(time=time_hiscale)
+if config['aerosol_output'] == True:
+            org_m = pom_m + mom_m + soa_m
+            bc_m_hiscale = bc_m.sel(time=time_hiscale)
+            dst_m_hiscale = dst_m.sel(time=time_hiscale)
+            org_m_hiscale = org_m.sel(time=time_hiscale)
+            so4_m_hiscale = so4_m.sel(time=time_hiscale)
+            ncl_m_hiscale = ncl_m.sel(time=time_hiscale)
+            ccn2_m_hiscale = ccn2_m.sel(time=time_hiscale)
+            ncn3_m_hiscale = ncn3_m.sel(time=time_hiscale)
+            ncn10_m_hiscale = ncn10_m.sel(time=time_hiscale)
+            ncn100_m_hiscale = ncn100_m.sel(time=time_hiscale)
+            CNsize_m_hiscale = CNsize_m.sel(time=time_hiscale)
+if config['cosp_output'] == True:
+            cod_m_hiscale = cod_m.sel(time=time_hiscale)
+if config['reff_output'] == True:
+            reff_m_hiscale = reff_m.sel(time=time_hiscale)
 lwp_m_hiscale = lwp_m.sel(time=time_hiscale)
 nd_m_hiscale = nd_m.sel(time=time_hiscale)
 precip_m_hiscale = precip_m.sel(time=time_hiscale)
@@ -250,7 +276,7 @@ cldlow_m_hiscale = cldlow_m.sel(time=time_hiscale)
 cldmid_m_hiscale = cldmid_m.sel(time=time_hiscale)
 cldhgh_m_hiscale = cldhgh_m.sel(time=time_hiscale)
 lwnetsfc_m_hiscale = lwnetsfc_m.sel(time=time_hiscale)
-lwnettoa_m_hiscale = lwnettoa_m.sel(time=time_hiscale)
+# lwnettoa_m_hiscale = lwnettoa_m.sel(time=time_hiscale)
 swnetsfc_m_hiscale = swnetsfc_m.sel(time=time_hiscale)
 swnettoa_m_hiscale = swnettoa_m.sel(time=time_hiscale)
 albedo_m_hiscale = albedo_m.sel(time=time_hiscale)
