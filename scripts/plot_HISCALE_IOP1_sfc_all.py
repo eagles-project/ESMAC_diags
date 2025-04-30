@@ -604,11 +604,8 @@ if config['aerosol_output'] == True:
 #                             [height_o, height_m, height_m2], 
 #                             [cloud_2d_hiscale.T.data, cloud_m_hiscale.T.data, cloud_m2_hiscale.T.data], 
 #                               legend = ['Obs','E3SMv1','E3SMv2'], title = 'Cloud Fraction (%)'),
-fig,ax = plot.timeseries_2d([time_hiscale,time_hiscale], 
-                            [height_o, height_m], 
-                            [cloud_2d_hiscale.T.data, cloud_m_hiscale.T.data], 
-                              legend = ['Obs','Model'], title = 'Cloud Fraction (%)'),
-                              yticks=[0,3,6,9,12], ylimit=(0,12), ylabel='Height (m)',cmap='jet', #ylimit=(3,1000)
+fig,ax = plot.timeseries_2d([time_hiscale,time_hiscale], [height_o, height_m], [cloud_2d_hiscale.T.data, cloud_m_hiscale.T.data],
+                            legend = ['Obs','Model'], title = 'Cloud Fraction (%)', yticks=[0,3,6,9,12], ylimit=(0,12), ylabel='Height (m)',cmap='jet') #, ylimit=(3,1000)
 # for ax_i in ax:
 #     ax_i.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
 #     ax_i.xaxis.set_major_locator(mdates.DayLocator(interval=5))
