@@ -90,9 +90,13 @@ reff = obsdata['reff'].load()
 obsdata.close()
 reff_hiscale = reff.sel(time=time_hiscale)
 obsdata = xr.open_dataset(prep_sfc_path + 'precip_'+site+'.nc')
-precip = obsdata['precip'].load()
+precip_tbrg = obsdata['precip_tbrg'].load()
+precip_pwd = obsdata['precip_pwd'].load()
+precip_pars = obsdata['precip_pars'].load()
 obsdata.close()
-precip_hiscale = precip.sel(time=time_hiscale)
+precip_tbrg_hiscale = precip_tbrg.sel(time=time_hiscale)
+precip_pwd_hiscale = precip_pwd.sel(time=time_hiscale)
+precip_pars_hiscale = precip_pars.sel(time=time_hiscale)
 
 obsdata = xr.open_dataset(prep_sfc_path + 'sfc_radiation_'+site+'.nc')
 lwdnsfc = obsdata['lwdn'].load()
@@ -393,12 +397,13 @@ lwp_m_hiscale[lwp_m_hiscale<20] = np.nan
 
 cod_hiscale[cod_hiscale<2] = np.nan
 cod_sat_hiscale[cod_sat_hiscale<2] = np.nan
-cod_m_hiscale[cod_m_hiscale<2] = np.nan
-# cod_m2_hiscale[cod_m2_hiscale<2] = np.nan
 cod_hiscale[cod_hiscale>100] = np.nan
 cod_sat_hiscale[cod_sat_hiscale>100] = np.nan
-cod_m_hiscale[cod_m_hiscale>100] = np.nan
-# cod_m2_hiscale[cod_m2_hiscale>100] = np.nan
+if config['cosp_output'] == True:
+            cod_m_hiscale[cod_m_hiscale<2] = np.nan
+            # cod_m2_hiscale[cod_m2_hiscale<2] = np.nan
+            cod_m_hiscale[cod_m_hiscale>100] = np.nan
+            # cod_m2_hiscale[cod_m2_hiscale>100] = np.nan
 
 # unit change:
 precip_m_hiscale = precip_m_hiscale*3600*1000   # m/s to mm/hr
@@ -520,10 +525,10 @@ ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
 ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 fig.savefig(figpath+'timeseries_reff_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [precip_hiscale,precip_m_hiscale,precip_m2_hiscale],  
-#                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-fig,ax = plot.timeseries([time_hiscale,time_hiscale], [precip_hiscale,precip_m_hiscale],  
-                          legend = ['Obs','Model'], color=['k','r'], 
+# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale,time_hiscale], [precip_tbrg_hiscale,precip_pwd_hiscale,precip_pars_hiscale,precip_m_hiscale,precip_m2_hiscale],  
+#                           legend = ['Tipping Bucket', 'PWD', 'Disdrometer', 'E3SMv1','E3SMv2'], color=['k','gray','silver','r','b'], 
+fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [precip_tbrg_hiscale,precip_pwd_hiscale,precip_pars_hiscale,precip_m_hiscale],  
+                          legend = ['Tipping Bucket', 'PWD', 'Disdrometer', 'Model'], color=['k','gray','silver','r'], 
                         title='Precip '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='mm/hr')
 ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
 ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
@@ -666,10 +671,10 @@ fig,ax = plot.diurnalcycle([reff_hiscale, reff_sat_hiscale, reff_m_hiscale],
                         title='droplet effective radius '+site+' '+IOP, xlabel='Time (UTC)', ylabel='$\mu$m')
 fig.savefig(figpath+'diurnalcycle_reff_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.diurnalcycle( [precip_hiscale,precip_m_hiscale,precip_m2_hiscale], 
-#                             legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-fig,ax = plot.diurnalcycle( [precip_hiscale,precip_m_hiscale], 
-                            legend = ['Obs','Model'], color=['k','r'], 
+# fig,ax = plot.diurnalcycle( [precip_tbrg_hiscale,precip_pwd_hiscale,precip_pars_hiscale,precip_m_hiscale,precip_m2_hiscale], 
+#                             legend = ['Tipping Bucket','PWD','Disdrometer','E3SMv1','E3SMv2'], color=['k','gray','silver','r','b'], 
+fig,ax = plot.diurnalcycle( [precip_tbrg_hiscale,precip_pwd_hiscale,precip_pars_hiscale,precip_m_hiscale], 
+                            legend = ['Tipping Bucket','PWD','Disdrometer','Model'], color=['k','gray','silver','r'], 
                         nozero_percentile=True, title='Precipitation '+site+' '+IOP, xlabel='Time (UTC)',ylabel='mm/hr')
 fig.savefig(figpath+'diurnalcycle_precip_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
@@ -819,16 +824,20 @@ fig,ax = plot.hist([reff_hiscale,reff_sat_hiscale,reff_m_hiscale], weights=[w0,w
                     title = 'Cloud Effective Radius '+site+' '+IOP, bins=np.arange(4,28,1), ylabel='Fraction', xlabel='$\mu$m')
 fig.savefig(figpath+'hist_reff_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-pr0 = precip_hiscale[precip_hiscale!=0]
+pr0 = precip_tbrg_hiscale[precip_tbrg_hiscale!=0]
+pr1 = precip_pwd_hiscale[precip_pwd_hiscale!=0]
+pr2 = precip_pars_hiscale[precip_pars_hiscale!=0]
 prm = precip_m_hiscale[precip_m_hiscale!=0]
 # prm2 = precip_m_hiscale[precip_m2_hiscale!=0]
 w0 = np.ones_like(pr0)/sum(~np.isnan(pr0.data))
-w1 = np.ones_like(prm)/sum(~np.isnan(prm.data))
-# w2 = np.ones_like(prm2)/sum(~np.isnan(prm2.data))
-# fig,ax = plot.hist( [pr0,prm,prm2], weights=[w0,w1,w2], legend = ['Obs','E3SMv1','E3SMv2'], 
-#                     color=['k','r','b'],  bins=np.arange(0,5,.1), 
-fig,ax = plot.hist( [pr0,prm], weights=[w0,w1], legend = ['Obs','Model'], 
-                    color=['k','r'],  bins=np.arange(0,5,.1), 
+w1 = np.ones_like(pr1)/sum(~np.isnan(pr1.data))
+w2 = np.ones_like(pr2)/sum(~np.isnan(pr2.data))
+wm1 = np.ones_like(prm)/sum(~np.isnan(prm.data))
+# wm2 = np.ones_like(prm2)/sum(~np.isnan(prm2.data))
+# fig,ax = plot.hist( [pr0,pr1,pr2,prm,prm2], weights=[w0,w1,w2,wm1,wm2], legend = ['Tipping Bucket','PWD','Disdrometer','E3SMv1','E3SMv2'], 
+#                     color=['k','gray','silver','r','b'],  bins=np.arange(0,5,.1), 
+fig,ax = plot.hist( [pr0,prm], weights=[w0,w1,w2,wm1], legend = ['Tipping Bucket','PWD','Disdrometer','Model'], 
+                    color=['k','gray','silver','r'],  bins=np.arange(0,5,.1), 
                     title = 'Precipitation '+site+' '+IOP, ylabel='Fraction', xlabel='mm/hr')
 fig.savefig(figpath+'hist_precip_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
@@ -880,7 +889,7 @@ fig.savefig(figpath+'mean_aerosol_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_in
 #                           outfile=figpath+'statistics_1var_LWP_'+site+'_'+IOP+'.txt')
 # calc.mean_std_percentiles([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale,nd_m2_hiscale],legend=['Ndrop','Nd_satellite','E3SMv1','E3SMv2'],
 #                           outfile=figpath+'statistics_1var_Nd_'+site+'_'+IOP+'.txt')
-# calc.mean_std_percentiles([precip_hiscale,precip_m_hiscale,precip_m2_hiscale],legend=['Obs','E3SMv1','E3SMv2'],
+# calc.mean_std_percentiles([precip_tbrg_hiscale,precip_pwd_hiscale,precip_pars_hiscale,precip_m_hiscale,precip_m2_hiscale],legend=['Tipping Bucket','PWD','Disdrometer','E3SMv1','E3SMv2'],
 #                           outfile=figpath+'statistics_1var_Precip_'+site+'_'+IOP+'.txt')
 # calc.mean_std_percentiles([cld_arscl_hiscale,cld_visst_hiscale,cld_tsi_hiscale,cld_m_hiscale,cld_m2_hiscale],
 #                           legend=['ARSCL','Satellite','TSI','E3SMv1','E3SMv2'],
