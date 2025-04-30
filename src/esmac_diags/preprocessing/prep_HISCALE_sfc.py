@@ -1148,7 +1148,7 @@ def prep_LWP(armbepath, mwrpath, predatapath, dt=3600):
         #%% read in MWR LWP
         lst1 = glob.glob(os.path.join(mwrpath, '*.nc'))
         mwrdata = xr.open_mfdataset(lst1, combine='by_coords')
-        time = mwrdata['time']
+        time1 = mwrdata['time']
         lwp = mwrdata['phys_lwp'] #units are g/m2
         qc_lwp = mwrdata['qc_phys_lwp']
         mwrdata.close()
