@@ -1155,7 +1155,7 @@ def prep_LWP(armbepath, mwrpath, predatapath, dt=3600):
     
         lwp.load()
         qc_lwp.load()
-        lwp = qc_mask_qcflag(lwp, qc_lwp2)
+        lwp = qc_mask_qcflag(lwp, qc_lwp)
   
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
