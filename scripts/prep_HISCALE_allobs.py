@@ -96,11 +96,11 @@ print('prepare surface data:')
 # sfc.prep_cloud_2d(armbepath, arsclpath, prep_data_path+'surface/'+str(surface_dt)+'s/', height_out, dt=surface_dt)   # 2D cloud fraction
 # sfc.prep_cloudheight_ARSCL(arsclbndpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)   # cloud height 
 # sfc.prep_totcld(armbepath, arsclbndpath, tsipath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)         # cloud fraction. from ARSCL, TSI and satellite sources
-sfc.prep_LWP(armbepath, mwrpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt) # cloud liquid water path
+# sfc.prep_LWP(armbepath, mwrpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt) # cloud liquid water path
 # sfc.prep_Ndrop(ndroppath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)          # cloud droplet number retrieval from ARM Ndrop VAP
 # sfc.prep_mfrsr_cod(mfrsrpath,  prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)     # cloud optical depth from MFRSR
 # sfc.prep_mfrsr_Reff(mfrsrpath,  prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)    # cloud effective radius from MFRSR
-# sfc.prep_radiation(armbepath, radfluxpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)      # surface radiation
+sfc.prep_radiation(armbepath, radfluxpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)      # surface radiation
 # sfc.prep_LTS(armbepath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)            # lower tropospheric stability
 # sfc.prep_precip(armbepath, metpath, parspath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)         # surface precipitation
 # prepare satellite data. output time in 1hr (dt=3600s) resolution
