@@ -58,8 +58,8 @@ reff_output: True
 # flag for whether model uses deep convective parameterization
 convectiveparam: True
 
-# # flag for whether rain mass and number concentrations are outputted
-# rain_output: True
+# flag for whether rain mass and number concentrations are outputted
+rain_output: True
 
 # flag for 3D visible optical depth output
 tau3d_output: True
