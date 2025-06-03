@@ -1970,7 +1970,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
               print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop and Bennartz 2007')
               lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
               e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
-              nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
+              nd_arm = calc_cdnc_ARM(lwp, cod_m2, e3sm_cloud_depth)
               nd_arm = xr.DataArray(data=nd_arm*1e6,  dims=[config['time_dim']],
                   coords=dict(time=([config['time_dim']], e3smtime_i)),
                   attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
