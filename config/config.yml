@@ -80,7 +80,7 @@ midlevel_thermo_output: False
 # model output variable names
 LON: 'lon'
 LAT: 'lat'
-PS: 'ps'        # ps, PS
+PS: 'PS'        # ps, PS
 
 P0: 'P0'        # if pres_output = False
 HYAM: 'hyam'    # if pres_output = False
