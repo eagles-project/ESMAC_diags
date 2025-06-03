@@ -1185,6 +1185,7 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     variables_1d = [l700, l850]
     
     # %% output extacted file
+    print('\nWriting file')
     varall_p = {
             varnames_p[vv]: ([config['time_dim'],config['vert_dim'],], np.float32(variables_p[vv])) for vv in range(len(varnames_p))
     }
@@ -2116,6 +2117,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
         NCNall_new = f(np.int64(time_new))
     
     # %% output extacted file
+    print('\nWriting file')
     varall_1d = {
             variable_names[vv]: (config['time_dim'], np.float32(variables_new[vv])) for vv in range(len(variable_names))
     }
