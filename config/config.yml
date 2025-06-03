@@ -99,7 +99,7 @@ CFLIQ: 'FREQL'  # cldfrac_liq, FREQL
 QC: 'CLDLIQ'    # qc, CLDLIQ
 QI: 'CLDICE'    # qi, CLDICE
 NC: 'NUMLIQ'    # nc, NUMLIQ, ICWNC (in cloud)
-NI: 'NUMIC'    # ni, NUMICE, ICINC (in cloud)
+NI: 'NUMICE'    # ni, NUMICE, ICINC (in cloud)
 QR: 'RAINQM'        # qr, RAIMQM
 NR: 'NUMRAI'        # nr, NUMRAI
 
