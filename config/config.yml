@@ -25,7 +25,7 @@ E3SMdomain_range: '' # '_330e_to_335e_37n_to_42n' for ENA; '_260e_to_265e_34n_to
 
 # model grid spacing (degrees)
 # used to load subsample of large model lat-lon grids around small aircraft regions
-model_grid_deg: 1
+model_grid_deg: 0.1
 
 # model array dimension names
 time_dim: 'time'
