@@ -266,6 +266,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
           matched_vlist = list(set(av_vars).intersection(req_vlist))
         
           if len(matched_vlist) == len(req_vlist):
+              print('\nAnalyzing for aerosol composition')
               bc_a1 = e3smdata3d[config['bc_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
               bc_a3 = e3smdata3d[config['bc_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
               bc_a4 = e3smdata3d[config['bc_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
@@ -315,6 +316,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         if len(matched_vlist) == len(req_vlist):
+            print('\nAnalyzing for condensate')
             qc = e3smdata3d[config['QC']+E3SMdomain_range][:,:,latlon_ind,...].load()
             qi = e3smdata3d[config['QI']+E3SMdomain_range][:,:,latlon_ind,...].load()
         else:
@@ -326,7 +328,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
             req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
             matched_vlist = list(set(av_vars).intersection(req_vlist))
             if len(matched_vlist) == len(req_vlist):
-                qr = e3smdata3d[config['QC']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                qr = e3smdata3d[config['QR']+E3SMdomain_range][:,:,latlon_ind,...].load()
             else:
                 qr = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
           
@@ -439,6 +441,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
                   matched_vlist = list(set(av_vars).intersection(req_vlist))
                 
                   if len(matched_vlist) == len(req_vlist):
+                      print('\nAnalyzing for aerosol composition')
                       new_bc_a1 = e3smdata3d[config['bc_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
                       new_bc_a3 = e3smdata3d[config['bc_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
                       new_bc_a4 = e3smdata3d[config['bc_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
@@ -530,6 +533,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
                 req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
                 matched_vlist = list(set(av_vars).intersection(req_vlist))
                 if len(matched_vlist) == len(req_vlist):
+                    print('\nAnalyzing for condensate')
                     new_qc = e3smdata3d[config['QC']+E3SMdomain_range][:,:,latlon_ind,...].load()
                     new_qi = e3smdata3d[config['QI']+E3SMdomain_range][:,:,latlon_ind,...].load()
                     qc = xr.concat([qc, new_qc], dim=config['time_dim'])
