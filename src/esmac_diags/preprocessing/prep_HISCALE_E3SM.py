@@ -2057,8 +2057,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
     variable_names = variable_names + ['Nd_mean']
     variables = variables + [cdnc_mean]
     if config['reff_output'] == True:
-      variable_names = variable_names + ['Nd_VISST']
-      variables = variables + [cdnc_sat]
+      variable_names = variable_names + ['Nd_ARM']
+      variables = variables + [cdnc_arm]
     if config['cosp_output'] == True:
       variable_names = variable_names + ['Nd_VISST']
       variables = variables + [cdnc_sat]
