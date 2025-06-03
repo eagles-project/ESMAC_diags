@@ -1989,7 +1989,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
               lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
               # lwp = e3smdata2d[config['LWPMODIS']+E3SMdomain_range][:,x_idx].data
               T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
-              nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m, adiabaticity=0.8)
+              nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m2, adiabaticity=0.8)
               nd_sat = xr.DataArray(data=nd_sat*1e6,  dims=[config['time_dim']],
                   coords=dict(time=([config['time_dim']], e3smtime_i)),
                   attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
