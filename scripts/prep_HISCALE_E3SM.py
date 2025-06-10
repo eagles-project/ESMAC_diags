@@ -23,10 +23,12 @@ config = yaml.full_load(stream)
 input_path = config['model_input_path']
 input2d_filehead = config['model_2d_input_filehead']
 input3d_filehead = config['model_3d_input_filehead']
+input3d_dryaerosol_filehead = config['model_3d_dryaerosol_input_filehead']
+input3d_cloudaerosol_filehead = config['model_3d_cloudaerosol_input_filehead']
 # input_path = '../raw_data/model/'
 # input_filehead = 'E3SMv1_SGP_ENA_2011_2020'
 
-output_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/HISCALE/model/ne30/'
+output_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/HISCALE/model/ne256mam/'
 output_filehead = 'HISCALE'
 
 # iwg data path for aircraft information
@@ -47,6 +49,6 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # output time in 1min (dt=60s) resolution for flight track and 1hr (dt=3600s) for other data
-# prep.prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path+'flight/'+str(aircraft_dt)+'s/', output_filehead, iwgpath, dt=aircraft_dt, config=config)
-prep.prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path+'sfc_prof/'+str(surface_dt)+'s/', output_filehead, dt=surface_dt, config=config)
+prep.prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dryaerosol_filehead, input3d_cloudaerosol_filehead, output_path+'flight/'+str(aircraft_dt)+'s/', output_filehead, iwgpath, dt=aircraft_dt, config=config)
+prep.prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaerosol_filehead, input3d_cloudaerosol_filehead, output_path+'sfc_prof/'+str(surface_dt)+'s/', output_filehead, dt=surface_dt, config=config)
 prep.prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_path+'sfc_prof/'+str(profile_dt)+'s/', output_filehead, height_out, lev_out=lev_out, dt=profile_dt, config=config)
