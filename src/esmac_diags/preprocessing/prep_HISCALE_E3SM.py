@@ -225,8 +225,8 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
             zlen = T.sizes[config['vert_dim']]
             for kk in range(zlen):
                 Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
-            else:
-                Pres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,latlon_ind,...].load()
+        else:
+            Pres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,latlon_ind,...].load()
       
         # change time format into seconds of the day
         # timem = np.float64((e3smtime - e3smtime[0]).seconds) # this only works for the first time being 0Z
@@ -417,14 +417,14 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
                 T = xr.concat([T, newT], dim=config['time_dim'])
     
                 if config['pres_output'] == False:
-                  PS = e3smdata3d[config['PS']+E3SMdomain_range][:,latlon_ind,...].load()
-                  newPres = xr.full_like(T, np.nan)
-                  newPres = Pres.assign_attrs(units='Pa',long_name='Pressure',standard_name='air_pressure')
-                  zlen = T.sizes[config['vert_dim']]
-                  for kk in range(zlen):
-                      newPres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
+                    PS = e3smdata3d[config['PS']+E3SMdomain_range][:,latlon_ind,...].load()
+                    newPres = xr.full_like(T, np.nan)
+                    newPres = Pres.assign_attrs(units='Pa',long_name='Pressure',standard_name='air_pressure')
+                    zlen = T.sizes[config['vert_dim']]
+                    for kk in range(zlen):
+                        newPres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
                 else:
-                  newPres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                    newPres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,latlon_ind,...].load()
     
                 Pres = xr.concat([Pres, newPres], dim=config['time_dim'])
           
