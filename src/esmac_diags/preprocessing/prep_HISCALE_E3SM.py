@@ -53,7 +53,7 @@ config = yaml.full_load(stream)
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path, output_filehead, 
+def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dryaerosol_filehead, input3d_cloudaerosol_filehead, output_path, output_filehead, 
                       iwgpath, dt=60, config=config):
     """
     prepare E3SM output along flight tracks
@@ -138,18 +138,18 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
     
         #%% read in E3SM data
         variable3d_names = [config['T'], config['Q'], config['U'], config['V'], config['Z'], 
-                            config['QI'], config['QC'], config['CF'], config['CFLIQ'], config['NC'], config['NI']]
+                            config['CF'], config['CFLIQ'], config['NC'], config['NI']] #,config['QI'], config['QC']
         
         if config['rain_output'] == True:
             variable3d_names.append(config['QR'])
             variable3d_names.append(config['NR'])
         if config['reff_output'] == True:
             variable3d_names.append(config['REL'])
-        if config['aerosol_output'] == True:
-            variable3d_names.append(config['CCN1'])
-            variable3d_names.append(config['CCN3'])
-            variable3d_names.append(config['CCN4'])
-            variable3d_names.append(config['CCN5'])
+        # if config['ccn_output'] == True:
+        #     variable3d_names.append(config['CCN1'])
+        #     variable3d_names.append(config['CCN3'])
+        #     variable3d_names.append(config['CCN4'])
+        #     variable3d_names.append(config['CCN5'])
           
         variables = list()
         variables_new = list()
@@ -159,17 +159,22 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         cwc = list()
         iwc = list()
         if config['rain_output'] == True:
-          rwc = list()
+            rwc = list()
         if config['aerosol_output'] == True:
-          NCNall = np.empty((3000,0))
-          bc_all  = list()
-          dst_all = list()
-          mom_all = list()
-          ncl_all = list()
-          pom_all = list()
-          so4_all = list()
-          soa_all = list()
-          phi_all = np.empty((999,0))
+            NCNall = np.empty((3000,0))
+            bc_all  = list()
+            dst_all = list()
+            mom_all = list()
+            ncl_all = list()
+            pom_all = list()
+            so4_all = list()
+            soa_all = list()
+            phi_all = np.empty((999,0))
+        if config['ccn_output'] == True:
+            ccn1_all = list()
+            ccn3_all = list()
+            ccn4_all = list()
+            ccn5_all = list()
         
         lst3d = glob.glob(input_path + input3d_filehead+'.*'+timestr[0]+'-*.nc')
         lst3d.sort()
@@ -209,19 +214,19 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         T = e3smdata3d[config['T']+E3SMdomain_range][:,:,latlon_ind,...].load()
 
         if config['pres_output'] == False:
-          P0 = e3smdata3d[config['P0']].load()
-          hyam = e3smdata3d[config['HYAM']].load()
-          hybm = e3smdata3d[config['HYBM']].load()
-          PS = e3smdata3d[config['PS']+E3SMdomain_range][:,latlon_ind,...].load()
-          # Pres = np.nan*T
-          # zlen = T.shape[1]
-          Pres = xr.full_like(T, np.nan)
-          Pres = Pres.assign_attrs(units='Pa',long_name='Pressure',standard_name='air_pressure')
-          zlen = T.sizes[config['vert_dim']]
-          for kk in range(zlen):
-              Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
-        else:
-          Pres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,latlon_ind,...].load()
+            P0 = e3smdata3d[config['P0']].load()
+            hyam = e3smdata3d[config['HYAM']].load()
+            hybm = e3smdata3d[config['HYBM']].load()
+            PS = e3smdata3d[config['PS']+E3SMdomain_range][:,latlon_ind,...].load()
+            # Pres = np.nan*T
+            # zlen = T.shape[1]
+            Pres = xr.full_like(T, np.nan)
+            Pres = Pres.assign_attrs(units='Pa',long_name='Pressure',standard_name='air_pressure')
+            zlen = T.sizes[config['vert_dim']]
+            for kk in range(zlen):
+                Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
+            else:
+                Pres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,latlon_ind,...].load()
       
         # change time format into seconds of the day
         # timem = np.float64((e3smtime - e3smtime[0]).seconds) # this only works for the first time being 0Z
@@ -230,86 +235,6 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         # Get all simulated variables
         vlist = list(e3smdata3d.variables.keys())
         av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
-        
-        # variables for calculating aerosol size
-        if config['aerosol_output'] == True:
-          req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], config['dgnd_a01'], config['dgnd_a02'], \
-                       config['dgnd_a03'], config['dgnd_a04']]
-          req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-          matched_vlist = list(set(av_vars).intersection(req_vlist))
-          if len(matched_vlist) == len(req_vlist):
-              print('\nAnalyzing for aerosol size')
-              num_a1 = e3smdata3d[config['num_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              num_a2 = e3smdata3d[config['num_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              num_a3 = e3smdata3d[config['num_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              num_a4 = e3smdata3d[config['num_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              dn1 = e3smdata3d[config['dgnd_a01']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              dn2 = e3smdata3d[config['dgnd_a02']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              dn3 = e3smdata3d[config['dgnd_a03']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              dn4 = e3smdata3d[config['dgnd_a04']+E3SMdomain_range][:,:,latlon_ind,...].load()
-          else:
-              num_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              num_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              num_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              num_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              dn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              dn2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              dn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              dn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            
-          # aerosol composition
-          req_vlist = [config['bc_a1'], config['bc_a3'], config['bc_a4'], config['dst_a1'], config['dst_a3'], config['mom_a1'], \
-                       config['mom_a2'], config['mom_a3'], config['mom_a4'], config['ncl_a1'], config['ncl_a2'], config['ncl_a3'], \
-                       config['pom_a1'], config['pom_a3'], config['pom_a4'], config['so4_a1'], config['so4_a2'], config['so4_a3'], \
-                       config['soa_a1'], config['soa_a2'], config['soa_a3']]
-          req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-          matched_vlist = list(set(av_vars).intersection(req_vlist))
-        
-          if len(matched_vlist) == len(req_vlist):
-              print('\nAnalyzing for aerosol composition')
-              bc_a1 = e3smdata3d[config['bc_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              bc_a3 = e3smdata3d[config['bc_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              bc_a4 = e3smdata3d[config['bc_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              dst_a1 = e3smdata3d[config['dst_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              dst_a3 = e3smdata3d[config['dst_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              mom_a1 = e3smdata3d[config['mom_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              mom_a2 = e3smdata3d[config['mom_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              mom_a3 = e3smdata3d[config['mom_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              mom_a4 = e3smdata3d[config['mom_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              ncl_a1 = e3smdata3d[config['ncl_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              ncl_a2 = e3smdata3d[config['ncl_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              ncl_a3 = e3smdata3d[config['ncl_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              pom_a1 = e3smdata3d[config['pom_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              pom_a3 = e3smdata3d[config['pom_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              pom_a4 = e3smdata3d[config['pom_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              so4_a1 = e3smdata3d[config['so4_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              so4_a2 = e3smdata3d[config['so4_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              so4_a3 = e3smdata3d[config['so4_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              soa_a1 = e3smdata3d[config['soa_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              soa_a2 = e3smdata3d[config['soa_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-              soa_a3 = e3smdata3d[config['soa_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-          else:
-              bc_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              bc_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              bc_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              dst_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              dst_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              mom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              mom_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              mom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              mom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              ncl_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              ncl_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              ncl_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              pom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              pom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              pom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              so4_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              so4_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              so4_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              soa_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              soa_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              soa_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
 
         # condensate mass and number
         req_vlist = [config['QC'], config['QI']]
@@ -358,6 +283,123 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
             variables.append(var)
         
         e3smdata3d.close()
+      
+        # variables for calculating aerosol size
+        if config['aerosol_output'] == True:
+            lst3d_dryaer = glob.glob(input_path + input3d_dryaerosol_filehead+'.*'+timestr[0]+'-*.nc')
+            lst3d_dryaer.sort()
+            if len(lst3d_dryaer)==0:
+                raise ValueError('No model output files on flight day')
+  
+          #define model variable arrays with first model file
+          print(lst3d_dryaer[file_inds[0]])
+          e3smdata3d_dryaer = xr.open_dataset(lst3d_dryaer[file_inds[0]])
+          e3smdata3d_dryaer = e3smdata3d_dryaer.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+          
+          req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], config['dgnd_a01'], config['dgnd_a02'], \
+                       config['dgnd_a03'], config['dgnd_a04']]
+          req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+          matched_vlist = list(set(av_vars).intersection(req_vlist))
+          if len(matched_vlist) == len(req_vlist):
+              print('\nAnalyzing for aerosol size')
+              num_a1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              num_a2 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              num_a3 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              num_a4 = e3smdata3d_dryaer[config['num_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              dn1 = e3smdata3d_dryaer[config['dgnd_a01']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              dn2 = e3smdata3d_dryaer[config['dgnd_a02']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              dn3 = e3smdata3d_dryaer[config['dgnd_a03']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              dn4 = e3smdata3d_dryaer[config['dgnd_a04']+E3SMdomain_range][:,:,latlon_ind,...].load()
+          else:
+              num_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              num_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              num_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              num_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              dn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              dn2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              dn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              dn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+            
+          # aerosol composition
+          req_vlist = [config['bc_a1'], config['bc_a3'], config['bc_a4'], config['dst_a1'], config['dst_a3'], config['mom_a1'], \
+                       config['mom_a2'], config['mom_a3'], config['mom_a4'], config['ncl_a1'], config['ncl_a2'], config['ncl_a3'], \
+                       config['pom_a1'], config['pom_a3'], config['pom_a4'], config['so4_a1'], config['so4_a2'], config['so4_a3'], \
+                       config['soa_a1'], config['soa_a2'], config['soa_a3']]
+          req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+          matched_vlist = list(set(av_vars).intersection(req_vlist))
+        
+          if len(matched_vlist) == len(req_vlist):
+              print('\nAnalyzing for aerosol composition')
+              bc_a1 = e3smdata3d_dryaer[config['bc_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              bc_a3 = e3smdata3d_dryaer[config['bc_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              bc_a4 = e3smdata3d_dryaer[config['bc_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              dst_a1 = e3smdata3d_dryaer[config['dst_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              dst_a3 = e3smdata3d_dryaer[config['dst_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              mom_a1 = e3smdata3d_dryaer[config['mom_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              mom_a2 = e3smdata3d_dryaer[config['mom_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              mom_a3 = e3smdata3d_dryaer[config['mom_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              mom_a4 = e3smdata3d_dryaer[config['mom_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              ncl_a1 = e3smdata3d_dryaer[config['ncl_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              ncl_a2 = e3smdata3d_dryaer[config['ncl_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              ncl_a3 = e3smdata3d_dryaer[config['ncl_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              pom_a1 = e3smdata3d_dryaer[config['pom_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              pom_a3 = e3smdata3d_dryaer[config['pom_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              pom_a4 = e3smdata3d_dryaer[config['pom_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              so4_a1 = e3smdata3d_dryaer[config['so4_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              so4_a2 = e3smdata3d_dryaer[config['so4_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              so4_a3 = e3smdata3d_dryaer[config['so4_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              soa_a1 = e3smdata3d_dryaer[config['soa_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              soa_a2 = e3smdata3d_dryaer[config['soa_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+              soa_a3 = e3smdata3d_dryaer[config['soa_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+          else:
+              bc_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              bc_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              bc_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              dst_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              dst_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              mom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              mom_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              mom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              mom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              ncl_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              ncl_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              ncl_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              pom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              pom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              pom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              so4_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              so4_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              so4_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              soa_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              soa_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              soa_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+
+        if config['ccn_output'] == True:
+            lst3d_wetaer = glob.glob(input_path + input3d_cloudaerosol_filehead+'.*'+timestr[0]+'-*.nc')
+            lst3d_wetaer.sort()
+            if len(lst3d_wetaer)==0:
+                raise ValueError('No model output files on flight day')
+    
+            #define model variable arrays with first model file
+            print(lst3d_wetaer[file_inds[0]])
+            e3smdata3d_wetaer = xr.open_dataset(lst3d_dryaer[file_inds[0]])
+            e3smdata3d_wetaer = e3smdata3d_wetaer.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+          
+            req_vlist = [config['CCN1'], config['CCN3'], config['CCN4'], config['CCN5']]
+            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+            matched_vlist = list(set(av_vars).intersection(req_vlist))
+            if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing for aerosol size')
+                ccn1 = e3smdata3d_dryaer[config['CCN1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                ccn3 = e3smdata3d_dryaer[config['CCN3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                ccn4 = e3smdata3d_dryaer[config['CCN4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                ccn5 = e3smdata3d_dryaer[config['CCN5']+E3SMdomain_range][:,:,latlon_ind,...].load()
+            else:
+                ccn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                ccn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                ccn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                ccn5 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+
 
         #add model variable arrays at additional times if there are additional model output files within the flight period
         if len(file_inds) > 1:
@@ -388,146 +430,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
           
                 # change time format into seconds of the day
                 timem = np.concatenate([timem, np.float64(e3smtime_i.hour + e3smtime_i.minute + e3smtime_i.second)*3600])
-                
-                # variables for calculating aerosol size
-                if config['aerosol_output'] == True:
-                  req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], config['dgnd_a01'], config['dgnd_a02'], \
-                               config['dgnd_a03'], config['dgnd_a04']]
-                  req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-                  matched_vlist = list(set(av_vars).intersection(req_vlist))
-                  if len(matched_vlist) == len(req_vlist):
-                      print('\nAnalyzing for aerosol size')
-                      new_num_a1 = e3smdata3d[config['num_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_num_a2 = e3smdata3d[config['num_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_num_a3 = e3smdata3d[config['num_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_num_a4 = e3smdata3d[config['num_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_dn1 = e3smdata3d[config['dgnd_a01']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_dn2 = e3smdata3d[config['dgnd_a02']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_dn3 = e3smdata3d[config['dgnd_a03']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_dn4 = e3smdata3d[config['dgnd_a04']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      num_a1 = xr.concat([num_a1, new_num_a1], dim=config['time_dim'])
-                      num_a2 = xr.concat([num_a2, new_num_a2], dim=config['time_dim'])
-                      num_a3 = xr.concat([num_a3, new_num_a3], dim=config['time_dim'])
-                      num_a4 = xr.concat([num_a4, new_num_a4], dim=config['time_dim'])
-                      num_dn1 = xr.concat([num_dn1, new_num_dn1], dim=config['time_dim'])
-                      num_dn2 = xr.concat([num_dn2, new_num_dn2], dim=config['time_dim'])
-                      num_dn3 = xr.concat([num_dn3, new_num_dn3], dim=config['time_dim'])
-                      num_dn4 = xr.concat([num_dn4, new_num_dn4], dim=config['time_dim'])
-                  else:
-                      new_num_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_num_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_num_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_num_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_dn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_dn2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_dn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_dn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      num_a1 = xr.concat([num_a1, new_num_a1], dim=config['time_dim'])
-                      num_a2 = xr.concat([num_a2, new_num_a2], dim=config['time_dim'])
-                      num_a3 = xr.concat([num_a3, new_num_a3], dim=config['time_dim'])
-                      num_a4 = xr.concat([num_a4, new_num_a4], dim=config['time_dim'])
-                      num_dn1 = xr.concat([num_dn1, new_num_dn1], dim=config['time_dim'])
-                      num_dn2 = xr.concat([num_dn2, new_num_dn2], dim=config['time_dim'])
-                      num_dn3 = xr.concat([num_dn3, new_num_dn3], dim=config['time_dim'])
-                      num_dn4 = xr.concat([num_dn4, new_num_dn4], dim=config['time_dim'])
-                    
-                    
-                  # aerosol composition
-                  req_vlist = [config['bc_a1'], config['bc_a3'], config['bc_a4'], config['dst_a1'], config['dst_a3'], config['mom_a1'], \
-                               config['mom_a2'], config['mom_a3'], config['mom_a4'], config['ncl_a1'], config['ncl_a2'], config['ncl_a3'], \
-                               config['pom_a1'], config['pom_a3'], config['pom_a4'], config['so4_a1'], config['so4_a2'], config['so4_a3'], \
-                               config['soa_a1'], config['soa_a2'], config['soa_a3']]
-                  req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-                  matched_vlist = list(set(av_vars).intersection(req_vlist))
-                
-                  if len(matched_vlist) == len(req_vlist):
-                      print('\nAnalyzing for aerosol composition')
-                      new_bc_a1 = e3smdata3d[config['bc_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_bc_a3 = e3smdata3d[config['bc_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_bc_a4 = e3smdata3d[config['bc_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_dst_a1 = e3smdata3d[config['dst_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_dst_a3 = e3smdata3d[config['dst_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_mom_a1 = e3smdata3d[config['mom_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_mom_a2 = e3smdata3d[config['mom_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_mom_a3 = e3smdata3d[config['mom_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_mom_a4 = e3smdata3d[config['mom_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_ncl_a1 = e3smdata3d[config['ncl_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_ncl_a2 = e3smdata3d[config['ncl_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_ncl_a3 = e3smdata3d[config['ncl_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_pom_a1 = e3smdata3d[config['pom_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_pom_a3 = e3smdata3d[config['pom_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_pom_a4 = e3smdata3d[config['pom_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_so4_a1 = e3smdata3d[config['so4_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_so4_a2 = e3smdata3d[config['so4_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_so4_a3 = e3smdata3d[config['so4_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_soa_a1 = e3smdata3d[config['soa_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_soa_a2 = e3smdata3d[config['soa_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      new_soa_a3 = e3smdata3d[config['soa_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                      bc_a1 = xr.concat([bc_a1, new_bc_a1], dim=config['time_dim'])
-                      bc_a3 = xr.concat([bc_a3, new_bc_a3], dim=config['time_dim'])
-                      bc_a4 = xr.concat([bc_a4, new_bc_a4], dim=config['time_dim'])
-                      dst_a1 = xr.concat([dst_a1, new_dst_a1], dim=config['time_dim'])
-                      dst_a3 = xr.concat([dst_a3, new_dst_a3], dim=config['time_dim'])
-                      mom_a1 = xr.concat([mom_a1, new_mom_a1], dim=config['time_dim'])
-                      mom_a2 = xr.concat([mom_a2, new_mom_a2], dim=config['time_dim'])
-                      mom_a3 = xr.concat([mom_a3, new_mom_a3], dim=config['time_dim'])
-                      mom_a4 = xr.concat([mom_a4, new_mom_a4], dim=config['time_dim'])
-                      ncl_a1 = xr.concat([ncl_a1, new_ncl_a1], dim=config['time_dim'])
-                      ncl_a2 = xr.concat([ncl_a2, new_ncl_a2], dim=config['time_dim'])
-                      ncl_a3 = xr.concat([ncl_a3, new_ncl_a3], dim=config['time_dim'])
-                      pom_a1 = xr.concat([pom_a1, new_pom_a1], dim=config['time_dim'])
-                      pom_a3 = xr.concat([pom_a3, new_pom_a3], dim=config['time_dim'])
-                      pom_a4 = xr.concat([pom_a4, new_pom_a4], dim=config['time_dim'])
-                      so4_a1 = xr.concat([so4_a1, new_so4_a1], dim=config['time_dim'])
-                      so4_a2 = xr.concat([so4_a2, new_so4_a2], dim=config['time_dim'])
-                      so4_a3 = xr.concat([so4_a3, new_so4_a3], dim=config['time_dim'])
-                      soa_a1 = xr.concat([soa_a1, new_soa_a1], dim=config['time_dim'])
-                      soa_a2 = xr.concat([soa_a2, new_soa_a2], dim=config['time_dim'])
-                      soa_a3 = xr.concat([soa_a3, new_soa_a3], dim=config['time_dim'])
-                  else:
-                      new_bc_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_bc_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_bc_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_dst_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_dst_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_mom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_mom_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_mom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_mom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_ncl_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_ncl_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_ncl_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_pom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_pom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_pom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_so4_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_so4_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_so4_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_soa_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_soa_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      new_soa_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                      bc_a1 = xr.concat([bc_a1, new_bc_a1], dim=config['time_dim'])
-                      bc_a3 = xr.concat([bc_a3, new_bc_a3], dim=config['time_dim'])
-                      bc_a4 = xr.concat([bc_a4, new_bc_a4], dim=config['time_dim'])
-                      dst_a1 = xr.concat([dst_a1, new_dst_a1], dim=config['time_dim'])
-                      dst_a3 = xr.concat([dst_a3, new_dst_a3], dim=config['time_dim'])
-                      mom_a1 = xr.concat([mom_a1, new_mom_a1], dim=config['time_dim'])
-                      mom_a2 = xr.concat([mom_a2, new_mom_a2], dim=config['time_dim'])
-                      mom_a3 = xr.concat([mom_a3, new_mom_a3], dim=config['time_dim'])
-                      mom_a4 = xr.concat([mom_a4, new_mom_a4], dim=config['time_dim'])
-                      ncl_a1 = xr.concat([ncl_a1, new_ncl_a1], dim=config['time_dim'])
-                      ncl_a2 = xr.concat([ncl_a2, new_ncl_a2], dim=config['time_dim'])
-                      ncl_a3 = xr.concat([ncl_a3, new_ncl_a3], dim=config['time_dim'])
-                      pom_a1 = xr.concat([pom_a1, new_pom_a1], dim=config['time_dim'])
-                      pom_a3 = xr.concat([pom_a3, new_pom_a3], dim=config['time_dim'])
-                      pom_a4 = xr.concat([pom_a4, new_pom_a4], dim=config['time_dim'])
-                      so4_a1 = xr.concat([so4_a1, new_so4_a1], dim=config['time_dim'])
-                      so4_a2 = xr.concat([so4_a2, new_so4_a2], dim=config['time_dim'])
-                      so4_a3 = xr.concat([so4_a3, new_so4_a3], dim=config['time_dim'])
-                      soa_a1 = xr.concat([soa_a1, new_soa_a1], dim=config['time_dim'])
-                      soa_a2 = xr.concat([soa_a2, new_soa_a2], dim=config['time_dim'])
-                      soa_a3 = xr.concat([soa_a3, new_soa_a3], dim=config['time_dim'])
-        
+
                 # condensate mass and number
                 req_vlist = [config['QC'], config['QI']]
                 req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
@@ -588,7 +491,177 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
                     vv = variable3d_names.index(varname)
                     variables[vv] = xr.concat([variables[vv], var],dim=config['time_dim'])            
               
-                e3smdata3d.close()   
+                e3smdata3d.close()  
+              
+                # variables for calculating aerosol size
+                if config['aerosol_output'] == True:
+                    print(lst3d_dryaer[file_inds[ii+1]])
+                    e3smdata3d_dryaer = xr.open_dataset(lst3d_dryaer[file_inds[ii+1]])
+                    e3smdata3d_dryaer = e3smdata3d_dryaer.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+                    req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], config['dgnd_a01'], config['dgnd_a02'], \
+                                 config['dgnd_a03'], config['dgnd_a04']]
+                    req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                    matched_vlist = list(set(av_vars).intersection(req_vlist))
+                    if len(matched_vlist) == len(req_vlist):
+                        print('\nAnalyzing for aerosol size')
+                        new_num_a1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_num_a2 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_num_a3 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_num_a4 = e3smdata3d_dryaer[config['num_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_dn1 = e3smdata3d_dryaer[config['dgnd_a01']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_dn2 = e3smdata3d_dryaer[config['dgnd_a02']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_dn3 = e3smdata3d_dryaer[config['dgnd_a03']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_dn4 = e3smdata3d_dryaer[config['dgnd_a04']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        num_a1 = xr.concat([num_a1, new_num_a1], dim=config['time_dim'])
+                        num_a2 = xr.concat([num_a2, new_num_a2], dim=config['time_dim'])
+                        num_a3 = xr.concat([num_a3, new_num_a3], dim=config['time_dim'])
+                        num_a4 = xr.concat([num_a4, new_num_a4], dim=config['time_dim'])
+                        num_dn1 = xr.concat([num_dn1, new_num_dn1], dim=config['time_dim'])
+                        num_dn2 = xr.concat([num_dn2, new_num_dn2], dim=config['time_dim'])
+                        num_dn3 = xr.concat([num_dn3, new_num_dn3], dim=config['time_dim'])
+                        num_dn4 = xr.concat([num_dn4, new_num_dn4], dim=config['time_dim'])
+                    else:
+                        new_num_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_num_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_num_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_num_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_dn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_dn2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_dn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_dn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        num_a1 = xr.concat([num_a1, new_num_a1], dim=config['time_dim'])
+                        num_a2 = xr.concat([num_a2, new_num_a2], dim=config['time_dim'])
+                        num_a3 = xr.concat([num_a3, new_num_a3], dim=config['time_dim'])
+                        num_a4 = xr.concat([num_a4, new_num_a4], dim=config['time_dim'])
+                        num_dn1 = xr.concat([num_dn1, new_num_dn1], dim=config['time_dim'])
+                        num_dn2 = xr.concat([num_dn2, new_num_dn2], dim=config['time_dim'])
+                        num_dn3 = xr.concat([num_dn3, new_num_dn3], dim=config['time_dim'])
+                        num_dn4 = xr.concat([num_dn4, new_num_dn4], dim=config['time_dim'])
+                      
+                      
+                    # aerosol composition
+                    req_vlist = [config['bc_a1'], config['bc_a3'], config['bc_a4'], config['dst_a1'], config['dst_a3'], config['mom_a1'], \
+                                 config['mom_a2'], config['mom_a3'], config['mom_a4'], config['ncl_a1'], config['ncl_a2'], config['ncl_a3'], \
+                                 config['pom_a1'], config['pom_a3'], config['pom_a4'], config['so4_a1'], config['so4_a2'], config['so4_a3'], \
+                                 config['soa_a1'], config['soa_a2'], config['soa_a3']]
+                    req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                    matched_vlist = list(set(av_vars).intersection(req_vlist))
+                
+                    if len(matched_vlist) == len(req_vlist):
+                        print('\nAnalyzing for aerosol composition')
+                        new_bc_a1 = e3smdata3d_dryaer[config['bc_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_bc_a3 = e3smdata3d_dryaer[config['bc_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_bc_a4 = e3smdata3d_dryaer[config['bc_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_dst_a1 = e3smdata3d_dryaer[config['dst_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_dst_a3 = e3smdata3d_dryaer[config['dst_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_mom_a1 = e3smdata3d_dryaer[config['mom_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_mom_a2 = e3smdata3d_dryaer[config['mom_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_mom_a3 = e3smdata3d_dryaer[config['mom_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_mom_a4 = e3smdata3d_dryaer[config['mom_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_ncl_a1 = e3smdata3d_dryaer[config['ncl_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_ncl_a2 = e3smdata3d_dryaer[config['ncl_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_ncl_a3 = e3smdata3d_dryaer[config['ncl_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_pom_a1 = e3smdata3d_dryaer[config['pom_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_pom_a3 = e3smdata3d_dryaer[config['pom_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_pom_a4 = e3smdata3d_dryaer[config['pom_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_so4_a1 = e3smdata3d_dryaer[config['so4_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_so4_a2 = e3smdata3d_dryaer[config['so4_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_so4_a3 = e3smdata3d_dryaer[config['so4_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_soa_a1 = e3smdata3d_dryaer[config['soa_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_soa_a2 = e3smdata3d_dryaer[config['soa_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_soa_a3 = e3smdata3d_dryaer[config['soa_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        bc_a1 = xr.concat([bc_a1, new_bc_a1], dim=config['time_dim'])
+                        bc_a3 = xr.concat([bc_a3, new_bc_a3], dim=config['time_dim'])
+                        bc_a4 = xr.concat([bc_a4, new_bc_a4], dim=config['time_dim'])
+                        dst_a1 = xr.concat([dst_a1, new_dst_a1], dim=config['time_dim'])
+                        dst_a3 = xr.concat([dst_a3, new_dst_a3], dim=config['time_dim'])
+                        mom_a1 = xr.concat([mom_a1, new_mom_a1], dim=config['time_dim'])
+                        mom_a2 = xr.concat([mom_a2, new_mom_a2], dim=config['time_dim'])
+                        mom_a3 = xr.concat([mom_a3, new_mom_a3], dim=config['time_dim'])
+                        mom_a4 = xr.concat([mom_a4, new_mom_a4], dim=config['time_dim'])
+                        ncl_a1 = xr.concat([ncl_a1, new_ncl_a1], dim=config['time_dim'])
+                        ncl_a2 = xr.concat([ncl_a2, new_ncl_a2], dim=config['time_dim'])
+                        ncl_a3 = xr.concat([ncl_a3, new_ncl_a3], dim=config['time_dim'])
+                        pom_a1 = xr.concat([pom_a1, new_pom_a1], dim=config['time_dim'])
+                        pom_a3 = xr.concat([pom_a3, new_pom_a3], dim=config['time_dim'])
+                        pom_a4 = xr.concat([pom_a4, new_pom_a4], dim=config['time_dim'])
+                        so4_a1 = xr.concat([so4_a1, new_so4_a1], dim=config['time_dim'])
+                        so4_a2 = xr.concat([so4_a2, new_so4_a2], dim=config['time_dim'])
+                        so4_a3 = xr.concat([so4_a3, new_so4_a3], dim=config['time_dim'])
+                        soa_a1 = xr.concat([soa_a1, new_soa_a1], dim=config['time_dim'])
+                        soa_a2 = xr.concat([soa_a2, new_soa_a2], dim=config['time_dim'])
+                        soa_a3 = xr.concat([soa_a3, new_soa_a3], dim=config['time_dim'])
+                    else:
+                        new_bc_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_bc_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_bc_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_dst_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_dst_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_mom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_mom_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_mom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_mom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_ncl_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_ncl_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_ncl_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_pom_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_pom_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_pom_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_so4_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_so4_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_so4_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_soa_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_soa_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_soa_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        bc_a1 = xr.concat([bc_a1, new_bc_a1], dim=config['time_dim'])
+                        bc_a3 = xr.concat([bc_a3, new_bc_a3], dim=config['time_dim'])
+                        bc_a4 = xr.concat([bc_a4, new_bc_a4], dim=config['time_dim'])
+                        dst_a1 = xr.concat([dst_a1, new_dst_a1], dim=config['time_dim'])
+                        dst_a3 = xr.concat([dst_a3, new_dst_a3], dim=config['time_dim'])
+                        mom_a1 = xr.concat([mom_a1, new_mom_a1], dim=config['time_dim'])
+                        mom_a2 = xr.concat([mom_a2, new_mom_a2], dim=config['time_dim'])
+                        mom_a3 = xr.concat([mom_a3, new_mom_a3], dim=config['time_dim'])
+                        mom_a4 = xr.concat([mom_a4, new_mom_a4], dim=config['time_dim'])
+                        ncl_a1 = xr.concat([ncl_a1, new_ncl_a1], dim=config['time_dim'])
+                        ncl_a2 = xr.concat([ncl_a2, new_ncl_a2], dim=config['time_dim'])
+                        ncl_a3 = xr.concat([ncl_a3, new_ncl_a3], dim=config['time_dim'])
+                        pom_a1 = xr.concat([pom_a1, new_pom_a1], dim=config['time_dim'])
+                        pom_a3 = xr.concat([pom_a3, new_pom_a3], dim=config['time_dim'])
+                        pom_a4 = xr.concat([pom_a4, new_pom_a4], dim=config['time_dim'])
+                        so4_a1 = xr.concat([so4_a1, new_so4_a1], dim=config['time_dim'])
+                        so4_a2 = xr.concat([so4_a2, new_so4_a2], dim=config['time_dim'])
+                        so4_a3 = xr.concat([so4_a3, new_so4_a3], dim=config['time_dim'])
+                        soa_a1 = xr.concat([soa_a1, new_soa_a1], dim=config['time_dim'])
+                        soa_a2 = xr.concat([soa_a2, new_soa_a2], dim=config['time_dim'])
+                        soa_a3 = xr.concat([soa_a3, new_soa_a3], dim=config['time_dim'])
+
+                if config['ccn_output'] == True:
+                    print(lst3d_wetaer[file_inds[ii+1]])
+                    e3smdata3d_wetaer = xr.open_dataset(lst3d_wetaer[file_inds[ii+1]])
+                    e3smdata3d_wetaer = e3smdata3d_wetaer.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+                    req_vlist = [config['CCN1'], config['CCN3'], config['CCN4'], config['CCN5']]
+                    req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                    matched_vlist = list(set(av_vars).intersection(req_vlist))
+                    if len(matched_vlist) == len(req_vlist):
+                        print('\nAnalyzing for aerosol size')
+                        new_ccn1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_ccn3 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_ccn4 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_ccn5 = e3smdata3d_dryaer[config['num_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        ccn1 = xr.concat([ccn1, new_ccn1], dim=config['time_dim'])
+                        ccn3 = xr.concat([ccn3, new_ccn3], dim=config['time_dim'])
+                        ccn4 = xr.concat([ccn4, new_ccn4], dim=config['time_dim'])
+                        ccn5 = xr.concat([ccn5, new_ccn5], dim=config['time_dim'])
+                    else:
+                        new_ccn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_ccn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_ccn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_ccn5 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        ccn1 = xr.concat([ccn1, new_ccn1], dim=config['time_dim'])
+                        ccn3 = xr.concat([ccn3, new_ccn3], dim=config['time_dim'])
+                        ccn4 = xr.concat([ccn4, new_ccn4], dim=config['time_dim'])
+                        ccn5 = xr.concat([ccn5, new_ccn5], dim=config['time_dim'])
+                      
         
         #%% find the flight track grid
         for tt in range(len(time_new)):
@@ -615,112 +688,118 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
 
             #Rain Water Content
             if config['rain_output'] == True:
-              if qr.attrs['units'] == 'kg/kg':
-                  rwc.append(qr[t_idx, z_idx, x_idx].data * rho * 1000)
-              if qr.attrs['units'] == 'kg/m3':
-                  rwc.append(qr[t_idx, z_idx, x_idx].data * 1000)
+                if qr.attrs['units'] == 'kg/kg':
+                    rwc.append(qr[t_idx, z_idx, x_idx].data * rho * 1000)
+                if qr.attrs['units'] == 'kg/m3':
+                    rwc.append(qr[t_idx, z_idx, x_idx].data * 1000)
           
             if config['aerosol_output'] == True:
-              # calculate aerosol size
-              numall = [num_a1[t_idx, z_idx, x_idx].data, num_a2[t_idx, z_idx, x_idx].data, 
-                        num_a3[t_idx, z_idx, x_idx].data, num_a4[t_idx, z_idx, x_idx].data]
-              dnall  = [dn1[t_idx, z_idx, x_idx].data,    dn2[t_idx, z_idx, x_idx].data,    
-                        dn3[t_idx, z_idx, x_idx].data,    dn4[t_idx, z_idx, x_idx].data]
-              NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[t_idx, z_idx, x_idx].data, Pres[t_idx, z_idx, x_idx].data)
-              # numall = [num_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data,
-              #           num_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data, 
-              #           num_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data,
-              #           num_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data]
-              # dnall  = [dn1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data,
-              #           dn2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data,    
-              #           dn3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data,
-              #           dn4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data]
-              # NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall,
-              #                                   T.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data,
-              #                                   Pres.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
-              NCNall = np.hstack((NCNall, np.reshape(NCN,(3000,1))))
-              # calculate aerosol composition
-              bc_all.append(bc_a1[t_idx, z_idx, x_idx].data +                       
-                      bc_a3[t_idx, z_idx, x_idx].data + bc_a4[t_idx, z_idx, x_idx].data)
-              dst_all.append(dst_a1[t_idx, z_idx, x_idx].data +                      
-                      dst_a3[t_idx, z_idx, x_idx].data)
-              mom_all.append(mom_a1[t_idx, z_idx, x_idx].data + mom_a2[t_idx, z_idx, x_idx].data + 
-                      mom_a3[t_idx, z_idx, x_idx].data + mom_a4[t_idx, z_idx, x_idx].data)
-              ncl_all.append(ncl_a1[t_idx, z_idx, x_idx].data + ncl_a2[t_idx, z_idx, x_idx].data + 
-                      ncl_a3[t_idx, z_idx, x_idx].data)
-              pom_all.append(pom_a1[t_idx, z_idx, x_idx].data +                    
-                      pom_a3[t_idx, z_idx, x_idx].data + pom_a4[t_idx, z_idx, x_idx].data)
-              so4_all.append(so4_a1[t_idx, z_idx, x_idx].data + so4_a2[t_idx, z_idx, x_idx].data + 
-                      so4_a3[t_idx, z_idx, x_idx].data)
-              soa_all.append(soa_a1[t_idx, z_idx, x_idx].data + soa_a2[t_idx, z_idx, x_idx].data + 
-                      soa_a3[t_idx, z_idx, x_idx].data)
-              # bc_all.append(bc_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data +                       
-              #               bc_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
-              #               bc_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
-              # dst_all.append(dst_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data +                      
-              #               dst_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
-              # mom_all.append(mom_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
-              #               mom_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
-              #               mom_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
-              #               mom_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
-              # ncl_all.append(ncl_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
-              #               ncl_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
-              #               ncl_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
-              # pom_all.append(pom_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data +                    
-              #               pom_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
-              #               pom_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
-              # so4_all.append(so4_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
-              #               so4_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
-              #               so4_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
-              # soa_all.append(soa_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
-              #               soa_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
-              #               soa_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
+                # calculate aerosol size
+                numall = [num_a1[t_idx, z_idx, x_idx].data, num_a2[t_idx, z_idx, x_idx].data, 
+                          num_a3[t_idx, z_idx, x_idx].data, num_a4[t_idx, z_idx, x_idx].data]
+                dnall  = [dn1[t_idx, z_idx, x_idx].data,    dn2[t_idx, z_idx, x_idx].data,    
+                          dn3[t_idx, z_idx, x_idx].data,    dn4[t_idx, z_idx, x_idx].data]
+                NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[t_idx, z_idx, x_idx].data, Pres[t_idx, z_idx, x_idx].data)
+                # numall = [num_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data,
+                #           num_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data, 
+                #           num_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data,
+                #           num_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data]
+                # dnall  = [dn1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data,
+                #           dn2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data,    
+                #           dn3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data,
+                #           dn4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data]
+                # NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall,
+                #                                   T.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data,
+                #                                   Pres.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
+                NCNall = np.hstack((NCNall, np.reshape(NCN,(3000,1))))
+                # calculate aerosol composition
+                bc_all.append(bc_a1[t_idx, z_idx, x_idx].data +                       
+                        bc_a3[t_idx, z_idx, x_idx].data + bc_a4[t_idx, z_idx, x_idx].data)
+                dst_all.append(dst_a1[t_idx, z_idx, x_idx].data +                      
+                        dst_a3[t_idx, z_idx, x_idx].data)
+                mom_all.append(mom_a1[t_idx, z_idx, x_idx].data + mom_a2[t_idx, z_idx, x_idx].data + 
+                        mom_a3[t_idx, z_idx, x_idx].data + mom_a4[t_idx, z_idx, x_idx].data)
+                ncl_all.append(ncl_a1[t_idx, z_idx, x_idx].data + ncl_a2[t_idx, z_idx, x_idx].data + 
+                        ncl_a3[t_idx, z_idx, x_idx].data)
+                pom_all.append(pom_a1[t_idx, z_idx, x_idx].data +                    
+                        pom_a3[t_idx, z_idx, x_idx].data + pom_a4[t_idx, z_idx, x_idx].data)
+                so4_all.append(so4_a1[t_idx, z_idx, x_idx].data + so4_a2[t_idx, z_idx, x_idx].data + 
+                        so4_a3[t_idx, z_idx, x_idx].data)
+                soa_all.append(soa_a1[t_idx, z_idx, x_idx].data + soa_a2[t_idx, z_idx, x_idx].data + 
+                        soa_a3[t_idx, z_idx, x_idx].data)
+                # bc_all.append(bc_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data +                       
+                #               bc_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
+                #               bc_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
+                # dst_all.append(dst_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data +                      
+                #               dst_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
+                # mom_all.append(mom_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
+                #               mom_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
+                #               mom_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
+                #               mom_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
+                # ncl_all.append(ncl_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
+                #               ncl_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
+                #               ncl_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
+                # pom_all.append(pom_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data +                    
+                #               pom_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
+                #               pom_a4.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
+                # so4_all.append(so4_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
+                #               so4_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
+                #               so4_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
+                # soa_all.append(soa_a1.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
+                #               soa_a2.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data + 
+                #               soa_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
+            if config['ccn_output'] == True:
+                ccn1_all.append(ccn1[t_idx, z_idx, x_idx].data)
+                ccn3_all.append(ccn3[t_idx, z_idx, x_idx].data)
+                ccn4_all.append(ccn4[t_idx, z_idx, x_idx].data)
+                ccn5_all.append(ccn5[t_idx, z_idx, x_idx].data)
+              
             if config['dsd_output'] == True:
-              # calculate droplet size distribution
-              N0 = nd_cld[t_idx, z_idx, x_idx].data * (lmda[t_idx, z_idx, x_idx].data ** (mu[t_idx, z_idx, x_idx].data+1)) / \
-                      gamma(mu[t_idx, z_idx, x_idx].data+1)    # parameter N0
-              # N0 = nd_cld.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data * 
-              #       (lmda.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data ** 
-              #       (mu.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data+1)) / \
-              #       gamma(mu.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data+1)    # parameter N0
-              D_cld = np.arange(1, 1000) * 1e-6  # in m
-              phi = N0 * (D_cld**mu[t_idx, z_idx, x_idx].data) * np.exp(- lmda[t_idx, z_idx, x_idx].data * D_cld)
-              # phi = N0 * (D_cld**mu.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data) * 
-              #       np.exp(- lmda.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data * D_cld)
-              phi_all = np.hstack((phi_all, np.reshape(phi,(len(D_cld),1))))
-              nd_bin = phi_all * (D_cld[1] - D_cld[0])   # droplet number concentration in each size bin
+                # calculate droplet size distribution
+                N0 = nd_cld[t_idx, z_idx, x_idx].data * (lmda[t_idx, z_idx, x_idx].data ** (mu[t_idx, z_idx, x_idx].data+1)) / \
+                        gamma(mu[t_idx, z_idx, x_idx].data+1)    # parameter N0
+                # N0 = nd_cld.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data * 
+                #       (lmda.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data ** 
+                #       (mu.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data+1)) / \
+                #       gamma(mu.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data+1)    # parameter N0
+                D_cld = np.arange(1, 1000) * 1e-6  # in m
+                phi = N0 * (D_cld**mu[t_idx, z_idx, x_idx].data) * np.exp(- lmda[t_idx, z_idx, x_idx].data * D_cld)
+                # phi = N0 * (D_cld**mu.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data) * 
+                #       np.exp(- lmda.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data * D_cld)
+                phi_all = np.hstack((phi_all, np.reshape(phi,(len(D_cld),1))))
+                nd_bin = phi_all * (D_cld[1] - D_cld[0])   # droplet number concentration in each size bin
 
         if config['aerosol_output'] == True:
-          NCN3 = np.nansum(NCNall[3:, :], 0)   # >3nm
-          NCN10 = np.nansum(NCNall[10:, :], 0)    # >10nm
-          NCN100 = np.nansum(NCNall[100:, :], 0)    # >100nm
+            NCN3 = np.nansum(NCNall[3:, :], 0)   # >3nm
+            NCN10 = np.nansum(NCNall[10:, :], 0)    # >10nm
+            NCN100 = np.nansum(NCNall[100:, :], 0)    # >100nm
         
         # #%%
         # nd_bin[nd_bin<1e-6]=np.nan
         
         #%% change some units
         if config['aerosol_output'] == True:
-          # composition
-          T = variables_new[variable3d_names.index('T')]
-          rho = np.array(p)/T/287.06
-          bc_all = np.array(bc_all)*1e9*rho
-          dst_all = np.array(dst_all)*1e9*rho
-          mom_all = np.array(mom_all)*1e9*rho
-          ncl_all = np.array(ncl_all)*1e9*rho
-          pom_all = np.array(pom_all)*1e9*rho
-          so4_all = np.array(so4_all)*1e9*rho
-          soa_all = np.array(soa_all)*1e9*rho
-          composition_units = 'ug/m3'
-          # aerosol number
-          NCNall = NCNall * 1e-6
-          NCN3 = NCN3 * 1e-6
-          NCN10 = NCN10 * 1e-6
-          NCN100 = NCN100 * 1e-6
-          ncn_units = '#/cm3'
+            # composition
+            T = variables_new[variable3d_names.index('T')]
+            rho = np.array(p)/T/287.06
+            bc_all = np.array(bc_all)*1e9*rho
+            dst_all = np.array(dst_all)*1e9*rho
+            mom_all = np.array(mom_all)*1e9*rho
+            ncl_all = np.array(ncl_all)*1e9*rho
+            pom_all = np.array(pom_all)*1e9*rho
+            so4_all = np.array(so4_all)*1e9*rho
+            soa_all = np.array(soa_all)*1e9*rho
+            composition_units = 'ug/m3'
+            # aerosol number
+            NCNall = NCNall * 1e-6
+            NCN3 = NCN3 * 1e-6
+            NCN10 = NCN10 * 1e-6
+            NCN100 = NCN100 * 1e-6
+            ncn_units = '#/cm3'
         if config['dsd_output'] == True:
-          # cloud number size distribution
-          nd_bin = nd_bin * 1e-6
-          nd_units = '#/cm3'
+            # cloud number size distribution
+            nd_bin = nd_bin * 1e-6
+            nd_units = '#/cm3'
         
         # LWC and IWC
         # idx = variable3d_names.index('LWC')
@@ -740,9 +819,9 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         # define dimensions
         t = f.createDimension('time', None)  # unlimited
         if config['aerosol_output'] == True:
-          s = f.createDimension('CNsize', 3000)  # unlimited
+            s = f.createDimension('CNsize', 3000)  # unlimited
         if config['dsd_output'] == True:
-          s = f.createDimension('Ndsize', 999)  # unlimited
+            s = f.createDimension('Ndsize', 999)  # unlimited
         
         # create variable list
         time_o = f.createVariable("time", "f8", ("time",))
@@ -754,21 +833,26 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         cwc_o = f.createVariable('cwc', 'f8', ("time",))
         iwc_o = f.createVariable('iwc', 'f8', ("time",))
         if config['rain_output'] == True:
-          rwc_o = f.createVariable('rwc', 'f8', ("time",))
+            rwc_o = f.createVariable('rwc', 'f8', ("time",))
         if config['aerosol_output'] == True:
-          bc_o = f.createVariable('bc', 'f8', ("time",))
-          dst_o = f.createVariable('dst', 'f8', ("time",))
-          pom_o = f.createVariable('pom', 'f8', ("time",))
-          mom_o = f.createVariable('mom', 'f8', ("time",))
-          ncl_o = f.createVariable('ncl', 'f8', ("time",))
-          so4_o = f.createVariable('so4', 'f8', ("time",))
-          soa_o = f.createVariable('soa', 'f8', ("time",))
-          ncn_o = f.createVariable('NCNall', 'f8', ("CNsize", "time",))
-          ncn3_o = f.createVariable('NCN3', 'f8', ("time",))
-          ncn10_o = f.createVariable('NCN10', 'f8', ("time",))
-          ncn100_o = f.createVariable('NCN100', 'f8', ("time",))
+            bc_o = f.createVariable('bc', 'f8', ("time",))
+            dst_o = f.createVariable('dst', 'f8', ("time",))
+            pom_o = f.createVariable('pom', 'f8', ("time",))
+            mom_o = f.createVariable('mom', 'f8', ("time",))
+            ncl_o = f.createVariable('ncl', 'f8', ("time",))
+            so4_o = f.createVariable('so4', 'f8', ("time",))
+            soa_o = f.createVariable('soa', 'f8', ("time",))
+            ncn_o = f.createVariable('NCNall', 'f8', ("CNsize", "time",))
+            ncn3_o = f.createVariable('NCN3', 'f8', ("time",))
+            ncn10_o = f.createVariable('NCN10', 'f8', ("time",))
+            ncn100_o = f.createVariable('NCN100', 'f8', ("time",))
+        if confid['ccn_output'] == True:
+            ccn1_o = f.createVariable('CCN1', 'f8', ("time",))
+            ccn3_o = f.createVariable('CCN3', 'f8', ("time",))
+            ccn4_o = f.createVariable('CCN4', 'f8', ("time",))
+            ccn5_o = f.createVariable('CCN5', 'f8', ("time",))
         if config['dsd_output'] == True:
-          nd_o = f.createVariable('Nd_bin', 'f8', ("Ndsize", "time",))
+            nd_o = f.createVariable('Nd_bin', 'f8', ("Ndsize", "time",))
         
         # write data
         time_o[:] = time_new
@@ -779,21 +863,26 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         cwc_o[:] = cwc
         iwc_o[:] = iwc
         if config['rain_output'] == True:
-          rwc_o[:] = rwc
+            rwc_o[:] = rwc
         if config['aerosol_output'] == True:
-          bc_o[:] = np.array(bc_all)
-          dst_o[:] = np.array(dst_all)
-          pom_o[:] = np.array(pom_all)
-          mom_o[:] = np.array(mom_all)
-          ncl_o[:] = np.array(ncl_all)
-          so4_o[:] = np.array(so4_all)
-          soa_o[:] = np.array(soa_all)
-          ncn_o[:,:] = NCNall
-          ncn3_o[:] = NCN3
-          ncn10_o[:] = NCN10
-          ncn100_o[:] = NCN100
+            bc_o[:] = np.array(bc_all)
+            dst_o[:] = np.array(dst_all)
+            pom_o[:] = np.array(pom_all)
+            mom_o[:] = np.array(mom_all)
+            ncl_o[:] = np.array(ncl_all)
+            so4_o[:] = np.array(so4_all)
+            soa_o[:] = np.array(soa_all)
+            ncn_o[:,:] = NCNall
+            ncn3_o[:] = NCN3
+            ncn10_o[:] = NCN10
+            ncn100_o[:] = NCN100
+        if config['ccn_output'] == True:
+            ccn1_o[:] = ccn1_all
+            ccn3_o[:] = ccn3_all
+            ccn4_o[:] = ccn4_all
+            ccn5_o[:] = ccn5_all
         if config['dsd_output'] == True:
-          nd_o[:,:] = nd_bin
+            nd_o[:,:] = nd_bin
         
         # attributes
         time_o.units = "Seconds since " + timestr[0] + ' 00:00 UTC'
@@ -808,36 +897,45 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, output_path
         iwc_o.units = 'g/m3'
         iwc_o.long_name = 'Ice Water Cotent'
         if config['rain_output'] == True:
-          rwc_o.units = 'g/m3'
-          rwc_o.long_name = 'Rain Water Cotent'
+            rwc_o.units = 'g/m3'
+            rwc_o.long_name = 'Rain Water Cotent'
         if config['aerosol_output'] == True:
-          bc_o.units = composition_units
-          bc_o.long_name = 'total black carbon aerosol concentration'
-          dst_o.units = composition_units
-          dst_o.long_name = 'total dust aerosol concentration'
-          ncl_o.units = composition_units
-          ncl_o.long_name = 'total sea salt aerosol concentration'
-          pom_o.units = composition_units
-          pom_o.long_name = 'total primary organic aerosol concentration'
-          mom_o.units = composition_units
-          mom_o.long_name = 'total marine organic aerosol concentration'
-          so4_o.units = composition_units
-          so4_o.long_name = 'total sulfate aerosol concentration'
-          soa_o.units = composition_units
-          soa_o.long_name = 'total secondary organic aerosol concentration'
-          ncn_o.units = ncn_units
-          ncn_o.long_name = 'Aerosol number size distribution'
-          ncn_o.description = 'calculated from modal information into 1nm increment'
-          ncn3_o.units = ncn_units
-          ncn3_o.long_name = 'Aerosol number concentration for size >3nm'
-          ncn10_o.units = ncn_units
-          ncn10_o.long_name = 'Aerosol number concentration for size >10nm'
-          ncn100_o.units = ncn_units
-          ncn100_o.long_name = 'Aerosol number concentration for size >100nm'
+            bc_o.units = composition_units
+            bc_o.long_name = 'total black carbon aerosol concentration'
+            dst_o.units = composition_units
+            dst_o.long_name = 'total dust aerosol concentration'
+            ncl_o.units = composition_units
+            ncl_o.long_name = 'total sea salt aerosol concentration'
+            pom_o.units = composition_units
+            pom_o.long_name = 'total primary organic aerosol concentration'
+            mom_o.units = composition_units
+            mom_o.long_name = 'total marine organic aerosol concentration'
+            so4_o.units = composition_units
+            so4_o.long_name = 'total sulfate aerosol concentration'
+            soa_o.units = composition_units
+            soa_o.long_name = 'total secondary organic aerosol concentration'
+            ncn_o.units = ncn_units
+            ncn_o.long_name = 'Aerosol number size distribution'
+            ncn_o.description = 'calculated from modal information into 1nm increment'
+            ncn3_o.units = ncn_units
+            ncn3_o.long_name = 'Aerosol number concentration for size >3nm'
+            ncn10_o.units = ncn_units
+            ncn10_o.long_name = 'Aerosol number concentration for size >10nm'
+            ncn100_o.units = ncn_units
+            ncn100_o.long_name = 'Aerosol number concentration for size >100nm'
+        if config['ccn_output'] == True:
+            ccn1_o.units = ccn1.units
+            ccn1_o.long_name = ccn1.long_name
+            ccn3_o.units = ccn3.units
+            ccn3_o.long_name = ccn3.long_name
+            ccn4_o.units = ccn4.units
+            ccn4_o.long_name = ccn4.long_name
+            ccn5_o.units = ccn5.units
+            ccn5_o.long_name = ccn5.long_name
         if config['dsd_output'] == True:
-          nd_o.units = nd_units
-          nd_o.long_name = 'cloud droplet number size distribution'
-          nd_o.description = 'calculated from microphysics scheme output into 1um increment from 1um to 1000um'
+            nd_o.units = nd_units
+            nd_o.long_name = 'cloud droplet number size distribution'
+            nd_o.description = 'calculated from microphysics scheme output into 1um increment from 1um to 1000um'
         
         # global attributes
         f.title = 'preprocessed E3SM data along aircraft track at the nearest time, grid, and vertical level'
@@ -1227,7 +1325,7 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
 
      
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, output_filehead, dt=3600, config=config):
+def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaerosol_filehead, input3d_cloudaerosol_filehead, output_path, output_filehead, dt=3600, config=config):
     """
     prepare surface (include TOA and vertical integrated) variables from E3SM output
     choose the grid nearest to the ARM site
@@ -1673,7 +1771,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, output_path, o
     
     # all other 3D (with vertical level) variables at the lowest model level
     variable3d_names = [config['Q'], config['T'], config['RH'], config['U'], config['V']] 
-    if config['aerosol_output'] == True:
+    if config['ccn_output'] == True:
       variable3d_names.append(config['CCN1'])
       variable3d_names.append(config['CCN3'])
       variable3d_names.append(config['CCN4'])
