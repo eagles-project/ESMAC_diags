@@ -1,7 +1,9 @@
 # data paths and filenames
-model_input_path: '/pscratch/sd/m/meng/testbed_output/cus_ne30/'  # '../raw_data/rrm/ena_rrm/', '../raw_data/rrm/emis_rrm/', '../raw_data/rrm/nep_rrm/', '../raw_data/rrm/so_rrm/', or '../raw_data/model/'
-model_3d_input_filehead: 'cus.ne30pg2_EC30to60E2r2.eam.h1' # 'cus_ne32x32pg2.eam.h1', 'scream_output.test.1hourlyINST_3Dvars_ne256.h.AVERAGE.nhours_x1', 'ena_ne32x32pg2', 'cus_emis_ne32x32pg2', 'nep_ne32x32pg2', 'so_ne32x32pg2', or 'E3SMv2_SGP_ENA_2011_2020'
-model_2d_input_filehead: 'cus.ne30pg2_EC30to60E2r2.eam.h1'  # if 2D and 3D are in the same file, then set this to be the same as model_3d_input_filehead; 'scream_output.test.1hourlyINST_2Dvars_ne256.h.AVERAGE.nhours_x1'
+model_input_path: '/pscratch/sd/p/plma/frontier/ne256.mam.ng/'  # '/pscratch/sd/m/meng/testbed_output/cus_ne30/', '../raw_data/rrm/ena_rrm/', '../raw_data/rrm/emis_rrm/', '../raw_data/rrm/nep_rrm/', '../raw_data/rrm/so_rrm/', or '../raw_data/model/'
+model_3d_input_filehead: 'h2/mam4xx.h2.INSTANT.nhours_x1' # 'cus.ne30pg2_EC30to60E2r2.eam.h1', 'cus_ne32x32pg2.eam.h1', 'scream_output.test.1hourlyINST_3Dvars_ne256.h.AVERAGE.nhours_x1', 'ena_ne32x32pg2', 'cus_emis_ne32x32pg2', 'nep_ne32x32pg2', 'so_ne32x32pg2', or 'E3SMv2_SGP_ENA_2011_2020'
+model_2d_input_filehead: 'h1/mam4xx.h1.INSTANT.nhours_x1' #if 2D and 3D are in the same file, then set this to be the same as model_3d_input_filehead; 'scream_output.test.1hourlyINST_2Dvars_ne256.h.AVERAGE.nhours_x1', 'cus.ne30pg2_EC30to60E2r2.eam.h1'
+model_3d_dryaerosol_input_filehead: 'h3/mam4xx.h3.INSTANT.nhours_x1'
+model_3d_cloudaerosol_input_filehead: 'h4/mam4xx.h4.INSTANT.nhours_x1'
 
 obs_input_path: '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/raw_data/obs/'
 
@@ -39,85 +41,86 @@ latlon_dimensions: 1
 
 # flag for model aerosol variables output
 aerosol_output: True
+ccn_output: False
 
 # flag for COSP MODIS simulator output
-cosp_output: True
+cosp_output: False
 
 # flag for pressure level output
-pres_output: False
+pres_output: True
 
 # # flag for hydrometeor mass output
 # masscontent_output: False
 
 # flag for drop size distribution parameter output
-dsd_output: True
+dsd_output: False
 
 # flag for column effective radius output
 reff_output: True
 
 # flag for whether model uses deep convective parameterization
-convectiveparam: True
+convectiveparam: False
 
 # flag for whether rain mass and number concentrations are outputted
 rain_output: True
 
 # flag for 3D visible optical depth output
-tau3d_output: True
+tau3d_output: False
 
 # flag for column-integrated cloud drop number concentration output
-colnc_output: True
+colnc_output: False
 
 # flag for absorbing AOD output
-aodabs_output: True
+aodabs_output: False
 
 # flags for whether net or clear sky radiation fluxes are outputted
-netradiation_output: True
-clrskyradiation_output: False
+netradiation_output: False
+clrskyradiation_output: True
 
 # flag for whether thermodynamic info is outputted at 850 and 700 hPa
-midlevel_thermo_output: False
+midlevel_thermo_output: True
 
 # model output variable names
 LON: 'lon'
 LAT: 'lat'
-PS: 'PS'        # ps, PS
+PS: 'ps'        # ps, PS
 
 P0: 'P0'        # if pres_output = False
 HYAM: 'hyam'    # if pres_output = False
 HYBM: 'hybm'    # if pres_output = False
 PRES: 'p_mid'   # if pres_output = True
 
-Z: 'Z3'      # z_mid, Z3
-T: 'T'      # T_mid, T
-Q: 'Q'         # qv, Q
+Z: 'z_mid'      # z_mid, Z3
+T: 'T_mid'      # T_mid, T
+Q: 'qv'         # qv, Q
 U: 'U'          # u, U
 V: 'V'          # v, V
-CF: 'CLOUD'     # cldfrac_tot_for_analysis, CLOUD
-CFLIQ: 'FREQL'  # cldfrac_liq, FREQL
+CF: 'cldfrac_tot_for_analysis'     # cldfrac_tot_for_analysis, CLOUD
+CFLIQ: 'cldfrac_liq'  # cldfrac_liq, FREQL
 # LWC: 'LWC'      # if masscontent_output = True
 # IWC: 'IWC'      # if masscontent_output = True
-QC: 'CLDLIQ'    # qc, CLDLIQ
-QI: 'CLDICE'    # qi, CLDICE
-NC: 'NUMLIQ'    # nc, NUMLIQ, ICWNC (in cloud)
-NI: 'NUMICE'    # ni, NUMICE, ICINC (in cloud)
-QR: 'RAINQM'        # qr, RAIMQM
-NR: 'NUMRAI'        # nr, NUMRAI
+QC: 'qc'    # qc, CLDLIQ
+QI: 'qi'    # qi, CLDICE
+NC: 'nc'    # nc, NUMLIQ, ICWNC (in cloud)
+NI: 'ni'    # ni, NUMICE, ICINC (in cloud)
+QR: 'qr'        # qr, RAIMQM
+NR: 'nr'        # nr, NUMRAI
 
 LAMBDA_CLOUD: 'lambda_cloud' # if dsd_output = True
 MU_CLOUD: 'mu_cloud'         # if dsd_output = True
 
-REL: 'REL'     # if reff_output = True
-REI: 'REI'     # if reff_output = True  (not currently used)
+REL: 'eff_radius_qc'     # eff_radius_qc, REL; if reff_output = True
+REI: 'eff_radius_qi'     # eff_radius_qi, REI; if reff_output = True  (not currently used)
 
-TS: 'TREFHT'  # T_2m, TREFHT
-RH: 'RELHUM'  # RelativeHumidity, RELHUM
-LWP: 'TGCLDLWP'     # LiqWaterPath, TGCLDLWP
-IWP: 'TGCLDIWP'     # IceWaterPath, TGCLDIWP
+TS: 'T_2m'  # T_2m, TREFHT
+RH: 'RelativeHumidity'  # RelativeHumidity, RELHUM
+LWP: 'LiqWaterPath'     # LiqWaterPath, TGCLDLWP
+IWP: 'IceWaterPath'     # IceWaterPath, TGCLDIWP
 RWP: 'RainWaterPath'
-CLDHGH: 'CLDHGH'  # cldhgh, CLDHGH
-CLDMED: 'CLDMED'  # cldmed, CLDMED
-CLDLOW: 'CLDLOW'  # cldlow, CLDLOW
-CLDTOT: 'CLDTOT'  # cldtot, CLDTOT
+CLDHGH: 'cldhgh'  # cldhgh, CLDHGH
+CLDMED: 'cldmed'  # cldmed, CLDMED
+CLDLOW: 'cldlow'  # cldlow, CLDLOW
+CLDTOT: 'cldtot'  # cldtot, CLDTOT
 
 PRECIPSFCTOT: 'PRECT'                     # if convectiveparam = True
 PRECIPSFCCONV: 'PRECC'                    # if convectiveparam = True
@@ -125,12 +128,12 @@ PRECIPSFCSTRAT: 'PRECL'                   # if convectiveparam = True
 PRECIPSFCLIQ: 'precip_liq_surf_mass_flux' # if convectiveparam = False
 PRECIPSFCICE: 'precip_ice_surf_mass_flux' # if convectiveparam = False
 
-SWDOWNTOA: 'SOLIN'   # SW_flux_dn_at_model_top, SOLIN
-SWUPTOA: 'FSUTOA'     # SW_flux_up_at_model_top, FSUTOA
-SWDOWNSFC: 'FSDS'   # SW_flux_dn_at_model_bot, FSDS
+SWDOWNTOA: 'SW_flux_dn_at_model_top'   # SW_flux_dn_at_model_top, SOLIN
+SWUPTOA: 'SW_flux_up_at_model_top'     # SW_flux_up_at_model_top, FSUTOA
+SWDOWNSFC: 'SW_flux_dn_at_model_bot'   # SW_flux_dn_at_model_bot, FSDS
 SWUPSFC: 'SW_flux_up_at_model_bot'     # if netradiation_output = False; SW_flux_up_at_model_bot
-LWUPTOA: 'FLUT'     # LW_flux_up_at_model_top, FLUT
-LWDOWNSFC: 'FLDS'   # LW_flux_dn_at_model_bot, FLDS
+LWUPTOA: 'LW_flux_up_at_model_top'     # LW_flux_up_at_model_top, FLUT
+LWDOWNSFC: 'LW_flux_dn_at_model_bot'   # LW_flux_dn_at_model_bot, FLDS
 LWUPSFC: 'LW_flux_up_at_model_bot'     # if netradiation_output = False; LW_flux_up_at_model_bot
 SWNETTOA: 'FSNT'    # if netradiation_output = True, FSNT
 SWNETSFC: 'FSNS'    # if netradiation_output = True, FSNS
@@ -141,12 +144,12 @@ LWUPTOACLR: 'LW_clrsky_flux_up_at_model_top'      # if clrskyradiation_output = 
 SWDOWNSFCCLR: 'SW_clrsky_flux_dn_at_model_bot'    # if clrskyradiation_output = True; SW_clrsky_flux_dn_at_model_bot
 LWDOWNSFCLR: 'LW_clrsky_flux_dn_at_model_bot'     # if clrskyradiation_output = True; LW_clrsky_flux_dn_at_model_bot
 
-SWCF: 'SWCF'  #ShortwaveCloudForcing, SWCF
-LWCF: 'LWCF'   #LongwaveCloudForcing, LWCF
-LHFLX: 'LHFLX' # surface_upward_latent_heat_flux, LHFLX
-SHFLX: 'SHFLX'  # surf_sens_flux, SHFLX
-PBLH: 'PBLH'       # pbl_height, PBLH
-AOD: 'AODALL'  # AerosolOpticalDepth550nm, AODALL
+SWCF: 'ShortwaveCloudForcing'  #ShortwaveCloudForcing, SWCF
+LWCF: 'LongwaveCloudForcing'   #LongwaveCloudForcing, LWCF
+LHFLX: 'surface_upward_latent_heat_flux' # surface_upward_latent_heat_flux, LHFLX
+SHFLX: 'surf_sens_flux'  # surf_sens_flux, SHFLX
+PBLH: 'pbl_height'       # pbl_height, PBLH
+AOD: 'AerosolOpticalDepth550nm'  # AerosolOpticalDepth550nm, AODALL
 AODABS: 'AODABS'                 #Absorbing Aerosol Optical Depth (if aodabs_output = True)
 
 TAU3D: 'TOT_CLD_VISTAU'  # if tau3d_output = True
@@ -157,10 +160,10 @@ THETA700: 'PotentialTemperature_at_700hPa'  # if midlevel_thermo_output = True
 RH700: 'RelativeHumidity_at_700hPa'         # if midlevel_thermo_output = True
 
 # variables below if aerosol_output = True
-CCN1: 'CCN1'
-CCN3: 'CCN3'
-CCN4: 'CCN4'
-CCN5: 'CCN5'
+CCN1: 'CCN1'    # if ccn_output = True
+CCN3: 'CCN3'    # if ccn_output = True
+CCN4: 'CCN4'    # if ccn_output = True
+CCN5: 'CCN5'    # if ccn_output = True
 num_a1: 'num_a1'
 num_a2: 'num_a2'
 num_a3: 'num_a3'
