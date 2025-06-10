@@ -1,9 +1,9 @@
 # data paths and filenames
 model_input_path: '/pscratch/sd/p/plma/frontier/ne256.mam.ng/'  # '/pscratch/sd/m/meng/testbed_output/cus_ne30/', '../raw_data/rrm/ena_rrm/', '../raw_data/rrm/emis_rrm/', '../raw_data/rrm/nep_rrm/', '../raw_data/rrm/so_rrm/', or '../raw_data/model/'
-model_3d_input_filehead: 'h2/mam4xx.h2.INSTANT.nhours_x1' # 'cus.ne30pg2_EC30to60E2r2.eam.h1', 'cus_ne32x32pg2.eam.h1', 'scream_output.test.1hourlyINST_3Dvars_ne256.h.AVERAGE.nhours_x1', 'ena_ne32x32pg2', 'cus_emis_ne32x32pg2', 'nep_ne32x32pg2', 'so_ne32x32pg2', or 'E3SMv2_SGP_ENA_2011_2020'
-model_2d_input_filehead: 'h1/mam4xx.h1.INSTANT.nhours_x1' #if 2D and 3D are in the same file, then set this to be the same as model_3d_input_filehead; 'scream_output.test.1hourlyINST_2Dvars_ne256.h.AVERAGE.nhours_x1', 'cus.ne30pg2_EC30to60E2r2.eam.h1'
-model_3d_dryaerosol_input_filehead: 'h3/mam4xx.h3.INSTANT.nhours_x1'
-model_3d_cloudaerosol_input_filehead: 'h4/mam4xx.h4.INSTANT.nhours_x1'
+model_3d_input_filehead: 'h2/mam4xx.h2.INSTANT.nhours_x1'       # 'cus.ne30pg2_EC30to60E2r2.eam.h1', 'cus_ne32x32pg2.eam.h1', 'scream_output.test.1hourlyINST_3Dvars_ne256.h.AVERAGE.nhours_x1', 'ena_ne32x32pg2', 'cus_emis_ne32x32pg2', 'nep_ne32x32pg2', 'so_ne32x32pg2', or 'E3SMv2_SGP_ENA_2011_2020'
+model_2d_input_filehead: 'h1/mam4xx.h1.INSTANT.nhours_x1'       # if 2D and 3D are in the same file, then set this to be the same as model_3d_input_filehead; 'scream_output.test.1hourlyINST_2Dvars_ne256.h.AVERAGE.nhours_x1', 'cus.ne30pg2_EC30to60E2r2.eam.h1'
+model_3d_dryaerosol_input_filehead: 'h3/mam4xx.h3.INSTANT.nhours_x1'   # if there is only a single 3D or overall model file, set this to that filename
+model_3d_cloudaerosol_input_filehead: 'h4/mam4xx.h4.INSTANT.nhours_x1' # if there is only a single 3D or overall model file, set this to that filename
 
 obs_input_path: '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/raw_data/obs/'
 
