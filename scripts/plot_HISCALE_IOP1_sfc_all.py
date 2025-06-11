@@ -476,9 +476,9 @@ if config['aerosol_output'] == True:
             ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
             fig.savefig(figpath+'timeseries_CPC10_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             
-            # fig,ax = plot.timeseries([obssfc_time_hiscale,time_hiscale,model_time_hiscale,model_time_hiscale], [smps100_hiscale,uhsas100_hiscale,ncn100_m_hiscale,ncn100_m2_hiscale], 
+            # fig,ax = plot.timeseries([obssfc_time_hiscale,obssfc_time_hiscale,model_time_hiscale,model_time_hiscale], [smps100_hiscale,uhsas100_hiscale,ncn100_m_hiscale,ncn100_m2_hiscale], 
             #                         legend = ['SMPS','UHSAS','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-            fig,ax = plot.timeseries([obssfc_time_hiscale,time_hiscale,model_time_hiscale], [smps100_hiscale,uhsas100_hiscale,ncn100_m_hiscale], 
+            fig,ax = plot.timeseries([obssfc_time_hiscale,obssfc_time_hiscale,model_time_hiscale], [smps100_hiscale,uhsas100_hiscale,ncn100_m_hiscale], 
                                     legend = ['SMPS','UHSAS','Model'], color=['k','gray','r'],
                                     title='CN(>100nm) '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
