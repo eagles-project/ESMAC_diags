@@ -2406,6 +2406,9 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     variables = variables + [cbt, ctt, cbh, cth, cloud_depth]
     
     #%% change some units
+    for vv in ['Nd_mean']:
+        variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data * 1e-6
+        variables[variable_names.index(vv)].attrs['units']='#/cm3'
     if config['aerosol_output'] == True:
         # composition
         T = variables[variable_names.index(config['T'])]
@@ -2417,7 +2420,15 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         # aerosol number
         NCNall.data = NCNall.data * 1e-6
         NCNall.attrs['units']='#/cm3'
-        for vv in ['NCN3', 'NCN10', 'NCN100', 'Nd_mean', 'Nd_ARM', 'Nd_VISST']:
+        for vv in ['NCN3', 'NCN10', 'NCN100']:
+            variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data * 1e-6
+            variables[variable_names.index(vv)].attrs['units']='#/cm3'
+    if config['cosp_output'] == True:
+        for vv in ['Nd_VISST']:
+            variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data * 1e-6
+            variables[variable_names.index(vv)].attrs['units']='#/cm3'
+    if config['tau3d_output'] == True:
+        for vv in ['Nd_ARM']:
             variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data * 1e-6
             variables[variable_names.index(vv)].attrs['units']='#/cm3'
     # LWC and IWC
