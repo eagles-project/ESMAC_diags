@@ -2408,8 +2408,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     #%% change some units
     if config['aerosol_output'] == True:
         # composition
-        T = variables[variable_names.index('T')]
-        ps = variables[variable_names.index('PS')]
+        T = variables[variable_names.index(config['T'])]
+        ps = variables[variable_names.index(config['PS'])]
         rho = np.array(ps/T/287.06)
         for vv in ['bc','dst','mom','ncl','pom','so4','soa']:
             variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *1e9*rho
