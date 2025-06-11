@@ -440,45 +440,45 @@ if config['aerosol_output'] == True:
             fig.savefig(figpath+'bar_composition_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             
             #%% timeseries
-            # fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [org_hiscale,org_m_hiscale,org_m2_hiscale], 
+            # fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale,model_time_hiscale], [org_hiscale,org_m_hiscale,org_m2_hiscale], 
             #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'],
-            fig,ax = plot.timeseries([time_hiscale,time_hiscale], [org_hiscale,org_m_hiscale], 
+            fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale], [org_hiscale,org_m_hiscale], 
                                       legend = ['Obs','Model'], color=['k','r'], 
                                       title='Total Organic '+site+' '+IOP, xlabel=None, ylabel='${\mu}$g/m$^{3}$')
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
             ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
             fig.savefig(figpath+'timeseries_org_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             
-            # fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [so4_hiscale,so4_m_hiscale,so4_m2_hiscale], 
+            # fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale,model_time_hiscale], [so4_hiscale,so4_m_hiscale,so4_m2_hiscale], 
             #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'],  
-            fig,ax = plot.timeseries([time_hiscale,time_hiscale], [so4_hiscale,so4_m_hiscale], 
+            fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale], [so4_hiscale,so4_m_hiscale], 
                                       legend = ['Obs','Model'], color=['k','r','b'],  
                                       title='Sulfate '+site+' '+IOP, xlabel=None, ylabel='${\mu}$g/m$^{3}$')
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
             ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
             fig.savefig(figpath+'timeseries_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             
-            # fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [cpc3_hiscale,ncn3_m_hiscale,ncn3_m2_hiscale], 
+            # fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale,model_time_hiscale], [cpc3_hiscale,ncn3_m_hiscale,ncn3_m2_hiscale], 
             #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-            fig,ax = plot.timeseries([time_hiscale,time_hiscale], [cpc3_hiscale,ncn3_m_hiscale], 
+            fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale], [cpc3_hiscale,ncn3_m_hiscale], 
                                       legend = ['Obs','Model'], color=['k','r'], 
                                       title='CN(>3nm) '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
             ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
             fig.savefig(figpath+'timeseries_CPC3_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             
-            # fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [cpc10_hiscale,ncn10_m_hiscale,ncn10_m2_hiscale], 
+            # fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale,model_time_hiscale], [cpc10_hiscale,ncn10_m_hiscale,ncn10_m2_hiscale], 
             #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-            fig,ax = plot.timeseries([time_hiscale,time_hiscale], [cpc10_hiscale,ncn10_m_hiscale], 
+            fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale], [cpc10_hiscale,ncn10_m_hiscale], 
                                       legend = ['Obs','Model'], color=['k','r'], 
                                       title='CN(>10nm) '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
             ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
             fig.savefig(figpath+'timeseries_CPC10_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             
-            # fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [smps100_hiscale,uhsas100_hiscale,ncn100_m_hiscale,ncn100_m2_hiscale], 
+            # fig,ax = plot.timeseries([obssfc_time_hiscale,time_hiscale,model_time_hiscale,model_time_hiscale], [smps100_hiscale,uhsas100_hiscale,ncn100_m_hiscale,ncn100_m2_hiscale], 
             #                         legend = ['SMPS','UHSAS','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-            fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [smps100_hiscale,uhsas100_hiscale,ncn100_m_hiscale], 
+            fig,ax = plot.timeseries([obssfc_time_hiscale,time_hiscale,model_time_hiscale], [smps100_hiscale,uhsas100_hiscale,ncn100_m_hiscale], 
                                     legend = ['SMPS','UHSAS','Model'], color=['k','gray','r'],
                                     title='CN(>100nm) '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
@@ -486,9 +486,9 @@ if config['aerosol_output'] == True:
             fig.savefig(figpath+'timeseries_CN100_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 if config['ccn_output'] == True:
-            # fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], 
+            # fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale,model_time_hiscale], [ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], 
             #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-            fig,ax = plot.timeseries([time_hiscale,time_hiscale], [ccn2_hiscale,ccn2_m_hiscale], 
+            fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale], [ccn2_hiscale,ccn2_m_hiscale], 
                                       legend = ['Obs','Model'], color=['k','r'], 
                                     title='0.2%CCN '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
@@ -496,27 +496,27 @@ if config['ccn_output'] == True:
             fig.savefig(figpath+'timeseries_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             
 if config['tau3d_output'] == True:
-            # fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [cod_hiscale,cod_sat_hiscale,cod_m_hiscale,cod_m2_hiscale], 
+            # fig,ax = plot.timeseries([obssfc_time_hiscale,obssat_time_hiscale,model_time_hiscale,model_time_hiscale], [cod_hiscale,cod_sat_hiscale,cod_m_hiscale,cod_m2_hiscale], 
             #                           legend = ['MFRSR','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'], #marker='.',
-            fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [cod_hiscale,cod_sat_hiscale,cod_m_hiscale], 
+            fig,ax = plot.timeseries([obssfc_time_hiscale,obssat_time_hiscale,model_time_hiscale], [cod_hiscale,cod_sat_hiscale,cod_m_hiscale], 
                                       legend = ['MFRSR','Satellite','Model'], color=['k','gray','r'], #marker='.',
                                     title='cloud optical depth '+site+' '+IOP, xlabel=None, ylabel=None)
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
             ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
             fig.savefig(figpath+'timeseries_cod_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [lwp_hiscale, lwp_sat_hiscale, lwp_m_hiscale, lwp_m2_hiscale], 
+# fig,ax = plot.timeseries([obssfc_time_hiscale,obssat_time_hiscale,model_time_hiscale,model_time_hiscale], [lwp_hiscale, lwp_sat_hiscale, lwp_m_hiscale, lwp_m2_hiscale], 
 #                         legend = ['MWR','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [lwp_hiscale, lwp_sat_hiscale, lwp_m_hiscale], 
+fig,ax = plot.timeseries([obssfc_time_hiscale,obssat_time_hiscale,model_time_hiscale], [lwp_hiscale, lwp_sat_hiscale, lwp_m_hiscale], 
                         legend = ['MWR','Satellite','Model'], color=['k','gray','r'],
                         title='LWP '+site+' '+IOP,xlabel=None, ylabel="g/m$^2$")
 ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
 ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 fig.savefig(figpath+'timeseries_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [ndrop_hiscale,nd_sat_hiscale, nd_m_hiscale, nd_m2_hiscale], 
+# fig,ax = plot.timeseries([obssfc_time_hiscale,obssat_time_hiscale,model_time_hiscale,model_time_hiscale], [ndrop_hiscale,nd_sat_hiscale, nd_m_hiscale, nd_m2_hiscale], 
 #                           legend = ['Ndrop','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'], #marker='.',
-fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [ndrop_hiscale,nd_sat_hiscale, nd_m_hiscale], 
+fig,ax = plot.timeseries([obssfc_time_hiscale,obssat_time_hiscale,model_time_hiscale], [ndrop_hiscale,nd_sat_hiscale, nd_m_hiscale], 
                           legend = ['Ndrop','Satellite','Model'], color=['k','gray','r'], #marker='.',
                           title='Nd '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
 ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
@@ -524,36 +524,36 @@ ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 fig.savefig(figpath+'timeseries_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 if config['reff_output'] == True:
-            # fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [reff_hiscale,reff_sat_hiscale,reff_m_hiscale,reff_m2_hiscale],  
+            # fig,ax = plot.timeseries([obssfc_time_hiscale,obssat_time_hiscale,model_time_hiscale,model_time_hiscale], [reff_hiscale,reff_sat_hiscale,reff_m_hiscale,reff_m2_hiscale],  
             #                         legend = ['MFRSR','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'],marker='.',
-            fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [reff_hiscale,reff_sat_hiscale,reff_m_hiscale],  
+            fig,ax = plot.timeseries([obssfc_time_hiscale,obssat_time_hiscale,model_time_hiscale], [reff_hiscale,reff_sat_hiscale,reff_m_hiscale],  
                                     legend = ['MFRSR','Satellite','Model'], color=['k','gray','r'],marker='.',
                                     title='Reff '+site+' '+IOP,xlabel=None, ylabel='$\mu$m')
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
             ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
             fig.savefig(figpath+'timeseries_reff_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale,time_hiscale], [precip_tbrg_hiscale,precip_pwd_hiscale,precip_pars_hiscale,precip_m_hiscale,precip_m2_hiscale],  
+# fig,ax = plot.timeseries([obssfc_time_hiscale,obssfc_time_hiscale,obssfc_time_hiscale,model_time_hiscale,model_time_hiscale], [precip_tbrg_hiscale,precip_pwd_hiscale,precip_pars_hiscale,precip_m_hiscale,precip_m2_hiscale],  
 #                           legend = ['Tipping Bucket', 'PWD', 'Disdrometer', 'E3SMv1','E3SMv2'], color=['k','gray','silver','r','b'], 
-fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [precip_tbrg_hiscale,precip_pwd_hiscale,precip_pars_hiscale,precip_m_hiscale],  
+fig,ax = plot.timeseries([obssfc_time_hiscale,obssfc_time_hiscale,obssfc_time_hiscale,model_time_hiscale], [precip_tbrg_hiscale,precip_pwd_hiscale,precip_pars_hiscale,precip_m_hiscale],  
                           legend = ['Tipping Bucket', 'PWD', 'Disdrometer', 'Model'], color=['k','gray','silver','r'], 
                         title='Precip '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='mm/hr')
 ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
 ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 fig.savefig(figpath+'timeseries_precip_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [lwnetsfc_hiscale,lwnetsfc_m_hiscale,lwnetsfc_m2_hiscale], 
+# fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale,model_time_hiscale], [lwnetsfc_hiscale,lwnetsfc_m_hiscale,lwnetsfc_m2_hiscale], 
 #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-fig,ax = plot.timeseries([time_hiscale,time_hiscale], [lwnetsfc_hiscale,lwnetsfc_m_hiscale], 
+fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale], [lwnetsfc_hiscale,lwnetsfc_m_hiscale], 
                           legend = ['Obs','Model'], color=['k','r'], 
                         title='Sfc. net LW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
 ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
 ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 fig.savefig(figpath+'timeseries_LWsfc_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [swnetsfc_hiscale,swnetsfc_m_hiscale,swnetsfc_m2_hiscale], 
+# fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale,model_time_hiscale], [swnetsfc_hiscale,swnetsfc_m_hiscale,swnetsfc_m2_hiscale], 
 #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-fig,ax = plot.timeseries([time_hiscale,time_hiscale], [swnetsfc_hiscale,swnetsfc_m_hiscale], 
+fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale], [swnetsfc_hiscale,swnetsfc_m_hiscale], 
                           legend = ['Obs','Model'], color=['k','r'], 
                         title='Sfc. net SW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
 ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
@@ -561,27 +561,27 @@ ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 fig.savefig(figpath+'timeseries_SWsfc_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 if config['netradiation_output'] == True:
-            # fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [lwnettoa_hiscale,lwnettoa_m_hiscale,lwnettoa_m2_hiscale], 
+            # fig,ax = plot.timeseries([obssat_time_hiscale,model_time_hiscale,model_time_hiscale], [lwnettoa_hiscale,lwnettoa_m_hiscale,lwnettoa_m2_hiscale], 
             #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-            fig,ax = plot.timeseries([time_hiscale,time_hiscale], [lwnettoa_hiscale,lwnettoa_m_hiscale], 
+            fig,ax = plot.timeseries([obssat_time_hiscale,model_time_hiscale], [lwnettoa_hiscale,lwnettoa_m_hiscale], 
                                       legend = ['Obs','Model'], color=['k','r'], 
                                     title='TOA. net LW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
             ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
             fig.savefig(figpath+'timeseries_LWtoa_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [swnettoa_hiscale,swnettoa_m_hiscale,swnettoa_m2_hiscale], 
+# fig,ax = plot.timeseries([obssat_time_hiscale,model_time_hiscale,model_time_hiscale], [swnettoa_hiscale,swnettoa_m_hiscale,swnettoa_m2_hiscale], 
 #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-fig,ax = plot.timeseries([time_hiscale,time_hiscale], [swnettoa_hiscale,swnettoa_m_hiscale], 
+fig,ax = plot.timeseries([obssat_time_hiscale,model_time_hiscale], [swnettoa_hiscale,swnettoa_m_hiscale], 
                           legend = ['Obs','Model'], color=['k','r'], 
                         title='TOA. net SW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
 ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
 ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 fig.savefig(figpath+'timeseries_SWtoa_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [cld_arscl_hiscale,cld_tsi_hiscale,cld_m_hiscale,cld_m2_hiscale], 
+# fig,ax = plot.timeseries([obssfc_time_hiscale,obssfc_time_hiscale,model_time_hiscale,model_time_hiscale], [cld_arscl_hiscale,cld_tsi_hiscale,cld_m_hiscale,cld_m2_hiscale], 
 #                         legend = ['ARSCL','TSI','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
-fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [cld_arscl_hiscale,cld_tsi_hiscale,cld_m_hiscale], 
+fig,ax = plot.timeseries([obssfc_time_hiscale,obssfc_time_hiscale,model_time_hiscale], [cld_arscl_hiscale,cld_tsi_hiscale,cld_m_hiscale], 
                         legend = ['ARSCL','TSI','Model'], color=['k','gray','r'],
                         title='Cloud fraction '+site+' '+IOP,xlabel=None, ylabel="%")
 ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
@@ -590,11 +590,11 @@ fig.savefig(figpath+'timeseries_totcld_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_in
 
 #%%
 if config['aerosol_output'] == True:
-            # fig,ax = plot.timeseries_size([time_hiscale,time_hiscale,time_hiscale,time_hiscale], 
+            # fig,ax = plot.timeseries_size([obssfc_time_hiscale,obssfc_time_hiscale,model_time_hiscale,model_time_hiscale], 
             #                               [size_uhsas,size_smps, np.arange(1,3001), np.arange(1,3001)], 
             #                               [uhsasall_hiscale.T.data, smpsall_hiscale.T.data, CNsize_m_hiscale.T.data, CNsize_m2_hiscale.T.data], 
             #                               legend = ['UHSAS','SMPS','E3SMv1','E3SMv2'],
-            fig,ax = plot.timeseries_size([time_hiscale,time_hiscale,time_hiscale], 
+            fig,ax = plot.timeseries_size([obssfc_time_hiscale,obssfc_time_hiscale,model_time_hiscale], 
                                           [size_uhsas,size_smps, np.arange(1,3001), np.arange(1,3001)], 
                                           [uhsasall_hiscale.T.data, smpsall_hiscale.T.data, CNsize_m_hiscale.T.data], 
                                           legend = ['UHSAS','SMPS','Model'],
@@ -605,11 +605,11 @@ if config['aerosol_output'] == True:
             #     ax_i.xaxis.set_major_locator(mdates.DayLocator(interval=5))
             fig.savefig(figpath+'aerosol_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-# fig,ax = plot.timeseries_2d([time_hiscale,time_hiscale,time_hiscale], 
+# fig,ax = plot.timeseries_2d([obssfc_time_hiscale,model_time_hiscale,model_time_hiscale], 
 #                             [height_o, height_m, height_m2], 
 #                             [cloud_2d_hiscale.T.data, cloud_m_hiscale.T.data, cloud_m2_hiscale.T.data], 
 #                               legend = ['Obs','E3SMv1','E3SMv2'], title = 'Cloud Fraction (%)'),
-fig,ax = plot.timeseries_2d([time_hiscale,time_hiscale], [height_o, height_m], [cloud_2d_hiscale.T.data, cloud_m_hiscale.T.data],
+fig,ax = plot.timeseries_2d([obssfc_time_hiscale,model_time_hiscale], [height_o, height_m], [cloud_2d_hiscale.T.data, cloud_m_hiscale.T.data],
                             legend = ['Obs','Model'], title = 'Cloud Fraction (%)', yticks=[0,3,6,9,12], ylimit=(0,12), ylabel='Height (m)',cmap='jet') #, ylimit=(3,1000)
 # for ax_i in ax:
 #     ax_i.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
