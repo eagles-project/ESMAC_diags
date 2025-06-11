@@ -919,7 +919,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
             ncn3_o = f.createVariable('NCN3', 'f8', ("time",))
             ncn10_o = f.createVariable('NCN10', 'f8', ("time",))
             ncn100_o = f.createVariable('NCN100', 'f8', ("time",))
-        if confid['ccn_output'] == True:
+        if config['ccn_output'] == True:
             ccn1_o = f.createVariable('CCN1', 'f8', ("time",))
             ccn3_o = f.createVariable('CCN3', 'f8', ("time",))
             ccn4_o = f.createVariable('CCN4', 'f8', ("time",))
