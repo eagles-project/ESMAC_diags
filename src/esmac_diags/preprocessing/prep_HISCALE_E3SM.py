@@ -241,7 +241,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
         req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
         if len(matched_vlist) == len(req_vlist):
-            print('\nAnalyzing for condensate')
+            print('\nAnalyzing Condensate')
             qc = e3smdata3d[config['QC']+E3SMdomain_range][:,:,latlon_ind,...].load()
             qi = e3smdata3d[config['QI']+E3SMdomain_range][:,:,latlon_ind,...].load()
         else:
@@ -253,6 +253,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
             req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
             matched_vlist = list(set(av_vars).intersection(req_vlist))
             if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing Rain')
                 qr = e3smdata3d[config['QR']+E3SMdomain_range][:,:,latlon_ind,...].load()
             else:
                 qr = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -263,6 +264,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
           req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
           matched_vlist = list(set(av_vars).intersection(req_vlist))
           if len(matched_vlist) == len(req_vlist):
+              print('\nAnalyzing DSD')
               nd_cld = e3smdata3d[config['NC']+E3SMdomain_range][:,:,latlon_ind,...].load()
               lmda = e3smdata3d[config['LAMBDA_CLOUD']+E3SMdomain_range][:,:,latlon_ind,...].load()
               mu = e3smdata3d[config['MU_CLOUD']+E3SMdomain_range][:,:,latlon_ind,...].load()
@@ -298,30 +300,52 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
 
             vlist = list(e3smdata3d_dryaer.variables.keys())
             av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
-          
-            req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], config['dgnd_a01'], config['dgnd_a02'], \
-                         config['dgnd_a03'], config['dgnd_a04']]
+
+            req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4']]
             req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
             matched_vlist = list(set(av_vars).intersection(req_vlist))
             if len(matched_vlist) == len(req_vlist):
-                print('\nAnalyzing for aerosol size')
+                print('\nAnalyzing for aerosol size (1)')
                 num_a1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
                 num_a2 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
                 num_a3 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
                 num_a4 = e3smdata3d_dryaer[config['num_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                dn1 = e3smdata3d_dryaer[config['dgnd_a01']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                dn2 = e3smdata3d_dryaer[config['dgnd_a02']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                dn3 = e3smdata3d_dryaer[config['dgnd_a03']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                dn4 = e3smdata3d_dryaer[config['dgnd_a04']+E3SMdomain_range][:,:,latlon_ind,...].load()
             else:
                 num_a1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
                 num_a2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
                 num_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
                 num_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                dn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                dn2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                dn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                dn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+
+            if config['dgnum_output_combined'] == True:
+                req_vlist = [config['dgnd_a01'], config['dgnd_a02'], config['dgnd_a03'], config['dgnd_a04']]
+                req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                matched_vlist = list(set(av_vars).intersection(req_vlist))
+                if len(matched_vlist) == len(req_vlist):
+                    print('\nAnalyzing for aerosol size (2)')
+                    num_dn1 = e3smdata3d_dryaer[config['dgnd_a01']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                    num_dn2 = e3smdata3d_dryaer[config['dgnd_a02']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                    num_dn3 = e3smdata3d_dryaer[config['dgnd_a03']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                    num_dn4 = e3smdata3d_dryaer[config['dgnd_a04']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                else:
+                    num_dn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                    num_dn2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                    num_dn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                    num_dn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+            else:
+                req_vlist = [config['dgnum']]
+                req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                matched_vlist = list(set(av_vars).intersection(req_vlist))
+                if len(matched_vlist) == len(req_vlist):
+                    print('\nAnalyzing for aerosol size (2)')
+                    num_dn1 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:,:,latlon_ind,0].load()
+                    num_dn2 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:,:,latlon_ind,1].load()
+                    num_dn3 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:,:,latlon_ind,2].load()
+                    num_dn4 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:,:,latlon_ind,3].load()
+                else:
+                    num_dn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                    num_dn2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                    num_dn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                    num_dn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
             
             # aerosol composition
             req_vlist = [config['bc_a1'], config['bc_a3'], config['bc_a4'], config['dst_a1'], config['dst_a3'], config['mom_a1'], \
@@ -395,7 +419,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
             req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
             matched_vlist = list(set(av_vars).intersection(req_vlist))
             if len(matched_vlist) == len(req_vlist):
-                print('\nAnalyzing for aerosol size')
+                print('\nAnalyzing CCN')
                 ccn1 = e3smdata3d_dryaer[config['CCN1']+E3SMdomain_range][:,:,latlon_ind,...].load()
                 ccn3 = e3smdata3d_dryaer[config['CCN3']+E3SMdomain_range][:,:,latlon_ind,...].load()
                 ccn4 = e3smdata3d_dryaer[config['CCN4']+E3SMdomain_range][:,:,latlon_ind,...].load()
@@ -445,7 +469,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
                 req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
                 matched_vlist = list(set(av_vars).intersection(req_vlist))
                 if len(matched_vlist) == len(req_vlist):
-                    print('\nAnalyzing for condensate')
+                    print('\nAnalyzing Condensate')
                     new_qc = e3smdata3d[config['QC']+E3SMdomain_range][:,:,latlon_ind,...].load()
                     new_qi = e3smdata3d[config['QI']+E3SMdomain_range][:,:,latlon_ind,...].load()
                     qc = xr.concat([qc, new_qc], dim=config['time_dim'])
@@ -461,6 +485,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
                     req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
                     matched_vlist = list(set(av_vars).intersection(req_vlist))
                     if len(matched_vlist) == len(req_vlist):
+                        print('\nAnalyzing Rain')
                         new_qr = e3smdata3d[config['QC']+E3SMdomain_range][:,:,latlon_ind,...].load()
                         qr = xr.concat([qr, new_qr], dim=config['time_dim'])
                     else:
@@ -473,6 +498,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
                   req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
                   matched_vlist = list(set(av_vars).intersection(req_vlist))
                   if len(matched_vlist) == len(req_vlist):
+                      print('\nAnalyzing DSD')
                       new_nd_cld = e3smdata3d[config['NC']+E3SMdomain_range][:,:,latlon_ind,...].load()
                       new_lmda = e3smdata3d[config['LAMBDA_CLOUD']+E3SMdomain_range][:,:,latlon_ind,...].load()
                       new_mu = e3smdata3d[config['MU_CLOUD']+E3SMdomain_range][:,:,latlon_ind,...].load()
@@ -511,46 +537,75 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
                     vlist = list(e3smdata3d_dryaer.variables.keys())
                     av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
               
-                    req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], config['dgnd_a01'], config['dgnd_a02'], \
-                                 config['dgnd_a03'], config['dgnd_a04']]
+                    req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4']]
                     req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
                     matched_vlist = list(set(av_vars).intersection(req_vlist))
                     if len(matched_vlist) == len(req_vlist):
-                        print('\nAnalyzing for aerosol size')
+                        print('\nAnalyzing for aerosol size (1)')
                         new_num_a1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
                         new_num_a2 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
                         new_num_a3 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
                         new_num_a4 = e3smdata3d_dryaer[config['num_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                        new_dn1 = e3smdata3d_dryaer[config['dgnd_a01']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                        new_dn2 = e3smdata3d_dryaer[config['dgnd_a02']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                        new_dn3 = e3smdata3d_dryaer[config['dgnd_a03']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                        new_dn4 = e3smdata3d_dryaer[config['dgnd_a04']+E3SMdomain_range][:,:,latlon_ind,...].load()
                         num_a1 = xr.concat([num_a1, new_num_a1], dim=config['time_dim'])
                         num_a2 = xr.concat([num_a2, new_num_a2], dim=config['time_dim'])
                         num_a3 = xr.concat([num_a3, new_num_a3], dim=config['time_dim'])
                         num_a4 = xr.concat([num_a4, new_num_a4], dim=config['time_dim'])
-                        num_dn1 = xr.concat([num_dn1, new_num_dn1], dim=config['time_dim'])
-                        num_dn2 = xr.concat([num_dn2, new_num_dn2], dim=config['time_dim'])
-                        num_dn3 = xr.concat([num_dn3, new_num_dn3], dim=config['time_dim'])
-                        num_dn4 = xr.concat([num_dn4, new_num_dn4], dim=config['time_dim'])
                     else:
                         new_num_a1 = xr.DataArray(np.zeros(newz3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
                         new_num_a2 = xr.DataArray(np.zeros(newz3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
                         new_num_a3 = xr.DataArray(np.zeros(newz3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
                         new_num_a4 = xr.DataArray(np.zeros(newz3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                        new_dn1 = xr.DataArray(np.zeros(newz3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                        new_dn2 = xr.DataArray(np.zeros(newz3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                        new_dn3 = xr.DataArray(np.zeros(newz3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                        new_dn4 = xr.DataArray(np.zeros(newz3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
                         num_a1 = xr.concat([num_a1, new_num_a1], dim=config['time_dim'])
                         num_a2 = xr.concat([num_a2, new_num_a2], dim=config['time_dim'])
                         num_a3 = xr.concat([num_a3, new_num_a3], dim=config['time_dim'])
                         num_a4 = xr.concat([num_a4, new_num_a4], dim=config['time_dim'])
-                        num_dn1 = xr.concat([num_dn1, new_num_dn1], dim=config['time_dim'])
-                        num_dn2 = xr.concat([num_dn2, new_num_dn2], dim=config['time_dim'])
-                        num_dn3 = xr.concat([num_dn3, new_num_dn3], dim=config['time_dim'])
-                        num_dn4 = xr.concat([num_dn4, new_num_dn4], dim=config['time_dim'])
-                      
+
+                    if config['dgnum_output_combined'] == True:
+                        req_vlist = [config['dgnd_a01'], config['dgnd_a02'], config['dgnd_a03'], config['dgnd_a04']]
+                        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                        matched_vlist = list(set(av_vars).intersection(req_vlist))
+                        if len(matched_vlist) == len(req_vlist):
+                            print('\nAnalyzing for aerosol size (2)')
+                            new_num_dn1 = e3smdata3d_dryaer[config['dgnd_a01']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                            new_num_dn2 = e3smdata3d_dryaer[config['dgnd_a02']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                            new_num_dn3 = e3smdata3d_dryaer[config['dgnd_a03']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                            new_num_dn4 = e3smdata3d_dryaer[config['dgnd_a04']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                            num_dn1 = xr.concat([num_dn1, new_num_dn1], dim=config['time_dim'])
+                            num_dn2 = xr.concat([num_dn2, new_num_dn2], dim=config['time_dim'])
+                            num_dn3 = xr.concat([num_dn3, new_num_dn3], dim=config['time_dim'])
+                            num_dn4 = xr.concat([num_dn4, new_num_dn4], dim=config['time_dim'])
+                        else:
+                            new_num_dn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                            new_num_dn2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                            new_num_dn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                            new_num_dn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                            num_dn1 = xr.concat([num_dn1, new_num_dn1], dim=config['time_dim'])
+                            num_dn2 = xr.concat([num_dn2, new_num_dn2], dim=config['time_dim'])
+                            num_dn3 = xr.concat([num_dn3, new_num_dn3], dim=config['time_dim'])
+                            num_dn4 = xr.concat([num_dn4, new_num_dn4], dim=config['time_dim'])
+                    else:
+                        req_vlist = [config['dgnum']]
+                        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                        matched_vlist = list(set(av_vars).intersection(req_vlist))
+                        if len(matched_vlist) == len(req_vlist):
+                            print('\nAnalyzing for aerosol size (2)')
+                            new_num_dn1 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:,:,latlon_ind,0].load()
+                            new_num_dn2 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:,:,latlon_ind,1].load()
+                            new_num_dn3 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:,:,latlon_ind,2].load()
+                            new_num_dn4 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:,:,latlon_ind,3].load()
+                            num_dn1 = xr.concat([num_dn1, new_num_dn1], dim=config['time_dim'])
+                            num_dn2 = xr.concat([num_dn2, new_num_dn2], dim=config['time_dim'])
+                            num_dn3 = xr.concat([num_dn3, new_num_dn3], dim=config['time_dim'])
+                            num_dn4 = xr.concat([num_dn4, new_num_dn4], dim=config['time_dim'])
+                        else:
+                            new_num_dn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                            new_num_dn2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                            new_num_dn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                            new_num_dn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                            num_dn1 = xr.concat([num_dn1, new_num_dn1], dim=config['time_dim'])
+                            num_dn2 = xr.concat([num_dn2, new_num_dn2], dim=config['time_dim'])
+                            num_dn3 = xr.concat([num_dn3, new_num_dn3], dim=config['time_dim'])
+                            num_dn4 = xr.concat([num_dn4, new_num_dn4], dim=config['time_dim'])
                       
                     # aerosol composition
                     req_vlist = [config['bc_a1'], config['bc_a3'], config['bc_a4'], config['dst_a1'], config['dst_a3'], config['mom_a1'], \
@@ -660,7 +715,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
                     req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
                     matched_vlist = list(set(av_vars).intersection(req_vlist))
                     if len(matched_vlist) == len(req_vlist):
-                        print('\nAnalyzing for aerosol size')
+                        print('\nAnalyzing CCN')
                         new_ccn1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
                         new_ccn3 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
                         new_ccn4 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
@@ -681,6 +736,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
                       
         
         #%% find the flight track grid
+        print('\nInterpolating to Flight Track')
         for tt in range(len(time_new)):
             t_idx = np.abs(timem-time_new[tt]).argmin()
             x_idx = find_nearest(lonm, latm, lon_new[tt], lat_new[tt])  # depends on 1D ncol; need a check and new function if lat and lon are separate
