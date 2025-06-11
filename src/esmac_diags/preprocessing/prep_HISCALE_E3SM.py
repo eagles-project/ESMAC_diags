@@ -2389,19 +2389,18 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     # mean cloud droplet number concentration
     variable_names = variable_names + ['Nd_mean']
     variables = variables + [cdnc_mean]
-    if config['reff_output'] == True:
+    if config['tau3d_output'] == True:
         variable_names = variable_names + ['Nd_ARM']
         variables = variables + [cdnc_arm]
     if config['cosp_output'] == True:
+        variable_names = variable_names + ['cod']
+        variables = variables + [cod_mean]
         variable_names = variable_names + ['Nd_VISST']
         variables = variables + [cdnc_sat]
-    # mean cloud optical depth and effective radius
     if config['reff_output'] == True:
         variable_names = variable_names + ['reff']
         variables = variables + [reff_mean]
-    if config['tau3d_output'] == True:
-        variable_names = variable_names + ['cod']
-        variables = variables + [cod_mean]
+        
     # cloud depth
     variable_names = variable_names + ['cbt','ctt','cbh','cth','clddepth']
     variables = variables + [cbt, ctt, cbh, cth, cloud_depth]
