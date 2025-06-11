@@ -316,7 +316,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
                 num_a3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
                 num_a4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
 
-            if config['dgnum_output_combined'] == True:
+            if config['dgnum_output_combined'] == False:
                 req_vlist = [config['dgnd_a01'], config['dgnd_a02'], config['dgnd_a03'], config['dgnd_a04']]
                 req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
                 matched_vlist = list(set(av_vars).intersection(req_vlist))
@@ -560,7 +560,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
                         num_a3 = xr.concat([num_a3, new_num_a3], dim=config['time_dim'])
                         num_a4 = xr.concat([num_a4, new_num_a4], dim=config['time_dim'])
 
-                    if config['dgnum_output_combined'] == True:
+                    if config['dgnum_output_combined'] == False:
                         req_vlist = [config['dgnd_a01'], config['dgnd_a02'], config['dgnd_a03'], config['dgnd_a04']]
                         req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
                         matched_vlist = list(set(av_vars).intersection(req_vlist))
