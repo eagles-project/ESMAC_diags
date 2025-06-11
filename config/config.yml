@@ -183,9 +183,9 @@ mom_a1: 'mom_a1'
 mom_a2: 'mom_a2'
 mom_a3: 'mom_a3'
 mom_a4: 'mom_a4'
-ncl_a1: 'ncl_a1'
-ncl_a2: 'ncl_a2'
-ncl_a3: 'ncl_a3'
+ncl_a1: 'nacl_a1' #ncl_a1 in old outputs
+ncl_a2: 'nacl_a2' #ncl_a2 in old outputs
+ncl_a3: 'nacl_a3' #ncl_a3 in old outputs
 pom_a1: 'pom_a1'
 pom_a3: 'pom_a3'
 pom_a4: 'pom_a4'
