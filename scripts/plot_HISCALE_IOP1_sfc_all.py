@@ -206,11 +206,12 @@ if config['aerosol_output'] == True:
             ncl_m = modeldata['ncl'].load()
             so4_m = modeldata['so4'].load()
             soa_m = modeldata['soa'].load()
-            ccn2_m = modeldata['CCN4'].load()
             ncn3_m = modeldata['NCN3'].load()
             ncn10_m = modeldata['NCN10'].load()
             ncn100_m = modeldata['NCN100'].load()
             CNsize_m = modeldata['NCNall'].load()
+if config['ccn_output'] == True:
+            ccn2_m = modeldata['CCN4'].load()            
 if config['tau3d_output'] == True:
             cod_m = modeldata['cod'].load()
 if config['reff_output'] == True:
@@ -260,11 +261,12 @@ if config['aerosol_output'] == True:
             org_m_hiscale = org_m.sel(time=model_time_hiscale)
             so4_m_hiscale = so4_m.sel(time=model_time_hiscale)
             ncl_m_hiscale = ncl_m.sel(time=model_time_hiscale)
-            ccn2_m_hiscale = ccn2_m.sel(time=model_time_hiscale)
             ncn3_m_hiscale = ncn3_m.sel(time=model_time_hiscale)
             ncn10_m_hiscale = ncn10_m.sel(time=model_time_hiscale)
             ncn100_m_hiscale = ncn100_m.sel(time=model_time_hiscale)
             CNsize_m_hiscale = CNsize_m.sel(time=model_time_hiscale)
+if config['ccn_output'] == True:
+            ccn2_m_hiscale = ccn2_m.sel(time=model_time_hiscale)            
 if config['tau3d_output'] == True:
             cod_m_hiscale = cod_m.sel(time=model_time_hiscale)
 if config['reff_output'] == True:
