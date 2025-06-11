@@ -1895,16 +1895,6 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
                   coords=dict(time=([config['time_dim']], e3smtime),size=(["size"], np.arange(1,3001))),
                   attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
           else:
-              num_a1 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              num_a2 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              num_a3 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              num_a4 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              numall = [num_a1.data, num_a2.data, num_a3.data, num_a4.data]
-              num_dn1 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              num_dn2 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              num_dn3 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              num_dn4 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              dnall  = [num_dn1.data,    num_dn2.data,    num_dn3.data,    num_dn4.data]
               NCNall = xr.DataArray(np.zeros((3000,len(e3smtime)))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
       else:
           req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], \
@@ -1928,16 +1918,6 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
                   coords=dict(time=([config['time_dim']], e3smtime),size=(["size"], np.arange(1,3001))),
                   attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
           else:
-              num_a1 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              num_a2 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              num_a3 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              num_a4 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              numall = [num_a1.data, num_a2.data, num_a3.data, num_a4.data]
-              num_dn1 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              num_dn2 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              num_dn3 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              num_dn4 = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-              dnall  = [num_dn1.data,    num_dn2.data,    num_dn3.data,    num_dn4.data]
               NCNall = xr.DataArray(np.zeros((3000,len(e3smtime)))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
             
     #CCN
@@ -2305,31 +2285,57 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
                 soa_all = xr.concat([soa_all, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='soa_all',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
           
             # aerosol size
-            req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], config['dgnd_a01'], config['dgnd_a02'], \
-                       config['dgnd_a03'], config['dgnd_a04']]
-            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-            matched_vlist = list(set(av_vars).intersection(req_vlist))
+            if config['dgnum_output_combined'] == False:
+                req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], \
+                             config['dgnd_a01'], config['dgnd_a02'], config['dgnd_a03'], config['dgnd_a04']]
+                req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                matched_vlist = list(set(av_vars).intersection(req_vlist))
             
-            if len(matched_vlist) == len(req_vlist):
-                print('\nAnalyzing aerosol size')
-                num_a1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:, -1, x_idx].load()
-                num_a2 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:, -1, x_idx].load()
-                num_a3 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:, -1, x_idx].load()
-                num_a4 = e3smdata3d_dryaer[config['num_a4']+E3SMdomain_range][:, -1, x_idx].load()
-                dn1 = e3smdata3d_dryaer[config['dgnd_a01']+E3SMdomain_range][:, -1, x_idx].load()
-                dn2 = e3smdata3d_dryaer[config['dgnd_a02']+E3SMdomain_range][:, -1, x_idx].load()
-                dn3 = e3smdata3d_dryaer[config['dgnd_a03']+E3SMdomain_range][:, -1, x_idx].load()
-                dn4 = e3smdata3d_dryaer[config['dgnd_a04']+E3SMdomain_range][:, -1, x_idx].load()
-                numall = [num_a1.data, num_a2.data, num_a3.data, num_a4.data]
-                dnall  = [dn1.data,    dn2.data,    dn3.data,    dn4.data]
-                NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1].data, Pres[:, -1].data)
-                NCN2 = xr.DataArray(data=NCN,  dims=["size", config['time_dim']],
-                    coords=dict(time=([config['time_dim']], e3smtime_i),size=(["size"], np.arange(1,3001))),
-                    attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
-                NCNall = xr.concat([NCNall, NCN2], dim=config['time_dim'])
+                if len(matched_vlist) == len(req_vlist):
+                    print('\nAnalyzing aerosol size')
+                    num_a1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_a2 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_a3 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_a4 = e3smdata3d_dryaer[config['num_a4']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_dn1 = e3smdata3d_dryaer[config['dgnd_a01']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_dn2 = e3smdata3d_dryaer[config['dgnd_a02']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_dn3 = e3smdata3d_dryaer[config['dgnd_a03']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_dn4 = e3smdata3d_dryaer[config['dgnd_a04']+E3SMdomain_range][:, -1, x_idx].load()
+                    numall = [num_a1.data, num_a2.data, num_a3.data, num_a4.data]
+                    dnall  = [num_dn1.data,    num_dn2.data,    num_dn3.data,    num_dn4.data]
+                    NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1].data, Pres[:, -1].data)
+                    NCN2 = xr.DataArray(data=NCN,  dims=["size", config['time_dim']],
+                        coords=dict(time=([config['time_dim']], e3smtime_i),size=(["size"], np.arange(1,3001))),
+                        attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
+                    NCNall = xr.concat([NCNall, NCN2], dim=config['time_dim'])
+                else:
+                    NCNall = xr.concat([NCNall, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name='NCNall',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
             else:
-                NCNall = xr.concat([NCNall, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name='NCNall',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
-    
+                req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], \
+                             config['dgnum']]
+                req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                matched_vlist = list(set(av_vars).intersection(req_vlist))
+            
+                if len(matched_vlist) == len(req_vlist):
+                    print('\nAnalyzing aerosol size')
+                    num_a1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_a2 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_a3 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_a4 = e3smdata3d_dryaer[config['num_a4']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_dn1 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:, -1, x_idx, 0].load()
+                    num_dn2 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:, -1, x_idx, 1].load()
+                    num_dn3 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:, -1, x_idx, 2].load()
+                    num_dn4 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:, -1, x_idx, 3].load()
+                    numall = [num_a1.data, num_a2.data, num_a3.data, num_a4.data]
+                    dnall  = [num_dn1.data,    num_dn2.data,    num_dn3.data,    num_dn4.data]
+                    NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1].data, Pres[:, -1].data)
+                    NCN2 = xr.DataArray(data=NCN,  dims=["size", config['time_dim']],
+                        coords=dict(time=([config['time_dim']], e3smtime_i),size=(["size"], np.arange(1,3001))),
+                        attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
+                    NCNall = xr.concat([NCNall, NCN2], dim=config['time_dim'])
+                else:
+                    NCNall = xr.concat([NCNall, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name='NCNall',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+      
     #CCN
     if config['ccn_output'] == True:
         print(lst3d_wetaer[ii+1])
