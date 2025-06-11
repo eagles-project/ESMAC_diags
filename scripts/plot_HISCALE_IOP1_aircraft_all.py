@@ -19,7 +19,7 @@ import matplotlib.dates as mdates
 # set site name.
 site = 'HISCALE'
 
-prep_model_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/model/flight/60s/'
+prep_model_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/model/ne256mam/flight/60s/'
 prep_obs_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/flight/60s/'
 
 config_file = '../config/config.yml'
@@ -32,7 +32,7 @@ time1 = np.datetime64('2016-04-25')
 time2 = np.datetime64('2016-05-21')
 IOP = 'IOP1'
 
-figpath= '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/figures/'+site+'/flight/60s/'
+figpath= '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/figures/'+site+'/ne256mam/flight/60s/'
 if not os.path.exists(figpath):
     os.makedirs(figpath)
     
