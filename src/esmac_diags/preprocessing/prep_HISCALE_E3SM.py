@@ -853,7 +853,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
         #%% change some units
         if config['aerosol_output'] == True:
             # composition
-            T = variables_new[variable3d_names.index('T')]
+            T = variables_new[variable3d_names.index(config['T'])]
             rho = np.array(p)/T/287.06
             bc_all = np.array(bc_all)*1e9*rho
             dst_all = np.array(dst_all)*1e9*rho
