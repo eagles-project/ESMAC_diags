@@ -134,6 +134,7 @@ SWUPTOA: 'SW_flux_up_at_model_top'     # SW_flux_up_at_model_top, FSUTOA
 SWDOWNSFC: 'SW_flux_dn_at_model_bot'   # SW_flux_dn_at_model_bot, FSDS
 SWUPSFC: 'SW_flux_up_at_model_bot'     # if netradiation_output = False; SW_flux_up_at_model_bot
 LWUPTOA: 'LW_flux_up_at_model_top'     # LW_flux_up_at_model_top, FLUT
+LWDOWNTOA: 'LW_flux_dn_at_model_top'   # if netradiation_output = False; LW_flux_dn_at_model_top
 LWDOWNSFC: 'LW_flux_dn_at_model_bot'   # LW_flux_dn_at_model_bot, FLDS
 LWUPSFC: 'LW_flux_up_at_model_bot'     # if netradiation_output = False; LW_flux_up_at_model_bot
 SWNETTOA: 'FSNT'    # if netradiation_output = True, FSNT
