@@ -168,10 +168,11 @@ num_a1: 'num_a1'
 num_a2: 'num_a2'
 num_a3: 'num_a3'
 num_a4: 'num_a4'
-dgnd_a01: 'dgnd_a01'
-dgnd_a02: 'dgnd_a02'
-dgnd_a03: 'dgnd_a03'
-dgnd_a04: 'dgnd_a04'
+dgnd_a01: 'dgnd_a01' #if dgnum_output_combined = False
+dgnd_a02: 'dgnd_a02' #if dgnum_output_combined = False
+dgnd_a03: 'dgnd_a03' #if dgnum_output_combined = False
+dgnd_a04: 'dgnd_a04' #if dgnum_output_combined = False
+dgnum: 'dgnum'       #if dgnum_output_combined = True
 bc_a1: 'bc_a1'
 bc_a3: 'bc_a3'
 bc_a4: 'bc_a4'
