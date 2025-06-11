@@ -1579,7 +1579,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         matched_vlist = list(set(av_vars3d).intersection(req_vlist))
   
         if len(matched_vlist) == len(req_vlist):
-          print('\nAnalyzing for effective radius')
+          print('\nAnalyzing effective radius')
           rel = e3smdata3d[config['REL']+E3SMdomain_range][:,:,x_idx].load()
           freql = e3smdata3d[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load()
           icwnc = e3smdata3d[config['NC']+E3SMdomain_range][:,:,x_idx].load()
@@ -1603,7 +1603,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         matched_vlist2d = list(set(av_vars2d).intersection(req_vlist2d))
         
         if np.logical_and(len(matched_vlist3d) == len(req_vlist3d), len(matched_vlist2d) == len(req_vlist2d)):
-            print('\nAnalyzing for cloud optical depth')
+            print('\nAnalyzing cloud optical depth')
             cod_a = e3smdata3d[config['TAU3D']+E3SMdomain_range][:,:,x_idx].load()
             solin = e3smdata2d[config['SWDOWNTOA']+E3SMdomain_range][:,x_idx].load()
           
@@ -1623,7 +1623,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         matched_vlist = list(set(av_vars2d).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
-            print('\nAnalyzing for MODIS simulator cloud optical depth')
+            print('\nAnalyzing MODIS simulator cloud optical depth')
             cod_m = e3smdata2d[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()*0.01   # cloud fraction is treated as 1 but is 100
         else:
             cod_m = xr.DataArray(np.zeros(len(e3smtime))*np.nan)
@@ -1635,7 +1635,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         matched_vlist = list(set(av_vars2d).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
-            print('\nAnalyzing for mean cloud droplet number concentration')
+            print('\nAnalyzing mean cloud droplet number concentration')
             cdnc_col = e3smdata3d[config['NC2D']+E3SMdomain_range][:,x_idx].load()
             weight = cloud*dz
             cdnc_mean = cdnc_col/weight.sum(dim=config['vert_dim'])
@@ -1651,7 +1651,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         matched_vlist = list(set(av_vars3d).intersection(req_vlist))
       
         if len(matched_vlist) == len(req_vlist):
-            print('\nAnalyzing for mean cloud droplet number concentration')
+            print('\nAnalyzing mean cloud droplet number concentration')
             #compute cloud layer mean CDNC from 3D NC (note that if NC is not in-cloud only, one needs to divide by cloud fraction)
             nc3d = e3smdata3d[config['NC']+E3SMdomain_range][:,:,x_idx].load()      
             if nc3d.attrs['units'] == '1/kg':
@@ -1678,7 +1678,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         matched_vlist = list(set(av_vars2d).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
-            print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop and Bennartz 2007')
+            print('\nAnalyzing cloud droplet number concentration retrieved like Ndrop')
             lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
             e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
             nd_arm = calc_cdnc_ARM(lwp, cod, e3sm_cloud_depth)
@@ -1696,7 +1696,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         matched_vlist = list(set(av_vars2d).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
-            print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop and Bennartz 2007')
+            print('\nAnalyzing cloud droplet number concentration retrieved like MODIS')
             lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
             # lwp = e3smdata2d[config['LWPMODIS']+E3SMdomain_range][:,x_idx].data
             T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
@@ -1723,6 +1723,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         variable2d_names.append(config['SWNETTOA'])
     else:
         variable2d_names.append(config['LWUPSFC'])
+        variable2d_names.append(config['LWDOWNTOA'])
         variable2d_names.append(config['SWUPSFC'])
 
     if config['clrskyradiation_output'] == True:
@@ -1811,7 +1812,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
       matched_vlist = list(set(av_vars).intersection(req_vlist))
     
       if len(matched_vlist) == len(req_vlist):
-          print('\nAnalyzing for aerosol composition')
+          print('\nAnalyzing aerosol composition')
           bc_a1 = e3smdata3d_dryaer[config['bc_a1']+E3SMdomain_range][:,-1,x_idx].load()
           bc_a3 = e3smdata3d_dryaer[config['bc_a3']+E3SMdomain_range][:,-1,x_idx].load()
           bc_a4 = e3smdata3d_dryaer[config['bc_a4']+E3SMdomain_range][:,-1,x_idx].load()
@@ -1878,7 +1879,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
       matched_vlist = list(set(av_vars).intersection(req_vlist))
     
       if len(matched_vlist) == len(req_vlist):
-          print('\nAnalyzing for aerosol size')
+          print('\nAnalyzing aerosol size')
           num_a1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:, -1, x_idx].load()
           num_a2 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:, -1, x_idx].load()
           num_a3 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:, -1, x_idx].load()
@@ -1910,7 +1911,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         matched_vlist = list(set(av_vars).intersection(req_vlist))
       
         if len(matched_vlist) == len(req_vlist):
-            print('\nAnalyzing for aerosol composition')
+            print('\nAnalyzing CCN')
             ccn1_all = e3smdata3d_dryaer[config['CCN1']+E3SMdomain_range][:,-1,x_idx].load()
             ccn3_all = e3smdata3d_dryaer[config['CCN3']+E3SMdomain_range][:,-1,x_idx].load()
             ccn4_all = e3smdata3d_dryaer[config['CCN4']+E3SMdomain_range][:,-1,x_idx].load()
@@ -1959,6 +1960,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         matched_vlist = list(set(av_vars3d).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
+            print('\nAnalyzing cloud base, top, and depth')
             z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,x_idx].load()
             cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
             dz = (z3[:,:-2].data - z3[:,2:].data)/2
@@ -2022,7 +2024,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             matched_vlist = list(set(av_vars3d).intersection(req_vlist))
       
             if len(matched_vlist) == len(req_vlist):
-                print('\nAnalyzing for effective radius')
+                print('\nAnalyzing effective radius')
                 rel = e3smdata3d[config['REL']+E3SMdomain_range][:,:,x_idx].load()
                 freql = e3smdata3d[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load()
                 icwnc = e3smdata3d[config['NC']+E3SMdomain_range][:,:,x_idx].load()
@@ -2047,7 +2049,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             matched_vlist2d = list(set(av_vars2d).intersection(req_vlist2d))
         
             if np.logical_and(len(matched_vlist3d) == len(req_vlist3d), len(matched_vlist2d) == len(req_vlist2d)):
-                print('\nAnalyzing for cloud optical depth')
+                print('\nAnalyzing cloud optical depth')
                 cod_a = e3smdata3d[config['TAU3D']+E3SMdomain_range][:,:,x_idx].load()
                 solin = e3smdata2d[config['SWDOWNTOA']+E3SMdomain_range][:,x_idx].load()
               
@@ -2068,7 +2070,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             matched_vlist = list(set(av_vars2d).intersection(req_vlist))
             
             if len(matched_vlist) == len(req_vlist):
-                print('\nAnalyzing for MODIS simulator cloud optical depth')
+                print('\nAnalyzing MODIS simulator cloud optical depth')
                 cod_m2 = e3smdata2d[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()*0.01   # cloud fraction is treated as 1 but is 100
                 cod_m = xr.concat([cod_m, cod_m2], dim=config['time_dim'])
             else:
@@ -2081,6 +2083,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             matched_vlist = list(set(av_vars2d).intersection(req_vlist))
             
             if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing mean cloud droplet number concentration')
                 cdnc_col = e3smdata3d[config['NC2D']+E3SMdomain_range][:,x_idx].load()
                 weight = cloud*dz
                 cdnc = cdnc_col/np.sum(weight,axis=1)
@@ -2097,7 +2100,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             matched_vlist = list(set(av_vars3d).intersection(req_vlist))
           
             if len(matched_vlist) == len(req_vlist):
-                print('\nAnalyzing for mean cloud droplet number concentration')
+                print('\nAnalyzing mean cloud droplet number concentration')
                 #compute cloud layer mean CDNC from 3D NC (note that if NC is not in-cloud only, one needs to divide by cloud fraction)
                 nc3d = e3smdata3d[config['NC']+E3SMdomain_range][:,:,x_idx].load()   
                 if nc3d.attrs['units'] == '1/kg':
@@ -2124,7 +2127,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             matched_vlist = list(set(av_vars2d).intersection(req_vlist))
             
             if len(matched_vlist) == len(req_vlist):
-                print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop and Bennartz 2007')
+                print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop')
                 lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
                 e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
                 nd_arm = calc_cdnc_ARM(lwp, cod_2, e3sm_cloud_depth)
@@ -2142,7 +2145,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             matched_vlist = list(set(av_vars2d).intersection(req_vlist))
             
             if len(matched_vlist) == len(req_vlist):
-                print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop and Bennartz 2007')
+                print('\nAnalyzing cloud droplet number concentration retrieved like MODIS')
                 lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
                 # lwp = e3smdata2d[config['LWPMODIS']+E3SMdomain_range][:,x_idx].data
                 T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
@@ -2205,6 +2208,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             matched_vlist = list(set(av_vars).intersection(req_vlist))
             
             if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing aerosol composition')
                 bc_a1 = e3smdata3d_dryaer[config['bc_a1']+E3SMdomain_range][:,-1,x_idx].load()
                 bc_a3 = e3smdata3d_dryaer[config['bc_a3']+E3SMdomain_range][:,-1,x_idx].load()
                 bc_a4 = e3smdata3d_dryaer[config['bc_a4']+E3SMdomain_range][:,-1,x_idx].load()
@@ -2264,6 +2268,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             matched_vlist = list(set(av_vars).intersection(req_vlist))
             
             if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing aerosol size')
                 num_a1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:, -1, x_idx].load()
                 num_a2 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:, -1, x_idx].load()
                 num_a3 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:, -1, x_idx].load()
@@ -2296,7 +2301,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         matched_vlist = list(set(av_vars).intersection(req_vlist))
       
         if len(matched_vlist) == len(req_vlist):
-            print('\nAnalyzing for aerosol composition')
+            print('\nAnalyzing CCN')
             ccn1 = e3smdata3d_dryaer[config['CCN1']+E3SMdomain_range][:,-1,x_idx].load()
             ccn3 = e3smdata3d_dryaer[config['CCN3']+E3SMdomain_range][:,-1,x_idx].load()
             ccn4 = e3smdata3d_dryaer[config['CCN4']+E3SMdomain_range][:,-1,x_idx].load()
