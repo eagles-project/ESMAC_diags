@@ -456,15 +456,6 @@ if config['aerosol_output'] == True:
             ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
             fig.savefig(figpath+'timeseries_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             
-            # fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], 
-            #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-            fig,ax = plot.timeseries([time_hiscale,time_hiscale], [ccn2_hiscale,ccn2_m_hiscale], 
-                                      legend = ['Obs','Model'], color=['k','r'], 
-                                    title='0.2%CCN '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
-            ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
-            ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
-            fig.savefig(figpath+'timeseries_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-            
             # fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [cpc3_hiscale,ncn3_m_hiscale,ncn3_m2_hiscale], 
             #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
             fig,ax = plot.timeseries([time_hiscale,time_hiscale], [cpc3_hiscale,ncn3_m_hiscale], 
@@ -492,6 +483,16 @@ if config['aerosol_output'] == True:
             ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
             fig.savefig(figpath+'timeseries_CN100_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
+if config['ccn_output'] == True:
+            # fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale], [ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], 
+            #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+            fig,ax = plot.timeseries([time_hiscale,time_hiscale], [ccn2_hiscale,ccn2_m_hiscale], 
+                                      legend = ['Obs','Model'], color=['k','r'], 
+                                    title='0.2%CCN '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
+            ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+            ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+            fig.savefig(figpath+'timeseries_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+            
 if config['tau3d_output'] == True:
             # fig,ax = plot.timeseries([time_hiscale,time_hiscale,time_hiscale,time_hiscale], [cod_hiscale,cod_sat_hiscale,cod_m_hiscale,cod_m2_hiscale], 
             #                           legend = ['MFRSR','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'], #marker='.',
@@ -626,11 +627,6 @@ if config['aerosol_output'] == True:
                                       title='Sulfate '+site+' '+IOP, xlabel='Time (UTC)', ylabel='${\mu}$g/m$^{3}$')
             fig.savefig(figpath+'diurnalcycle_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             
-            # fig,ax = plot.diurnalcycle([ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
-            fig,ax = plot.diurnalcycle([ccn2_hiscale,ccn2_m_hiscale], legend = ['Obs','Model'], color=['k','r'], 
-                                    title='0.2%CCN '+site+' '+IOP, xlabel='Time (UTC)', ylabel='cm$^{-3}$')
-            fig.savefig(figpath+'diurnalcycle_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-            
             # fig,ax = plot.diurnalcycle([cpc3_hiscale,ncn3_m_hiscale,ncn3_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
             fig,ax = plot.diurnalcycle([cpc3_hiscale,ncn3_m_hiscale], legend = ['Obs','Model'], color=['k','r'], 
                                     title='CN(>3nm) '+site+' '+IOP, xlabel='Time (UTC)', ylabel='cm$^{-3}$')
@@ -647,6 +643,12 @@ if config['aerosol_output'] == True:
                                     title='CN(>100nm) '+site+' '+IOP, color=['k','gray','r'], xlabel='Time (UTC)',ylabel='cm$^{-3}$')
             fig.savefig(figpath+'diurnalcycle_CN100_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
+if config['ccn_output'] == True:
+            # fig,ax = plot.diurnalcycle([ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
+            fig,ax = plot.diurnalcycle([ccn2_hiscale,ccn2_m_hiscale], legend = ['Obs','Model'], color=['k','r'], 
+                                    title='0.2%CCN '+site+' '+IOP, xlabel='Time (UTC)', ylabel='cm$^{-3}$')
+            fig.savefig(figpath+'diurnalcycle_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+            
 if config['tau3d_output'] == True:
             # fig,ax = plot.diurnalcycle( [cod_hiscale, cod_sat_hiscale, cod_m_hiscale, cod_m2_hiscale], 
             #                             legend = ['MFRSR','Satellite','E3SMv1','E3SMv2'], color=['k','gray','r','b'], 
@@ -752,18 +754,7 @@ if config['aerosol_output'] == True:
             fig,ax = plot.hist([so4_hiscale,so4_m_hiscale], weights=[w1,w2], bins=np.arange(0,6,0.2),
                                 legend =['Obs','Model',], color=['k','r'],
                                 title = 'Sulfate '+site+' '+IOP, ylabel='Fraction', xlabel='${\mu}$g/m$^{3}$')
-            fig.savefig(figpath+'hist_SO4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-            
-            w1 = np.ones_like(ccn2_hiscale)/sum(~np.isnan(ccn2_hiscale.data))
-            w2 = np.ones_like(ccn2_m_hiscale)/sum(~np.isnan(ccn2_m_hiscale.data))
-            # w3 = np.ones_like(ccn2_m2_hiscale)/sum(~np.isnan(ccn2_m2_hiscale.data))
-            # fig,ax = plot.hist([ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], weights=[w1,w2,w3], bins=np.arange(0,1800,50),
-            #                     legend =['Obs','E3SMv1','E3SMv2',], color=['k','r','b'],
-            fig,ax = plot.hist([ccn2_hiscale,ccn2_m_hiscale], weights=[w1,w2], bins=np.arange(0,1800,50),
-                                legend =['Obs','Model',], color=['k','r'],
-                                title = 'CCN (SS=0.2%) '+site+' '+IOP, ylabel='Fraction', xlabel='cm$^{-3}$')
-            fig.savefig(figpath+'hist_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-            
+            fig.savefig(figpath+'hist_SO4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)            
             
             w0 = np.ones_like(cpc10_hiscale)/sum(~np.isnan(cpc10_hiscale.data))
             w1 = np.ones_like(ncn10_m_hiscale)/sum(~np.isnan(ncn10_m_hiscale.data))
@@ -785,6 +776,17 @@ if config['aerosol_output'] == True:
                                 title='Aerosol number (>100nm) '+site+' '+IOP,  ylabel='Fraction', xlabel='cm$^{-3}$')
             fig.savefig(figpath+'hist_CN100_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
+if config['ccn_output'] == True:
+            w1 = np.ones_like(ccn2_hiscale)/sum(~np.isnan(ccn2_hiscale.data))
+            w2 = np.ones_like(ccn2_m_hiscale)/sum(~np.isnan(ccn2_m_hiscale.data))
+            # w3 = np.ones_like(ccn2_m2_hiscale)/sum(~np.isnan(ccn2_m2_hiscale.data))
+            # fig,ax = plot.hist([ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], weights=[w1,w2,w3], bins=np.arange(0,1800,50),
+            #                     legend =['Obs','E3SMv1','E3SMv2',], color=['k','r','b'],
+            fig,ax = plot.hist([ccn2_hiscale,ccn2_m_hiscale], weights=[w1,w2], bins=np.arange(0,1800,50),
+                                legend =['Obs','Model',], color=['k','r'],
+                                title = 'CCN (SS=0.2%) '+site+' '+IOP, ylabel='Fraction', xlabel='cm$^{-3}$')
+            fig.savefig(figpath+'hist_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+            
 if config['tau3d_output'] == True:
             w0 = np.ones_like(cod_hiscale)/sum(~np.isnan(cod_hiscale.data))
             w00 = np.ones_like(cod_sat_hiscale)/sum(~np.isnan(cod_sat_hiscale.data))
@@ -959,7 +961,7 @@ if config['aerosol_output'] == True:
 #                         outfile=figpath+'statistics_Reff_E3SMv2vsSat_'+site+'_'+IOP+'.txt')
 
 #%% joint histogram
-if config['aerosol_output'] == True:
+if config['ccn_output'] == True:
             # fig,ax = plot.jointhist([uhsas100_hiscale,ncn100_m_hiscale,ncn100_m2_hiscale], [ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], 
             #                     title=['Ground','E3SMv1','E3SMv2']),
             fig,ax = plot.jointhist([uhsas100_hiscale,ncn100_m_hiscale], [ccn2_hiscale,ccn2_m_hiscale], title=['Ground','Model'],
@@ -1001,7 +1003,7 @@ if config['tau3d_output'] == True:
             fig.savefig(figpath+'jointhist_COD_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 #%% scatter plot
-if config['aerosol_output'] == True:
+if config['ccn_output'] == True:
             # fig,ax = plot.scatter([ndrop_hiscale.data, nd_sat_hiscale.data,nd_m_hiscale.data,nd_m2_hiscale.data], 
             #                       [ccn2_hiscale.data,ccn2_hiscale.data,ccn2_m_hiscale.data,ccn2_m2_hiscale.data],
             #                     title=['Ground','Satellite','E3SMv1','E3SMv2'],
