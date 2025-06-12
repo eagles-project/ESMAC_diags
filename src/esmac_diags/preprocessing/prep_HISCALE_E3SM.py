@@ -1067,16 +1067,19 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     
     #%% read in data
     lst3d = glob.glob(input_path + input3d_filehead+'.*2016-04-2?-*.nc') + \
+            glob.glob(input_path + input3d_filehead+'.*2016-04-3?-*.nc') + \
             glob.glob(input_path + input3d_filehead+'.*2016-05-??-*.nc') + \
             glob.glob(input_path + input3d_filehead+'.*2016-06-0?-*.nc') + \
             glob.glob(input_path + input3d_filehead+'.*2016-08-2?-*.nc') + \
             glob.glob(input_path + input3d_filehead+'.*2016-09-??-*.nc')
     lst2d = glob.glob(input_path + input2d_filehead+'.*2016-04-2?-*.nc') + \
+            glob.glob(input_path + input2d_filehead+'.*2016-04-3?-*.nc') + \
             glob.glob(input_path + input2d_filehead+'.*2016-05-??-*.nc') + \
             glob.glob(input_path + input2d_filehead+'.*2016-06-0?-*.nc') + \
             glob.glob(input_path + input2d_filehead+'.*2016-08-2?-*.nc') + \
             glob.glob(input_path + input2d_filehead+'.*2016-09-??-*.nc')
     # lst = glob.glob(input_path + input_filehead+'.*.h?.*2016-04-2?-00000.nc') + \
+    #         glob.glob(input_path + input_filehead+'.*.h?.*2016-04-3?-00000.nc') + \
     #         glob.glob(input_path + input_filehead+'.*.h?.*2016-05-??-00000.nc') + \
     #         glob.glob(input_path + input_filehead+'.*.h?.*2016-06-0?-00000.nc') + \
     #         glob.glob(input_path + input_filehead+'.*.h?.*2016-08-2?-00000.nc') + \
@@ -1443,27 +1446,32 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     variables = list()
     
     # lst = glob.glob(input_path + input_filehead+'.*.h?.*2016-04-2?-00000.nc') + \
+    #         glob.glob(input_path + input_filehead+'.*.h?.*2016-04-3?-00000.nc') + \
     #         glob.glob(input_path + input_filehead+'.*.h?.*2016-05-??-00000.nc') + \
     #         glob.glob(input_path + input_filehead+'.*.h?.*2016-06-0?-00000.nc') + \
     #         glob.glob(input_path + input_filehead+'.*.h?.*2016-08-2?-00000.nc') + \
     #         glob.glob(input_path + input_filehead+'.*.h?.*2016-09-??-00000.nc') 
     # lst.sort()
     lst3d = glob.glob(input_path + input3d_filehead+'.*2016-04-2?-*.nc') + \
+            glob.glob(input_path + input3d_filehead+'.*2016-04-3?-*.nc') + \
             glob.glob(input_path + input3d_filehead+'.*2016-05-??-*.nc') + \
             glob.glob(input_path + input3d_filehead+'.*2016-06-0?-*.nc') + \
             glob.glob(input_path + input3d_filehead+'.*2016-08-2?-*.nc') + \
             glob.glob(input_path + input3d_filehead+'.*2016-09-??-*.nc')
     lst3d_dryaer = glob.glob(input_path + input3d_dryaerosol_filehead+'.*2016-04-2?-*.nc') + \
+            glob.glob(input_path + input3d_dryaerosol_filehead+'.*2016-04-3?-*.nc') + \
             glob.glob(input_path + input3d_dryaerosol_filehead+'.*2016-05-??-*.nc') + \
             glob.glob(input_path + input3d_dryaerosol_filehead+'.*2016-06-0?-*.nc') + \
             glob.glob(input_path + input3d_dryaerosol_filehead+'.*2016-08-2?-*.nc') + \
             glob.glob(input_path + input3d_dryaerosol_filehead+'.*2016-09-??-*.nc')
     lst3d_wetaer = glob.glob(input_path + input3d_cloudaerosol_filehead+'.*2016-04-2?-*.nc') + \
+            glob.glob(input_path + input3d_cloudaerosol_filehead+'.*2016-04-3?-*.nc') + \
             glob.glob(input_path + input3d_cloudaerosol_filehead+'.*2016-05-??-*.nc') + \
             glob.glob(input_path + input3d_cloudaerosol_filehead+'.*2016-06-0?-*.nc') + \
             glob.glob(input_path + input3d_cloudaerosol_filehead+'.*2016-08-2?-*.nc') + \
             glob.glob(input_path + input3d_cloudaerosol_filehead+'.*2016-09-??-*.nc')
     lst2d = glob.glob(input_path + input2d_filehead+'.*2016-04-2?-*.nc') + \
+            glob.glob(input_path + input2d_filehead+'.*2016-04-3?-*.nc') + \
             glob.glob(input_path + input2d_filehead+'.*2016-05-??-*.nc') + \
             glob.glob(input_path + input2d_filehead+'.*2016-06-0?-*.nc') + \
             glob.glob(input_path + input2d_filehead+'.*2016-08-2?-*.nc') + \
