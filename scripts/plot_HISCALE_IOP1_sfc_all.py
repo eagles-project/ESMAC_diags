@@ -1027,13 +1027,17 @@ if config['ccn_output'] == True:
             fig.savefig(figpath+'scatter_CN100_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 #%% heatmaps
+#if using satellite albedo, need sfc obs at same time resolution
+#otherwise, can use surface cloud effective albedo using SW fluxes at the sfc for a different comparison with model
+ndrop_hiscale_sattime = ndrop.sel(time=obssat_time_hiscale)
+lwp_hiscale_sattime = lwp.sel(time=obssat_time_hiscale)
 # xedges=np.exp(np.arange(np.log(10),6.5,0.5))
 # yedges=np.exp(np.arange(np.log(10),6.5,0.5))
-# fig,ax = plot.heatmap([ndrop_hiscale.data, nd_sat_hiscale.data,nd_m_hiscale.data,nd_m2_hiscale.data],
-#                       [lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale],
+# fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hiscale.data,nd_m2_hiscale.data],
+#                       [lwp_hiscale_sattime,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale],
 #                       [albedo_hiscale,albedo_hiscale,albedo_m_hiscale,albedo_m2_hiscale],vmax=60,
-fig,ax = plot.heatmap([ndrop_hiscale.data, nd_sat_hiscale.data,nd_m_hiscale.data],
-                      [lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale],
+fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hiscale.data],
+                      [lwp_hiscale_sattime,lwp_sat_hiscale,lwp_m_hiscale],
                       [albedo_hiscale,albedo_hiscale,albedo_m_hiscale],vmax=60,
                     xedges=np.arange(0,300,20), yedges=np.arange(10,300,20),
                     # xedges=xedges, yedges=yedges, 
