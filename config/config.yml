@@ -4,6 +4,7 @@ model_3d_input_filehead: 'mam4xx.h1.INSTANT.nhours_x1'       # 'cus.ne30pg2_EC30
 model_2d_input_filehead: 'mam4xx.h1.INSTANT.nhours_x1'       # if 2D and 3D are in the same file, then set this to be the same as model_3d_input_filehead; 'scream_output.test.1hourlyINST_2Dvars_ne256.h.AVERAGE.nhours_x1', 'cus.ne30pg2_EC30to60E2r2.eam.h1'
 model_3d_dryaerosol_input_filehead: 'mam4xx.h2.INSTANT.nhours_x1'   # if there is only a single 3D or overall model file, set this to that filename
 model_3d_cloudaerosol_input_filehead: 'mam4xx.h1.INSTANT.nhours_x1' # if there is only a single 3D or overall model file, set this to that filename
+model_cosp_input_filehead: 'mam4xx.h4.AVERAGE.nhours_x1'
 
 obs_input_path: '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/raw_data/obs/'
 
@@ -45,7 +46,7 @@ ccn_output: True
 dgnum_output_combined: True
 
 # flag for COSP MODIS simulator output
-cosp_output: False
+cosp_output: True
 
 # flag for pressure level output
 pres_output: True
@@ -198,13 +199,17 @@ soa_a2: 'soa_a2'
 soa_a3: 'soa_a3'
 
 # variables below if cosp_output = True
-LWPMODIS: 'LWPMODIS'
-IWPMODIS: 'IWPMODIS'
-REFFLIQMODIS: 'REFFCLWMODIS'
-REFFICEMODIS: 'REFFCLIMODIS'
-TAULIQMODIS: 'TAUWMODIS'
-TAUICEMODIS: 'TAUIMODIS'
-TAUTOTMODIS: 'TAUTMODIS'
-CFLIQMODIS: 'CLLWPMODIS'
-CFICEMODIS: 'CLIMODIS'
-CFTOTMODIS: 'CLTMODIS'
+SUNLIT: 'cosp_sunlit'
+LWPMODIS: 'modis_lwp'  #'LWPMODIS'
+IWPMODIS: 'modis_iwp'  #'IWPMODIS'
+REFFLIQMODIS: 'modis_reffw'  #'REFFCLWMODIS'
+REFFICEMODIS: 'modis_reffi'  #'REFFCLIMODIS'
+TAULIQMODIS: 'modis_tauw'  #'TAUWMODIS'
+TAUICEMODIS: 'modis_taui'  #'TAUIMODIS'
+TAUTOTMODIS: 'modis_taut'  #'TAUTMODIS'
+CFLIQMODIS: 'modis_clwtot'  #'CLLWPMODIS'
+CFICEMODIS: 'modis_clitot'  #'CLIMODIS'
+CFTOTMODIS: 'modis_cldtot'  #'CLTMODIS'
+CTPMODIS: 'modis_pct'
+NDMODIS: 'modis_nd'
+#there are also _ALL and _Q06 Nd, CF, Tau, Reff, and LWP variables
