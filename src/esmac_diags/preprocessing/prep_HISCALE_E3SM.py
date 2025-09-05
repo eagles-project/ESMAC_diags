@@ -409,7 +409,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
     
             #define model variable arrays with first model file
             print(lst3d_wetaer[file_inds[0]])
-            e3smdata3d_wetaer = xr.open_dataset(lst3d_dryaer[file_inds[0]])
+            e3smdata3d_wetaer = xr.open_dataset(lst3d_wetaer[file_inds[0]])
             e3smdata3d_wetaer = e3smdata3d_wetaer.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
 
             vlist = list(e3smdata3d_wetaer.variables.keys())
