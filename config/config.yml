@@ -82,6 +82,9 @@ clrskyradiation_output: True
 # flag for whether thermodynamic info is outputted at 850 and 700 hPa
 midlevel_thermo_output: True
 
+# flag for whether cloud fraction is outputted over low, medium, and high layers
+cloudfraction_layers_output: False
+
 # model output variable names
 LON: 'lon'
 LAT: 'lat'
