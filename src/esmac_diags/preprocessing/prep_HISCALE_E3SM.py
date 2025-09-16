@@ -1738,7 +1738,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             cdnc_sat = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
     
     # all other 2D (surface and vertical integrated) variables
-    variable2d_names = [config['AOD'], config['CLDHGH'], config['CLDMED'], config['CLDLOW'], config['CLDTOT'], 
+    variable2d_names = [config['AOD'], config['CLDTOT'], 
                         config['LWDOWNSFC'], config['LWUPTOA'],
                         config['SWDOWNSFC'], config['SWUPTOA'], config['SWDOWNTOA'], 
                         config['LHFLX'], config['SHFLX'], config['LWCF'], config['SWCF'], config['LWP'], config['IWP'], 
@@ -1781,6 +1781,11 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         variable2d_names.append(config['TAUICEMODIS'])
         variable2d_names.append(config['TAUTOTMODIS'])
         variable2d_names.append(config['TAULIQMODIS'])
+
+    if config['cloudfraction_layers_output'] == True:
+        variable2d_names.append(config['CLDHGH'])
+        variable2d_names.append(config['CLDMED'])
+        variable2d_names.append(config['CLDLOW'])
 
     for varname in variable2d_names:
         try:
