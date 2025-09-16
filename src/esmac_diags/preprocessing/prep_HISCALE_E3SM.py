@@ -1476,18 +1476,36 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             glob.glob(input_path + input2d_filehead+'.*2016-06-0?-*.nc') + \
             glob.glob(input_path + input2d_filehead+'.*2016-08-2?-*.nc') + \
             glob.glob(input_path + input2d_filehead+'.*2016-09-??-*.nc')
+    lst2d_cosp = glob.glob(input_path + input_cosp_filehead+'.*2016-04-2?-*.nc') + \
+            glob.glob(input_path + input_cosp_filehead+'.*2016-04-3?-*.nc') + \
+            glob.glob(input_path + input_cosp_filehead+'.*2016-05-??-*.nc') + \
+            glob.glob(input_path + input_cosp_filehead+'.*2016-06-0?-*.nc') + \
+            glob.glob(input_path + input_cosp_filehead+'.*2016-08-2?-*.nc') + \
+            glob.glob(input_path + input_cosp_filehead+'.*2016-09-??-*.nc')
     lst3d.sort()
     lst3d_dryaer.sort()
     lst3d_wetaer.sort()
     lst2d.sort()
+    lst2d_cosp.sort()
   
     # first data
     print(lst3d[0])
     e3smdata3d = xr.open_dataset(lst3d[0])
     e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+    dimensions3d = (config['time_dim'], config['vert_dim'], config['latlon_dim']+E3SMdomain_range)
+    variables3d = []
+    for var_name, var_data in e3smdata3d.data_vars.items():
+        if set(var_data.dims) == set(dimensions3d):
+            variables3d.append(var_name)
+          
     e3smdata2d = xr.open_dataset(lst2d[0])
     e3smdata2d = e3smdata2d.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
-                        
+    dimensions2d = (config['time_dim'], config['latlon_dim']+E3SMdomain_range)
+    variables2d = []
+    for var_name, var_data in e3smdata2d.data_vars.items():
+        if set(var_data.dims) == set(dimensions2d):
+            variables2d.append(var_name)
+                     
     e3smtime = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
     lonm = e3smdata3d[config['LON']+E3SMdomain_range].load()
     latm = e3smdata3d[config['LAT']+E3SMdomain_range].load()
@@ -1516,10 +1534,12 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     len_lev = len(e3smdata3d[config['vert_dim']])
     
     # Get all simulated variables
-    vlist3d = list(e3smdata3d.variables.keys())
+    # vlist3d = list(e3smdata3d.variables.keys())
+    vlist3d = variables3d
     av_vars3d = fnmatch.filter(vlist3d,'*'+E3SMdomain_range)
 
-    vlist2d = list(e3smdata2d.variables.keys())
+    # vlist2d = list(e3smdata2d.variables.keys())
+    vlist2d = variables2d
     av_vars2d = fnmatch.filter(vlist2d,'*'+E3SMdomain_range)
 
     # variables to calculate Reff and Nd
@@ -1961,8 +1981,19 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         # e3smdata = xr.open_dataset(file)
         e3smdata3d = xr.open_dataset(lst3d[ii])
         e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+        dimensions3d = (config['time_dim'], config['vert_dim'], config['latlon_dim']+E3SMdomain_range)
+        variables3d = []
+        for var_name, var_data in e3smdata3d.data_vars.items():
+            if set(var_data.dims) == set(dimensions3d):
+                variables3d.append(var_name)
+      
         e3smdata2d = xr.open_dataset(lst2d[ii])
         e3smdata2d = e3smdata2d.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
+        dimensions2d = (config['time_dim'], config['latlon_dim']+E3SMdomain_range)
+        variables2d = []
+        for var_name, var_data in e3smdata2d.data_vars.items():
+            if set(var_data.dims) == set(dimensions2d):
+                variables2d.append(var_name)
         
         e3smtime_i = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
         e3smtime = np.hstack((e3smtime, e3smtime_i))
@@ -1978,10 +2009,12 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         else:
             Pres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,x_idx].load()
 
-        vlist3d = list(e3smdata3d.variables.keys())
+        # vlist3d = list(e3smdata3d.variables.keys())
+        vlist3d = variables3d
         av_vars3d = fnmatch.filter(vlist3d,'*'+E3SMdomain_range)
     
-        vlist2d = list(e3smdata2d.variables.keys())
+        # vlist2d = list(e3smdata2d.variables.keys())
+        vlist2d = variables2d
         av_vars2d = fnmatch.filter(vlist2d,'*'+E3SMdomain_range)
 
         # variables to calculate cloud heights and depth
