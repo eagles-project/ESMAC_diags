@@ -27,7 +27,7 @@ prep_model_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/m
 prep_sfc_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/surface/300s/'
 prep_sat_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/satellite/3600s/'
 
-obssfc_time_hiscale = pd.date_range(start='2016-04-25', end='2016-05-21', freq='300s')
+obssfc_time_hiscale = pd.date_range(start='2016-04-25', end='2016-05-21', freq='900s')
 obssat_time_hiscale = pd.date_range(start='2016-04-25', end='2016-05-21', freq='3600s')
 model_time_hiscale = pd.date_range(start='2016-04-25', end='2016-05-21', freq='3600s')
 IOP = 'IOP1'
@@ -1045,3 +1045,4 @@ fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hisc
                     # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                     title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
