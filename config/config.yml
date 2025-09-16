@@ -122,10 +122,10 @@ RH: 'RelativeHumidity'  # RelativeHumidity, RELHUM
 LWP: 'LiqWaterPath'     # LiqWaterPath, TGCLDLWP
 IWP: 'IceWaterPath'     # IceWaterPath, TGCLDIWP
 RWP: 'RainWaterPath'
-CLDHGH: 'cldhgh'  # cldhgh, CLDHGH
-CLDMED: 'cldmed'  # cldmed, CLDMED
-CLDLOW: 'cldlow'  # cldlow, CLDLOW
-CLDTOT: 'cldtot'  # cldtot, CLDTOT
+CLDHGH: 'cldhgh'  # cldhgh, CLDHGH; if cloudfraction_layers_output = True
+CLDMED: 'cldmed'  # cldmed, CLDMED; if cloudfraction_layers_output = True
+CLDLOW: 'cldlow'  # cldlow, CLDLOW; if cloudfraction_layers_output = True
+CLDTOT: 'cldfrac_tot_for_analysis'  # cldtot, CLDTOT
 
 PRECIPSFCTOT: 'PRECT'                     # if convectiveparam = True
 PRECIPSFCCONV: 'PRECC'                    # if convectiveparam = True
