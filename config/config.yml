@@ -19,7 +19,7 @@ model_aircraft_dt: 60      #interpolated
 model_surface_dt: 3600     #instantaneous
 model_profile_dt: 3600     #instantaneous
 obs_aircraft_dt: 60        #median or average    
-obs_surface_dt: 3600        #median or average
+obs_surface_dt: 900        #median or average
 obs_satellite_dt: 3600     #instantaneous
 
 # model variable names
@@ -42,11 +42,11 @@ latlon_dimensions: 1
 
 # flag for model aerosol variables output
 aerosol_output: True
-ccn_output: True
+ccn_output: False
 dgnum_output_combined: True
 
 # flag for COSP MODIS simulator output
-cosp_output: True
+cosp_output: False
 
 # flag for pressure level output
 pres_output: True
