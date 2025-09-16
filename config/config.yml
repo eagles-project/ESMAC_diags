@@ -80,7 +80,7 @@ netradiation_output: False
 clrskyradiation_output: True
 
 # flag for whether thermodynamic info is outputted at 850 and 700 hPa
-midlevel_thermo_output: True
+midlevel_thermo_output: False
 
 # flag for whether cloud fraction is outputted over low, medium, and high layers
 cloudfraction_layers_output: False
@@ -166,10 +166,10 @@ THETA700: 'PotentialTemperature_at_700hPa'  # if midlevel_thermo_output = True
 RH700: 'RelativeHumidity_at_700hPa'         # if midlevel_thermo_output = True
 
 # variables below if aerosol_output = True
-CCN1: 'CCN1'    # if ccn_output = True
-CCN3: 'CCN3'    # if ccn_output = True
-CCN4: 'CCN4'    # if ccn_output = True
-CCN5: 'CCN5'    # if ccn_output = True
+CCN1: 'ccn_0p1'    # CCN1; if ccn_output = True
+CCN3: 'ccn_0p2'    # CCN3; if ccn_output = True
+CCN4: 'ccn_0p5'    # CCN4; if ccn_output = True
+CCN5: 'ccn_1p0'    # CCN5; if ccn_output = True
 num_a1: 'num_a1'
 num_a2: 'num_a2'
 num_a3: 'num_a3'
