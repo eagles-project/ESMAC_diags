@@ -1741,7 +1741,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     variable2d_names = [config['AOD'], config['CLDTOT'], 
                         config['LWDOWNSFC'], config['LWUPTOA'],
                         config['SWDOWNSFC'], config['SWUPTOA'], config['SWDOWNTOA'], 
-                        config['LHFLX'], config['SHFLX'], config['LWCF'], config['SWCF'], config['LWP'], config['IWP'], 
+                        config['LWCF'], config['SWCF'], config['LWP'], config['IWP'], 
                         config['PBLH'], config['PS'], config['TS']]
 
     if config['netradiation_output'] == True:
@@ -1786,6 +1786,10 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         variable2d_names.append(config['CLDHGH'])
         variable2d_names.append(config['CLDMED'])
         variable2d_names.append(config['CLDLOW'])
+
+    if config['surfaceflux_output'] == True:
+        variable2d_names.append(config['LHFLX'])
+        variable2d_names.append(config['SHFLX'])
 
     for varname in variable2d_names:
         try:
