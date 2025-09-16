@@ -85,6 +85,9 @@ midlevel_thermo_output: False
 # flag for whether cloud fraction is outputted over low, medium, and high layers
 cloudfraction_layers_output: False
 
+# flag for whether surface heat fluxes are outputted
+surfaceflux_output: False
+
 # model output variable names
 LON: 'lon'
 LAT: 'lat'
@@ -152,8 +155,8 @@ LWDOWNSFCLR: 'LW_clrsky_flux_dn_at_model_bot'     # if clrskyradiation_output = 
 
 SWCF: 'ShortwaveCloudForcing'  #ShortwaveCloudForcing, SWCF
 LWCF: 'LongwaveCloudForcing'   #LongwaveCloudForcing, LWCF
-LHFLX: 'surface_upward_latent_heat_flux' # surface_upward_latent_heat_flux, LHFLX
-SHFLX: 'surf_sens_flux'  # surf_sens_flux, SHFLX
+LHFLX: 'surface_upward_latent_heat_flux' # surface_upward_latent_heat_flux, LHFLX; if surfaceflux_output = True
+SHFLX: 'surf_sens_flux'  # surf_sens_flux, SHFLX; if surfaceflux_output = True
 PBLH: 'pbl_height'       # pbl_height, PBLH
 AOD: 'AerosolOpticalDepth550nm'  # AerosolOpticalDepth550nm, AODALL
 AODABS: 'AODABS'                 #Absorbing Aerosol Optical Depth (if aodabs_output = True)
