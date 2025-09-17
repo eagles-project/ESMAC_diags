@@ -1550,6 +1550,9 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     vlist2d = variables2d
     av_vars2d = fnmatch.filter(vlist2d,'*'+E3SMdomain_range)
 
+    vlistcosp = variablescosp
+    av_varscosp = fnmatch.filter(vlistcosp,'*'+E3SMdomain_range)
+
     # variables to calculate Reff and Nd
     req_vlist = [config['Z'], config['CF']]
     req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
@@ -1656,7 +1659,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     if config['cosp_output'] == True:   
         req_vlist = [config['TAULIQMODIS']]
         req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-        matched_vlist = list(set(av_vars2d).intersection(req_vlist))
+        matched_vlist = list(set(av_varscosp).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing MODIS simulator cloud optical depth')
@@ -1730,7 +1733,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         # req_vlist = [config['LWP']]
         req_vlist = [config['LWPMODIS']]
         req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-        matched_vlist = list(set(av_vars2d).intersection(req_vlist))
+        matched_vlist = list(set(av_varscosp).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing cloud droplet number concentration retrieved like MODIS')
@@ -2058,6 +2061,9 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         vlist2d = variables2d
         av_vars2d = fnmatch.filter(vlist2d,'*'+E3SMdomain_range)
 
+        vlistcosp = variablescosp
+        av_varscosp = fnmatch.filter(vlistcosp,'*'+E3SMdomain_range)
+
         # variables to calculate cloud heights and depth
         print('\nAnalyzing cloud base, top, and depth')
         req_vlist = [config['Z'], config['CF']]
@@ -2172,7 +2178,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         if config['cosp_output'] == True:   
             req_vlist = [config['TAULIQMODIS']]
             req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-            matched_vlist = list(set(av_vars2d).intersection(req_vlist))
+            matched_vlist = list(set(av_varscosp).intersection(req_vlist))
             
             if len(matched_vlist) == len(req_vlist):
                 print('\nAnalyzing MODIS simulator cloud optical depth')
@@ -2248,7 +2254,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             # req_vlist = [config['LWP']]
             req_vlist = [config['LWPMODIS']]
             req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-            matched_vlist = list(set(av_vars2d).intersection(req_vlist))
+            matched_vlist = list(set(av_varscosp).intersection(req_vlist))
             
             if len(matched_vlist) == len(req_vlist):
                 print('\nAnalyzing cloud droplet number concentration retrieved like MODIS')
