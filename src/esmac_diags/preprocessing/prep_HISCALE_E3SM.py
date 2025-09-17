@@ -1996,10 +1996,10 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
       
         if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing CCN')
-            ccn1_all = e3smdata3d_dryaer[config['CCN1']+E3SMdomain_range][:,-1,x_idx].load()
-            ccn2_all = e3smdata3d_dryaer[config['CCN2']+E3SMdomain_range][:,-1,x_idx].load()
-            ccn5_all = e3smdata3d_dryaer[config['CCN5']+E3SMdomain_range][:,-1,x_idx].load()
-            ccn10_all = e3smdata3d_dryaer[config['CCN10']+E3SMdomain_range][:,-1,x_idx].load()
+            ccn1_all = e3smdata3d_wetaer[config['CCN1']+E3SMdomain_range][:,-1,x_idx].load()
+            ccn2_all = e3smdata3d_wetaer[config['CCN2']+E3SMdomain_range][:,-1,x_idx].load()
+            ccn5_all = e3smdata3d_wetaer[config['CCN5']+E3SMdomain_range][:,-1,x_idx].load()
+            ccn10_all = e3smdata3d_wetaer[config['CCN10']+E3SMdomain_range][:,-1,x_idx].load()
         else:
             ccn1_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
             ccn2_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -2448,10 +2448,10 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
       
         if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing CCN')
-            ccn1 = e3smdata3d_dryaer[config['CCN1']+E3SMdomain_range][:,-1,x_idx].load()
-            ccn2 = e3smdata3d_dryaer[config['CCN2']+E3SMdomain_range][:,-1,x_idx].load()
-            ccn5 = e3smdata3d_dryaer[config['CCN5']+E3SMdomain_range][:,-1,x_idx].load()
-            ccn10 = e3smdata3d_dryaer[config['CCN10']+E3SMdomain_range][:,-1,x_idx].load()
+            ccn1 = e3smdata3d_wetaer[config['CCN1']+E3SMdomain_range][:,-1,x_idx].load()
+            ccn2 = e3smdata3d_wetaer[config['CCN2']+E3SMdomain_range][:,-1,x_idx].load()
+            ccn5 = e3smdata3d_wetaer[config['CCN5']+E3SMdomain_range][:,-1,x_idx].load()
+            ccn10 = e3smdata3d_wetaer[config['CCN10']+E3SMdomain_range][:,-1,x_idx].load()
             ccn1_all = xr.concat([ccn1_all, ccn1], dim=config['time_dim'])
             ccn2_all = xr.concat([ccn2_all, ccn2], dim=config['time_dim'])
             ccn5_all = xr.concat([ccn5_all, ccn5], dim=config['time_dim'])
