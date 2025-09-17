@@ -1966,21 +1966,21 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         vlist = list(e3smdata3d_wetaer.variables.keys())
         av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
 
-        req_vlist = [config['CCN1'], config['CCN3'], config['CCN4'], config['CCN5']]
+        req_vlist = [config['CCN1'], config['CCN2'], config['CCN5'], config['CCN10']]
         req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
       
         if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing CCN')
             ccn1_all = e3smdata3d_dryaer[config['CCN1']+E3SMdomain_range][:,-1,x_idx].load()
-            ccn3_all = e3smdata3d_dryaer[config['CCN3']+E3SMdomain_range][:,-1,x_idx].load()
-            ccn4_all = e3smdata3d_dryaer[config['CCN4']+E3SMdomain_range][:,-1,x_idx].load()
+            ccn2_all = e3smdata3d_dryaer[config['CCN2']+E3SMdomain_range][:,-1,x_idx].load()
             ccn5_all = e3smdata3d_dryaer[config['CCN5']+E3SMdomain_range][:,-1,x_idx].load()
+            ccn10_all = e3smdata3d_dryaer[config['CCN10']+E3SMdomain_range][:,-1,x_idx].load()
         else:
             ccn1_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            ccn3_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-            ccn4_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+            ccn2_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
             ccn5_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+            ccn10_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
 
   
     #%%  add data for each day
@@ -2395,25 +2395,25 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         vlist = list(e3smdata3d_wetaer.variables.keys())
         av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
       
-        req_vlist = [config['CCN1'], config['CCN3'], config['CCN4'], config['CCN5']]
+        req_vlist = [config['CCN1'], config['CCN2'], config['CCN5'], config['CCN10']]
         req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars).intersection(req_vlist))
       
         if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing CCN')
             ccn1 = e3smdata3d_dryaer[config['CCN1']+E3SMdomain_range][:,-1,x_idx].load()
-            ccn3 = e3smdata3d_dryaer[config['CCN3']+E3SMdomain_range][:,-1,x_idx].load()
-            ccn4 = e3smdata3d_dryaer[config['CCN4']+E3SMdomain_range][:,-1,x_idx].load()
+            ccn2 = e3smdata3d_dryaer[config['CCN2']+E3SMdomain_range][:,-1,x_idx].load()
             ccn5 = e3smdata3d_dryaer[config['CCN5']+E3SMdomain_range][:,-1,x_idx].load()
+            ccn10 = e3smdata3d_dryaer[config['CCN10']+E3SMdomain_range][:,-1,x_idx].load()
             ccn1_all = xr.concat([ccn1_all, ccn1], dim=config['time_dim'])
-            ccn3_all = xr.concat([ccn3_all, ccn3], dim=config['time_dim'])
-            ccn4_all = xr.concat([ccn4_all, ccn4], dim=config['time_dim'])
+            ccn2_all = xr.concat([ccn2_all, ccn2], dim=config['time_dim'])
             ccn5_all = xr.concat([ccn5_all, ccn5], dim=config['time_dim'])
+            ccn10_all = xr.concat([ccn10_all, ccn10], dim=config['time_dim'])
         else:
             ccn1_all = xr.concat([ccn1_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN1'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
-            ccn3_all = xr.concat([ccn3_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN3'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
-            ccn4_all = xr.concat([ccn4_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN4'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+            ccn2_all = xr.concat([ccn2_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN2'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
             ccn5_all = xr.concat([ccn5_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN5'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+            ccn10_all = xr.concat([ccn10_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN10'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
           
       
     # put all variables into the list
@@ -2434,8 +2434,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         variable_names = variable_names + [ 'NCN3', 'NCN10', 'NCN100']
         variables = variables + [NCN3, NCN10, NCN100]  # size distribution data will be added later
     if config['ccn_output'] == True:
-        variable_names = variable_names + [ 'CCN1', 'CCN3', 'CCN4', 'CCN5']
-        variables = variables + [ccn1_all, ccn3_all, ccn4_all, ccn5_all]
+        variable_names = variable_names + [ 'CCN1', 'CCN2', 'CCN5', 'CCN10']
+        variables = variables + [ccn1_all, ccn2_all, ccn5_all, ccn10_all]
     # mean cloud droplet number concentration
     variable_names = variable_names + ['Nd_mean']
     variables = variables + [cdnc_mean]
