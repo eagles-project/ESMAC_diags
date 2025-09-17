@@ -147,9 +147,9 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
             variable3d_names.append(config['REL'])
         # if config['ccn_output'] == True:
         #     variable3d_names.append(config['CCN1'])
-        #     variable3d_names.append(config['CCN3'])
-        #     variable3d_names.append(config['CCN4'])
+        #     variable3d_names.append(config['CCN2'])
         #     variable3d_names.append(config['CCN5'])
+        #     variable3d_names.append(config['CCN10'])
           
         variables = list()
         variables_new = list()
@@ -172,9 +172,9 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
             phi_all = np.empty((999,0))
         if config['ccn_output'] == True:
             ccn1_all = list()
-            ccn3_all = list()
-            ccn4_all = list()
+            ccn2_all = list()
             ccn5_all = list()
+            ccn10_all = list()
         
         lst3d = glob.glob(input_path + input3d_filehead+'.*'+timestr[0]+'-*.nc')
         lst3d.sort()
@@ -415,20 +415,20 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
             vlist = list(e3smdata3d_wetaer.variables.keys())
             av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
       
-            req_vlist = [config['CCN1'], config['CCN3'], config['CCN4'], config['CCN5']]
+            req_vlist = [config['CCN1'], config['CCN2'], config['CCN5'], config['CCN10']]
             req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
             matched_vlist = list(set(av_vars).intersection(req_vlist))
             if len(matched_vlist) == len(req_vlist):
                 print('\nAnalyzing CCN')
                 ccn1 = e3smdata3d_dryaer[config['CCN1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                ccn3 = e3smdata3d_dryaer[config['CCN3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                ccn4 = e3smdata3d_dryaer[config['CCN4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                ccn2 = e3smdata3d_dryaer[config['CCN2']+E3SMdomain_range][:,:,latlon_ind,...].load()
                 ccn5 = e3smdata3d_dryaer[config['CCN5']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                ccn10 = e3smdata3d_dryaer[config['CCN10']+E3SMdomain_range][:,:,latlon_ind,...].load()
             else:
                 ccn1 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                ccn3 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                ccn4 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                ccn2 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
                 ccn5 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                ccn10 = xr.DataArray(np.zeros(z3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
 
 
         #add model variable arrays at additional times if there are additional model output files within the flight period
@@ -711,28 +711,28 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
                     vlist = list(e3smdata3d_wetaer.variables.keys())
                     av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
                   
-                    req_vlist = [config['CCN1'], config['CCN3'], config['CCN4'], config['CCN5']]
+                    req_vlist = [config['CCN1'], config['CCN2'], config['CCN5'], config['CCN10']]
                     req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
                     matched_vlist = list(set(av_vars).intersection(req_vlist))
                     if len(matched_vlist) == len(req_vlist):
                         print('\nAnalyzing CCN')
                         new_ccn1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                        new_ccn3 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                        new_ccn4 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
-                        new_ccn5 = e3smdata3d_dryaer[config['num_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_ccn2 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_ccn5 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:,:,latlon_ind,...].load()
+                        new_ccn10 = e3smdata3d_dryaer[config['num_a4']+E3SMdomain_range][:,:,latlon_ind,...].load()
                         ccn1 = xr.concat([ccn1, new_ccn1], dim=config['time_dim'])
-                        ccn3 = xr.concat([ccn3, new_ccn3], dim=config['time_dim'])
-                        ccn4 = xr.concat([ccn4, new_ccn4], dim=config['time_dim'])
+                        ccn2 = xr.concat([ccn2, new_ccn2], dim=config['time_dim'])
                         ccn5 = xr.concat([ccn5, new_ccn5], dim=config['time_dim'])
+                        ccn10 = xr.concat([ccn10, new_ccn10], dim=config['time_dim'])
                     else:
                         new_ccn1 = xr.DataArray(np.zeros(newz3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                        new_ccn3 = xr.DataArray(np.zeros(newz3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-                        new_ccn4 = xr.DataArray(np.zeros(newz3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_ccn2 = xr.DataArray(np.zeros(newz3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
                         new_ccn5 = xr.DataArray(np.zeros(newz3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+                        new_ccn10 = xr.DataArray(np.zeros(newz3.shape)*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
                         ccn1 = xr.concat([ccn1, new_ccn1], dim=config['time_dim'])
-                        ccn3 = xr.concat([ccn3, new_ccn3], dim=config['time_dim'])
-                        ccn4 = xr.concat([ccn4, new_ccn4], dim=config['time_dim'])
+                        ccn2 = xr.concat([ccn2, new_ccn2], dim=config['time_dim'])
                         ccn5 = xr.concat([ccn5, new_ccn5], dim=config['time_dim'])
+                        ccn10 = xr.concat([ccn10, new_ccn10], dim=config['time_dim'])
                       
         
         #%% find the flight track grid
@@ -823,9 +823,9 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
                 #               soa_a3.isel(**{config['time_dim']:t_idx}, **{config['vert_dim']:z_idx}, **{config['latlon_dim']+E3SMdomain_range:x_idx}).data)
             if config['ccn_output'] == True:
                 ccn1_all.append(ccn1[t_idx, z_idx, x_idx].data)
-                ccn3_all.append(ccn3[t_idx, z_idx, x_idx].data)
-                ccn4_all.append(ccn4[t_idx, z_idx, x_idx].data)
+                ccn2_all.append(ccn2[t_idx, z_idx, x_idx].data)
                 ccn5_all.append(ccn5[t_idx, z_idx, x_idx].data)
+                ccn10_all.append(ccn10[t_idx, z_idx, x_idx].data)
               
             if config['dsd_output'] == True:
                 # calculate droplet size distribution
@@ -921,9 +921,9 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
             ncn100_o = f.createVariable('NCN100', 'f8', ("time",))
         if config['ccn_output'] == True:
             ccn1_o = f.createVariable('CCN1', 'f8', ("time",))
-            ccn3_o = f.createVariable('CCN3', 'f8', ("time",))
-            ccn4_o = f.createVariable('CCN4', 'f8', ("time",))
+            ccn2_o = f.createVariable('CCN2', 'f8', ("time",))
             ccn5_o = f.createVariable('CCN5', 'f8', ("time",))
+            ccn10_o = f.createVariable('CCN10', 'f8', ("time",))
         if config['dsd_output'] == True:
             nd_o = f.createVariable('Nd_bin', 'f8', ("Ndsize", "time",))
         
@@ -951,9 +951,9 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
             ncn100_o[:] = NCN100
         if config['ccn_output'] == True:
             ccn1_o[:] = ccn1_all
-            ccn3_o[:] = ccn3_all
-            ccn4_o[:] = ccn4_all
+            ccn2_o[:] = ccn2_all
             ccn5_o[:] = ccn5_all
+            ccn10_o[:] = ccn10_all
         if config['dsd_output'] == True:
             nd_o[:,:] = nd_bin
         
@@ -999,12 +999,12 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
         if config['ccn_output'] == True:
             ccn1_o.units = ccn1.units
             ccn1_o.long_name = ccn1.long_name
-            ccn3_o.units = ccn3.units
-            ccn3_o.long_name = ccn3.long_name
-            ccn4_o.units = ccn4.units
-            ccn4_o.long_name = ccn4.long_name
+            ccn2_o.units = ccn2.units
+            ccn2_o.long_name = ccn2.long_name
             ccn5_o.units = ccn5.units
             ccn5_o.long_name = ccn5.long_name
+            ccn10_o.units = ccn10.units
+            ccn10_o.long_name = ccn10.long_name
         if config['dsd_output'] == True:
             nd_o.units = nd_units
             nd_o.long_name = 'cloud droplet number size distribution'
