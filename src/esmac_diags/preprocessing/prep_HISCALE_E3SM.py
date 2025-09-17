@@ -1476,7 +1476,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             glob.glob(input_path + input2d_filehead+'.*2016-06-0?-*.nc') + \
             glob.glob(input_path + input2d_filehead+'.*2016-08-2?-*.nc') + \
             glob.glob(input_path + input2d_filehead+'.*2016-09-??-*.nc')
-    lst2d_cosp = glob.glob(input_path + input_cosp_filehead+'.*2016-04-2?-*.nc') + \
+    lstcosp = glob.glob(input_path + input_cosp_filehead+'.*2016-04-2?-*.nc') + \
             glob.glob(input_path + input_cosp_filehead+'.*2016-04-3?-*.nc') + \
             glob.glob(input_path + input_cosp_filehead+'.*2016-05-??-*.nc') + \
             glob.glob(input_path + input_cosp_filehead+'.*2016-06-0?-*.nc') + \
@@ -1486,7 +1486,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     lst3d_dryaer.sort()
     lst3d_wetaer.sort()
     lst2d.sort()
-    lst2d_cosp.sort()
+    lstcosp.sort()
   
     # first data
     print(lst3d[0])
@@ -1505,7 +1505,15 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     for var_name, var_data in e3smdata2d.data_vars.items():
         if set(var_data.dims) == set(dimensions2d):
             variables2d.append(var_name)
-                     
+
+    e3smdatacosp = xr.open_dataset(lstcosp[0])
+    e3smdatacosp = e3smdatacosp.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
+    dimensions2d = (config['time_dim'], config['latlon_dim']+E3SMdomain_range)
+    variablescosp = []
+    for var_name, var_data in e3smdatacosp.data_vars.items():
+        if set(var_data.dims) == set(dimensions2d):
+            variablescosp.append(var_name)
+          
     e3smtime = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
     lonm = e3smdata3d[config['LON']+E3SMdomain_range].load()
     latm = e3smdata3d[config['LAT']+E3SMdomain_range].load()
@@ -1652,7 +1660,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         
         if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing MODIS simulator cloud optical depth')
-            cod_m = e3smdata2d[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()*0.01   # cloud fraction is treated as 1 but is 100
+            cod_m = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].load()*0.01   # cloud fraction is treated as 1 but is 100
         else:
             cod_m = xr.DataArray(np.zeros(len(e3smtime))*np.nan)
     
@@ -1719,14 +1727,15 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             cdnc_arm = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
 
     if config['cosp_output'] == True:
-        req_vlist = [config['LWP']]
+        # req_vlist = [config['LWP']]
+        req_vlist = [config['LWPMODIS']]
         req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars2d).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing cloud droplet number concentration retrieved like MODIS')
-            lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
-            # lwp = e3smdata2d[config['LWPMODIS']+E3SMdomain_range][:,x_idx].data
+            # lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
+            lwp = e3smdatacosp[config['LWPMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].load()
             T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
             nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m, adiabaticity=0.8)
           
@@ -1775,12 +1784,13 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         variable2d_names.append(config['AODABS'])
 
     if config['cosp_output'] == True:
-        variable2d_names.append(config['IWPMODIS'])
-        variable2d_names.append(config['LWPMODIS'])
-        variable2d_names.append(config['REFFLIQMODIS'])
-        variable2d_names.append(config['TAUICEMODIS'])
-        variable2d_names.append(config['TAUTOTMODIS'])
-        variable2d_names.append(config['TAULIQMODIS'])
+        variablecosp_names = []
+        variablecosp_names.append(config['IWPMODIS'])
+        variablecosp_names.append(config['LWPMODIS'])
+        variablecosp_names.append(config['REFFLIQMODIS'])
+        variablecosp_names.append(config['TAUICEMODIS'])
+        variablecosp_names.append(config['TAUTOTMODIS'])
+        variablecosp_names.append(config['TAULIQMODIS'])
 
     if config['cloudfraction_layers_output'] == True:
         variable2d_names.append(config['CLDHGH'])
@@ -1806,14 +1816,28 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             var.attrs['units']='N/A'
         variable_names.append(varname)
         variables.append(var)
+
+    for varname in variablecosp_names:
+        try:
+            var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].load()
+            var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
+        except:
+            # var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
+            #                    dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime,config['latlon_dim']+E3SMdomain_range:np.arange(len_ncol)},\
+            #                    attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+            var = xr.DataArray(np.zeros((len(e3smtime)))*np.nan,name=varname,\
+                               dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime},\
+                               attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+        variable_names.append(varname)
+        variables.append(var)
     
     # all other 3D (with vertical level) variables at the lowest model level
     variable3d_names = [config['Q'], config['T'], config['RH'], config['U'], config['V']] 
     # if config['ccn_output'] == True:
     #     variable3d_names.append(config['CCN1'])
-    #     variable3d_names.append(config['CCN3'])
-    #     variable3d_names.append(config['CCN4'])
+    #     variable3d_names.append(config['CCN2'])
     #     variable3d_names.append(config['CCN5'])
+    #     variable3d_names.append(config['CCN10'])
 
     for varname in variable3d_names:
         try:
@@ -2003,7 +2027,15 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         for var_name, var_data in e3smdata2d.data_vars.items():
             if set(var_data.dims) == set(dimensions2d):
                 variables2d.append(var_name)
-        
+
+        e3smdatacosp = xr.open_dataset(lstcosp[0])
+        e3smdatacosp = e3smdatacosp.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
+        dimensions2d = (config['time_dim'], config['latlon_dim']+E3SMdomain_range)
+        variablescosp = []
+        for var_name, var_data in e3smdatacosp.data_vars.items():
+            if set(var_data.dims) == set(dimensions2d):
+                variablescosp.append(var_name)
+          
         e3smtime_i = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
         e3smtime = np.hstack((e3smtime, e3smtime_i))
 
@@ -2144,7 +2176,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             
             if len(matched_vlist) == len(req_vlist):
                 print('\nAnalyzing MODIS simulator cloud optical depth')
-                cod_m2 = e3smdata2d[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()*0.01   # cloud fraction is treated as 1 but is 100
+                cod_m2 = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].load()*0.01   # cloud fraction is treated as 1 but is 100
                 cod_m = xr.concat([cod_m, cod_m2], dim=config['time_dim'])
             else:
                 cod_m = xr.concat([cod_m, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
@@ -2213,14 +2245,15 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
                 cdnc_arm = xr.concat([cdnc_arm, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cdnc_arm',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
     
         if config['cosp_output'] == True:
-            req_vlist = [config['LWP']]
+            # req_vlist = [config['LWP']]
+            req_vlist = [config['LWPMODIS']]
             req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
             matched_vlist = list(set(av_vars2d).intersection(req_vlist))
             
             if len(matched_vlist) == len(req_vlist):
                 print('\nAnalyzing cloud droplet number concentration retrieved like MODIS')
-                lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
-                # lwp = e3smdata2d[config['LWPMODIS']+E3SMdomain_range][:,x_idx].data
+                # lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
+                lwp = e3smdatacosp[config['LWPMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].load()
                 T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
                 nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m2, adiabaticity=0.8)
                 nd_sat = xr.DataArray(data=nd_sat*1e6,  dims=[config['time_dim']],
@@ -2245,6 +2278,20 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             vv = variable_names.index(varname)
             variables[vv] = xr.concat([variables[vv], var],dim=config['time_dim'])
+
+        for varname in variablecosp_names:
+          try:
+              var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].load()
+              var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
+          except:
+              # var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
+              #                    dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime,config['latlon_dim']+E3SMdomain_range:np.arange(len_ncol)},\
+              #                    attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+              var = xr.DataArray(np.zeros((len(e3smtime)))*np.nan,name=varname,\
+                                 dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime},\
+                                 attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+          variable_names.append(varname)
+          variables.append(var)
         
         # all other 3D (with vertical level) variables at the lowest model level
         for varname in variable3d_names:
