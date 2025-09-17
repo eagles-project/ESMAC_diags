@@ -42,11 +42,11 @@ latlon_dimensions: 1
 
 # flag for model aerosol variables output
 aerosol_output: True
-ccn_output: False
+ccn_output: True
 dgnum_output_combined: True
 
 # flag for COSP MODIS simulator output
-cosp_output: False
+cosp_output: True
 
 # flag for pressure level output
 pres_output: True
