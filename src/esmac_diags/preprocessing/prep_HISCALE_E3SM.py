@@ -2031,7 +2031,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             if set(var_data.dims) == set(dimensions2d):
                 variables2d.append(var_name)
 
-        e3smdatacosp = xr.open_dataset(lstcosp[0])
+        e3smdatacosp = xr.open_dataset(lstcosp[ii])
         e3smdatacosp = e3smdatacosp.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
         dimensions2d = (config['time_dim'], config['latlon_dim']+E3SMdomain_range)
         variablescosp = []
@@ -2441,8 +2441,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
       
     #CCN
     if config['ccn_output'] == True:
-        print(lst3d_wetaer[ii+1])
-        e3smdata3d_wetaer = xr.open_dataset(lst3d_wetaer[ii+1])
+        print(lst3d_wetaer[ii])
+        e3smdata3d_wetaer = xr.open_dataset(lst3d_wetaer[ii])
         e3smdata3d_wetaer = e3smdata3d_wetaer.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
 
         vlist = list(e3smdata3d_wetaer.variables.keys())
