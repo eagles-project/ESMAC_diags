@@ -2545,7 +2545,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *1000
             variables[variable_names.index(vv)].attrs['units']='g/m2'
     # cloud fraction
-    varbls = [config['CLDTOT'],config['CLDLOW'],config['CLDMED'],config['CLDHGH']]
+    varbls = [config['CLDTOT']]#,config['CLDLOW'],config['CLDMED'],config['CLDHGH']]
     varbls = ["{}{}".format(i,E3SMdomain_range) for i in varbls]
     varbls = list(set(av_vars).intersection(varbls))
     if len(varbls) > 0:
