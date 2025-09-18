@@ -2493,11 +2493,13 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     variable_names = variable_names + ['Nd_mean']
     variables = variables + [cdnc_mean]
     if config['tau3d_output'] == True:
+        variable_names = variable_names + ['cod']
+        variables = variables + [cod_mean]
         variable_names = variable_names + ['Nd_ARM']
         variables = variables + [cdnc_arm]
     if config['cosp_output'] == True:
-        variable_names = variable_names + ['cod']
-        variables = variables + [cod_mean]
+        variable_names = variable_names + ['cod_VISST']
+        variables = variables + [cod_m]
         variable_names = variable_names + ['Nd_VISST']
         variables = variables + [cdnc_sat]
     if config['reff_output'] == True:
