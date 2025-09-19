@@ -2571,7 +2571,6 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     variables_new = list()
     #1d variable. only numpy.interp can keep some single-point values (see Nd_mean)
     for var in variables:
-        print(var)
         var_new = np.interp(np.int64(time_new), np.int64(e3smtime), var, left=np.nan, right=np.nan)
         variables_new.append(var_new)
     # treat variables with other dimensions (e.g., size distribution)
@@ -2597,6 +2596,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     ds[config['time_dim']].attrs["long_name"] = "Time"
     ds[config['time_dim']].attrs["standard_name"] = "time"
     for vv in range(len(variable_names)):
+        print(variables[vv])
         ds[variable_names[vv]].attrs["long_name"] = variables[vv].long_name
         ds[variable_names[vv]].attrs["units"] = variables[vv].units
         ds[variable_names[vv]].attrs["description"] = "variables at surface, TOA or the lowest model level"
