@@ -1664,7 +1664,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         
         if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing MODIS simulator cloud optical depth')
-            cod_m = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].load()*0.01   # cloud fraction is treated as 1 but is 100
+            cod_m = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx]
+            cod_m[:] = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values*0.01   # cloud fraction is treated as 1 but is 100
         else:
             cod_m = xr.DataArray(np.zeros(len(e3smtime))*np.nan)
     
@@ -1739,7 +1740,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing cloud droplet number concentration retrieved like MODIS')
             # lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
-            lwp = e3smdatacosp[config['LWPMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].load()
+            lwp = e3smdatacosp[config['LWPMODIS']+E3SMdomain_range][:,x_idx]
+            lwp[:] = e3smdatacosp[config['LWPMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
             T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
             nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m, adiabaticity=0.8)
           
@@ -1823,7 +1825,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
 
     for varname in variablecosp_names:
         try:
-            var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
+            var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx]
+            var[:] = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
             var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
         except:
             # var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
@@ -2184,7 +2187,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             
             if len(matched_vlist) == len(req_vlist):
                 print('\nAnalyzing MODIS simulator cloud optical depth')
-                cod_m2 = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].load()*0.01   # cloud fraction is treated as 1 but is 100
+                cod_m2 = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx]
+                cod_m2[:] = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values*0.01   # cloud fraction is treated as 1 but is 100
                 cod_m = xr.concat([cod_m, cod_m2], dim=config['time_dim'])
             else:
                 cod_m = xr.concat([cod_m, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
@@ -2261,7 +2265,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             if len(matched_vlist) == len(req_vlist):
                 print('\nAnalyzing cloud droplet number concentration retrieved like MODIS')
                 # lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
-                lwp = e3smdatacosp[config['LWPMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].load()
+                lwp = e3smdatacosp[config['LWPMODIS']+E3SMdomain_range]
+                lwp[:] = e3smdatacosp[config['LWPMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
                 T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
                 nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m2, adiabaticity=0.8)
                 nd_sat = xr.DataArray(data=nd_sat*1e6,  dims=[config['time_dim']],
@@ -2289,7 +2294,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
 
         for varname in variablecosp_names:
           try:
-              var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
+              var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx]
+              var[:] = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
               var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
           except:
               # var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
