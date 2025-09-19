@@ -2265,7 +2265,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             if len(matched_vlist) == len(req_vlist):
                 print('\nAnalyzing cloud droplet number concentration retrieved like MODIS')
                 # lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
-                lwp = e3smdatacosp[config['LWPMODIS']+E3SMdomain_range]
+                lwp = e3smdatacosp[config['LWPMODIS']+E3SMdomain_range][:,x_idx]
                 lwp[:] = e3smdatacosp[config['LWPMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
                 T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
                 nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m2, adiabaticity=0.8)
