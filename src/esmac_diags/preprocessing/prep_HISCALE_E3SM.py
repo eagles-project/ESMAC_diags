@@ -2555,8 +2555,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
                 variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data*100
                 variables[variable_names.index(vv)].attrs['units']='%'
             if variables[variable_names.index(vv)].ndim == 2:
+                var2dto1d = variables[variable_names.index(vv)].max(dim=config['vert_dim'])*100 #max cloud fraction in the column
                 variables[variable_names.index(vv)] = variables[variable_names.index(vv)][:,0] #retain only time dimension (time is first dimension based on dimension reordering earlier)
-                var2dto1d = variables[variable_names.index(vv)].max(dim=config['vert_dim'])*100
                 variables[variable_names.index(vv)] = var2dto1d
                 variables[variable_names.index(vv)].attrs['units']='%'
     
