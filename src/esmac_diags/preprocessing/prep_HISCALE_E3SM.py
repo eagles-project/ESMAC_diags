@@ -2549,7 +2549,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     varbls = ["{}{}".format(i,E3SMdomain_range) for i in varbls]
     varbls = list(set(av_vars).intersection(varbls))
     if len(varbls) > 0:
-        for vv in [config['CLDTOT']]#,config['CLDLOW'],config['CLDMED'],config['CLDHGH']]:
+        for vv in [config['CLDTOT']]:#,config['CLDLOW'],config['CLDMED'],config['CLDHGH']]:
             variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *100
             variables[variable_names.index(vv)].attrs['units']='%'
     
