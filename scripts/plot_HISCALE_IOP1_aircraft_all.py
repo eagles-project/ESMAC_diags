@@ -127,7 +127,7 @@ if config['aerosol_output'] == True:
     soa_m = modeldata['soa'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
 if config['ccn_output'] == True:
     # ccn1_m = modeldata['CCN3'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
-    ccn2_m = modeldata['CCN4'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
+    ccn2_m = modeldata['CCN3'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
     ccn5_m = modeldata['CCN5'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)    
 lwc_m = modeldata['cwc'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
 if config['reff_output'] == True:
@@ -145,7 +145,7 @@ modeldata.close()
 # ncn100_m2 = modeldata['NCN100'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
 # ncn_m2 = modeldata['NCNall'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
 # ccn1_m2 = modeldata['CCN3'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
-# ccn2_m2 = modeldata['CCN4'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
+# ccn2_m2 = modeldata['CCN3'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
 # ccn5_m2 = modeldata['CCN5'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
 # bc_m2 = modeldata['bc'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
 # dst_m2 = modeldata['dst'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
@@ -559,4 +559,5 @@ if config['reff_output'] == True:
                         xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m)', 
                         linear_fit=False, intercept=True)
     fig.savefig(figpath+'scatter_Reff_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
