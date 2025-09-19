@@ -2551,15 +2551,17 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     varbls = list(set(av_vars).intersection(varbls))
     if len(varbls) > 0:
         for vv in [config['CLDTOT']]:#,config['CLDLOW'],config['CLDMED'],config['CLDHGH']]:
-            variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *100
-            variables[variable_names.index(vv)].attrs['units']='%'
+            if variables[variable_names.index(vv)].ndim == 1:
+                variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *100
+                variables[variable_names.index(vv)].attrs['units']='%'
+            if variables[variable_names.index(vv)].ndim == 2:
+                variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].max(dim=config['vert_dim']).data *100
+                variables[variable_names.index(vv)].attrs['units']='%'
     
     #%% re-shape the data into pre-defined resolution
     variables_new = list()
     #1d variable. only numpy.interp can keep some single-point values (see Nd_mean)
-    print(variables)
     for var in variables:
-        print(var)
         var_new = np.interp(np.int64(time_new), np.int64(e3smtime), var, left=np.nan, right=np.nan)
         variables_new.append(var_new)
     # treat variables with other dimensions (e.g., size distribution)
