@@ -968,6 +968,11 @@ if config['aerosol_output'] == True:
 
 #%% joint histogram
 if config['ccn_output'] == True:
+            print(ccn2_hiscale)
+            print(ndrop_hiscale)
+            print(nd_sat_hiscale)
+            print(ccn2_m_hiscale)
+            print(nd_m_hiscale)
             # fig,ax = plot.jointhist([uhsas100_hiscale,ncn100_m_hiscale,ncn100_m2_hiscale], [ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], 
             #                     title=['Ground','E3SMv1','E3SMv2']),
             fig,ax = plot.jointhist([uhsas100_hiscale,ncn100_m_hiscale], [ccn2_hiscale,ccn2_m_hiscale], title=['Ground','Model'],
@@ -1047,6 +1052,7 @@ fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hisc
                     # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                     title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
