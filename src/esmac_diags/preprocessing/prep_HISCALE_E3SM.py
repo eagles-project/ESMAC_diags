@@ -2441,34 +2441,34 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
                 else:
                     NCNall = xr.concat([NCNall, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name='NCNall',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
       
-    #CCN
-    if config['ccn_output'] == True:
-        print(lst3d_wetaer[ii])
-        e3smdata3d_wetaer = xr.open_dataset(lst3d_wetaer[ii])
-        e3smdata3d_wetaer = e3smdata3d_wetaer.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
-
-        vlist = list(e3smdata3d_wetaer.variables.keys())
-        av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
-      
-        req_vlist = [config['CCN1'], config['CCN2'], config['CCN5'], config['CCN10']]
-        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-        matched_vlist = list(set(av_vars).intersection(req_vlist))
-      
-        if len(matched_vlist) == len(req_vlist):
-            print('\nAnalyzing CCN')
-            ccn1 = e3smdata3d_wetaer[config['CCN1']+E3SMdomain_range][:,-1,x_idx].load()
-            ccn2 = e3smdata3d_wetaer[config['CCN2']+E3SMdomain_range][:,-1,x_idx].load()
-            ccn5 = e3smdata3d_wetaer[config['CCN5']+E3SMdomain_range][:,-1,x_idx].load()
-            ccn10 = e3smdata3d_wetaer[config['CCN10']+E3SMdomain_range][:,-1,x_idx].load()
-            ccn1_all = xr.concat([ccn1_all, ccn1], dim=config['time_dim'])
-            ccn2_all = xr.concat([ccn2_all, ccn2], dim=config['time_dim'])
-            ccn5_all = xr.concat([ccn5_all, ccn5], dim=config['time_dim'])
-            ccn10_all = xr.concat([ccn10_all, ccn10], dim=config['time_dim'])
-        else:
-            ccn1_all = xr.concat([ccn1_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN1'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
-            ccn2_all = xr.concat([ccn2_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN2'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
-            ccn5_all = xr.concat([ccn5_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN5'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
-            ccn10_all = xr.concat([ccn10_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN10'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+        #CCN
+        if config['ccn_output'] == True:
+            print(lst3d_wetaer[ii])
+            e3smdata3d_wetaer = xr.open_dataset(lst3d_wetaer[ii])
+            e3smdata3d_wetaer = e3smdata3d_wetaer.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+    
+            vlist = list(e3smdata3d_wetaer.variables.keys())
+            av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
+          
+            req_vlist = [config['CCN1'], config['CCN2'], config['CCN5'], config['CCN10']]
+            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+            matched_vlist = list(set(av_vars).intersection(req_vlist))
+          
+            if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing CCN')
+                ccn1 = e3smdata3d_wetaer[config['CCN1']+E3SMdomain_range][:,-1,x_idx].load()
+                ccn2 = e3smdata3d_wetaer[config['CCN2']+E3SMdomain_range][:,-1,x_idx].load()
+                ccn5 = e3smdata3d_wetaer[config['CCN5']+E3SMdomain_range][:,-1,x_idx].load()
+                ccn10 = e3smdata3d_wetaer[config['CCN10']+E3SMdomain_range][:,-1,x_idx].load()
+                ccn1_all = xr.concat([ccn1_all, ccn1], dim=config['time_dim'])
+                ccn2_all = xr.concat([ccn2_all, ccn2], dim=config['time_dim'])
+                ccn5_all = xr.concat([ccn5_all, ccn5], dim=config['time_dim'])
+                ccn10_all = xr.concat([ccn10_all, ccn10], dim=config['time_dim'])
+            else:
+                ccn1_all = xr.concat([ccn1_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN1'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+                ccn2_all = xr.concat([ccn2_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN2'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+                ccn5_all = xr.concat([ccn5_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN5'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+                ccn10_all = xr.concat([ccn10_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN10'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
           
       
     # put all variables into the list
