@@ -213,7 +213,7 @@ if config['aerosol_output'] == True:
             ncn100_m = modeldata['NCN100'].load()
             CNsize_m = modeldata['NCNall'].load()
 if config['ccn_output'] == True:
-            ccn2_m = modeldata['CCN4'].load()            
+            ccn2_m = modeldata['CCN2'].load()            
 if config['tau3d_output'] == True:
             cod_m = modeldata['cod'].load()
 if config['reff_output'] == True:
@@ -299,7 +299,7 @@ albedo_m_hiscale = albedo_m.sel(time=model_time_hiscale)
 # ncl_m2 = modeldata['ncl'].load()
 # so4_m2 = modeldata['so4'].load()
 # soa_m2 = modeldata['soa'].load()
-# ccn2_m2 = modeldata['CCN4'].load()
+# ccn2_m2 = modeldata['CCN2'].load()
 # ncn3_m2 = modeldata['NCN3'].load()
 # ncn10_m2 = modeldata['NCN10'].load()
 # ncn100_m2 = modeldata['NCN100'].load()
@@ -1045,4 +1045,5 @@ fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hisc
                     # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                     title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
