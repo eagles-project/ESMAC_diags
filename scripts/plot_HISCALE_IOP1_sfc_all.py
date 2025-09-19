@@ -228,9 +228,10 @@ cld_m = modeldata[config['CLDTOT']].load()
 cbh_m = modeldata['cbh'].load()
 cth_m = modeldata['cth'].load()
 Hcld_m = modeldata['clddepth'].load()
-cldlow_m = modeldata[config['CLDLOW']].load()
-cldmid_m = modeldata[config['CLDMED']].load()
-cldhgh_m = modeldata[config['CLDHGH']].load()
+if config['cloudfraction_layers_output'] == True:
+            cldlow_m = modeldata[config['CLDLOW']].load()
+            cldmid_m = modeldata[config['CLDMED']].load()
+            cldhgh_m = modeldata[config['CLDHGH']].load()
 if config['netradiation_output'] == True:
             lwnetsfc_m = modeldata[config['LWNETSFC']].load()
             lwnettoa_m = modeldata[config['LWNETTOA']].load()
@@ -280,9 +281,10 @@ cld_m_hiscale = cld_m.sel(time=model_time_hiscale)
 cbh_m_hiscale = cbh_m.sel(time=model_time_hiscale)
 cth_m_hiscale = cth_m.sel(time=model_time_hiscale)
 Hcld_m_hiscale = Hcld_m.sel(time=model_time_hiscale)
-cldlow_m_hiscale = cldlow_m.sel(time=model_time_hiscale)
-cldmid_m_hiscale = cldmid_m.sel(time=model_time_hiscale)
-cldhgh_m_hiscale = cldhgh_m.sel(time=model_time_hiscale)
+if config['cloudfraction_layers_output'] == True:
+            cldlow_m_hiscale = cldlow_m.sel(time=model_time_hiscale)
+            cldmid_m_hiscale = cldmid_m.sel(time=model_time_hiscale)
+            cldhgh_m_hiscale = cldhgh_m.sel(time=model_time_hiscale)
 lwnetsfc_m_hiscale = lwnetsfc_m.sel(time=model_time_hiscale)
 # lwnettoa_m_hiscale = lwnettoa_m.sel(time=model_time_hiscale)
 swnetsfc_m_hiscale = swnetsfc_m.sel(time=model_time_hiscale)
@@ -1045,5 +1047,6 @@ fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hisc
                     # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                     title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
