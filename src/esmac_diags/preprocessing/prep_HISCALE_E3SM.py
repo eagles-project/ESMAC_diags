@@ -1822,7 +1822,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
 
     for varname in variablecosp_names:
         try:
-            var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].load()
+            var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
             var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
         except:
             # var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
@@ -2288,7 +2288,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
 
         for varname in variablecosp_names:
           try:
-              var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].load()
+              var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
               var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
           except:
               # var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
@@ -2297,8 +2297,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
               var = xr.DataArray(np.zeros((len(e3smtime)))*np.nan,name=varname,\
                                  dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime},\
                                  attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
-          variable_names.append(varname)
-          variables.append(var)
+          vv = variable_names.index(varname)
+          variables[vv] = xr.concat([variables[vv], var],dim=config['time_dim'])
         
         # all other 3D (with vertical level) variables at the lowest model level
         for varname in variable3d_names:
