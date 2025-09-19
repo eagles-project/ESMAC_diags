@@ -24,7 +24,7 @@ stream = open(config_file, "r")
 config = yaml.full_load(stream)
 
 prep_model_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/model/ne256mam/sfc_prof/3600s/'
-prep_sfc_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/surface/300s/'
+prep_sfc_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/surface/900s/'
 prep_sat_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/'+site+'/satellite/3600s/'
 
 obssfc_time_hiscale = pd.date_range(start='2016-04-25', end='2016-05-21', freq='900s')
@@ -968,11 +968,7 @@ if config['aerosol_output'] == True:
 
 #%% joint histogram
 if config['ccn_output'] == True:
-            print(ccn2_hiscale)
-            print(ndrop_hiscale)
-            print(nd_sat_hiscale)
-            print(ccn2_m_hiscale)
-            print(nd_m_hiscale)
+            ccn2_sat_hiscale = ccn2_hiscale.sel(time=obssat_time_hiscale)
             # fig,ax = plot.jointhist([uhsas100_hiscale,ncn100_m_hiscale,ncn100_m2_hiscale], [ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], 
             #                     title=['Ground','E3SMv1','E3SMv2']),
             fig,ax = plot.jointhist([uhsas100_hiscale,ncn100_m_hiscale], [ccn2_hiscale,ccn2_m_hiscale], title=['Ground','Model'],
@@ -983,7 +979,7 @@ if config['ccn_output'] == True:
             # fig,ax = plot.jointhist([ccn2_hiscale,ccn2_hiscale,ccn2_m_hiscale,ccn2_m2_hiscale], 
             #                         [ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale,nd_m2_hiscale],
             #                     title=['Ground','Satellite','E3SMv1','E3SMv2']),
-            fig,ax = plot.jointhist([ccn2_hiscale,ccn2_hiscale,ccn2_m_hiscale], [ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale], title=['Ground','Satellite','Model'],
+            fig,ax = plot.jointhist([ccn2_hiscale,ccn2_sat_hiscale,ccn2_m_hiscale], [ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale], title=['Ground','Satellite','Model'],
                                 xedges=np.arange(0,500,30),yedges=np.arange(0,300,20), normalize_x=True,
                                 xlabel='CCN (SS=0.2%) (cm$^{-3}$)', ylabel='Nd (cm$^{-3}$)', vmax=0.4)
             fig.savefig(figpath+'jointhist_CCN2_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
@@ -1052,6 +1048,7 @@ fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hisc
                     # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                     title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
