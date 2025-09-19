@@ -1014,7 +1014,7 @@ if config['ccn_output'] == True:
             # fig,ax = plot.scatter([ndrop_hiscale.data, nd_sat_hiscale.data,nd_m_hiscale.data,nd_m2_hiscale.data], 
             #                       [ccn2_hiscale.data,ccn2_hiscale.data,ccn2_m_hiscale.data,ccn2_m2_hiscale.data],
             #                     title=['Ground','Satellite','E3SMv1','E3SMv2'],
-            fig,ax = plot.scatter([ndrop_hiscale.data, nd_sat_hiscale.data,nd_m_hiscale.data], [ccn2_hiscale.data,ccn2_hiscale.data,ccn2_m_hiscale.data],
+            fig,ax = plot.scatter([ndrop_hiscale.data, nd_sat_hiscale.data,nd_m_hiscale.data], [ccn2_hiscale.data,ccn2_sat_hiscale.data,ccn2_m_hiscale.data],
                                 title=['Ground','Satellite','Model'], xlimit=(0,300), ylimit=(0,600),
                                 xlabel='Nd (cm$^{-3}$)', ylabel='Surface CCN (SS=0.2%) (cm$^{-3}$)', 
                             linear_fit=True, intercept=False)
@@ -1048,6 +1048,7 @@ fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hisc
                     # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                     title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
