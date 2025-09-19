@@ -2563,8 +2563,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     #%% re-shape the data into pre-defined resolution
     variables_new = list()
     #1d variable. only numpy.interp can keep some single-point values (see Nd_mean)
-    print(e3smtime)
-    print(var)
+    print(variables)
     for var in variables:
         var_new = np.interp(np.int64(time_new), np.int64(e3smtime), var, left=np.nan, right=np.nan)
         variables_new.append(var_new)
