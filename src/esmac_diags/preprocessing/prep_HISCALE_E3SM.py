@@ -2555,7 +2555,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
                 variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *100
                 variables[variable_names.index(vv)].attrs['units']='%'
             if variables[variable_names.index(vv)].ndim == 2:
-                variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].max(dim=config['vert_dim']).data *100
+                var2dto1d = variables[variable_names.index(vv)].max(dim=config['vert_dim']).data *100
+                variables[variable_names.index(vv)].data = var2dto1d
                 variables[variable_names.index(vv)].attrs['units']='%'
     
     #%% re-shape the data into pre-defined resolution
