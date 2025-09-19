@@ -2013,7 +2013,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     #%%  add data for each day
     # for file in lst[1:]:
     # for ii in np.arange(len(lst3d[1:]))+1:
-    for ii in np.arange(47)+1:
+    for ii in np.arange(23)+1:
         print(lst3d[ii])
         # e3smdata = xr.open_dataset(file)
         e3smdata3d = xr.open_dataset(lst3d[ii])
@@ -2556,7 +2556,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
                 variables[variable_names.index(vv)].attrs['units']='%'
             if variables[variable_names.index(vv)].ndim == 2:
                 var2dto1d = variables[variable_names.index(vv)].max(dim=config['vert_dim']).data *100
-                variables[variable_names.index(vv)].data = var2dto1d
+                variables[variable_names.index(vv)] = var2dto1d
                 variables[variable_names.index(vv)].attrs['units']='%'
     
     #%% re-shape the data into pre-defined resolution
