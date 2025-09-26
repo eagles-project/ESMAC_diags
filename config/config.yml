@@ -214,7 +214,7 @@ TAULIQMODIS: 'modis_tau_ALL'  #'TAUWMODIS'
 # TAUICEMODIS: 'modis_taui'  #'TAUIMODIS'; non _ALL do not look correct divided by sunlit or otherwise
 # TAUTOTMODIS: 'modis_taut'  #'TAUTMODIS'; non _ALL do not look correct divided by sunlit or otherwise
 CFLIQMODIS: 'modis_cld_ALL'  #'CLLWPMODIS'; _ALL and non _ALL seem fine if divided by sunlit
-CFICEMODIS: 'modis_clitot'  #'CLIMODIS'; non _ALL seem fine if divided by sunlit
-CFTOTMODIS: 'modis_cldtot'  #'CLTMODIS'; non _ALL seem fine if divided by sunlit
+# CFICEMODIS: 'modis_clitot'  #'CLIMODIS'; non _ALL seem fine if divided by sunlit
+# CFTOTMODIS: 'modis_cldtot'  #'CLTMODIS'; non _ALL seem fine if divided by sunlit
 CTPMODIS: 'modis_pct' #doesn't appear to be multiplied by sunlit
 NDMODIS: 'modis_nd_ALL'
