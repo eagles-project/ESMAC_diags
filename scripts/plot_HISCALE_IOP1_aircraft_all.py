@@ -139,7 +139,7 @@ if config['reff_output'] == True:
     reff_m = modeldata[config['REL']].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
 nd_m = modeldata[config['NC']].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
 pres_m = modeldata['pres'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
-T_m = modeldata[config['T']].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
+Temp_m = modeldata[config['T']].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
 if config['dsd_output'] == True:
     nd_bin_m = modeldata['Nd_bin'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
 modeldata.close()
@@ -179,7 +179,7 @@ if config['aerosol_output'] == True:
 nd = nd/1000 # #/L to #/cm3
 nd_size = nd_size/1000 # #/L to #/cm3
 if nd_m.attrs['units'] == '1/kg':
-    rho_m = pres_m/T_m/287.06
+    rho_m = pres_m/Temp_m/287.06
     nd_m = nd_m * rho_m * 1e-6
 
 # calculate effective radius from observed size distribution
@@ -569,6 +569,7 @@ if config['reff_output'] == True:
                         xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m)', 
                         linear_fit=False, intercept=True)
     fig.savefig(figpath+'scatter_Reff_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
