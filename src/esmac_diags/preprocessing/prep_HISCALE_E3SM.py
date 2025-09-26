@@ -1794,9 +1794,10 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         variablecosp_names.append(config['IWPMODIS'])
         variablecosp_names.append(config['LWPMODIS'])
         variablecosp_names.append(config['REFFLIQMODIS'])
-        variablecosp_names.append(config['TAUICEMODIS'])
-        variablecosp_names.append(config['TAUTOTMODIS'])
+        # variablecosp_names.append(config['TAUICEMODIS'])
+        # variablecosp_names.append(config['TAUTOTMODIS'])
         variablecosp_names.append(config['TAULIQMODIS'])
+        variablecosp_names.append(config['NDMODIS'])
 
     if config['cloudfraction_layers_output'] == True:
         variable2d_names.append(config['CLDHGH'])
