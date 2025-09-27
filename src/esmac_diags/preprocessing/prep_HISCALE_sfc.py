@@ -461,7 +461,7 @@ def prep_cloud_2d(armbepath, arsclpath, predatapath, height_out, dt=3600):
         cloud_i = cloud_flag.resample(time = dt_new, offset = dt_new/2).sum()/cloud_flag.resample(time = dt_new, offset = dt_new/2).count()
         cloud_i['time'] = cloud_i['time'] + dt_new/2
         
-        cloud_o = avg_height_2d(height,cloud_i,height_out)
+        cloud_o = avg_height_2d(height,cloud_i,height_out) * 100 #convert to %
     
     #%% output file
     outfile = predatapath + 'cloud_2d_HISCALE.nc'
@@ -1826,3 +1826,4 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=3600)
     
     ds.to_netcdf(outfile, mode='w')
     
+
