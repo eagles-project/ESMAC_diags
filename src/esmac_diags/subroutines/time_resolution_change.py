@@ -405,7 +405,9 @@ def interp_time_1d(time0, data0, time, arraytype='numpy'):
     if arraytype == 'xarray':
         data = data0.interp(time = time, kwargs={"fill_value":np.nan})    
     elif arraytype == 'numpy':
-        data = np.interp(time, time0, data0, left=np.nan, right=np.nan) 
+        time0_numeric = np.array([t.timestamp() for t in time0])
+        time_numeric = np.array([t.timestamp() for t in time])
+        data = np.interp(time_numeric, time0_numeric, data0, left=np.nan, right=np.nan) 
     else:
         raise ValueError("Array type must by numpy or xarray")
     
@@ -438,8 +440,10 @@ def interp_time_2d(time0, data0, time, arraytype='xarray'):
         data = data0.interp(time = time, kwargs={"fill_value":np.nan})
     elif arraytype == 'numpy':
         data = np.full((len(time), data0.shape[1]), np.nan)
-        for tt in range(len(time)):
-            data[tt,:] = np.interp(time, time0, data0[tt,:], left=np.nan, right=np.nan)
+        time0_numeric = np.array([t.timestamp() for t in time0])
+        time_numeric = np.array([t.timestamp() for t in time])
+        for tt in range(len(time_numeric)):
+            data[tt,:] = np.interp(time_numeric, time0_numeric, data0[tt,:], left=np.nan, right=np.nan)
     else:
         raise ValueError("Array type must by numpy or xarray")
     
@@ -472,12 +476,15 @@ def interp_time_height(time0, height0, data0, time, height, arraytype='numpy'):
         data = data0.interp(time = time, height = height, kwargs={"fill_value":np.nan})    
     elif arraytype == 'numpy':
         tmpdata = np.full((len(time),len(height)), np.nan)
-        for tt in range(len(time)):
-            tmpdata[tt,:] = np.interp(time, time0, data0, left=np.nan, right=np.nan)
-        data = np.full((len(time),len(height)), np.nan)
+        time0_numeric = np.array([t.timestamp() for t in time0])
+        time_numeric = np.array([t.timestamp() for t in time])
+        for tt in range(len(time_numeric)):
+            tmpdata[tt,:] = np.interp(time_numeric, time0_numeric, data0, left=np.nan, right=np.nan)
+        data = np.full((len(time_numeric),len(height)), np.nan)
         for hh in range(len(height)):
             data[:,hh] = np.interp(height, height0, tmpdata, left=np.nan, right=np.nan)
     else:
         raise ValueError("Array type must by numpy or xarray")
     
     return(data)
+
