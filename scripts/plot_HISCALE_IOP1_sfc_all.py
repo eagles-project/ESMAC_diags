@@ -418,7 +418,7 @@ precip_m_hiscale = precip_m_hiscale*3600*1000   # m/s to mm/hr
 # precip_m2_hiscale = precip_m2_hiscale*3600*1000   # m/s to mm/hr
 cloud_m_hiscale = cloud_m_hiscale*100  # fraction to %
 # cloud_m2_hiscale = cloud_m2_hiscale*100  # fraction to %
-cloud_2d_hiscale = cloud_2d_hiscale*100  # fraction to %
+# cloud_2d_hiscale = cloud_2d_hiscale*100  # fraction to %
 height_o = height_o.data*0.001   # m to km
 height_m = height_m.data*0.001   # m to km
 # height_m2 = height_m2.data*0.001   # m to km
@@ -1049,6 +1049,7 @@ fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hisc
                     # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                     title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
