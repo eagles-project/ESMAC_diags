@@ -1730,6 +1730,23 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
                             description='Retrieved using ARM Ndrop algorithm'),)
         else:
             cdnc_arm = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+    else if config['cosp_output'] == True:
+        req_vlist = [config['LWP']]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+        matched_vlist = list(set(av_vars2d).intersection(req_vlist))
+        
+        if len(matched_vlist) == len(req_vlist):
+            print('\nAnalyzing cloud droplet number concentration retrieved like Ndrop')
+            lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
+            e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+            nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
+          
+            cdnc_arm = xr.DataArray(data=nd_arm*1e6,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime)),
+                attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                            description='Retrieved using ARM Ndrop algorithm'),)
+        else:
+            cdnc_arm = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
 
     if config['cosp_output'] == True:
         # req_vlist = [config['LWP']]
@@ -2263,6 +2280,23 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
                 cdnc_arm = xr.concat([cdnc_arm, nd_arm], dim=config['time_dim'])
             else:
                 cdnc_arm = xr.concat([cdnc_arm, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cdnc_arm',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+        else if config['cosp_output'] == True:
+            req_vlist = [config['LWP']]
+            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+            matched_vlist = list(set(av_vars2d).intersection(req_vlist))
+            
+            if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop')
+                lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
+                e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+                nd_arm = calc_cdnc_ARM(lwp, cod_m2, e3sm_cloud_depth)
+                nd_arm = xr.DataArray(data=nd_arm*1e6,  dims=[config['time_dim']],
+                    coords=dict(time=([config['time_dim']], e3smtime_i)),
+                    attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                                description='Retrieved using ARM Ndrop algorithm'),)
+                cdnc_arm = xr.concat([cdnc_arm, nd_arm], dim=config['time_dim'])
+            else:
+                cdnc_arm = xr.concat([cdnc_arm, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cdnc_arm',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
     
         if config['cosp_output'] == True:
             # req_vlist = [config['LWP']]
@@ -2515,6 +2549,9 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     if config['tau3d_output'] == True:
         variable_names = variable_names + ['cod']
         variables = variables + [cod_mean]
+        variable_names = variable_names + ['Nd_ARM']
+        variables = variables + [cdnc_arm]
+    else if config['cosp_output'] == True:
         variable_names = variable_names + ['Nd_ARM']
         variables = variables + [cdnc_arm]
     if config['cosp_output'] == True:
