@@ -2180,18 +2180,18 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             else:
                 cod_mean = xr.concat([cod_mean, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cod',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
 
-        if config['cosp_output'] == True:   
-            req_vlist = [config['TAULIQMODIS']]
-            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-            matched_vlist = list(set(av_varscosp).intersection(req_vlist))
+        # if config['cosp_output'] == True:   
+        #     req_vlist = [config['TAULIQMODIS']]
+        #     req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+        #     matched_vlist = list(set(av_varscosp).intersection(req_vlist))
             
-            if len(matched_vlist) == len(req_vlist):
-                print('\nAnalyzing MODIS simulator cloud optical depth')
-                cod_m2 = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx]
-                cod_m2[:] = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values*0.01   # cloud fraction is treated as 1 but is 100
-                cod_m = xr.concat([cod_m, cod_m2], dim=config['time_dim'])
-            else:
-                cod_m = xr.concat([cod_m, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+        #     if len(matched_vlist) == len(req_vlist):
+        #         print('\nAnalyzing MODIS simulator cloud optical depth')
+        #         cod_m2 = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx]
+        #         cod_m2[:] = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
+        #         cod_m = xr.concat([cod_m, cod_m2], dim=config['time_dim'])
+        #     else:
+        #         cod_m = xr.concat([cod_m, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
 
         # mean cloud droplet number concentration
         if config['colnc_output'] == True:
