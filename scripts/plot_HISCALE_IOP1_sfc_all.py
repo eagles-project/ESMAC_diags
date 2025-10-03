@@ -220,6 +220,13 @@ if config['reff_output'] == True:
             reff_m = modeldata['reff'].load()
 lwp_m = modeldata[config['LWP']].load()
 nd_m = modeldata['Nd_mean'].load()
+if config['cosp_output'] == True:
+            lwp_modis_m = modeldata['modis_lwp'].load()
+            iwp_modis_m = modeldata['modis_iwp'].load()
+            reff_modis_m = modeldata['modis_reff_ALL'].load()
+            cod_modis_m = modeldata['modis_tau_ALL'].load()
+            nd_modis_m = modeldata['modis_nd_ALL'].load()
+            # nd_modis_m = modeldata['Nd_VISST'].load()
 if config['convectiveparam'] == True:
             precip_m = modeldata[config['PRECIPSFCTOT']].load()
 else:
@@ -1049,6 +1056,7 @@ fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hisc
                     # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                     title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
