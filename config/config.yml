@@ -214,7 +214,7 @@ TAULIQMODIS: 'modis_tau_ALL'  #'TAUWMODIS' ; non _ALL have units that are factor
 # TAUICEMODIS: 'modis_taui'  #'TAUIMODIS' ; non _ALL have units that are factor of 100 too high (maybe divide by cloud fraction in %?)
 # TAUTOTMODIS: 'modis_taut'  #'TAUTMODIS' ; non _ALL have units that are factor of 100 too high (maybe divide by cloud fraction in %?)
 CFLIQMODIS: 'modis_cld_ALL'  #'CLLWPMODIS'; _ALL and non _ALL seem fine if divided by sunlit
-# CFICEMODIS: 'modis_clitot'  #'CLIMODIS'; non _ALL seem fine if divided by sunlit
+CFICEMODIS: 'modis_clitot'  #'CLIMODIS'; non _ALL seem fine if divided by sunlit
 # CFTOTMODIS: 'modis_cldtot'  #'CLTMODIS'; non _ALL seem fine if divided by sunlit
 CTPMODIS: 'modis_pct' #factor of 100 too high (maybe divide by cloud fraction in %?)
 NDMODIS: 'modis_nd_ALL'
