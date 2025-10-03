@@ -1833,9 +1833,9 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx]
             var[:] = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
             if varname == config['IWPMODIS'] + E3SMdomain_range or varname == config['REFFICEMODIS'] + E3SMdomain_range or varname == config['TAUICEMODIS'] + E3SMdomain_range:
-                var = var/e3smdatacosp[config['CFICEMODIS'] + E3SMdomain_range][:,x_idx]
+                var = var/e3smdatacosp[config['CFICEMODIS'] + E3SMdomain_range][:,x_idx].values
             if varname == config['TAUTOTMODIS'] + E3SMdomain_range:
-                var = var/e3smdatacosp[config['CFTOTMODIS'] + E3SMdomain_range][:,x_idx]
+                var = var/e3smdatacosp[config['CFTOTMODIS'] + E3SMdomain_range][:,x_idx].values
             var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
         except:
             # var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
@@ -2305,9 +2305,9 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
               var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx]
               var[:] = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
               if varname == config['IWPMODIS'] + E3SMdomain_range or varname == config['REFFICEMODIS'] + E3SMdomain_range or varname == config['TAUICEMODIS'] + E3SMdomain_range:
-                  var = var/e3smdatacosp[config['CFICEMODIS'] + E3SMdomain_range][:,x_idx]
+                  var = var/e3smdatacosp[config['CFICEMODIS'] + E3SMdomain_range][:,x_idx].values
               if varname == config['TAUTOTMODIS'] + E3SMdomain_range:
-                  var = var/e3smdatacosp[config['CFTOTMODIS'] + E3SMdomain_range][:,x_idx]
+                  var = var/e3smdatacosp[config['CFTOTMODIS'] + E3SMdomain_range][:,x_idx].values
               var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
           except:
               # var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
