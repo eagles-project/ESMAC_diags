@@ -206,15 +206,15 @@ soa_a3: 'soa_a3'
 
 # variables below if cosp_output = True
 SUNLIT: 'cosp_sunlit'
-LWPMODIS: 'modis_lwp'  #'LWPMODIS'; _ALL variables do not look correct divided by sunlit or otherwise
-IWPMODIS: 'modis_iwp'  #'IWPMODIS'
-REFFLIQMODIS: 'modis_reff_ALL'  #'REFFCLWMODIS'
-# REFFICEMODIS: 'modis_reffi'  #'REFFCLIMODIS'; non _ALL do not look correct divided by sunlit or otherwise
-TAULIQMODIS: 'modis_tau_ALL'  #'TAUWMODIS'
-# TAUICEMODIS: 'modis_taui'  #'TAUIMODIS'; non _ALL do not look correct divided by sunlit or otherwise
-# TAUTOTMODIS: 'modis_taut'  #'TAUTMODIS'; non _ALL do not look correct divided by sunlit or otherwise
+LWPMODIS: 'modis_lwp_ALL'  #'LWPMODIS' ; non _ALL have units that are factor of 100 too high (maybe divide by cloud fraction in %?)
+IWPMODIS: 'modis_iwp'  #'IWPMODIS' ; non _ALL have units that are factor of 100 too high (maybe divide by cloud fraction in %?)
+REFFLIQMODIS: 'modis_reff_ALL'  #'REFFCLWMODIS' ; non _ALL have units that are factor of 100 too high (maybe divide by cloud fraction in %?)
+# REFFICEMODIS: 'modis_reffi'  #'REFFCLIMODIS' ; non _ALL have units that are factor of 100 too high (maybe divide by cloud fraction in %?)
+TAULIQMODIS: 'modis_tau_ALL'  #'TAUWMODIS' ; non _ALL have units that are factor of 100 too high (maybe divide by cloud fraction in %?)
+# TAUICEMODIS: 'modis_taui'  #'TAUIMODIS' ; non _ALL have units that are factor of 100 too high (maybe divide by cloud fraction in %?)
+# TAUTOTMODIS: 'modis_taut'  #'TAUTMODIS' ; non _ALL have units that are factor of 100 too high (maybe divide by cloud fraction in %?)
 CFLIQMODIS: 'modis_cld_ALL'  #'CLLWPMODIS'; _ALL and non _ALL seem fine if divided by sunlit
 # CFICEMODIS: 'modis_clitot'  #'CLIMODIS'; non _ALL seem fine if divided by sunlit
 # CFTOTMODIS: 'modis_cldtot'  #'CLTMODIS'; non _ALL seem fine if divided by sunlit
-CTPMODIS: 'modis_pct' #doesn't appear to be multiplied by sunlit
+CTPMODIS: 'modis_pct' #factor of 100 too high (maybe divide by cloud fraction in %?)
 NDMODIS: 'modis_nd_ALL'
