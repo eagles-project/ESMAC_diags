@@ -2042,7 +2042,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
   
     #%%  add data for each day
     # for file in lst[1:]:
-    for ii in np.arange(len(lst3d[1:]))+1:
+    # for ii in np.arange(len(lst3d[1:]))+1:
+    for ii in np.arange(2)+1:
         print(lst3d[ii])
         # e3smdata = xr.open_dataset(file)
         e3smdata3d = xr.open_dataset(lst3d[ii])
@@ -2649,6 +2650,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     ds[config['time_dim']].attrs["long_name"] = "Time"
     ds[config['time_dim']].attrs["standard_name"] = "time"
     for vv in range(len(variable_names)):
+        print(variable_names[vv])
         ds[variable_names[vv]].attrs["long_name"] = variables[vv].long_name
         ds[variable_names[vv]].attrs["units"] = variables[vv].units
         ds[variable_names[vv]].attrs["description"] = "variables at surface, TOA or the lowest model level"
