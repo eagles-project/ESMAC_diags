@@ -1794,10 +1794,14 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         variablecosp_names.append(config['IWPMODIS'])
         variablecosp_names.append(config['LWPMODIS'])
         variablecosp_names.append(config['REFFLIQMODIS'])
-        # variablecosp_names.append(config['TAUICEMODIS'])
-        # variablecosp_names.append(config['TAUTOTMODIS'])
+        variablecosp_names.append(config['REFFICEMODIS'])
+        variablecosp_names.append(config['TAUICEMODIS'])
+        variablecosp_names.append(config['TAUTOTMODIS'])
         variablecosp_names.append(config['TAULIQMODIS'])
         variablecosp_names.append(config['NDMODIS'])
+        variablecosp_names.append(config['CFLIQMODIS'])
+        variablecosp_names.append(config['CFICEMODIS'])
+        variablecosp_names.append(config['CFTOTMODIS'])
 
     if config['cloudfraction_layers_output'] == True:
         variable2d_names.append(config['CLDHGH'])
@@ -1819,7 +1823,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             var = xr.DataArray(np.zeros((len(e3smtime)))*np.nan,name=varname,\
                                dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
-        if varname==config['AODABS'] or varname==config['AOD']:
+        if varname==config['AODABS'] + E3SMdomain_range or varname==config['AOD'] + E3SMdomain_range:
             var.attrs['units']='N/A'
         variable_names.append(varname)
         variables.append(var)
@@ -1828,6 +1832,10 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         try:
             var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx]
             var[:] = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
+            if varname = config['IWPMODIS' + E3SMdomain_range] or varname = config['REFFICEMODIS' + E3SMdomain_range] or varname = config['TAUICEMODIS' + E3SMdomain_range]:
+                var = var/e3smdatacosp[config['CFICEMODIS'] + E3SMdomain_range][:,x_idx]
+            if varname = config['TAUTOTMODIS' + E3SMdomain_range]:
+                var = var/e3smdatacosp[config['CFTOTMODIS'] + E3SMdomain_range][:,x_idx]
             var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
         except:
             # var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
@@ -2296,6 +2304,10 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
           try:
               var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx]
               var[:] = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
+              if varname = config['IWPMODIS' + E3SMdomain_range] or varname = config['REFFICEMODIS' + E3SMdomain_range] or varname = config['TAUICEMODIS' + E3SMdomain_range]:
+                  var = var/e3smdatacosp[config['CFICEMODIS'] + E3SMdomain_range][:,x_idx]
+              if varname = config['TAUTOTMODIS' + E3SMdomain_range]:
+                  var = var/e3smdatacosp[config['CFTOTMODIS'] + E3SMdomain_range][:,x_idx]
               var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
           except:
               # var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
