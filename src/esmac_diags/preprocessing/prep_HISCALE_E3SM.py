@@ -1730,7 +1730,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
                             description='Retrieved using ARM Ndrop algorithm'),)
         else:
             cdnc_arm = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-    else if config['cosp_output'] == True:
+    else if: config['cosp_output'] == True:
         req_vlist = [config['LWP']]
         req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
         matched_vlist = list(set(av_vars2d).intersection(req_vlist))
@@ -2281,7 +2281,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
                 cdnc_arm = xr.concat([cdnc_arm, nd_arm], dim=config['time_dim'])
             else:
                 cdnc_arm = xr.concat([cdnc_arm, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cdnc_arm',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
-        else if config['cosp_output'] == True:
+        else if: config['cosp_output'] == True:
             req_vlist = [config['LWP']]
             req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
             matched_vlist = list(set(av_vars2d).intersection(req_vlist))
@@ -2552,7 +2552,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         variables = variables + [cod_mean]
         variable_names = variable_names + ['Nd_ARM']
         variables = variables + [cdnc_arm]
-    else if config['cosp_output'] == True:
+    else if: config['cosp_output'] == True:
         variable_names = variable_names + ['Nd_ARM']
         variables = variables + [cdnc_arm]
     if config['cosp_output'] == True:
