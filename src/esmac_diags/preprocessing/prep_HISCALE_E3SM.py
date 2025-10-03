@@ -1665,7 +1665,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing MODIS simulator cloud optical depth')
             cod_m = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx]
-            cod_m[:] = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values*0.01   # cloud fraction is treated as 1 but is 100
+            cod_m[:] = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
         else:
             cod_m = xr.DataArray(np.zeros(len(e3smtime))*np.nan)
     
@@ -2180,18 +2180,18 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
             else:
                 cod_mean = xr.concat([cod_mean, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cod',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
 
-        # if config['cosp_output'] == True:   
-        #     req_vlist = [config['TAULIQMODIS']]
-        #     req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
-        #     matched_vlist = list(set(av_varscosp).intersection(req_vlist))
+        if config['cosp_output'] == True:   
+            req_vlist = [config['TAULIQMODIS']]
+            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+            matched_vlist = list(set(av_varscosp).intersection(req_vlist))
             
-        #     if len(matched_vlist) == len(req_vlist):
-        #         print('\nAnalyzing MODIS simulator cloud optical depth')
-        #         cod_m2 = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx]
-        #         cod_m2[:] = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
-        #         cod_m = xr.concat([cod_m, cod_m2], dim=config['time_dim'])
-        #     else:
-        #         cod_m = xr.concat([cod_m, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+            if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing MODIS simulator cloud optical depth')
+                cod_m2 = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx]
+                cod_m2[:] = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
+                cod_m = xr.concat([cod_m, cod_m2], dim=config['time_dim'])
+            else:
+                cod_m = xr.concat([cod_m, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
 
         # mean cloud droplet number concentration
         if config['colnc_output'] == True:
@@ -2506,8 +2506,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         variable_names = variable_names + ['Nd_ARM']
         variables = variables + [cdnc_arm]
     if config['cosp_output'] == True:
-        variable_names = variable_names + ['cod_VISST']
-        variables = variables + [cod_m]
+        # variable_names = variable_names + ['cod_VISST']
+        # variables = variables + [cod_m]
         variable_names = variable_names + ['Nd_VISST']
         variables = variables + [cdnc_sat]
     if config['reff_output'] == True:
