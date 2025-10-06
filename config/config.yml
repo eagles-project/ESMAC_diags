@@ -8,6 +8,9 @@ model_cosp_input_filehead: 'mam4xx.h4.AVERAGE.nhours_x1'
 
 obs_input_path: '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/raw_data/obs/'
 
+# model resolution
+model_resolution: 'ne256'
+
 # # model longitude and latitude limits
 # latmin: 37
 # latmax: 42
