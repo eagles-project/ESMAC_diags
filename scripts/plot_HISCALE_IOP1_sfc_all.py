@@ -455,6 +455,10 @@ height_m = height_m.data*0.001   # m to km
 precip_m_hiscale[precip_m_hiscale<0.02] = 0
 # precip_m2_hiscale[precip_m2_hiscale<0.02] = 0
 
+#for satellite data, pixel data is comparable to ne1024 and grid data is comparable to ne60
+#for ne256, pixel data should be averaged down ~3x
+#for ne30, grid data could be used or average down 2x
+
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1077,6 +1081,7 @@ fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hisc
                     # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                     title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
