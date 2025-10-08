@@ -621,7 +621,33 @@ ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 fig.savefig(figpath+'timeseries_totcld_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 if config['cosp_output'] == True:
-            
+            fig,ax = plot.timeseries([obssfc_time_hiscale, obssat_time_hiscale, model_time_hiscale, model_time_hiscale], [cod_hiscale, cod_sat_hiscale, cod_m_hiscale, cod_modis_m_hiscale], 
+                                      legend = ['MFRSR','Satellite','Model','Model (COSP)'], color=['k','gray','r','orange'], #marker='.',
+                                    title='cloud optical depth '+site+' '+IOP, xlabel=None, ylabel=None)
+            ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+            ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+            fig.savefig(figpath+'timeseries_cod_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+            fig,ax = plot.timeseries([obssfc_time_hiscale, obssat_time_hiscale, model_time_hiscale, model_time_hiscale], [lwp_hiscale, lwp_sat_hiscale, lwp_m_hiscale, lwp_modis_m_hiscale], 
+                                    legend = ['MWR','Satellite','Model','Model (COSP)'], color=['k','gray','r','orange'],
+                                    title='LWP '+site+' '+IOP,xlabel=None, ylabel="g/m$^2$")
+            ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+            ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+            fig.savefig(figpath+'timeseries_LWP_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+            fig,ax = plot.timeseries([obssfc_time_hiscale, obssat_time_hiscale, model_time_hiscale, model_time_hiscale, model_time_hiscale], [ndrop_hiscale, nd_sat_hiscale, nd_m_hiscale, nd_modis_m_hiscale, ndarm_m_hiscale], 
+                                      legend = ['Ndrop','Satellite','Model','Model (COSP)','Model (ARM)'], color=['k','gray','r','orange','purple'], #marker='.',
+                                      title='Nd '+site+' '+IOP, xlabel=None, ylabel='cm$^{-3}$')
+            ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+            ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+            fig.savefig(figpath+'timeseries_Nd_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+            fig,ax = plot.timeseries([obssfc_time_hiscale, obssat_time_hiscale, model_time_hiscale, model_time_hiscale], [reff_hiscale, reff_sat_hiscale, reff_m_hiscale, reff_modis_m_hiscale],  
+                                    legend = ['MFRSR','Satellite','Model','Model (COSP)'], color=['k','gray','r','orange'],marker='.',
+                                    title='Reff '+site+' '+IOP,xlabel=None, ylabel='$\mu$m')
+            ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
+            ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
+            fig.savefig(figpath+'timeseries_reff_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)            
 
 #%%
 if config['aerosol_output'] == True:
@@ -1161,6 +1187,7 @@ else:
                                 # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                                 title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
