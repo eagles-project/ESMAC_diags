@@ -444,6 +444,7 @@ if config['tau3d_output'] == True:
             ndarm_m_hiscale[ndarm_m_hiscale>500] = np.nan
 
 if config['cosp_output'] == True:
+            reff_modis_m_hiscale[reff_modis_m_hiscale<1] = np.nan
             lwp_modis_m_hiscale[lwp_modis_m_hiscale<20] = np.nan
             cod_modis_m_hiscale[cod_modis_m_hiscale<2] = np.nan
             cod_modis_m_hiscale[cod_modis_m_hiscale>100] = np.nan
@@ -1215,6 +1216,7 @@ else:
                                 # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                                 title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
