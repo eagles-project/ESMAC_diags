@@ -621,8 +621,8 @@ ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 fig.savefig(figpath+'timeseries_totcld_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 if config['cosp_output'] == True:
-            fig,ax = plot.timeseries([obssfc_time_hiscale, obssat_time_hiscale, model_time_hiscale, model_time_hiscale], [cod_hiscale, cod_sat_hiscale, cod_m_hiscale, cod_modis_m_hiscale], 
-                                      legend = ['MFRSR','Satellite','Model','Model (COSP)'], color=['k','gray','r','orange'], #marker='.',
+            fig,ax = plot.timeseries([obssfc_time_hiscale, obssat_time_hiscale, model_time_hiscale, model_time_hiscale], [cod_hiscale, cod_sat_hiscale, cod_modis_m_hiscale], 
+                                      legend = ['MFRSR','Satellite','Model (COSP)'], color=['k','gray','orange'], #marker='.',
                                     title='cloud optical depth '+site+' '+IOP, xlabel=None, ylabel=None)
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
             ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
@@ -798,7 +798,25 @@ fig,ax = plot.diurnalcycle_2d([cloud_2d_hiscale, cloud_m_hiscale], y = [height_o
 fig.savefig(figpath+'diurnalcycle_cloud2d_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 if config['cosp_output'] == True:
+            fig,ax = plot.diurnalcycle( [cod_hiscale, cod_sat_hiscale, cod_modis_m_hiscale], 
+                                        legend = ['MFRSR','Satellite','Model (COSP)'], color=['k','gray','orange'], 
+                                    title='Cloud optical depth '+site+' '+IOP, xlabel='Time (UTC)', ylabel=None)
+            fig.savefig(figpath+'diurnalcycle_cod_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+            fig,ax = plot.diurnalcycle([lwp_hiscale,lwp_sat_hiscale, lwp_m_hiscale, lwp_modis_m_hiscale], 
+                                        legend = ['MWR','Satellite','Model','Model (COSP)'], color=['k','gray','r','orange'],
+                                    title='LWP '+site+' '+IOP,  xlabel='Time (UTC)',ylabel="g/m$^2$")
+            fig.savefig(figpath+'diurnalcycle_LWP_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             
+            fig,ax = plot.diurnalcycle([ndrop_hiscale, nd_sat_hiscale, nd_m_hiscale, nd_modis_m_hiscale, ndarm_m_hiscale], 
+                                        legend = ['Ndrop', 'Satellite', 'Model','Model (COSP)','Model (ARM)'], color=['k','gray','r','orange','purple'], 
+                                      title='Nd '+site+' '+IOP, xlabel='Time (UTC)', ylabel='cm$^{-3}$')
+            fig.savefig(figpath+'diurnalcycle_Nd_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+            fig,ax = plot.diurnalcycle([reff_hiscale, reff_sat_hiscale, reff_m_hiscale, reff_modis_m_hiscale], 
+                                        legend = ['MFRSR','Satellite','Model','Model (COSP)'], color=['k','gray','r','orange'],
+                                    title='droplet effective radius '+site+' '+IOP, xlabel='Time (UTC)', ylabel='$\mu$m')
+            fig.savefig(figpath+'diurnalcycle_reff_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)            
 
 #%% 1d histogram
 if config['aerosol_output'] == True:
@@ -932,10 +950,9 @@ fig.savefig(figpath+'hist_totcld_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='
 if config['cosp_output'] == True:
             w0 = np.ones_like(cod_hiscale)/sum(~np.isnan(cod_hiscale.data))
             w00 = np.ones_like(cod_sat_hiscale)/sum(~np.isnan(cod_sat_hiscale.data))
-            w1 = np.ones_like(cod_m_hiscale)/sum(~np.isnan(cod_m_hiscale.data))
             w2 = np.ones_like(cod_modis_m_hiscale)/sum(~np.isnan(cod_modis_m_hiscale.data))
-            fig,ax = plot.hist( [cod_hiscale, cod_sat_hiscale, cod_modis_m_hiscale, cod_m_hiscale], weights=[w0,w00,w2,w1], 
-                                legend = ['MFRSR','Satellite','Model (COSP)','Model'], color=['k','gray','r'],
+            fig,ax = plot.hist( [cod_hiscale, cod_sat_hiscale, cod_modis_m_hiscale], weights=[w0,w00,w2], 
+                                legend = ['MFRSR','Satellite','Model (COSP)'], color=['k','gray','r','orange'],
                                 title='Cloud Optical Depth '+site+' '+IOP, bins=np.arange(0,61,3), ylabel='Fraction', xlabel='N/A')
             fig.savefig(figpath+'hist_cod_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
@@ -943,8 +960,8 @@ if config['cosp_output'] == True:
             w00 = np.ones_like(lwp_sat_hiscale)/sum(~np.isnan(lwp_sat_hiscale.data))
             w1 = np.ones_like(lwp_m_hiscale)/sum(~np.isnan(lwp_m_hiscale.data))
             w2 = np.ones_like(lwp_modis_m_hiscale)/sum(~np.isnan(lwp_modis_m_hiscale.data))
-            fig,ax = plot.hist([lwp_hiscale, lwp_sat_hiscale, lwp_modis_m_hiscale, lwp_m_hiscale], weights=[w0,w00,w2,w1], 
-                                legend = ['MWR','Satellite','Model (COSP)','Model'], color=['k','gray','r'],
+            fig,ax = plot.hist([lwp_hiscale, lwp_sat_hiscale, lwp_m_hiscale, lwp_modis_m_hiscale], weights=[w0,w00,w1,w2], 
+                                legend = ['MWR','Satellite','Model','Model (COSP)'], color=['k','gray','r','orange'],
                                 title='LWP '+site+' '+IOP, bins=np.arange(10,410,20), ylabel='Fraction', xlabel="g/m$^2$")
             fig.savefig(figpath+'hist_LWP_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
@@ -953,8 +970,8 @@ if config['cosp_output'] == True:
             w1 = np.ones_like(nd_m_hiscale)/sum(~np.isnan(nd_m_hiscale.data))
             w2 = np.ones_like(nd_modis_m_hiscale)/sum(~np.isnan(nd_modis_m_hiscale.data))
             w3 = np.ones_like(ndarm_m_hiscale)/sum(~np.isnan(ndarm_m_hiscale.data))
-            fig,ax = plot.hist([ndrop_hiscale, nd_sat_hiscale, ndarm_m_hiscale, nd_modis_m_hiscale, nd_m_hiscale],  weights=[w0,w00,w3,w2,w1], 
-                                legend = ['Ndrop','Satellite','Model (ARM)','Model (COSP)','Model'], color=['k','gray','r'],
+            fig,ax = plot.hist([ndrop_hiscale, nd_sat_hiscale, ndarm_m_hiscale, nd_modis_m_hiscale, nd_m_hiscale],  weights=[w0,w00,w1,w2,w3], 
+                                legend = ['Ndrop','Satellite','Model','Model (COSP)','Model (ARM)'], color=['k','gray','r','orange','purple'],
                                 title = 'Nd '+site+' '+IOP, bins=np.arange(0,410,20), ylabel='Fraction', xlabel='cm$^{-3}$')
             fig.savefig(figpath+'hist_Nd_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
@@ -962,8 +979,8 @@ if config['cosp_output'] == True:
             w00 = np.ones_like(reff_sat_hiscale)/sum(~np.isnan(reff_sat_hiscale.data))
             w1 = np.ones_like(reff_m_hiscale)/sum(~np.isnan(reff_m_hiscale.data))
             w2 = np.ones_like(reff_modis_m_hiscale)/sum(~np.isnan(reff_modis_m_hiscale.data))
-            fig,ax = plot.hist([reff_hiscale, reff_sat_hiscale, reff_modis_m_hiscale, reff_m_hiscale], weights=[w0,w00,w2,w1], 
-                                legend = ['MFRSR','Satellite','Model'], color=['k','gray','r'],
+            fig,ax = plot.hist([reff_hiscale, reff_sat_hiscale, reff_modis_m_hiscale, reff_m_hiscale], weights=[w0,w00,w1,w2], 
+                                legend = ['MFRSR','Satellite','Model','Model (COSP)'], color=['k','gray','r','orange'],
                                 title = 'Cloud Effective Radius '+site+' '+IOP, bins=np.arange(4,28,1), ylabel='Fraction', xlabel='$\mu$m')
             fig.savefig(figpath+'hist_reff_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
@@ -1187,6 +1204,7 @@ else:
                                 # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                                 title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
