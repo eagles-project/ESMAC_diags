@@ -455,11 +455,6 @@ height_m = height_m.data*0.001   # m to km
 precip_m_hiscale[precip_m_hiscale<0.02] = 0
 # precip_m2_hiscale[precip_m2_hiscale<0.02] = 0
 
-#for satellite data, pixel data is comparable to ne1024 and grid data is comparable to ne60
-#for ne256, pixel data should be averaged down ~3x
-#for ne30, grid data could be used or average down 2x
-
-
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if config['aerosol_output'] == True:
@@ -625,6 +620,9 @@ ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
 ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 fig.savefig(figpath+'timeseries_totcld_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
+if config['cosp_output'] == True:
+            
+
 #%%
 if config['aerosol_output'] == True:
             # fig,ax = plot.timeseries_size([obssfc_time_hiscale,obssfc_time_hiscale,model_time_hiscale,model_time_hiscale], 
@@ -773,6 +771,9 @@ fig,ax = plot.diurnalcycle_2d([cloud_2d_hiscale, cloud_m_hiscale], y = [height_o
                         yticks=[0,3,6,9,12], ylimit=(0,12), ylabel='Height (km)',  cmap='jet', levellist=np.arange(0,45,1))
 fig.savefig(figpath+'diurnalcycle_cloud2d_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
+if config['cosp_output'] == True:
+            
+
 #%% 1d histogram
 if config['aerosol_output'] == True:
             w1 = np.ones_like(org_hiscale)/sum(~np.isnan(org_hiscale.data))
@@ -902,6 +903,44 @@ fig,ax = plot.hist([cld_arscl_hiscale,cld_tsi_hiscale,cld_m_hiscale],
                       title = 'Cloud Fraction '+site+' '+IOP, ylabel='Fraction', xlabel="%")
 fig.savefig(figpath+'hist_totcld_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
+if config['cosp_output'] == True:
+            w0 = np.ones_like(cod_hiscale)/sum(~np.isnan(cod_hiscale.data))
+            w00 = np.ones_like(cod_sat_hiscale)/sum(~np.isnan(cod_sat_hiscale.data))
+            w1 = np.ones_like(cod_m_hiscale)/sum(~np.isnan(cod_m_hiscale.data))
+            w2 = np.ones_like(cod_modis_m_hiscale)/sum(~np.isnan(cod_modis_m_hiscale.data))
+            fig,ax = plot.hist( [cod_hiscale, cod_sat_hiscale, cod_modis_m_hiscale, cod_m_hiscale], weights=[w0,w00,w2,w1], 
+                                legend = ['MFRSR','Satellite','Model (COSP)','Model'], color=['k','gray','r'],
+                                title='Cloud Optical Depth '+site+' '+IOP, bins=np.arange(0,61,3), ylabel='Fraction', xlabel='N/A')
+            fig.savefig(figpath+'hist_cod_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+            w0 = np.ones_like(lwp_hiscale)/sum(~np.isnan(lwp_hiscale.data))
+            w00 = np.ones_like(lwp_sat_hiscale)/sum(~np.isnan(lwp_sat_hiscale.data))
+            w1 = np.ones_like(lwp_m_hiscale)/sum(~np.isnan(lwp_m_hiscale.data))
+            w2 = np.ones_like(lwp_modis_m_hiscale)/sum(~np.isnan(lwp_modis_m_hiscale.data))
+            fig,ax = plot.hist([lwp_hiscale, lwp_sat_hiscale, lwp_modis_m_hiscale, lwp_m_hiscale], weights=[w0,w00,w2,w1], 
+                                legend = ['MWR','Satellite','Model (COSP)','Model'], color=['k','gray','r'],
+                                title='LWP '+site+' '+IOP, bins=np.arange(10,410,20), ylabel='Fraction', xlabel="g/m$^2$")
+            fig.savefig(figpath+'hist_LWP_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+            w0 = np.ones_like(ndrop_hiscale)/sum(~np.isnan(ndrop_hiscale.data))
+            w00 = np.ones_like(nd_sat_hiscale)/sum(~np.isnan(nd_sat_hiscale.data))
+            w1 = np.ones_like(nd_m_hiscale)/sum(~np.isnan(nd_m_hiscale.data))
+            w2 = np.ones_like(nd_modis_m_hiscale)/sum(~np.isnan(nd_modis_m_hiscale.data))
+            w3 = np.ones_like(ndarm_m_hiscale)/sum(~np.isnan(ndarm_m_hiscale.data))
+            fig,ax = plot.hist([ndrop_hiscale, nd_sat_hiscale, ndarm_m_hiscale, nd_modis_m_hiscale, nd_m_hiscale],  weights=[w0,w00,w3,w2,w1], 
+                                legend = ['Ndrop','Satellite','Model (ARM)','Model (COSP)','Model'], color=['k','gray','r'],
+                                title = 'Nd '+site+' '+IOP, bins=np.arange(0,410,20), ylabel='Fraction', xlabel='cm$^{-3}$')
+            fig.savefig(figpath+'hist_Nd_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+            w0 = np.ones_like(reff_hiscale)/sum(~np.isnan(reff_hiscale.data))
+            w00 = np.ones_like(reff_sat_hiscale)/sum(~np.isnan(reff_sat_hiscale.data))
+            w1 = np.ones_like(reff_m_hiscale)/sum(~np.isnan(reff_m_hiscale.data))
+            w2 = np.ones_like(reff_modis_m_hiscale)/sum(~np.isnan(reff_modis_m_hiscale.data))
+            fig,ax = plot.hist([reff_hiscale, reff_sat_hiscale, reff_modis_m_hiscale, reff_m_hiscale], weights=[w0,w00,w2,w1], 
+                                legend = ['MFRSR','Satellite','Model'], color=['k','gray','r'],
+                                title = 'Cloud Effective Radius '+site+' '+IOP, bins=np.arange(4,28,1), ylabel='Fraction', xlabel='$\mu$m')
+            fig.savefig(figpath+'hist_reff_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 if config['aerosol_output'] == True:
             #%% mean size distribution
             # fig,ax = plot.mean_size([size_uhsas,size_smps,np.arange(1,3001),np.arange(1,3001)], 
@@ -1020,39 +1059,70 @@ if config['ccn_output'] == True:
 # fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale,nd_m2_hiscale],
 #                         [lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale], 
 #                     title=['Ground','Satellite','E3SMv1','E3SMv2']),
-fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale], [lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale], title=['Ground','Satellite','Model'],
+fig,ax = plot.jointhist([ndrop_hiscale, nd_sat_hiscale, nd_m_hiscale], [lwp_hiscale, lwp_sat_hiscale, lwp_m_hiscale], title=['Ground','Satellite','Model'],
                     xedges=np.arange(0,300,20),yedges=np.arange(0,300,20), normalize_x=True,
                     xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', vmax=0.4)
 fig.savefig(figpath+'jointhist_LWP_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+if config['cosp_output'] == True:
+            fig,ax = plot.jointhist([ccn2_hiscale, ccn2_sat_hiscale, ccn2_m_hiscale, ccn2_m_hiscale, ccn2_m_hiscale], [ndrop_hiscale, nd_sat_hiscale, ndarm_m_hiscale, nd_modis_m_hiscale, nd_m_hiscale], title=['Ground','Satellite','Model'],
+                                xedges=np.arange(0,500,30),yedges=np.arange(0,300,20), normalize_x=True,
+                                xlabel='CCN (SS=0.2%) (cm$^{-3}$)', ylabel='Nd (cm$^{-3}$)', vmax=0.4)
+            fig.savefig(figpath+'jointhist_CCN2_Nd_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+            fig,ax = plot.jointhist([ndrop_hiscale, nd_sat_hiscale, ndarm_m_hiscale, nd_modis_m_hiscale, nd_m_hiscale], [lwp_hiscale, lwp_sat_hiscale, lwp_m_hiscale, lwp_modis_m_hiscale, lwp_m_hiscale], title=['Ground','Satellite','Model'],
+                    xedges=np.arange(0,300,20),yedges=np.arange(0,300,20), normalize_x=True,
+                    xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', vmax=0.4)
+            fig.savefig(figpath+'jointhist_LWP_Nd_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 if config['reff_output'] == True:
             # fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale,nd_m2_hiscale],
             #                         [reff_hiscale,reff_sat_hiscale,reff_m_hiscale,reff_m2_hiscale],
             #                     title=['Ground','Satellite','E3SMv1','E3SMv2']),
-            fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale], [reff_hiscale,reff_sat_hiscale,reff_m_hiscale], title=['Ground','Satellite','Model'],
+            fig,ax = plot.jointhist([ndrop_hiscale, ndarm_m_hiscale, nd_m_hiscale], [reff_hiscale, reff_m_hiscale, reff_m_hiscale], title=['Ground','Model (ARM Nd)','Model'],
                                 xedges=np.arange(0,300,20),yedges=np.arange(4,25,1), normalize_x=True,
                                 xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m)', vmax=0.25)
-            fig.savefig(figpath+'jointhist_Reff_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+            fig.savefig(figpath+'jointhist_Reff_Nd_ARM_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 if config['tau3d_output'] == True:
             # fig,ax = plot.jointhist([cod_sat_hiscale,cod_sat_hiscale,cod_m_hiscale,cod_m2_hiscale],[lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale], 
             #                     title=['Ground','Satellite','E3SMv1','E3SMv2']),
-            fig,ax = plot.jointhist([cod_sat_hiscale,cod_sat_hiscale,cod_m_hiscale],[lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale], title=['Ground','Satellite','Model'],
+            fig,ax = plot.jointhist([cod_sat_hiscale, cod_m_hiscale],[lwp_hiscale, lwp_m_hiscale], title=['Ground','Model'],
                                 xedges=np.arange(0,40,3),yedges=np.arange(0,300,20), normalize_x=True,
                                 xlabel='Cloud Optical Depth (N/A)', ylabel='LWP (g/m$^2$)', vmax=0.25)
-            fig.savefig(figpath+'jointhist_COD_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+            fig.savefig(figpath+'jointhist_COD_Nd_ARM_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+            
+if config['cosp_output'] == True:
+            fig,ax = plot.jointhist([nd_sat_hiscale, nd_modis_m_hiscale, nd_m_hiscale], [reff_sat_hiscale, reff_modis_m_hiscale, reff_modis_m_hiscale], title=['Satellite','Model (COSP)','Model'],
+                                xedges=np.arange(0,300,20),yedges=np.arange(4,25,1), normalize_x=True,
+                                xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m)', vmax=0.25)
+            fig.savefig(figpath+'jointhist_Reff_Nd_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
+            fig,ax = plot.jointhist([cod_sat_hiscale, cod_modis_m_hiscale, cod_modis_m_hiscale],[lwp_sat_hiscale, lwp_modis_m_hiscale, lwp_m_hiscale], title=['Satellite','Model (COSP)','Model'],
+                                xedges=np.arange(0,40,3),yedges=np.arange(0,300,20), normalize_x=True,
+                                xlabel='Cloud Optical Depth (N/A)', ylabel='LWP (g/m$^2$)', vmax=0.25)
+            fig.savefig(figpath+'jointhist_COD_Nd_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+            
 
 #%% scatter plot
 if config['ccn_output'] == True:
             # fig,ax = plot.scatter([ndrop_hiscale.data, nd_sat_hiscale.data,nd_m_hiscale.data,nd_m2_hiscale.data], 
             #                       [ccn2_hiscale.data,ccn2_hiscale.data,ccn2_m_hiscale.data,ccn2_m2_hiscale.data],
             #                     title=['Ground','Satellite','E3SMv1','E3SMv2'],
-            fig,ax = plot.scatter([ndrop_hiscale.data, nd_sat_hiscale.data,nd_m_hiscale.data], [ccn2_hiscale.data,ccn2_sat_hiscale.data,ccn2_m_hiscale.data],
-                                title=['Ground','Satellite','Model'], xlimit=(0,300), ylimit=(0,600),
-                                xlabel='Nd (cm$^{-3}$)', ylabel='Surface CCN (SS=0.2%) (cm$^{-3}$)', 
-                            linear_fit=True, intercept=False)
-            fig.savefig(figpath+'scatter_Nd_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-            
+            if config['cosp_output'] == True:
+                        fig,ax = plot.scatter([ndrop_hiscale.data, nd_sat_hiscale.data, nd_m_hiscale.data, ndarm_m_hiscale.data, nd_modis_m_hiscale.data],
+                                              [ccn2_hiscale.data, ccn2_sat_hiscale.data, ccn2_m_hiscale.data, ccn2_m_hiscale.data, ccn2_m_hiscale.data],
+                                            title=['Ground','Satellite','Model','Model (ARM Nd)','Model (COSP Nd)'], xlimit=(0,300), ylimit=(0,600),
+                                            xlabel='Nd (cm$^{-3}$)', ylabel='Surface CCN (SS=0.2%) (cm$^{-3}$)', 
+                                        linear_fit=True, intercept=False)
+                        fig.savefig(figpath+'scatter_Nd_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+            else:
+                        fig,ax = plot.scatter([ndrop_hiscale.data, nd_sat_hiscale.data, nd_m_hiscale.data], [ccn2_hiscale.data, ccn2_sat_hiscale.data, ccn2_m_hiscale.data],
+                                            title=['Ground','Satellite','Model'], xlimit=(0,300), ylimit=(0,600),
+                                            xlabel='Nd (cm$^{-3}$)', ylabel='Surface CCN (SS=0.2%) (cm$^{-3}$)', 
+                                        linear_fit=True, intercept=False)
+                        fig.savefig(figpath+'scatter_Nd_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+                        
             # fig,ax = plot.scatter([smps100_hiscale.data,ncn100_m_hiscale.data,ncn100_m2_hiscale.data], 
             #                       [ccn2_hiscale.data,ccn2_m_hiscale.data,ccn2_m2_hiscale.data],
             #                     title=['Ground','E3SMv1','E3SMv2'],
@@ -1072,15 +1142,26 @@ lwp_hiscale_sattime = lwp.sel(time=obssat_time_hiscale)
 # fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hiscale.data,nd_m2_hiscale.data],
 #                       [lwp_hiscale_sattime,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale],
 #                       [albedo_hiscale,albedo_hiscale,albedo_m_hiscale,albedo_m2_hiscale],vmax=60,
-fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hiscale.data],
-                      [lwp_hiscale_sattime,lwp_sat_hiscale,lwp_m_hiscale],
-                      [albedo_hiscale,albedo_hiscale,albedo_m_hiscale],vmax=60,
-                    xedges=np.arange(0,300,20), yedges=np.arange(10,300,20),
-                    # xedges=xedges, yedges=yedges, 
-                    xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', zlabel='TOA Albedo (%)',
-                    # title=['Ground','Satellite','E3SMv1','E3SMv2'])
-                    title=['Ground','Satellite','Model'])
+if config['cosp_output'] == True:
+            fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hiscale.data, ndarm_m_hiscale.data, nd_modis_m_hiscale.data],
+                                  [lwp_hiscale_sattime, lwp_sat_hiscale, lwp_m_hiscale, lwp_m_hiscale, lwp_modis_m_hiscale],
+                                  [albedo_hiscale, albedo_hiscale, albedo_m_hiscale, albedo_m_hiscale, albedo_m_hiscale],vmax=60,
+                                xedges=np.arange(0,300,20), yedges=np.arange(10,300,20),
+                                # xedges=xedges, yedges=yedges, 
+                                xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', zlabel='TOA Albedo (%)',
+                                # title=['Ground','Satellite','E3SMv1','E3SMv2'])
+                                title=['Ground','Satellite','Model','Model (ARM Nd)','Model (COSP)'])
+else:
+            fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hiscale.data],
+                                  [lwp_hiscale_sattime, lwp_sat_hiscale, lwp_m_hiscale],
+                                  [albedo_hiscale, albedo_hiscale, albedo_m_hiscale],vmax=60,
+                                xedges=np.arange(0,300,20), yedges=np.arange(10,300,20),
+                                # xedges=xedges, yedges=yedges, 
+                                xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', zlabel='TOA Albedo (%)',
+                                # title=['Ground','Satellite','E3SMv1','E3SMv2'])
+                                title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
