@@ -952,7 +952,7 @@ if config['cosp_output'] == True:
             w00 = np.ones_like(cod_sat_hiscale)/sum(~np.isnan(cod_sat_hiscale.data))
             w2 = np.ones_like(cod_modis_m_hiscale)/sum(~np.isnan(cod_modis_m_hiscale.data))
             fig,ax = plot.hist( [cod_hiscale, cod_sat_hiscale, cod_modis_m_hiscale], weights=[w0,w00,w2], 
-                                legend = ['MFRSR','Satellite','Model (COSP)'], color=['k','gray','r','orange'],
+                                legend = ['MFRSR','Satellite','Model (COSP)'], color=['k','gray','orange'],
                                 title='Cloud Optical Depth '+site+' '+IOP, bins=np.arange(0,61,3), ylabel='Fraction', xlabel='N/A')
             fig.savefig(figpath+'hist_cod_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
@@ -1204,6 +1204,7 @@ else:
                                 # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                                 title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
