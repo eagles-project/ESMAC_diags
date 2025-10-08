@@ -224,21 +224,21 @@ if config['ccn_output'] == True:
             ccn2_m = modeldata['CCN2'].load()            
 if config['tau3d_output'] == True:
             cod_m = modeldata['cod'].load()
-            ndarm_m = modeldata['Nd_ARM'].load()
+            ndarm_m = modeldata['Nd_ARM'].load()/1e6 #convert from m-3 to cm-3
 if config['reff_output'] == True:
             reff_m = modeldata['reff'].load()
 lwp_m = modeldata[config['LWP']].load()
 nd_m = modeldata['Nd_mean'].load()
 if config['cosp_output'] == True:
-            lwp_modis_m = modeldata['modis_lwp_ALL'].load()
-            iwp_modis_m = modeldata['modis_iwp'].load()
-            reff_modis_m = modeldata['modis_reff_ALL'].load()
+            lwp_modis_m = modeldata['modis_lwp_ALL'].load()*1e3 #convert kg/m2 to g/m2
+            iwp_modis_m = modeldata['modis_iwp'].load()*1e3
+            reff_modis_m = modeldata['modis_reff_ALL'].load()*1e6 #convert m to um
             cod_modis_m = modeldata['modis_tau_ALL'].load()
             cfliq_modis_m = modeldata['modis_cld_ALL'].load()
             cftot_modis_m = modeldata['modis_cldtot'].load()
             nd_modis_m = modeldata['modis_nd_ALL'].load()
             # nd_modis_m = modeldata['Nd_VISST'].load()
-            ndarm_m = modeldata['Nd_ARM'].load()
+            ndarm_m = modeldata['Nd_ARM'].load()/1e6 #convert from m-3 to cm-3
 if config['convectiveparam'] == True:
             precip_m = modeldata[config['PRECIPSFCTOT']].load()
 else:
@@ -1215,6 +1215,7 @@ else:
                                 # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                                 title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
