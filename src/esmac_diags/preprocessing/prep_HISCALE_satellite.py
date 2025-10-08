@@ -23,7 +23,7 @@ from esmac_diags.subroutines.specific_data_treatment import calc_cdnc_VISST, cal
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
+def prep_VISST_grid(visstgridpath, predatapath, dx=0.5, dt=3600):
     """
     prepare VISST-satellite data in grid level (0.5x0.5 degrees)
 
@@ -33,6 +33,8 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
         input datapath
     predatapath : str
         output datapath
+    dx : float
+        spatial resolution (units: deg) of output (currently not used in code)
     dt : float
         time resolution (unit: sec) of output
 
@@ -185,31 +187,58 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    Nd_new = avg_time_1d(vissttime, Nd_array, time_new, arraytype='numpy')
-    H_new = avg_time_1d(vissttime, H, time_new, arraytype='numpy')
-    lwp_new = avg_time_1d(vissttime, lwp, time_new, arraytype='xarray')
-    iwp_new = avg_time_1d(vissttime, iwp, time_new, arraytype='xarray')
-    swnetsfc_new = avg_time_1d(vissttime, sfc_net_sw, time_new, arraytype='xarray')
-    lwnetsfc_new = avg_time_1d(vissttime, sfc_net_lw, time_new, arraytype='xarray')
-    swdnsfc_new = avg_time_1d(vissttime, sfc_down_sw, time_new, arraytype='xarray')
-    lwdnsfc_new = avg_time_1d(vissttime, sfc_down_lw, time_new, arraytype='xarray')
-    reff_new = avg_time_1d(vissttime, reff_liq, time_new, arraytype='xarray')
-    cod_new = avg_time_1d(vissttime, cod_linavg, time_new, arraytype='xarray')
-    codlog_new = avg_time_1d(vissttime, cod_logavg, time_new, arraytype='xarray')
-    cf_all_new = avg_time_1d(vissttime, cf_allz, time_new, arraytype='xarray')
-    cf_low_new = avg_time_1d(vissttime, cf_low, time_new, arraytype='xarray')
-    cf_mid_new = avg_time_1d(vissttime, cf_mid, time_new, arraytype='xarray')
-    cf_high_new = avg_time_1d(vissttime, cf_high, time_new, arraytype='xarray')
-    ctt_new = avg_time_1d(vissttime, ctt_all, time_new, arraytype='xarray')
-    ctp_new = avg_time_1d(vissttime, ctp_all, time_new, arraytype='xarray')
-    cth_new = avg_time_1d(vissttime, cth_all, time_new, arraytype='xarray')
-    ctt_liq_new = avg_time_1d(vissttime, ctt_liq, time_new, arraytype='xarray')
-    ctp_liq_new = avg_time_1d(vissttime, ctp_liq, time_new, arraytype='xarray')
-    cth_liq_new = avg_time_1d(vissttime, cth_liq, time_new, arraytype='xarray')
-    lw_new = avg_time_1d(vissttime, bb_lw_all, time_new, arraytype='xarray')
-    sw_new = avg_time_1d(vissttime, bb_sw_all, time_new, arraytype='xarray')
-    albedo_new = avg_time_1d(vissttime, bb_sw_albedo_all, time_new, arraytype='xarray')
-    solar_zenith_new = avg_time_1d(vissttime, solar_zenith, time_new, arraytype='xarray')
+    # Nd_new = avg_time_1d(vissttime, Nd_array, time_new, arraytype='numpy')
+    # H_new = avg_time_1d(vissttime, H, time_new, arraytype='numpy')
+    # lwp_new = avg_time_1d(vissttime, lwp, time_new, arraytype='xarray')
+    # iwp_new = avg_time_1d(vissttime, iwp, time_new, arraytype='xarray')
+    # swnetsfc_new = avg_time_1d(vissttime, sfc_net_sw, time_new, arraytype='xarray')
+    # lwnetsfc_new = avg_time_1d(vissttime, sfc_net_lw, time_new, arraytype='xarray')
+    # swdnsfc_new = avg_time_1d(vissttime, sfc_down_sw, time_new, arraytype='xarray')
+    # lwdnsfc_new = avg_time_1d(vissttime, sfc_down_lw, time_new, arraytype='xarray')
+    # reff_new = avg_time_1d(vissttime, reff_liq, time_new, arraytype='xarray')
+    # cod_new = avg_time_1d(vissttime, cod_linavg, time_new, arraytype='xarray')
+    # codlog_new = avg_time_1d(vissttime, cod_logavg, time_new, arraytype='xarray')
+    # cf_all_new = avg_time_1d(vissttime, cf_allz, time_new, arraytype='xarray')
+    # cf_low_new = avg_time_1d(vissttime, cf_low, time_new, arraytype='xarray')
+    # cf_mid_new = avg_time_1d(vissttime, cf_mid, time_new, arraytype='xarray')
+    # cf_high_new = avg_time_1d(vissttime, cf_high, time_new, arraytype='xarray')
+    # ctt_new = avg_time_1d(vissttime, ctt_all, time_new, arraytype='xarray')
+    # ctp_new = avg_time_1d(vissttime, ctp_all, time_new, arraytype='xarray')
+    # cth_new = avg_time_1d(vissttime, cth_all, time_new, arraytype='xarray')
+    # ctt_liq_new = avg_time_1d(vissttime, ctt_liq, time_new, arraytype='xarray')
+    # ctp_liq_new = avg_time_1d(vissttime, ctp_liq, time_new, arraytype='xarray')
+    # cth_liq_new = avg_time_1d(vissttime, cth_liq, time_new, arraytype='xarray')
+    # lw_new = avg_time_1d(vissttime, bb_lw_all, time_new, arraytype='xarray')
+    # sw_new = avg_time_1d(vissttime, bb_sw_all, time_new, arraytype='xarray')
+    # albedo_new = avg_time_1d(vissttime, bb_sw_albedo_all, time_new, arraytype='xarray')
+    # solar_zenith_new = avg_time_1d(vissttime, solar_zenith, time_new, arraytype='xarray')
+
+    #old method was averaging times but it would be more approriate to interpolate or take the nearest in time sample for comparing to model output later
+    Nd_new = interp_time_1d(vissttime, Nd_array, time_new, arraytype='numpy')
+    H_new = interp_time_1d(vissttime, H, time_new, arraytype='numpy')
+    lwp_new = interp_time_1d(vissttime, lwp, time_new, arraytype='xarray')
+    iwp_new = interp_time_1d(vissttime, iwp, time_new, arraytype='xarray')
+    swnetsfc_new = interp_time_1d(vissttime, sfc_net_sw, time_new, arraytype='xarray')
+    lwnetsfc_new = interp_time_1d(vissttime, sfc_net_lw, time_new, arraytype='xarray')
+    swdnsfc_new = interp_time_1d(vissttime, sfc_down_sw, time_new, arraytype='xarray')
+    lwdnsfc_new = interp_time_1d(vissttime, sfc_down_lw, time_new, arraytype='xarray')
+    reff_new = interp_time_1d(vissttime, reff_liq, time_new, arraytype='xarray')
+    cod_new = interp_time_1d(vissttime, cod_linavg, time_new, arraytype='xarray')
+    codlog_new = interp_time_1d(vissttime, cod_logavg, time_new, arraytype='xarray')
+    cf_all_new = interp_time_1d(vissttime, cf_allz, time_new, arraytype='xarray')
+    cf_low_new = interp_time_1d(vissttime, cf_low, time_new, arraytype='xarray')
+    cf_mid_new = interp_time_1d(vissttime, cf_mid, time_new, arraytype='xarray')
+    cf_high_new = interp_time_1d(vissttime, cf_high, time_new, arraytype='xarray')
+    ctt_new = interp_time_1d(vissttime, ctt_all, time_new, arraytype='xarray')
+    ctp_new = interp_time_1d(vissttime, ctp_all, time_new, arraytype='xarray')
+    cth_new = interp_time_1d(vissttime, cth_all, time_new, arraytype='xarray')
+    ctt_liq_new = interp_time_1d(vissttime, ctt_liq, time_new, arraytype='xarray')
+    ctp_liq_new = interp_time_1d(vissttime, ctp_liq, time_new, arraytype='xarray')
+    cth_liq_new = interp_time_1d(vissttime, cth_liq, time_new, arraytype='xarray')
+    lw_new = interp_time_1d(vissttime, bb_lw_all, time_new, arraytype='xarray')
+    sw_new = interp_time_1d(vissttime, bb_sw_all, time_new, arraytype='xarray')
+    albedo_new = interp_time_1d(vissttime, bb_sw_albedo_all, time_new, arraytype='xarray')
+    solar_zenith_new = interp_time_1d(vissttime, solar_zenith, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'Nd_VISSTgrid_HISCALE.nc'
@@ -454,7 +483,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dt=3600):
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
+def prep_VISST_pixel(visstpixpath, predatapath, dx=4, dt=3600):
     """
     prepare VISST-satellite data in pixel level (4km)
 
@@ -464,6 +493,8 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
         input datapath
     predatapath : str
         output datapath
+    dx : float
+        spatial resolution (units: km) of output (currently not used in code)
     dt : float
         time resolution (unit: sec) of output
 
@@ -612,19 +643,31 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     # time_new = pd.date_range(start=startdate, end=enddate, freq=str(int(dt))+"s")
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    Nd_new = avg_time_1d(vissttime, Nd_array, time_new, arraytype='numpy')
-    H_new = avg_time_1d(vissttime, H, time_new, arraytype='numpy')
-    lwp_new = avg_time_1d(vissttime, lwp, time_new, arraytype='numpy')
-    iwp_new = avg_time_1d(vissttime, iwp, time_new, arraytype='numpy')
-    reff_new = avg_time_1d(vissttime, particle_size, time_new, arraytype='xarray')
-    cod_new = avg_time_1d(vissttime, cod, time_new, arraytype='xarray')
-    ctt_new = avg_time_1d(vissttime, ctt, time_new, arraytype='xarray')
-    ctp_new = avg_time_1d(vissttime, ctp, time_new, arraytype='xarray')
-    cth_new = avg_time_1d(vissttime, cth, time_new, arraytype='xarray')
-    lw_new = avg_time_1d(vissttime, bb_lw, time_new, arraytype='xarray')
-    sw_new = avg_time_1d(vissttime, bb_sw, time_new, arraytype='xarray')
-    albedo_new = avg_time_1d(vissttime, bb_sw_albedo, time_new, arraytype='xarray')
+    # Nd_new = avg_time_1d(vissttime, Nd_array, time_new, arraytype='numpy')
+    # H_new = avg_time_1d(vissttime, H, time_new, arraytype='numpy')
+    # lwp_new = avg_time_1d(vissttime, lwp, time_new, arraytype='numpy')
+    # iwp_new = avg_time_1d(vissttime, iwp, time_new, arraytype='numpy')
+    # reff_new = avg_time_1d(vissttime, particle_size, time_new, arraytype='xarray')
+    # cod_new = avg_time_1d(vissttime, cod, time_new, arraytype='xarray')
+    # ctt_new = avg_time_1d(vissttime, ctt, time_new, arraytype='xarray')
+    # ctp_new = avg_time_1d(vissttime, ctp, time_new, arraytype='xarray')
+    # cth_new = avg_time_1d(vissttime, cth, time_new, arraytype='xarray')
+    # lw_new = avg_time_1d(vissttime, bb_lw, time_new, arraytype='xarray')
+    # sw_new = avg_time_1d(vissttime, bb_sw, time_new, arraytype='xarray')
+    # albedo_new = avg_time_1d(vissttime, bb_sw_albedo, time_new, arraytype='xarray')
     
+    #old method was averaging times but it would be more approriate to interpolate or take the nearest in time sample for comparing to model output later
+    H_new = interp_time_1d(vissttime, H, time_new, arraytype='numpy')
+    lwp_new = interp_time_1d(vissttime, lwp, time_new, arraytype='numpy')
+    iwp_new = interp_time_1d(vissttime, iwp, time_new, arraytype='numpy')
+    reff_new = interp_time_1d(vissttime, particle_size, time_new, arraytype='xarray')
+    cod_new = interp_time_1d(vissttime, cod, time_new, arraytype='xarray')
+    ctt_new = interp_time_1d(vissttime, ctt, time_new, arraytype='xarray')
+    ctp_new = interp_time_1d(vissttime, ctp, time_new, arraytype='xarray')
+    cth_new = interp_time_1d(vissttime, cth, time_new, arraytype='xarray')
+    lw_new = interp_time_1d(vissttime, bb_lw, time_new, arraytype='xarray')
+    sw_new = interp_time_1d(vissttime, bb_sw, time_new, arraytype='xarray')
+    albedo_new = avg_time
     
     #%% output file
     outfile = predatapath + 'Nd_VISSTpix_HISCALE.nc'
@@ -817,3 +860,4 @@ def prep_VISST_pixel(visstpixpath, predatapath, dt=3600):
     
     ds.to_netcdf(outfile, mode='w')
     
+
