@@ -1107,12 +1107,12 @@ fig,ax = plot.jointhist([ndrop_hiscale, nd_sat_hiscale, nd_m_hiscale], [lwp_hisc
                     xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', vmax=0.4)
 fig.savefig(figpath+'jointhist_LWP_Nd_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 if config['cosp_output'] == True:
-            fig,ax = plot.jointhist([ccn2_hiscale, ccn2_sat_hiscale, ccn2_m_hiscale, ccn2_m_hiscale, ccn2_m_hiscale], [ndrop_hiscale, nd_sat_hiscale, ndarm_m_hiscale, nd_modis_m_hiscale, nd_m_hiscale], title=['Ground','Satellite','Model'],
+            fig,ax = plot.jointhist([ccn2_hiscale, ccn2_sat_hiscale, ccn2_m_hiscale, ccn2_m_hiscale, ccn2_m_hiscale], [ndrop_hiscale, nd_sat_hiscale, nd_m_hiscale, nd_modis_m_hiscale, ndarm_m_hiscale], title=['Ground','Satellite','Model','Model (COSP Nd)','Model (ARM Nd)'],
                                 xedges=np.arange(0,500,30),yedges=np.arange(0,300,20), normalize_x=True,
                                 xlabel='CCN (SS=0.2%) (cm$^{-3}$)', ylabel='Nd (cm$^{-3}$)', vmax=0.4)
             fig.savefig(figpath+'jointhist_CCN2_Nd_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-            fig,ax = plot.jointhist([ndrop_hiscale, nd_sat_hiscale, ndarm_m_hiscale, nd_modis_m_hiscale, nd_m_hiscale], [lwp_hiscale, lwp_sat_hiscale, lwp_m_hiscale, lwp_modis_m_hiscale, lwp_m_hiscale], title=['Ground','Satellite','Model'],
+            fig,ax = plot.jointhist([ndrop_hiscale, nd_sat_hiscale, nd_m_hiscale, nd_modis_m_hiscale, ndarm_m_hiscale], [lwp_hiscale, lwp_sat_hiscale, lwp_m_hiscale, lwp_modis_m_hiscale, lwp_m_hiscale], title=['Ground','Satellite','Model','Model (COSP)','Model (ARM Nd)'],
                     xedges=np.arange(0,300,20),yedges=np.arange(0,300,20), normalize_x=True,
                     xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', vmax=0.4)
             fig.savefig(figpath+'jointhist_LWP_Nd_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
@@ -1122,7 +1122,7 @@ if config['reff_output'] == True:
             # fig,ax = plot.jointhist([ndrop_hiscale,nd_sat_hiscale,nd_m_hiscale,nd_m2_hiscale],
             #                         [reff_hiscale,reff_sat_hiscale,reff_m_hiscale,reff_m2_hiscale],
             #                     title=['Ground','Satellite','E3SMv1','E3SMv2']),
-            fig,ax = plot.jointhist([ndrop_hiscale, ndarm_m_hiscale, nd_m_hiscale], [reff_hiscale, reff_m_hiscale, reff_m_hiscale], title=['Ground','Model (ARM Nd)','Model'],
+            fig,ax = plot.jointhist([ndrop_hiscale, nd_m_hiscale, ndarm_m_hiscale], [reff_hiscale, reff_m_hiscale, reff_m_hiscale], title=['Ground','Model','Model (ARM Nd)'],
                                 xedges=np.arange(0,300,20),yedges=np.arange(4,25,1), normalize_x=True,
                                 xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m)', vmax=0.25)
             fig.savefig(figpath+'jointhist_Reff_Nd_ARM_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
@@ -1136,12 +1136,12 @@ if config['tau3d_output'] == True:
             fig.savefig(figpath+'jointhist_COD_Nd_ARM_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             
 if config['cosp_output'] == True:
-            fig,ax = plot.jointhist([nd_sat_hiscale, nd_modis_m_hiscale, nd_m_hiscale], [reff_sat_hiscale, reff_modis_m_hiscale, reff_modis_m_hiscale], title=['Satellite','Model (COSP)','Model'],
+            fig,ax = plot.jointhist([nd_sat_hiscale, nd_m_hiscale, nd_modis_m_hiscale], [reff_sat_hiscale, reff_modis_m_hiscale, reff_modis_m_hiscale], title=['Satellite','Model','Model (COSP)'],
                                 xedges=np.arange(0,300,20),yedges=np.arange(4,25,1), normalize_x=True,
                                 xlabel='Nd (cm$^{-3}$)', ylabel='Reff ($\mu$m)', vmax=0.25)
             fig.savefig(figpath+'jointhist_Reff_Nd_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-            fig,ax = plot.jointhist([cod_sat_hiscale, cod_modis_m_hiscale, cod_modis_m_hiscale],[lwp_sat_hiscale, lwp_modis_m_hiscale, lwp_m_hiscale], title=['Satellite','Model (COSP)','Model'],
+            fig,ax = plot.jointhist([cod_sat_hiscale, cod_modis_m_hiscale, cod_modis_m_hiscale],[lwp_sat_hiscale, lwp_m_hiscale, lwp_modis_m_hiscale], title=['Satellite','Model','Model (COSP)'],
                                 xedges=np.arange(0,40,3),yedges=np.arange(0,300,20), normalize_x=True,
                                 xlabel='Cloud Optical Depth (N/A)', ylabel='LWP (g/m$^2$)', vmax=0.25)
             fig.savefig(figpath+'jointhist_COD_Nd_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
@@ -1153,9 +1153,9 @@ if config['ccn_output'] == True:
             #                       [ccn2_hiscale.data,ccn2_hiscale.data,ccn2_m_hiscale.data,ccn2_m2_hiscale.data],
             #                     title=['Ground','Satellite','E3SMv1','E3SMv2'],
             if config['cosp_output'] == True:
-                        fig,ax = plot.scatter([ndrop_hiscale.data, nd_sat_hiscale.data, nd_m_hiscale.data, ndarm_m_hiscale.data, nd_modis_m_hiscale.data],
+                        fig,ax = plot.scatter([ndrop_hiscale.data, nd_sat_hiscale.data, nd_m_hiscale.data, nd_modis_m_hiscale.data, ndarm_m_hiscale.data],
                                               [ccn2_hiscale.data, ccn2_sat_hiscale.data, ccn2_m_hiscale.data, ccn2_m_hiscale.data, ccn2_m_hiscale.data],
-                                            title=['Ground','Satellite','Model','Model (ARM Nd)','Model (COSP Nd)'], xlimit=(0,300), ylimit=(0,600),
+                                            title=['Ground','Satellite','Model','Model (COSP Nd)','Model (ARM Nd)'], xlimit=(0,300), ylimit=(0,600),
                                             xlabel='Nd (cm$^{-3}$)', ylabel='Surface CCN (SS=0.2%) (cm$^{-3}$)', 
                                         linear_fit=True, intercept=False)
                         fig.savefig(figpath+'scatter_Nd_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
@@ -1186,14 +1186,14 @@ lwp_hiscale_sattime = lwp.sel(time=obssat_time_hiscale)
 #                       [lwp_hiscale_sattime,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale],
 #                       [albedo_hiscale,albedo_hiscale,albedo_m_hiscale,albedo_m2_hiscale],vmax=60,
 if config['cosp_output'] == True:
-            fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hiscale.data, ndarm_m_hiscale.data, nd_modis_m_hiscale.data],
-                                  [lwp_hiscale_sattime, lwp_sat_hiscale, lwp_m_hiscale, lwp_m_hiscale, lwp_modis_m_hiscale],
+            fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data, nd_m_hiscale.data, nd_modis_m_hiscale.data, ndarm_m_hiscale.data],
+                                  [lwp_hiscale_sattime, lwp_sat_hiscale, lwp_m_hiscale, lwp_modis_m_hiscale, lwp_m_hiscale],
                                   [albedo_hiscale, albedo_hiscale, albedo_m_hiscale, albedo_m_hiscale, albedo_m_hiscale],vmax=60,
                                 xedges=np.arange(0,300,20), yedges=np.arange(10,300,20),
                                 # xedges=xedges, yedges=yedges, 
                                 xlabel='Nd (cm$^{-3}$)', ylabel='LWP (g/m$^2$)', zlabel='TOA Albedo (%)',
                                 # title=['Ground','Satellite','E3SMv1','E3SMv2'])
-                                title=['Ground','Satellite','Model','Model (ARM Nd)','Model (COSP)'])
+                                title=['Ground','Satellite','Model','Model (COSP)','Model (ARM Nd)'])
 else:
             fig,ax = plot.heatmap([ndrop_hiscale_sattime.data, nd_sat_hiscale.data,nd_m_hiscale.data],
                                   [lwp_hiscale_sattime, lwp_sat_hiscale, lwp_m_hiscale],
@@ -1204,6 +1204,7 @@ else:
                                 # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                                 title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
