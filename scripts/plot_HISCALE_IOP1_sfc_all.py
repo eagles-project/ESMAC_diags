@@ -440,6 +440,17 @@ if config['tau3d_output'] == True:
             # cod_m2_hiscale[cod_m2_hiscale<2] = np.nan
             cod_m_hiscale[cod_m_hiscale>100] = np.nan
             # cod_m2_hiscale[cod_m2_hiscale>100] = np.nan
+            ndarm_m_hiscale[ndarm_m_hiscale<10] = np.nan
+            ndarm_m_hiscale[ndarm_m_hiscale>500] = np.nan
+
+if config['cosp_output'] == True:
+            lwp_modis_m_hiscale[lwp_modis_m_hiscale<20] = np.nan
+            cod_modis_m_hiscale[cod_modis_m_hiscale<2] = np.nan
+            cod_modis_m_hiscale[cod_modis_m_hiscale>100] = np.nan
+            nd_modis_m_hiscale[nd_modis_m_hiscale<10] = np.nan
+            ndarm_m_hiscale[ndarm_m_hiscale<10] = np.nan
+            nd_modis_m_hiscale[nd_modis_m_hiscale>500] = np.nan
+            ndarm_m_hiscale[ndarm_m_hiscale>500] = np.nan
 
 # unit change:
 precip_m_hiscale = precip_m_hiscale*3600*1000   # m/s to mm/hr
@@ -1204,6 +1215,7 @@ else:
                                 # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                                 title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
