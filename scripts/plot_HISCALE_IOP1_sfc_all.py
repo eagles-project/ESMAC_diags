@@ -981,7 +981,7 @@ if config['cosp_output'] == True:
             w1 = np.ones_like(nd_m_hiscale)/sum(~np.isnan(nd_m_hiscale.data))
             w2 = np.ones_like(nd_modis_m_hiscale)/sum(~np.isnan(nd_modis_m_hiscale.data))
             w3 = np.ones_like(ndarm_m_hiscale)/sum(~np.isnan(ndarm_m_hiscale.data))
-            fig,ax = plot.hist([ndrop_hiscale, nd_sat_hiscale, ndarm_m_hiscale, nd_modis_m_hiscale, nd_m_hiscale],  weights=[w0,w00,w1,w2,w3], 
+            fig,ax = plot.hist([ndrop_hiscale, nd_sat_hiscale, nd_m_hiscale, nd_modis_m_hiscale, ndarm_m_hiscale],  weights=[w0,w00,w1,w2,w3], 
                                 legend = ['Ndrop','Satellite','Model','Model (COSP)','Model (ARM)'], color=['k','gray','r','orange','purple'],
                                 title = 'Nd '+site+' '+IOP, bins=np.arange(0,410,20), ylabel='Fraction', xlabel='cm$^{-3}$')
             fig.savefig(figpath+'hist_Nd_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
@@ -990,7 +990,7 @@ if config['cosp_output'] == True:
             w00 = np.ones_like(reff_sat_hiscale)/sum(~np.isnan(reff_sat_hiscale.data))
             w1 = np.ones_like(reff_m_hiscale)/sum(~np.isnan(reff_m_hiscale.data))
             w2 = np.ones_like(reff_modis_m_hiscale)/sum(~np.isnan(reff_modis_m_hiscale.data))
-            fig,ax = plot.hist([reff_hiscale, reff_sat_hiscale, reff_modis_m_hiscale, reff_m_hiscale], weights=[w0,w00,w1,w2], 
+            fig,ax = plot.hist([reff_hiscale, reff_sat_hiscale, reff_m_hiscale, reff_modis_m_hiscale], weights=[w0,w00,w1,w2], 
                                 legend = ['MFRSR','Satellite','Model','Model (COSP)'], color=['k','gray','r','orange'],
                                 title = 'Cloud Effective Radius '+site+' '+IOP, bins=np.arange(4,28,1), ylabel='Fraction', xlabel='$\mu$m')
             fig.savefig(figpath+'hist_reff_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
@@ -1215,6 +1215,7 @@ else:
                                 # title=['Ground','Satellite','E3SMv1','E3SMv2'])
                                 title=['Ground','Satellite','Model'])
 fig.savefig(figpath+'heatmap_Albedo_vs_Nd_LWP_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
+
 
 
 
