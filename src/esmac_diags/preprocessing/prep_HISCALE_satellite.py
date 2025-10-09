@@ -669,7 +669,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dx=4, dt=3600):
     cth_new = interp_time_1d(vissttime, cth, time_new, arraytype='xarray')
     lw_new = interp_time_1d(vissttime, bb_lw, time_new, arraytype='xarray')
     sw_new = interp_time_1d(vissttime, bb_sw, time_new, arraytype='xarray')
-    albedo_new = avg_time
+    albedo_new = interp_time_1d(vissttime, bb_sw_albedo, time_new, arraytype='xarray')
     
     #%% output file
     outfile = predatapath + 'Nd_VISSTpix_HISCALE.nc'
@@ -862,6 +862,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dx=4, dt=3600):
     
     ds.to_netcdf(outfile, mode='w')
     
+
 
 
 
