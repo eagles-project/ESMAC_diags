@@ -10,7 +10,7 @@ import xarray as xr
 import pandas as pd
 import time as ttt
 import esmac_diags
-from esmac_diags.subroutines.time_resolution_change import avg_time_1d
+from esmac_diags.subroutines.time_resolution_change import avg_time_1d, interp_time_1d
 from esmac_diags.subroutines.time_format_change import datetime2cday
 from esmac_diags.subroutines.specific_data_treatment import calc_cdnc_VISST, calc_clouddepth_VISST, insolation
 
@@ -860,4 +860,5 @@ def prep_VISST_pixel(visstpixpath, predatapath, dx=4, dt=3600):
     
     ds.to_netcdf(outfile, mode='w')
     
+
 
