@@ -1145,10 +1145,10 @@ if config['reff_output'] == True:
             fig.savefig(figpath+'jointhist_Reff_Nd_ARM_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 if config['tau3d_output'] == True:
-            # fig,ax = plot.jointhist([cod_sat_hiscale,cod_sat_hiscale,cod_m_hiscale,cod_m2_hiscale],[lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale], 
+            # fig,ax = plot.jointhist([cod_hiscale,cod_sat_hiscale,cod_m_hiscale,cod_m2_hiscale],[lwp_hiscale,lwp_sat_hiscale,lwp_m_hiscale,lwp_m2_hiscale], 
             #                     title=['Ground','Satellite','E3SMv1','E3SMv2']),
-            fig,ax = plot.jointhist([cod_sat_hiscale, cod_m_hiscale],[lwp_hiscale, lwp_m_hiscale], title=['Ground','Model'],
-                                xedges=np.arange(0,45,3),yedges=np.arange(0,300,20), normalize_x=True,
+            fig,ax = plot.jointhist([cod_hiscale, cod_m_hiscale],[lwp_hiscale, lwp_m_hiscale], title=['Ground','Model'],
+                                xedges=np.arange(0,40,3),yedges=np.arange(0,300,20), normalize_x=True,
                                 xlabel='Cloud Optical Depth', ylabel='LWP (g/m$^2$)', vmax=0.25)
             fig.savefig(figpath+'jointhist_COD_Nd_ARM_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             
@@ -1159,8 +1159,8 @@ if config['cosp_output'] == True:
             fig.savefig(figpath+'jointhist_Reff_Nd_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
             fig,ax = plot.jointhist([cod_sat_hiscale, cod_modis_m_hiscale, cod_modis_m_hiscale],[lwp_sat_hiscale, lwp_m_hiscale, lwp_modis_m_hiscale], title=['Satellite','Model','Model (COSP)'],
-                                xedges=np.arange(0,45,3),yedges=np.arange(0,300,20), normalize_x=True,
-                                xlabel='Cloud Optical Depth (N/A)', ylabel='LWP (g/m$^2$)', vmax=0.25)
+                                xedges=np.arange(0,40,3),yedges=np.arange(0,300,20), normalize_x=True,
+                                xlabel='Cloud Optical Depth', ylabel='LWP (g/m$^2$)', vmax=0.25)
             fig.savefig(figpath+'jointhist_COD_Nd_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
             
 
