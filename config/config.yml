@@ -1,5 +1,5 @@
 # data paths and filenames
-model_input_path: '/pscratch/sd/a/avarble/eagles/hiscale.iop1.hremis.ne256/'  # '/pscratch/sd/m/meng/testbed_output/cus_ne30/', '../raw_data/rrm/ena_rrm/', '../raw_data/rrm/emis_rrm/', '../raw_data/rrm/nep_rrm/', '../raw_data/rrm/so_rrm/', or '../raw_data/model/'
+model_input_path: '/pscratch/sd/p/plma/e3sm_scratch/fork3/cases/2016-04-01/run/'  # '/pscratch/sd/m/meng/testbed_output/cus_ne30/', '../raw_data/rrm/ena_rrm/', '../raw_data/rrm/emis_rrm/', '../raw_data/rrm/nep_rrm/', '../raw_data/rrm/so_rrm/', or '../raw_data/model/'
 model_3d_input_filehead: 'mam4xx.h1.INSTANT.nhours_x1'       # 'cus.ne30pg2_EC30to60E2r2.eam.h1', 'cus_ne32x32pg2.eam.h1', 'scream_output.test.1hourlyINST_3Dvars_ne256.h.AVERAGE.nhours_x1', 'ena_ne32x32pg2', 'cus_emis_ne32x32pg2', 'nep_ne32x32pg2', 'so_ne32x32pg2', or 'E3SMv2_SGP_ENA_2011_2020'
 model_2d_input_filehead: 'mam4xx.h1.INSTANT.nhours_x1'       # if 2D and 3D are in the same file, then set this to be the same as model_3d_input_filehead; 'scream_output.test.1hourlyINST_2Dvars_ne256.h.AVERAGE.nhours_x1', 'cus.ne30pg2_EC30to60E2r2.eam.h1'
 model_3d_dryaerosol_input_filehead: 'mam4xx.h2.INSTANT.nhours_x1'   # if there is only a single 3D or overall model file, set this to that filename
@@ -70,7 +70,7 @@ convectiveparam: False
 rain_output: True
 
 # flag for 3D visible optical depth output
-tau3d_output: False
+tau3d_output: True
 
 # flag for column-integrated cloud drop number concentration output
 colnc_output: False
@@ -83,7 +83,7 @@ netradiation_output: False
 clrskyradiation_output: True
 
 # flag for whether thermodynamic info is outputted at 850 and 700 hPa
-midlevel_thermo_output: False
+midlevel_thermo_output: True
 
 # flag for whether cloud fraction is outputted over low, medium, and high layers
 cloudfraction_layers_output: False
@@ -164,7 +164,7 @@ PBLH: 'pbl_height'       # pbl_height, PBLH
 AOD: 'AerosolOpticalDepth550nm'  # AerosolOpticalDepth550nm, AODALL
 AODABS: 'AODABS'                 #Absorbing Aerosol Optical Depth (if aodabs_output = True)
 
-TAU3D: 'TOT_CLD_VISTAU'  # if tau3d_output = True
+TAU3D: 'dtau067'  # dtau067, TOT_CLD_VISTAU; if tau3d_output = True
 NC2D: 'CDNUMC'           # if colnc_output = True
 
 THETA850: 'PotentialTemperature_at_850hPa'  # if midlevel_thermo_output = True
