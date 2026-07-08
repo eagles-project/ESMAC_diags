@@ -208,7 +208,7 @@ swnettoa_hiscale = swnettoa.sel(time=obssat_time_hiscale)
 filename = prep_model_path +site+'_sfc.nc'
 modeldata = xr.open_dataset(filename)
 time_m = modeldata['time'].load()
-if config['aerosol_output'] == True:
+if config['composition_output'] == True:
             bc_m = modeldata['bc'].load()
             dst_m = modeldata['dst'].load()
             mom_m = modeldata['mom'].load()
@@ -216,6 +216,7 @@ if config['aerosol_output'] == True:
             ncl_m = modeldata['ncl'].load()
             so4_m = modeldata['so4'].load()
             soa_m = modeldata['soa'].load()
+if config['aerosol_output'] == True:
             ncn3_m = modeldata['NCN3'].load()
             ncn10_m = modeldata['NCN10'].load()
             ncn100_m = modeldata['NCN100'].load()
@@ -275,13 +276,14 @@ else:
             swnetsfc_m = swdnsfc_m - swupsfc_m
             swnettoa_m = swdntoa_m - swuptoa_m
 albedo_m = swuptoa_m/swdntoa_m*100
-if config['aerosol_output'] == True:
+if config['composition_output'] == True:
             org_m = pom_m + mom_m + soa_m
             bc_m_hiscale = bc_m.sel(time=model_time_hiscale)
             dst_m_hiscale = dst_m.sel(time=model_time_hiscale)
             org_m_hiscale = org_m.sel(time=model_time_hiscale)
             so4_m_hiscale = so4_m.sel(time=model_time_hiscale)
             ncl_m_hiscale = ncl_m.sel(time=model_time_hiscale)
+if config['aerosol_output'] == True:
             ncn3_m_hiscale = ncn3_m.sel(time=model_time_hiscale)
             ncn10_m_hiscale = ncn10_m.sel(time=model_time_hiscale)
             ncn100_m_hiscale = ncn100_m.sel(time=model_time_hiscale)
