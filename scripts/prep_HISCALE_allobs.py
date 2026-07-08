@@ -77,23 +77,23 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 # prepare flight data; output time in 1min (dt=60s) resolution
-print('prepare aircraft data:')
-air.prep_AMS(amspath, iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt)       # aerosol composition
-air.prep_beasd(beasdpath,iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt)    # best estimate aerosol size distribution
-air.prep_CCN(ccnairpath, iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt)       # CCN number concentration
-air.prep_CPC(cpcairpath, iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt)       # aerosol number concentration (>3 or 10nm)
-air.prep_PCASP100(pcasppath, iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt)# aerosol number concentration (>100nm)
-air.prep_mergeSD(mergeSDpath, iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt) # merged cloud size distribution
-air.prep_WCM(wcmpath, iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt)       # cloud liquid water content
+# print('prepare aircraft data:')
+# air.prep_AMS(amspath, iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt)       # aerosol composition
+# air.prep_beasd(beasdpath,iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt)    # best estimate aerosol size distribution
+# air.prep_CCN(ccnairpath, iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt)       # CCN number concentration
+# air.prep_CPC(cpcairpath, iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt)       # aerosol number concentration (>3 or 10nm)
+# air.prep_PCASP100(pcasppath, iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt)# aerosol number concentration (>100nm)
+# air.prep_mergeSD(mergeSDpath, iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt) # merged cloud size distribution
+# air.prep_WCM(wcmpath, iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt)       # cloud liquid water content
 # prepare surface data. output time in 1hr (dt=3600s) resolution
 print('prepare surface data:')
-sfc.prep_ACSM(acsmpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)            # aerosol composition
-sfc.prep_ccn(ccnsfcpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)              # CCN number concentration
-sfc.prep_CPC(cpcpath, cpcupath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)    # aerosol number concentration (>3 or 10nm)
-sfc.prep_CNsize_UHSAS(uhsaspath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)   # aerosol size distribution from UHSAS
-sfc.prep_CNsize_SMPS_IOP1(smpspath, nanosmpspath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)# aerosol size distribution from SMPS for IOP1
-sfc.prep_CNsize_SMPS_IOP2(smps_pnnl_path, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)# aerosol size distribution from SMPS for IOP2
-sfc.prep_cloud_2d(armbepath, arsclpath, prep_data_path+'surface/'+str(surface_dt)+'s/', height_out, dt=surface_dt)   # 2D cloud fraction
+# sfc.prep_ACSM(acsmpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)            # aerosol composition
+# sfc.prep_ccn(ccnsfcpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)              # CCN number concentration
+# sfc.prep_CPC(cpcpath, cpcupath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)    # aerosol number concentration (>3 or 10nm)
+# sfc.prep_CNsize_UHSAS(uhsaspath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)   # aerosol size distribution from UHSAS
+# sfc.prep_CNsize_SMPS_IOP1(smpspath, nanosmpspath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)# aerosol size distribution from SMPS for IOP1
+# sfc.prep_CNsize_SMPS_IOP2(smps_pnnl_path, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)# aerosol size distribution from SMPS for IOP2
+# sfc.prep_cloud_2d(armbepath, arsclpath, prep_data_path+'surface/'+str(surface_dt)+'s/', height_out, dt=surface_dt)   # 2D cloud fraction
 sfc.prep_cloudheight_ARSCL(arsclbndpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)   # cloud height 
 sfc.prep_totcld(armbepath, arsclbndpath, tsipath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)         # cloud fraction. from ARSCL, TSI and satellite sources
 sfc.prep_LWP(armbepath, mwrpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt) # cloud liquid water path
