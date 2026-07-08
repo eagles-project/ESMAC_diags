@@ -1876,7 +1876,8 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         variables.append(var)
     
     # all other 3D (with vertical level) variables at the lowest model level
-    variable3d_names = [config['Q'], config['T'], config['RH'], config['U'], config['V']] 
+    # variable3d_names = [config['Q'], config['T'], config['RH'], config['U'], config['V']] 
+    variable3d_names = [config['T']]
     # if config['ccn_output'] == True:
     #     variable3d_names.append(config['CCN1'])
     #     variable3d_names.append(config['CCN2'])
