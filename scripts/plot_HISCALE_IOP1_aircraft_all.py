@@ -118,6 +118,7 @@ if config['aerosol_output'] == True:
     ncn10_m = modeldata['NCN10'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
     ncn100_m = modeldata['NCN100'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
     ncn_m = modeldata['NCNall'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
+if config['composition_output'] == True:
     bc_m = modeldata['bc'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
     dst_m = modeldata['dst'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
     ncl_m = modeldata['ncl'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
@@ -126,9 +127,9 @@ if config['aerosol_output'] == True:
     so4_m = modeldata['so4'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
     soa_m = modeldata['soa'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
 if config['ccn_output'] == True:
-    # ccn1_m = modeldata['CCN3'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
+    ccn1_m = modeldata['CCN1'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
     ccn2_m = modeldata['CCN2'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
-    ccn5_m = modeldata['CCN5'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)    
+    # ccn5_m = modeldata['CCN5'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)    
 cwc_m = modeldata['cwc'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
 if config['rain_output'] == True:
     rwc_m = modeldata['rwc'].load().where(np.logical_and(modeldata.time>time1, modeldata.time<time2), drop=True)
@@ -170,7 +171,7 @@ modeldata.close()
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # specific data treatments
 
-if config['aerosol_output'] == True:
+if config['composition_output'] == True:
     # total organic in E3SM
     org_m = pom_m+mom_m+soa_m
     # org_m2 = pom_m2+mom_m2+soa_m2
@@ -218,7 +219,7 @@ if config['dsd_output'] == True:
     # nd_bin_m2 = nd_bin_m2.T/dlogDp_nd_e3sm
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if config['aerosol_output'] == True:
+if config['composition_output'] == True:
     #%% bar plot
     datagroup0 = [org,so4,nh4,no3,chl, [], []]
     datagroup1 = [org_m, so4_m, [], [], [], bc_m, dst_m]
@@ -231,7 +232,8 @@ if config['aerosol_output'] == True:
     fig,ax = plot.bar(dataall, datalabel=['Obs','Model',], xlabel=None, ylabel='unit: $\mu$g/m$^3$', 
                       title='Aerosol Composition  '+site+' '+IOP, varlabel= labelall, colorall=colorall)
     fig.savefig(figpath+'bar_composition_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-
+    
+if config['aerosol_output'] == True:
     #%% mean aerosol size distribution
     fig,ax = plot.mean_size_witherror([size_beasd, np.arange(1,3001), np.arange(1,3001)], 
                       #       [beasd,ncn_m,ncn_m2], 
@@ -260,7 +262,7 @@ if config['dsd_output'] == True:
     fig.savefig(figpath+'mean_cloud_size_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 #%% 1d histogram
-if config['aerosol_output'] == True:
+if config['composition_output'] == True:
     w0 = np.ones_like(org)/sum(~np.isnan(org.data))
     w1 = np.ones_like(org_m)/sum(~np.isnan(org_m.data))
     # w2 = np.ones_like(org_m2)/sum(~np.isnan(org_m2.data))
@@ -281,6 +283,7 @@ if config['aerosol_output'] == True:
                               ylabel='Fraction', xlabel='${\mu}$g/m$^{3}$')
     fig.savefig(figpath+'hist_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
+if config['aerosol_output'] == True:
     w0 = np.ones_like(cpc3)/sum(~np.isnan(cpc3.data))
     w1 = np.ones_like(ncn3_m)/sum(~np.isnan(ncn3_m.data))
     # w2 = np.ones_like(ncn3_m2)/sum(~np.isnan(ncn3_m2.data))
@@ -319,14 +322,14 @@ if config['ccn_output'] == True:
                         bins=np.arange(0,1500,50), ylabel='Fraction', xlabel='cm$^{-3}$')
     fig.savefig(figpath+'hist_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
-    w0 = np.ones_like(ccn5)/sum(~np.isnan(ccn5.data))
-    w1 = np.ones_like(ccn5_m)/sum(~np.isnan(ccn5_m.data))
-    # w2 = np.ones_like(ccn5_m2)/sum(~np.isnan(ccn5_m2.data))
-    # fig,ax = plot.hist([ccn5,ccn5_m, ccn5_m2], weights=[w0,w1,w2], legend = ['Obs','E3SMv1','E3SMv2'], title='CCN (SS=0.5%) '+site+' '+IOP, 
-                        # color=['k','r','b'], bins=np.arange(0,2200,100), ylabel='Fraction', xlabel='cm$^{-3}$')
-    fig,ax = plot.hist([ccn5,ccn5_m], weights=[w0,w1], legend = ['Obs','Model'], title='CCN (SS=0.5%) '+site+' '+IOP, 
-                        color=['k','r'], bins=np.arange(0,2200,100), ylabel='Fraction', xlabel='cm$^{-3}$')
-    fig.savefig(figpath+'hist_CCN5_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)    
+    # w0 = np.ones_like(ccn5)/sum(~np.isnan(ccn5.data))
+    # w1 = np.ones_like(ccn5_m)/sum(~np.isnan(ccn5_m.data))
+    # # w2 = np.ones_like(ccn5_m2)/sum(~np.isnan(ccn5_m2.data))
+    # # fig,ax = plot.hist([ccn5,ccn5_m, ccn5_m2], weights=[w0,w1,w2], legend = ['Obs','E3SMv1','E3SMv2'], title='CCN (SS=0.5%) '+site+' '+IOP, 
+    #                     # color=['k','r','b'], bins=np.arange(0,2200,100), ylabel='Fraction', xlabel='cm$^{-3}$')
+    # fig,ax = plot.hist([ccn5,ccn5_m], weights=[w0,w1], legend = ['Obs','Model'], title='CCN (SS=0.5%) '+site+' '+IOP, 
+    #                     color=['k','r'], bins=np.arange(0,2200,100), ylabel='Fraction', xlabel='cm$^{-3}$')
+    # fig.savefig(figpath+'hist_CCN5_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)    
 
 w0 = np.ones_like(lwc)/sum(~np.isnan(lwc.data))
 w1 = np.ones_like(lwc_m)/sum(~np.isnan(lwc_m.data))
@@ -361,7 +364,7 @@ if config['reff_output'] == True:
     fig.savefig(figpath+'hist_Reff_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 #%% percentiles with height
-if config['aerosol_output'] == True:
+if config['composition_output'] == True:
     # fig,ax = plot.percentile_z([org,org_m,org_m2], [height,height,height], 
                           # height_bin, figsize=(3,8), title='Organic',color=['k','r','b'],
                           # xlabel='$\mu$g/m$^3$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
@@ -377,6 +380,7 @@ if config['aerosol_output'] == True:
                           xlabel='$\mu$g/m$^3$', ylabel='height (m)', legend = ['Obs', 'Model'], )
     fig.savefig(figpath+'percentile_z_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
+if config['aerosol_output'] == True:
     # fig,ax = plot.percentile_z([cpc3,ncn3_m,ncn3_m2], [height,height,height], 
                           # height_bin, figsize=(3,8), title='CN (>3nm)',color=['k','r','b'],
                           # xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
@@ -407,13 +411,13 @@ if config['ccn_output'] == True:
                           height_bin, figsize=(3,8), title='CCN (0.2%)',color=['k','r'],
                           xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'Model'], )
     fig.savefig(figpath+'percentile_z_CCN2_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-    # fig,ax = plot.percentile_z([ccn5,ccn5_m,ccn5_m2], [height,height,height], 
-                          # height_bin, figsize=(3,8), title='CCN (0.5%)',color=['k','r','b'],
-                          # xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
-    fig,ax = plot.percentile_z([ccn5,ccn5_m], [height,height,height], 
-                          height_bin, figsize=(3,8), title='CCN (0.5%)',color=['k','r'],
-                          xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'Model'], )
-    fig.savefig(figpath+'percentile_z_CCN5_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)    
+    # # fig,ax = plot.percentile_z([ccn5,ccn5_m,ccn5_m2], [height,height,height], 
+    #                       # height_bin, figsize=(3,8), title='CCN (0.5%)',color=['k','r','b'],
+    #                       # xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'E3SMv1', 'E3SMv2'], )
+    # fig,ax = plot.percentile_z([ccn5,ccn5_m], [height,height,height], 
+    #                       height_bin, figsize=(3,8), title='CCN (0.5%)',color=['k','r'],
+    #                       xlabel='cm$^{-3}$', ylabel='height (m)', legend = ['Obs', 'Model'], )
+    # fig.savefig(figpath+'percentile_z_CCN5_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)    
 
 # fig,ax = plot.percentile_z([lwc, lwc_m, lwc_m2], [height,height,height], 
                       # height_bin, figsize=(3,8), title='LWC',color=['k','r','b'],
