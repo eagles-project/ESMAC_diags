@@ -1357,7 +1357,7 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     pz = xr.DataArray(data=p_z_new,  dims=[config['time_dim'],"height"],
         coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='Pressure', units='hPa'),)
-    varnames_z = [ 'P_z', 'cloud_z', 'T_z', 'theta_z', 'Q_z', 'RH_z' ]
+    varnames_z = [ 'P_z', 'cloud_z', 'T_z', 'theta_z']#, 'Q_z', 'RH_z' ]
     variables_z = [ pz, cz, tz, thz]#, qz, rhz]
     #
     l700 = xr.DataArray(data=LTS700_new,  dims=[config['time_dim']],
