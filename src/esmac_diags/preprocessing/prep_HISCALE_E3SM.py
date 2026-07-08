@@ -1126,7 +1126,7 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     Ts = e3smdata2d[config['TS']+E3SMdomain_range][:,x_idx].load()
     if config['midlevel_thermo_output'] == True:
         theta700 = e3smdata2d[config['THETA700']+E3SMdomain_range][:,x_idx].load()
-        theta850 = e3smdata2d[config['THETA850']+E3SMdomain_range][:,x_idx].load()
+        # theta850 = e3smdata2d[config['THETA850']+E3SMdomain_range][:,x_idx].load()
                         
     if config['pres_output'] == False:
         p0 = e3smdata3d[config['P0']].load()
@@ -1179,14 +1179,14 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
             print(lev_out[idx700])
             raise ValueError('the index of 700hPa has changed! check idx')
         LTS700 = theta_p[:, idx700] - theta_s    
-        idx850 = 33
-        if lev_out[idx850]!=850:
-            print(lev_out[idx850])
-            raise ValueError('the index of 850hPa has changed! check idx')
-        LTS850 = theta_p[:, idx850] - theta_s
+        # idx850 = 33
+        # if lev_out[idx850]!=850:
+        #     print(lev_out[idx850])
+        #     raise ValueError('the index of 850hPa has changed! check idx')
+        # LTS850 = theta_p[:, idx850] - theta_s
     if config['midlevel_thermo_output'] == True:
         LTS700 = theta700 - theta_s
-        LTS850 = theta850 - theta_s 
+        # LTS850 = theta850 - theta_s 
     
     #%%  add data for each day
     # for file in lst[1:]:
@@ -1214,7 +1214,7 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
         Ts = e3smdata2d[config['TS']+E3SMdomain_range][:, x_idx].load()
         if config['midlevel_thermo_output'] == True:
             theta700_2 = e3smdata2d[config['THETA700']+E3SMdomain_range][:,x_idx].load()
-            theta850_2 = e3smdata2d[config['THETA850']+E3SMdomain_range][:,x_idx].load()
+            # theta850_2 = e3smdata2d[config['THETA850']+E3SMdomain_range][:,x_idx].load()
       
         if config['pres_output'] == False:
             levm = 0.01* (ps*hybm + hyam*p0)  # hPa
@@ -1262,10 +1262,10 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
         # lower tropospheric stability (theta diff between sfc and 700hPa)
         if config['midlevel_thermo_output'] == False:
             LTS700_2 = theta_p2[:, idx700] - theta_s2   
-            LTS850_2 = theta_p2[:, idx850] - theta_s2
+            # LTS850_2 = theta_p2[:, idx850] - theta_s2
         if config['midlevel_thermo_output'] == True:
             LTS700_2 = theta700_2 - theta_s2   
-            LTS850_2 = theta850_2 - theta_s2
+            # LTS850_2 = theta850_2 - theta_s2
            
         # combine data
         cloud_p = np.vstack((cloud_p,cloud_p2))
@@ -1366,8 +1366,8 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     l850 = xr.DataArray(data=LTS850_new,  dims=[config['time_dim']],
         coords=dict(time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='lower troposphere stability (850hPa theta - surface theta)', units='K'),)
-    varnames_1d = [ 'LTS700', 'LTS850']
-    variables_1d = [l700, l850]
+    varnames_1d = [ 'LTS700']#, 'LTS850']
+    variables_1d = [l700]#, l850]
     
     # %% output extacted file
     print('\nWriting file')
