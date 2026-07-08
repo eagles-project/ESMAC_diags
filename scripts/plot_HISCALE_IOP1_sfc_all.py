@@ -471,7 +471,7 @@ precip_m_hiscale[precip_m_hiscale<0.02] = 0
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if config['aerosol_output'] == True:
+if config['composition_output'] == True:
             #%% bar plot
             datagroup0 = [org_hiscale,so4_hiscale,nh4_hiscale,no3_hiscale,chl_hiscale, [], []]
             datagroup1 = [org_m_hiscale, so4_m_hiscale, [], [], [], bc_m_hiscale, dst_m_hiscale]
@@ -503,7 +503,8 @@ if config['aerosol_output'] == True:
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
             ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
             fig.savefig(figpath+'timeseries_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-            
+
+if config['aerosol_output'] == True:
             # fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale,model_time_hiscale], [cpc3_hiscale,ncn3_m_hiscale,ncn3_m2_hiscale], 
             #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
             fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale], [cpc3_hiscale,ncn3_m_hiscale], 
@@ -592,7 +593,7 @@ fig.savefig(figpath+'timeseries_precip_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_in
 #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
 fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale], [lwnetsfc_hiscale,lwnetsfc_m_hiscale], 
                           legend = ['Obs','Model'], color=['k','r'], 
-                        title='Sfc. net LW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
+                        title='Sfc Net LW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
 ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
 ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 fig.savefig(figpath+'timeseries_LWsfc_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
@@ -601,7 +602,7 @@ fig.savefig(figpath+'timeseries_LWsfc_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inc
 #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
 fig,ax = plot.timeseries([obssfc_time_hiscale,model_time_hiscale], [swnetsfc_hiscale,swnetsfc_m_hiscale], 
                           legend = ['Obs','Model'], color=['k','r'], 
-                        title='Sfc. net SW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
+                        title='Sfc Net SW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
 ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
 ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 fig.savefig(figpath+'timeseries_SWsfc_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
@@ -611,7 +612,7 @@ if config['netradiation_output'] == True:
             #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
             fig,ax = plot.timeseries([obssat_time_hiscale,model_time_hiscale], [lwnettoa_hiscale,lwnettoa_m_hiscale], 
                                       legend = ['Obs','Model'], color=['k','r'], 
-                                    title='TOA. net LW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
+                                    title='TOA Net LW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
             ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
             fig.savefig(figpath+'timeseries_LWtoa_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
@@ -620,7 +621,7 @@ if config['netradiation_output'] == True:
 #                           legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
 fig,ax = plot.timeseries([obssat_time_hiscale,model_time_hiscale], [swnettoa_hiscale,swnettoa_m_hiscale], 
                           legend = ['Obs','Model'], color=['k','r'], 
-                        title='TOA. net SW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
+                        title='TOA Net SW Flux '+site+' '+IOP, figsize=(10,3), xlabel=None, ylabel='W/m$^2$')
 ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
 ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 fig.savefig(figpath+'timeseries_SWtoa_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
@@ -629,7 +630,7 @@ fig.savefig(figpath+'timeseries_SWtoa_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inc
 #                         legend = ['ARSCL','TSI','E3SMv1','E3SMv2'], color=['k','gray','r','b'],
 fig,ax = plot.timeseries([obssfc_time_hiscale,obssfc_time_hiscale,model_time_hiscale], [cld_arscl_hiscale,cld_tsi_hiscale,cld_m_hiscale], 
                         legend = ['ARSCL','TSI','Model'], color=['k','gray','r'],
-                        title='Cloud fraction '+site+' '+IOP,xlabel=None, ylabel="%")
+                        title='Cloud Fraction '+site+' '+IOP,xlabel=None, ylabel="%")
 ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
 ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
 fig.savefig(figpath+'timeseries_totcld_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
@@ -693,7 +694,7 @@ fig.savefig(figpath+'cloud_2d_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tig
 
 
 #%% diurnal cycle
-if config['aerosol_output'] == True:
+if config['composition_output'] == True:
             # fig,ax = plot.diurnalcycle([org_hiscale,org_m_hiscale,org_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
             fig,ax = plot.diurnalcycle([org_hiscale,org_m_hiscale], legend = ['Obs','Model'], color=['k','r'], 
                                       title='Organic '+site+' '+IOP, xlabel='Time (UTC)', ylabel='${\mu}$g/m$^{3}$')
@@ -703,7 +704,8 @@ if config['aerosol_output'] == True:
             fig,ax = plot.diurnalcycle([so4_hiscale,so4_m_hiscale], legend = ['Obs','Model'], color=['k','r'], 
                                       title='Sulfate '+site+' '+IOP, xlabel='Time (UTC)', ylabel='${\mu}$g/m$^{3}$')
             fig.savefig(figpath+'diurnalcycle_so4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
-            
+
+if config['aerosol_output'] == True:
             # fig,ax = plot.diurnalcycle([cpc3_hiscale,ncn3_m_hiscale,ncn3_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
             fig,ax = plot.diurnalcycle([cpc3_hiscale,ncn3_m_hiscale], legend = ['Obs','Model'], color=['k','r'], 
                                     title='CN(>3nm) '+site+' '+IOP, xlabel='Time (UTC)', ylabel='cm$^{-3}$')
@@ -765,23 +767,23 @@ fig.savefig(figpath+'diurnalcycle_precip_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_
 
 # fig,ax = plot.diurnalcycle([lwnetsfc_hiscale,lwnetsfc_m_hiscale,lwnetsfc_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
 fig,ax = plot.diurnalcycle([lwnetsfc_hiscale,lwnetsfc_m_hiscale], legend = ['Obs','Model'], color=['k','r'], 
-                        title='Sfc. net LW Flux '+site+' '+IOP, xlabel='Time (UTC)',ylabel='W/m$^2$')
+                        title='Sfc Net LW Flux '+site+' '+IOP, xlabel='Time (UTC)',ylabel='W/m$^2$')
 fig.savefig(figpath+'diurnalcycle_LWsfc_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 # fig,ax = plot.diurnalcycle([swnetsfc_hiscale,swnetsfc_m_hiscale,swnetsfc_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
 fig,ax = plot.diurnalcycle([swnetsfc_hiscale,swnetsfc_m_hiscale], legend = ['Obs','Model'], color=['k','r'], 
-                        title='Sfc. net SW Flux '+site+' '+IOP, xlabel='Time (UTC)', ylabel='W/m$^2$')
+                        title='Sfc Net SW Flux '+site+' '+IOP, xlabel='Time (UTC)', ylabel='W/m$^2$')
 fig.savefig(figpath+'diurnalcycle_SWsfc_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 if config['netradiation_output'] == True:
             # fig,ax = plot.diurnalcycle([lwnettoa_hiscale,lwnettoa_m_hiscale,lwnettoa_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
             fig,ax = plot.diurnalcycle([lwnettoa_hiscale,lwnettoa_m_hiscale], legend = ['Obs','Model'], color=['k','r'], 
-                                    title='TOA. net LW Flux '+site+' '+IOP, xlabel='Time (UTC)', ylabel='W/m$^2$')
+                                    title='TOA Net LW Flux '+site+' '+IOP, xlabel='Time (UTC)', ylabel='W/m$^2$')
             fig.savefig(figpath+'diurnalcycle_LWtoa_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 # fig,ax = plot.diurnalcycle([swnettoa_hiscale,swnettoa_m_hiscale,swnettoa_m2_hiscale], legend = ['Obs','E3SMv1','E3SMv2'], color=['k','r','b'], 
 fig,ax = plot.diurnalcycle([swnettoa_hiscale,swnettoa_m_hiscale], legend = ['Obs','Model'], color=['k','r'], 
-                        title='TOA. net SW Flux '+site+' '+IOP, xlabel='Time (UTC)', ylabel='W/m$^2$')
+                        title='TOA Net SW Flux '+site+' '+IOP, xlabel='Time (UTC)', ylabel='W/m$^2$')
 fig.savefig(figpath+'diurnalcycle_SWtoa_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)
 
 # fig,ax = plot.diurnalcycle([cld_arscl_hiscale,cld_tsi_hiscale,cld_m_hiscale,cld_m2_hiscale],
@@ -833,7 +835,7 @@ if config['cosp_output'] == True:
             fig.savefig(figpath+'diurnalcycle_reff_cosp_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)            
 
 #%% 1d histogram
-if config['aerosol_output'] == True:
+if config['composition_output'] == True:
             w1 = np.ones_like(org_hiscale)/sum(~np.isnan(org_hiscale.data))
             w2 = np.ones_like(org_m_hiscale)/sum(~np.isnan(org_m_hiscale.data))
             # w3 = np.ones_like(org_m2_hiscale)/sum(~np.isnan(org_m2_hiscale.data))
@@ -853,7 +855,8 @@ if config['aerosol_output'] == True:
                                 legend =['Obs','Model',], color=['k','r'],
                                 title = 'Sulfate '+site+' '+IOP, ylabel='Fraction', xlabel='${\mu}$g/m$^{3}$')
             fig.savefig(figpath+'hist_SO4_'+site+'_'+IOP+'.png',dpi=fig.dpi,bbox_inches='tight', pad_inches=1)            
-            
+
+if config['aerosol_output'] == True:
             w0 = np.ones_like(cpc10_hiscale)/sum(~np.isnan(cpc10_hiscale.data))
             w1 = np.ones_like(ncn10_m_hiscale)/sum(~np.isnan(ncn10_m_hiscale.data))
             # w2 = np.ones_like(ncn10_m2_hiscale)/sum(~np.isnan(ncn10_m2_hiscale.data))
