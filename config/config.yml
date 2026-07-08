@@ -45,6 +45,7 @@ latlon_dimensions: 1
 
 # flag for model aerosol variables output
 aerosol_output: True
+composition_output: False
 ccn_output: True
 dgnum_output_combined: True
 
