@@ -1281,7 +1281,7 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
         # Q_z = np.vstack((Q_z,Q_z2))
         p_z = np.vstack((p_z,p_z2))
         LTS700 = np.hstack((LTS700,LTS700_2))
-        LTS850 = np.hstack((LTS850,LTS850_2))
+        # LTS850 = np.hstack((LTS850,LTS850_2))
         
     #%% re-shape the data into pre-defined resolution
     
