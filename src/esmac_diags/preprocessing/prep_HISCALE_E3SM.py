@@ -1312,8 +1312,8 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     p_z_new = f(np.int64(time_new))
     f = interp1d(np.int64(e3smtime), LTS700, axis=0, bounds_error=False)
     LTS700_new = f(np.int64(time_new))
-    f = interp1d(np.int64(e3smtime), LTS850, axis=0, bounds_error=False)
-    LTS850_new = f(np.int64(time_new))
+    # f = interp1d(np.int64(e3smtime), LTS850, axis=0, bounds_error=False)
+    # LTS850_new = f(np.int64(time_new))
     
         
     # put all variables into the list
@@ -1363,9 +1363,9 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     l700 = xr.DataArray(data=LTS700_new,  dims=[config['time_dim']],
         coords=dict(time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='lower troposphere stability (700hPa theta - surface theta)', units='K'),)
-    l850 = xr.DataArray(data=LTS850_new,  dims=[config['time_dim']],
-        coords=dict(time=([config['time_dim']], time_new), ),
-        attrs=dict(long_name='lower troposphere stability (850hPa theta - surface theta)', units='K'),)
+    # l850 = xr.DataArray(data=LTS850_new,  dims=[config['time_dim']],
+    #     coords=dict(time=([config['time_dim']], time_new), ),
+    #     attrs=dict(long_name='lower troposphere stability (850hPa theta - surface theta)', units='K'),)
     varnames_1d = [ 'LTS700']#, 'LTS850']
     variables_1d = [l700]#, l850]
     
