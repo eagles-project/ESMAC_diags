@@ -458,7 +458,7 @@ if config['cosp_output'] == True:
 # unit change:
 precip_m_hiscale = precip_m_hiscale*3600*1000   # m/s to mm/hr
 # precip_m2_hiscale = precip_m2_hiscale*3600*1000   # m/s to mm/hr
-cloud_m_hiscale = cloud_m_hiscale*100  # fraction to %
+cloud_m_hiscale = cloud_m_hiscale#*100  # fraction to %
 # cloud_m2_hiscale = cloud_m2_hiscale*100  # fraction to %
 # cloud_2d_hiscale = cloud_2d_hiscale*100  # fraction to %
 height_o = height_o.data*0.001   # m to km
