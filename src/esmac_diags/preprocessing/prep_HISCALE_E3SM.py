@@ -1116,10 +1116,10 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     hyam = e3smdata3d[config['HYAM']].load()
     hybm = e3smdata3d[config['HYBM']].load()
     T = e3smdata3d[config['T']+E3SMdomain_range][:,:,x_idx].load()
-    Q = e3smdata3d[config['Q']+E3SMdomain_range][:,:,x_idx].load()
-    U = e3smdata3d[config['U']+E3SMdomain_range][:,:,x_idx].load()
-    V = e3smdata3d[config['V']+E3SMdomain_range][:,:,x_idx].load()
-    RH = e3smdata3d[config['RH']+E3SMdomain_range][:,:,x_idx].load()
+    # Q = e3smdata3d[config['Q']+E3SMdomain_range][:,:,x_idx].load()
+    # U = e3smdata3d[config['U']+E3SMdomain_range][:,:,x_idx].load()
+    # V = e3smdata3d[config['V']+E3SMdomain_range][:,:,x_idx].load()
+    # RH = e3smdata3d[config['RH']+E3SMdomain_range][:,:,x_idx].load()
     cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
                         
     ps = e3smdata2d[config['PS']+E3SMdomain_range][:,x_idx].load()
@@ -1145,31 +1145,31 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     # interpolate data into pressure coordinate
     cloud_p = np.empty((cloud.shape[0],len(lev_out)))
     T_p = np.empty((T.shape[0],len(lev_out)))
-    Q_p = np.empty((Q.shape[0],len(lev_out)))
-    RH_p = np.empty((RH.shape[0],len(lev_out)))
+    # Q_p = np.empty((Q.shape[0],len(lev_out)))
+    # RH_p = np.empty((RH.shape[0],len(lev_out)))
     theta_p = np.empty((T.shape[0],len(lev_out)))
     z_p = np.empty((T.shape[0],len(lev_out)))
     for i in range(len(e3smtime)):
         cloud_p[i,:] = np.interp(lev_out,levm[i,:],cloud[i,:])
         T_p[i,:] = np.interp(lev_out,levm[i,:],T[i,:])
-        Q_p[i,:] = np.interp(lev_out,levm[i,:],Q[i,:])
-        RH_p[i,:] = np.interp(lev_out,levm[i,:],RH[i,:])
+        # Q_p[i,:] = np.interp(lev_out,levm[i,:],Q[i,:])
+        # RH_p[i,:] = np.interp(lev_out,levm[i,:],RH[i,:])
         theta_p[i,:] = np.interp(lev_out,levm[i,:],theta[i,:])
         z_p[i,:] = np.interp(lev_out,levm[i,:],z3[i,:])
             
     # interpolate data into height coordinate. flip model data since numpy.interp only works for increasing dimension
     cloud_z = np.empty((len(e3smtime),len(height_out)))
     T_z = np.empty((len(e3smtime),len(height_out)))
-    RH_z = np.empty((len(e3smtime),len(height_out)))
+    # RH_z = np.empty((len(e3smtime),len(height_out)))
     theta_z = np.empty((len(e3smtime),len(height_out)))
-    Q_z = np.empty((len(e3smtime),len(height_out)))
+    # Q_z = np.empty((len(e3smtime),len(height_out)))
     p_z = np.empty((len(e3smtime),len(height_out)))
     for i in range(len(e3smtime)):
         cloud_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(cloud[i,:]))
         T_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(T[i,:]))
-        RH_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(RH[i,:]))
+        # RH_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(RH[i,:]))
         theta_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(theta[i,:]))
-        Q_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(Q[i,:]))
+        # Q_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(Q[i,:]))
         p_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(levm[i,:]))
         
     # lower tropospheric stability (theta diff between sfc and 700hPa)
@@ -1204,10 +1204,10 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
         
         z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,x_idx].load()
         T = e3smdata3d[config['T']+E3SMdomain_range][:,:,x_idx].load()
-        Q = e3smdata3d[config['Q']+E3SMdomain_range][:,:,x_idx].load()
-        U = e3smdata3d[config['U']+E3SMdomain_range][:,:,x_idx].load()
-        V = e3smdata3d[config['V']+E3SMdomain_range][:,:,x_idx].load()
-        RH = e3smdata3d[config['RH']+E3SMdomain_range][:,:,x_idx].load()
+        # Q = e3smdata3d[config['Q']+E3SMdomain_range][:,:,x_idx].load()
+        # U = e3smdata3d[config['U']+E3SMdomain_range][:,:,x_idx].load()
+        # V = e3smdata3d[config['V']+E3SMdomain_range][:,:,x_idx].load()
+        # RH = e3smdata3d[config['RH']+E3SMdomain_range][:,:,x_idx].load()
         cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
 
         ps = e3smdata2d[config['PS']+E3SMdomain_range][:, x_idx].load()
@@ -1232,31 +1232,31 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
         # interpolate data into pressure coordinate
         cloud_p2 = np.empty((len(e3smtime_i),len(lev_out)))
         T_p2 = np.empty((len(e3smtime_i),len(lev_out)))
-        Q_p2 = np.empty((len(e3smtime_i),len(lev_out)))
-        RH_p2 = np.empty((len(e3smtime_i),len(lev_out)))
+        # Q_p2 = np.empty((len(e3smtime_i),len(lev_out)))
+        # RH_p2 = np.empty((len(e3smtime_i),len(lev_out)))
         theta_p2 = np.empty((len(e3smtime_i),len(lev_out)))
         z_p2 = np.empty((T.shape[0],len(lev_out)))
         for i in range(len(e3smtime_i)):
             cloud_p2[i,:] = np.interp(lev_out,levm[i,:],cloud[i,:])
             T_p2[i,:] = np.interp(lev_out,levm[i,:],T[i,:])
-            Q_p2[i,:] = np.interp(lev_out,levm[i,:],Q[i,:])
-            RH_p2[i,:] = np.interp(lev_out,levm[i,:],RH[i,:])
+            # Q_p2[i,:] = np.interp(lev_out,levm[i,:],Q[i,:])
+            # RH_p2[i,:] = np.interp(lev_out,levm[i,:],RH[i,:])
             theta_p2[i,:] = np.interp(lev_out,levm[i,:],theta[i,:])
             z_p2[i,:] = np.interp(lev_out,levm[i,:],z3[i,:])
         
         # interpolate data into height coordinate
         cloud_z2 = np.empty((len(e3smtime_i),len(height_out)))
         T_z2 = np.empty((len(e3smtime_i),len(height_out)))
-        RH_z2 = np.empty((len(e3smtime_i),len(height_out)))
+        # RH_z2 = np.empty((len(e3smtime_i),len(height_out)))
         theta_z2 = np.empty((len(e3smtime_i),len(height_out)))
-        Q_z2 = np.empty((len(e3smtime_i),len(height_out)))
+        # Q_z2 = np.empty((len(e3smtime_i),len(height_out)))
         p_z2 = np.empty((len(e3smtime_i),len(height_out)))
         for i in range(len(e3smtime_i)):
             cloud_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(cloud[i,:]))
             T_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(T[i,:]))
-            RH_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(RH[i,:]))
+            # RH_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(RH[i,:]))
             theta_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(theta[i,:]))
-            Q_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(Q[i,:]))
+            # Q_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(Q[i,:]))
             p_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(levm[i,:]))
             
         # lower tropospheric stability (theta diff between sfc and 700hPa)
@@ -1270,15 +1270,15 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
         # combine data
         cloud_p = np.vstack((cloud_p,cloud_p2))
         T_p = np.vstack((T_p,T_p2))
-        Q_p = np.vstack((Q_p,Q_p2))
-        RH_p = np.vstack((RH_p,RH_p2))
+        # Q_p = np.vstack((Q_p,Q_p2))
+        # RH_p = np.vstack((RH_p,RH_p2))
         theta_p = np.vstack((theta_p,theta_p2))
         z_p = np.vstack((z_p,z_p2))
         cloud_z = np.vstack((cloud_z,cloud_z2))
         T_z = np.vstack((T_z,T_z2))
-        RH_z = np.vstack((RH_z,RH_z2))
+        # RH_z = np.vstack((RH_z,RH_z2))
         theta_z = np.vstack((theta_z,theta_z2))
-        Q_z = np.vstack((Q_z,Q_z2))
+        # Q_z = np.vstack((Q_z,Q_z2))
         p_z = np.vstack((p_z,p_z2))
         LTS700 = np.hstack((LTS700,LTS700_2))
         LTS850 = np.hstack((LTS850,LTS850_2))
@@ -1290,10 +1290,10 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     cloud_p_new = f(np.int64(time_new))
     f = interp1d(np.int64(e3smtime), T_p, axis=0, bounds_error=False)
     T_p_new = f(np.int64(time_new))
-    f = interp1d(np.int64(e3smtime), Q_p, axis=0, bounds_error=False)
-    Q_p_new = f(np.int64(time_new))
-    f = interp1d(np.int64(e3smtime), RH_p, axis=0, bounds_error=False)
-    RH_p_new = f(np.int64(time_new))
+    # f = interp1d(np.int64(e3smtime), Q_p, axis=0, bounds_error=False)
+    # Q_p_new = f(np.int64(time_new))
+    # f = interp1d(np.int64(e3smtime), RH_p, axis=0, bounds_error=False)
+    # RH_p_new = f(np.int64(time_new))
     f = interp1d(np.int64(e3smtime), theta_p, axis=0, bounds_error=False)
     theta_p_new = f(np.int64(time_new))
     f = interp1d(np.int64(e3smtime), z_p, axis=0, bounds_error=False)
@@ -1302,10 +1302,10 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     cloud_z_new = f(np.int64(time_new))
     f = interp1d(np.int64(e3smtime), T_z, axis=0, bounds_error=False)
     T_z_new = f(np.int64(time_new))
-    f = interp1d(np.int64(e3smtime), Q_z, axis=0, bounds_error=False)
-    Q_z_new = f(np.int64(time_new))
-    f = interp1d(np.int64(e3smtime), RH_z, axis=0, bounds_error=False)
-    RH_z_new = f(np.int64(time_new))
+    # f = interp1d(np.int64(e3smtime), Q_z, axis=0, bounds_error=False)
+    # Q_z_new = f(np.int64(time_new))
+    # f = interp1d(np.int64(e3smtime), RH_z, axis=0, bounds_error=False)
+    # RH_z_new = f(np.int64(time_new))
     f = interp1d(np.int64(e3smtime), theta_z, axis=0, bounds_error=False)
     theta_z_new = f(np.int64(time_new))
     f = interp1d(np.int64(e3smtime), p_z, axis=0, bounds_error=False)
@@ -1324,20 +1324,20 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     tp = xr.DataArray(data=T_p_new,  dims=[config['time_dim'],config['vert_dim']],
         coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=T.long_name, units=T.units),)
-    qp = xr.DataArray(data=Q_p_new,  dims=[config['time_dim'],config['vert_dim']],
-        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
-        attrs=dict(long_name=Q.long_name, units=Q.units),)
-    rhp = xr.DataArray(data=RH_p_new,  dims=[config['time_dim'],config['vert_dim']],
-        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
-        attrs=dict(long_name=RH.long_name, units=RH.units),)
+    # qp = xr.DataArray(data=Q_p_new,  dims=[config['time_dim'],config['vert_dim']],
+    #     coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
+    #     attrs=dict(long_name=Q.long_name, units=Q.units),)
+    # rhp = xr.DataArray(data=RH_p_new,  dims=[config['time_dim'],config['vert_dim']],
+    #     coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
+    #     attrs=dict(long_name=RH.long_name, units=RH.units),)
     thp = xr.DataArray(data=theta_p_new,  dims=[config['time_dim'],config['vert_dim']],
         coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='Potential Temperature', units='K'),)
     zp = xr.DataArray(data=z_p_new,  dims=[config['time_dim'],config['vert_dim']],
         coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=z3.long_name, units=z3.units),)
-    varnames_p = [ 'cloud_p', 'T_p', 'Q_p', 'RH_p', 'theta_p', 'Z_p']
-    variables_p = [   cp,      tp,     qp,    rhp,    thp,    zp]
+    varnames_p = [ 'Z_p', 'cloud_p', 'T_p', 'theta_p']#, 'Q_p', 'RH_p']
+    variables_p = [ zp, cp, tp, thp]#, qp, rhp]
     # z-level
     cz = xr.DataArray(data=cloud_z_new,  dims=[config['time_dim'],"height"],
         coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
@@ -1345,20 +1345,20 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     tz = xr.DataArray(data=T_z_new,  dims=[config['time_dim'],"height"],
         coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=T.long_name, units=T.units),)
-    qz = xr.DataArray(data=Q_z_new,  dims=[config['time_dim'],"height"],
-        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
-        attrs=dict(long_name=Q.long_name, units=Q.units),)
-    rhz = xr.DataArray(data=RH_z_new,  dims=[config['time_dim'],"height"],
-        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
-        attrs=dict(long_name=RH.long_name, units=RH.units),)
+    # qz = xr.DataArray(data=Q_z_new,  dims=[config['time_dim'],"height"],
+    #     coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
+    #     attrs=dict(long_name=Q.long_name, units=Q.units),)
+    # rhz = xr.DataArray(data=RH_z_new,  dims=[config['time_dim'],"height"],
+    #     coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
+    #     attrs=dict(long_name=RH.long_name, units=RH.units),)
     thz = xr.DataArray(data=theta_z_new,  dims=[config['time_dim'],"height"],
         coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='Potential Temperature', units='K'),)
     pz = xr.DataArray(data=p_z_new,  dims=[config['time_dim'],"height"],
         coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='Pressure', units='hPa'),)
-    varnames_z = [ 'cloud_z', 'T_z', 'Q_z', 'RH_z', 'theta_z', 'P_z']
-    variables_z = [   cz,      tz,     qz,    rhz,    thz,    pz]
+    varnames_z = [ 'P_z', 'cloud_z', 'T_z', 'theta_z', 'Q_z', 'RH_z' ]
+    variables_z = [ pz, cz, tz, thz]#, qz, rhz]
     #
     l700 = xr.DataArray(data=LTS700_new,  dims=[config['time_dim']],
         coords=dict(time=([config['time_dim']], time_new), ),
