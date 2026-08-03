@@ -47,9 +47,9 @@ from netCDF4 import Dataset
 # import warnings
 # warnings.filterwarnings("ignore")
 
-config_file = '../config/config.yml'
-stream = open(config_file, "r")
-config = yaml.full_load(stream)
+# config_file = '../config/config.yml'
+# stream = open(config_file, "r")
+# config = yaml.full_load(stream)
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
