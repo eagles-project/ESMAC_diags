@@ -89,6 +89,9 @@ midlevel_thermo_output: True
 # flag for whether cloud fraction is outputted over low, medium, and high layers
 cloudfraction_layers_output: False
 
+# flag for whether 3D total cloud fraction is properly defined
+cloudfraction3d_legit: False
+
 # flag for whether surface heat fluxes are outputted
 surfaceflux_output: False
 
@@ -109,6 +112,7 @@ U: 'U'          # u, U
 V: 'V'          # v, V
 CF: 'cldfrac_tot_for_analysis'     # cldfrac_tot_for_analysis, CLOUD
 CFLIQ: 'cldfrac_liq'  # cldfrac_liq, FREQL
+CFICE: 'cldfrac_ice_for_analysis'
 # LWC: 'LWC'      # if masscontent_output = True
 # IWC: 'IWC'      # if masscontent_output = True
 QC: 'qc'    # qc, CLDLIQ
