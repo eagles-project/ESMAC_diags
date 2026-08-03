@@ -140,7 +140,7 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
         # variable3d_names = [config['T'], config['Q'], config['U'], config['V'], config['Z'], 
         #                     config['CF'], config['CFLIQ'], config['NC'], config['NI']] #,config['QI'], config['QC']
         variable3d_names = [config['T'], config['Z'], 
-                            config['CF'], config['CFLIQ'], config['NC']]
+                            config['CF'], config['CFLIQ'], config['CFICE'], config['NC']]
         
         if config['rain_output'] == True:
             variable3d_names.append(config['QR'])
@@ -1120,7 +1120,11 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
     # U = e3smdata3d[config['U']+E3SMdomain_range][:,:,x_idx].load()
     # V = e3smdata3d[config['V']+E3SMdomain_range][:,:,x_idx].load()
     # RH = e3smdata3d[config['RH']+E3SMdomain_range][:,:,x_idx].load()
-    cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
+    if config['cloudfraction3d_legit'] == True:
+        cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
+    else:
+        cloud = e3smdata3d[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load() + e3smdata3d[config['CFICE']+E3SMdomain_range][:,:,x_idx].load()
+        cloud = cloud.where(cloud <= 1, 1) # make sure CF doesn't exceed 100%
                         
     ps = e3smdata2d[config['PS']+E3SMdomain_range][:,x_idx].load()
     Ts = e3smdata2d[config['TS']+E3SMdomain_range][:,x_idx].load()
@@ -1208,7 +1212,11 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
         # U = e3smdata3d[config['U']+E3SMdomain_range][:,:,x_idx].load()
         # V = e3smdata3d[config['V']+E3SMdomain_range][:,:,x_idx].load()
         # RH = e3smdata3d[config['RH']+E3SMdomain_range][:,:,x_idx].load()
-        cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
+        if config['cloudfraction3d_legit'] == True:
+            cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
+        else:
+            cloud = e3smdata3d[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load() + e3smdata3d[config['CFICE']+E3SMdomain_range][:,:,x_idx].load()
+            cloud = cloud.where(cloud <= 1, 1) # make sure CF doesn't exceed 100%
 
         ps = e3smdata2d[config['PS']+E3SMdomain_range][:, x_idx].load()
         Ts = e3smdata2d[config['TS']+E3SMdomain_range][:, x_idx].load()
@@ -1573,7 +1581,11 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     if len(matched_vlist) == len(req_vlist):
         print('\nAnalyzing cloud base, top, and depth')
         z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,x_idx].load()
-        cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
+        if config['cloudfraction3d_legit'] == True:
+            cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
+        else:
+            cloud = e3smdata3d[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load() + e3smdata3d[config['CFICE']+E3SMdomain_range][:,:,x_idx].load()
+            cloud = cloud.where(cloud <= 1, 1) # make sure CF doesn't exceed 100%
         dz = (z3[:,:-2].data - z3[:,2:].data)/2
         dz = np.append(dz, (z3[:,-2:-1].data+z3[:,-1:].data)/2, axis=1)
         dz = np.insert(dz,0,dz[:,0],axis=1)
@@ -2116,7 +2128,11 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         if len(matched_vlist) == len(req_vlist):
             print('\nAnalyzing cloud base, top, and depth')
             z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,x_idx].load()
-            cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
+            if config['cloudfraction3d_legit'] == True:
+                cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
+            else:
+                cloud = e3smdata3d[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load() + e3smdata3d[config['CFICE']+E3SMdomain_range][:,:,x_idx].load()
+                cloud = cloud.where(cloud <= 1, 1) # make sure CF doesn't exceed 100%
             dz = (z3[:,:-2].data - z3[:,2:].data)/2
             dz = np.append(dz, (z3[:,-2:-1].data+z3[:,-1:].data)/2, axis=1)
             dz = np.insert(dz,0,dz[:,0],axis=1)
