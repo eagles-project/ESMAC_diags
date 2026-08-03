@@ -929,13 +929,13 @@ def prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dry
         # variables_new[idx] = np.array(variables_new[idx])*1000
         # variables[idx].attrs['units']='g/m3'
       
-        # droplet number
-        idx = variable3d_names.index('ICWNC')
-        variables_new[idx] = np.array(variables_new[idx])*1e-6
-        variables[idx].attrs['units']='#/cm3'
-        idx = variable3d_names.index('ICINC')
-        variables_new[idx] = np.array(variables_new[idx])*1e-6
-        variables[idx].attrs['units']='#/cm3'
+        # # droplet number
+        # idx = variable3d_names.index('ICWNC')
+        # variables_new[idx] = np.array(variables_new[idx])*1e-6
+        # variables[idx].attrs['units']='#/cm3'
+        # idx = variable3d_names.index('ICINC')
+        # variables_new[idx] = np.array(variables_new[idx])*1e-6
+        # variables[idx].attrs['units']='#/cm3'
         
         #%% output 
         outfile = output_path + output_filehead + '_flight_'+date+'.nc'
