@@ -21,11 +21,14 @@ stream = open(config_file, "r")
 config = yaml.full_load(stream)
 
 input_path = config['model_input_path']
-input_filehead = config['model_input_filehead']
-# input_path = '../raw_data/rrm/ena_rrm/'
-# input_filehead = 'ena_ne32x32pg2'
-output_path = '../prep_data/ACEENA/model/'
-output_filehead = 'E3SMv2_ACEENA'
+input2d_filehead = config['model_2d_input_filehead']
+input3d_filehead = config['model_3d_input_filehead']
+input3d_dryaerosol_filehead = config['model_3d_dryaerosol_input_filehead']
+input3d_cloudaerosol_filehead = config['model_3d_cloudaerosol_input_filehead']
+input_cosp_filehead = config['model_cosp_input_filehead']
+
+output_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/ACEENA/model/ne256mam/'
+output_filehead = 'ACEENA'
 
 # iwg data path for aircraft information
 obs_input_path = config['obs_input_path']
@@ -45,7 +48,7 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # output time in 1min (dt=60s) resolution for flight track and 1hr (dt=3600s) for other data
-# prep.prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, iwgpath, config, dt=aircraft_dt)
-prep.prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, config, dt=surface_dt)
-# prep.prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, height_out, config, lev_out=lev_out, dt=profile_dt)
+# prep.prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dryaerosol_filehead, input3d_cloudaerosol_filehead, output_path+'flight/'+str(aircraft_dt)+'s/', output_filehead, iwgpath, dt=aircraft_dt, config=config)
+# prep.prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaerosol_filehead, input3d_cloudaerosol_filehead, input_cosp_filehead, output_path+'sfc_prof/'+str(surface_dt)+'s/', output_filehead, dt=surface_dt, config=config)
+prep.prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_path+'sfc_prof/'+str(profile_dt)+'s/', output_filehead, height_out, lev_out=lev_out, dt=profile_dt, config=config)
 
