@@ -5,6 +5,8 @@ options of average data into coarser resolution
 
 import glob
 import os
+import re
+import fnmatch
 import yaml
 import numpy as np
 import pandas as pd
