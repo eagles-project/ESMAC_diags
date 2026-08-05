@@ -2032,56 +2032,57 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
         
     # put all variables into the list
     # p-level
-    cp = xr.DataArray(data=cloud_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    cp = xr.DataArray(data=cloud_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=cloud.long_name, units=cloud.units),)
-    tp = xr.DataArray(data=T_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    tp = xr.DataArray(data=T_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=T.long_name, units=T.units),)
-    # qp = xr.DataArray(data=Q_p_new,  dims=["time","lev"],
-    #     coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    # qp = xr.DataArray(data=Q_p_new,  dims=[config['time_dim'],config['vert_dim']],
+    #     coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
     #     attrs=dict(long_name=Q.long_name, units=Q.units),)
-    # rhp = xr.DataArray(data=RH_p_new,  dims=["time","lev"],
-    #     coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    # rhp = xr.DataArray(data=RH_p_new,  dims=[config['time_dim'],config['vert_dim']],
+    #     coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
     #     attrs=dict(long_name=RH.long_name, units=RH.units),)
-    thp = xr.DataArray(data=theta_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    thp = xr.DataArray(data=theta_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='Potential Temperature', units='K'),)
-    zp = xr.DataArray(data=z_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    zp = xr.DataArray(data=z_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=z3.long_name, units=z3.units),)
     varnames_p = ['cloud_p', 'T_p', 'theta_p', 'Z_p']#, 'Q_p', 'RH_p']
     variables_p = [cp, tp, thp, zp]#, qp, rhp]
     # z-level
-    cz = xr.DataArray(data=cloud_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    cz = xr.DataArray(data=cloud_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=cloud.long_name, units=cloud.units),)
-    tz = xr.DataArray(data=T_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    tz = xr.DataArray(data=T_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=T.long_name, units=T.units),)
-    # qz = xr.DataArray(data=Q_z_new,  dims=["time","height"],
-    #     coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    # qz = xr.DataArray(data=Q_z_new,  dims=[config['time_dim'],"height"],
+    #     coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
     #     attrs=dict(long_name=Q.long_name, units=Q.units),)
-    # rhz = xr.DataArray(data=RH_z_new,  dims=["time","height"],
-    #     coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    # rhz = xr.DataArray(data=RH_z_new,  dims=[config['time_dim'],"height"],
+    #     coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
     #     attrs=dict(long_name=RH.long_name, units=RH.units),)
-    thz = xr.DataArray(data=theta_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    thz = xr.DataArray(data=theta_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='Potential Temperature', units='K'),)
-    pz = xr.DataArray(data=p_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    pz = xr.DataArray(data=p_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='Pressure', units='hPa'),)
     varnames_z = ['cloud_z', 'T_z', 'theta_z', 'P_z']#, 'Q_z', 'RH_z']
     variables_z = [cz, tz, thz, pz]#, qz, rhz]
     #
-    l700 = xr.DataArray(data=LTS700_new,  dims=["time"],
-        coords=dict(time=(["time"], time_new), ),
+    l700 = xr.DataArray(data=LTS700_new,  dims=[config['time_dim']],
+        coords=dict(time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='lower troposphere stability (700hPa theta - surface theta)', units='K'),)
-    # l850 = xr.DataArray(data=LTS850_new,  dims=["time"],
-    #     coords=dict(time=(["time"], time_new), ),
+    # l850 = xr.DataArray(data=LTS850_new,  dims=[config['time_dim']],
+    #     coords=dict(time=([config['time_dim']], time_new), ),
     #     attrs=dict(long_name='lower troposphere stability (850hPa theta - surface theta)', units='K'),)
     varnames_1d = [ 'LTS700']#, 'LTS850']
     variables_1d = [l700]#, l850]
+                        
     # add longtitude and latitude
     lon_new = xr.DataArray(data=lon_new,  dims=["time"],
         coords=dict(time=(["time"], time_new)),
