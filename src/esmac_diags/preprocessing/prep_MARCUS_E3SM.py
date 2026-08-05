@@ -1612,11 +1612,11 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
         NCNall_new = f(np.int64(time_new))
       
     # add longtitude and latitude
-    lon_new = xr.DataArray(data=lon_new,  dims=["time"],
-        coords=dict(time=(["time"], time_new)),
+    lon_new = xr.DataArray(data=lon_new,  dims=[config['time_dim']],
+        coords=dict(time=([config['time_dim']], time_new)),
         attrs=dict(long_name="longitude",units="degree_east"),)
-    lat_new = xr.DataArray(data=lat_new,  dims=["time"],
-        coords=dict(time=(["time"], time_new)),
+    lat_new = xr.DataArray(data=lat_new,  dims=[config['time_dim']],
+        coords=dict(time=([config['time_dim']], time_new)),
         attrs=dict(long_name="latitude",units="degree_north"),)
     variable_names = variable_names + ['lon','lat']
     variables_new = variables_new + [lon_new, lat_new]
