@@ -36,7 +36,7 @@ from esmac_diags.subroutines.CN_mode_to_size import calc_CNsize_cutoff_0_3000nm
 # shipmetpath = '../../../data/MARCUS/obs/ship/maraadmetX1.b1/'
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaerosol_filehead, input3d_cloudaerosol_filehead, input_cosp_filehead, output_path, output_filehead, dt=3600, config=config):
+def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaerosol_filehead, input3d_cloudaerosol_filehead, input_cosp_filehead, output_path, output_filehead, shipmetpath, dt=3600, config=config):
     """
     prepare surface (include TOA and vertical integrated) variables from E3SM output along ship tracks
     choose the grid nearest to the ship track location
@@ -1656,7 +1656,7 @@ def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaer
     ds.to_netcdf(outfile, mode='w')
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_path, output_filehead, 
+def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_path, output_filehead, shipmetpath,
                       height_out, lev_out=np.arange(25.,1001,25.), dt=3600, config=config):
     """
     prepare vertical profile (to p or to z) variables from E3SM output along ship tracks
