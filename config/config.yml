@@ -55,8 +55,8 @@ cosp_output: True
 # flag for pressure level output
 pres_output: True
 
-# # flag for hydrometeor mass output
-# masscontent_output: False
+# flag for hydrometeor mass output
+hydrowatercontent_output: False
 
 # flag for drop size distribution parameter output
 dsd_output: False
@@ -113,8 +113,8 @@ V: 'V'          # v, V
 CF: 'cldfrac_tot_for_analysis'     # cldfrac_tot_for_analysis, CLOUD
 CFLIQ: 'cldfrac_liq'  # cldfrac_liq, FREQL
 CFICE: 'cldfrac_ice_for_analysis'
-# LWC: 'LWC'      # if masscontent_output = True
-# IWC: 'IWC'      # if masscontent_output = True
+LWC: 'LWC'      # if hydrowatercontent_output = True
+IWC: 'IWC'      # if hydrowatercontent_output = True
 QC: 'qc'    # qc, CLDLIQ
 QI: 'qi'    # qi, CLDICE
 NC: 'nc'    # nc, NUMLIQ, ICWNC (in cloud)
