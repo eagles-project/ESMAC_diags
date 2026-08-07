@@ -161,15 +161,15 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
         lwc_p = np.empty((lwc.shape[0],len(lev_out)))
         iwc_p = np.empty((iwc.shape[0],len(lev_out)))
     for i in range(len(e3smtime)):
-        cloud_p[i,:] = np.interp(lev_out,levm[i,:],cloud[i,:,x_idx])
-        T_p[i,:] = np.interp(lev_out,levm[i,:],T[i,:,x_idx])
-        Q_p[i,:] = np.interp(lev_out,levm[i,:],Q[i,:,x_idx])
-        RH_p[i,:] = np.interp(lev_out,levm[i,:],RH[i,:,x_idx])
-        theta_p[i,:] = np.interp(lev_out,levm[i,:],theta[i,:,x_idx])
-        z_p[i,:] = np.interp(lev_out,levm[i,:],z3[i,:,x_idx])
+        cloud_p[i,:] = np.interp(lev_out,levm[i,:],cloud[i,:])
+        T_p[i,:] = np.interp(lev_out,levm[i,:],T[i,:])
+        Q_p[i,:] = np.interp(lev_out,levm[i,:],Q[i,:])
+        RH_p[i,:] = np.interp(lev_out,levm[i,:],RH[i,:])
+        theta_p[i,:] = np.interp(lev_out,levm[i,:],theta[i,:])
+        z_p[i,:] = np.interp(lev_out,levm[i,:],z3[i,:])
         if config['hydrowatercontent_output'] == True:
-            lwc_p[i,:] = np.interp(lev_out,levm[i,:],lwc[i,:,x_idx])
-            iwc_p[i,:] = np.interp(lev_out,levm[i,:],iwc[i,:,x_idx])
+            lwc_p[i,:] = np.interp(lev_out,levm[i,:],lwc[i,:])
+            iwc_p[i,:] = np.interp(lev_out,levm[i,:],iwc[i,:])
             
     # interpolate data into height coordinate. flip model data since numpy.interp only works for increasing dimension
     cloud_z = np.empty((len(e3smtime),len(height_out)))
@@ -182,15 +182,15 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
         lwc_z = np.empty((len(e3smtime),len(height_out)))
         iwc_z = np.empty((len(e3smtime),len(height_out)))
     for i in range(len(e3smtime)):
-        cloud_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(cloud[i,:,x_idx]))
-        T_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(T[i,:,x_idx]))
-        RH_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(RH[i,:,x_idx]))
-        theta_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(theta[i,:,x_idx]))
-        Q_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(Q[i,:,x_idx]))
-        p_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(levm[i,:]))
+        cloud_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(cloud[i,:]))
+        T_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(T[i,:]))
+        RH_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(RH[i,:]))
+        theta_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(theta[i,:]))
+        Q_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(Q[i,:,]))
+        p_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(levm[i,:]))
         if config['hydrowatercontent_output'] == True:
-            lwc_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(lwc[i,:,x_idx]))
-            iwc_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(iwc[i,:,x_idx]))
+            lwc_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(lwc[i,:]))
+            iwc_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(iwc[i,:]))
         
     # lower tropospheric stability (theta diff between sfc and 700hPa)
     if config['midlevel_thermo_output'] == False:
@@ -305,15 +305,15 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
             lwc_p2 = np.empty((lwc.shape[0],len(lev_out)))
             iwc_p2 = np.empty((iwc.shape[0],len(lev_out)))
         for i in range(len(e3smtime_i)):
-            cloud_p2[i,:] = np.interp(lev_out,levm[i,:],cloud[i,:,x_idx])
-            T_p2[i,:] = np.interp(lev_out,levm[i,:],T[i,:,x_idx])
-            Q_p2[i,:] = np.interp(lev_out,levm[i,:],Q[i,:,x_idx])
-            RH_p2[i,:] = np.interp(lev_out,levm[i,:],RH[i,:,x_idx])
-            theta_p2[i,:] = np.interp(lev_out,levm[i,:],theta[i,:,x_idx])
-            z_p2[i,:] = np.interp(lev_out,levm[i,:],z3[i,:,x_idx])
+            cloud_p2[i,:] = np.interp(lev_out,levm[i,:],cloud[i,:])
+            T_p2[i,:] = np.interp(lev_out,levm[i,:],T[i,:])
+            Q_p2[i,:] = np.interp(lev_out,levm[i,:],Q[i,:])
+            RH_p2[i,:] = np.interp(lev_out,levm[i,:],RH[i,:])
+            theta_p2[i,:] = np.interp(lev_out,levm[i,:],theta[i,:])
+            z_p2[i,:] = np.interp(lev_out,levm[i,:],z3[i,:])
             if config['hydrowatercontent_output'] == True:
-                lwc_p2[i,:] = np.interp(lev_out,levm[i,:],lwc[i,:,x_idx])
-                iwc_p2[i,:] = np.interp(lev_out,levm[i,:],iwc[i,:,x_idx])
+                lwc_p2[i,:] = np.interp(lev_out,levm[i,:],lwc[i,:])
+                iwc_p2[i,:] = np.interp(lev_out,levm[i,:],iwc[i,:])
         
         # interpolate data into height coordinate
         cloud_z2 = np.empty((len(e3smtime_i),len(height_out)))
@@ -326,15 +326,15 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
             lwc_z2 = np.empty((len(e3smtime_i),len(height_out)))
             iwc_z2 = np.empty((len(e3smtime_i),len(height_out)))
         for i in range(len(e3smtime_i)):
-            cloud_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(cloud[i,:,x_idx]))
-            T_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(T[i,:,x_idx]))
-            RH_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(RH[i,:,x_idx]))
-            theta_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(theta[i,:,x_idx]))
-            Q_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(Q[i,:,x_idx]))
-            p_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(levm[i,:]))
+            cloud_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(cloud[i,:]))
+            T_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(T[i,:]))
+            RH_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(RH[i,:]))
+            theta_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(theta[i,:]))
+            Q_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(Q[i,:]))
+            p_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(levm[i,:]))
             if config['hydrowatercontent_output'] == True:
-                lwc_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(lwc[i,:,x_idx]))
-                iwc_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(iwc[i,:,x_idx]))
+                lwc_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(lwc[i,:]))
+                iwc_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(iwc[i,:]))
             
         # lower tropospheric stability (theta diff between sfc and 700hPa)
         if config['midlevel_thermo_output'] == False:
