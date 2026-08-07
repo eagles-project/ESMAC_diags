@@ -7,7 +7,9 @@ all variables has a region appendix similar to "lat_330e_to_335e_37n_to_42n"
 
 import glob
 import os
+import re
 import fnmatch
+import yaml
 import numpy as np
 from scipy.interpolate import interp1d
 import xarray as xr
@@ -30,8 +32,8 @@ from esmac_diags.subroutines.CN_mode_to_size import calc_CNsize_cutoff_0_3000nm
 # lev_out=np.arange(25.,1001,25.)
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead, 
-                      height_out, lev_out=np.arange(25.,1001,25.), dt=3600):
+def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_path, output_filehead, 
+                      height_out, lev_out=np.arange(25.,1001,25.), dt=3600, config=config):
     """
     prepare vertical profile (to p or to z) variables from E3SM output
     choose the grid nearest to the ARM site
@@ -68,51 +70,99 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     # ENA
     lat0 = 39.09527
     lon0 = -28.0339
-    E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
+    E3SMdomain_range = config['E3SMdomain_range']    # domain range in E3SM regional output
     
     # output time range and resolution
     time_new = pd.date_range(start='2016-01-01', end='2018-12-31 23:59:00', freq=str(int(dt))+"s")  # ENA time period
     
-    #%% read in data
-    
-    lst = glob.glob(input_path + input_filehead+'.*.h?.*2016-*-00000.nc') + \
-            glob.glob(input_path + input_filehead+'.*.h?.*2017-*-00000.nc') + \
-            glob.glob(input_path + input_filehead+'.*.h?.*2018-*-00000.nc')
-    lst.sort()
+    #%% read in data  
+    # lst = glob.glob(input_path + input_filehead+'.*.h?.*2016-*-00000.nc') + \
+    #         glob.glob(input_path + input_filehead+'.*.h?.*2017-*-00000.nc') + \
+    #         glob.glob(input_path + input_filehead+'.*.h?.*2018-*-00000.nc')
+    # lst.sort()
+    lst3d = glob.glob(input_path + input3d_filehead+'.*20??-??-??-*.nc')
+    lst2d = glob.glob(input_path + input2d_filehead+'.*20??-??-??-*.nc')
+    lst3d.sort()
+    lst2d.sort()
+                        
     # first data
-    e3smdata = xr.open_dataset(lst[0])
-    e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-    lonm = e3smdata['lon'+'_'+E3SMdomain_range].load()
-    latm = e3smdata['lat'+'_'+E3SMdomain_range].load()
-    z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
-    hyam = e3smdata['hyam'].load()
-    hybm = e3smdata['hybm'].load()
-    p0 = e3smdata['P0'].load()
-    ps = e3smdata['PS'+'_'+E3SMdomain_range].load()
-    Ts = e3smdata['TREFHT'+'_'+E3SMdomain_range].load()
-    T = e3smdata['T'+'_'+E3SMdomain_range].load()
-    Q = e3smdata['Q'+'_'+E3SMdomain_range].load()
-    U = e3smdata['U'+'_'+E3SMdomain_range].load()
-    V = e3smdata['V'+'_'+E3SMdomain_range].load()
-    RH = e3smdata['RELHUM'+'_'+E3SMdomain_range].load()
-    cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
-    lwc = e3smdata['LWC'+'_'+E3SMdomain_range].load()
-    iwc = e3smdata['IWC'+'_'+E3SMdomain_range].load()
-    e3smdata.close()
+    # e3smdata = xr.open_dataset(lst[0])
+    # e3smtime = e3smdata.indexes['time'].to_datetimeindex()
+    # lonm = e3smdata['lon'+'_'+E3SMdomain_range].load()
+    # latm = e3smdata['lat'+'_'+E3SMdomain_range].load()
+    # z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
+    # hyam = e3smdata['hyam'].load()
+    # hybm = e3smdata['hybm'].load()
+    # p0 = e3smdata['P0'].load()
+    # ps = e3smdata['PS'+'_'+E3SMdomain_range].load()
+    # Ts = e3smdata['TREFHT'+'_'+E3SMdomain_range].load()
+    # T = e3smdata['T'+'_'+E3SMdomain_range].load()
+    # Q = e3smdata['Q'+'_'+E3SMdomain_range].load()
+    # U = e3smdata['U'+'_'+E3SMdomain_range].load()
+    # V = e3smdata['V'+'_'+E3SMdomain_range].load()
+    # RH = e3smdata['RELHUM'+'_'+E3SMdomain_range].load()
+    # cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
+    # lwc = e3smdata['LWC'+'_'+E3SMdomain_range].load()
+    # iwc = e3smdata['IWC'+'_'+E3SMdomain_range].load()
+    # e3smdata.close()
+    e3smdata3d = xr.open_dataset(lst3d[0])
+    e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+    e3smdata2d = xr.open_dataset(lst2d[0])
+    e3smdata2d = e3smdata2d.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
+                        
+    e3smtime = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
+    lonm = e3smdata3d[config['LON']+E3SMdomain_range].load()
+    latm = e3smdata3d[config['LAT']+E3SMdomain_range].load()    
+                        
     # only extract the model column at the site
     if lon0<0:
         lon0=lon0+360   # make longitude consistent with E3SM from 0 to 360
     x_idx = find_nearest(lonm,latm,lon0,lat0)
     
-    Pres = np.nan*T
-    zlen = T.shape[1]
-    for kk in range(zlen):
-        Pres[:, kk, :] = hyam[kk]*p0  +  hybm[kk]*ps
-    levm = 0.01* (ps[:,x_idx]*hybm + hyam*p0)  # hPa
+    # Pres = np.nan*T
+    # zlen = T.shape[1]
+    # for kk in range(zlen):
+    #     Pres[:, kk, :] = hyam[kk]*p0  +  hybm[kk]*ps
+    # levm = 0.01* (ps[:,x_idx]*hybm + hyam*p0)  # hPa
+    # # calculate theta
+    # theta = T * (1000./levm)**0.286
+    # theta_s = Ts[:, x_idx] * (100000./ps[:, x_idx])**0.286
+    z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,x_idx].load()
+    hyam = e3smdata3d[config['HYAM']].load()
+    hybm = e3smdata3d[config['HYBM']].load()
+    T = e3smdata3d[config['T']+E3SMdomain_range][:,:,x_idx].load()
+    Q = e3smdata3d[config['Q']+E3SMdomain_range][:,:,x_idx].load()
+    U = e3smdata3d[config['U']+E3SMdomain_range][:,:,x_idx].load()
+    V = e3smdata3d[config['V']+E3SMdomain_range][:,:,x_idx].load()
+    RH = e3smdata3d[config['RH']+E3SMdomain_range][:,:,x_idx].load()
+    if config['cloudfraction3d_legit'] == True:
+        cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
+    else:
+        cloud = e3smdata3d[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load() + e3smdata3d[config['CFICE']+E3SMdomain_range][:,:,x_idx].load()
+        cloud = cloud.where(cloud <= 1, 1) # make sure CF doesn't exceed 100%
+    if config['hydrowatercontent_output'] == True:
+        lwc = e3smdata3d[config['LWC']+E3SMdomain_range][:,:,x_idx].load()
+        iwc = e3smdata3d[config['IWC']+E3SMdomain_range][:,:,x_idx].load()
+                        
+    ps = e3smdata2d[config['PS']+E3SMdomain_range][:,x_idx].load()
+    Ts = e3smdata2d[config['TS']+E3SMdomain_range][:,x_idx].load()
+    if config['midlevel_thermo_output'] == True:
+        theta700 = e3smdata2d[config['THETA700']+E3SMdomain_range][:,x_idx].load()
+        theta850 = e3smdata2d[config['THETA850']+E3SMdomain_range][:,x_idx].load()
+                        
+    if config['pres_output'] == False:
+        p0 = e3smdata3d[config['P0']].load()
+        levm = 0.01* (ps*hybm + hyam*p0)  # hPa
+    else:
+        levm = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,x_idx].load()
+
+    e3smdata3d.close()
+    e3smdata2d.close()
+
     # calculate theta
     theta = T * (1000./levm)**0.286
-    theta_s = Ts[:, x_idx] * (100000./ps[:, x_idx])**0.286
-    
+    theta_s = Ts * (100000./ps)**0.286
+                        
     # interpolate data into pressure coordinate
     cloud_p = np.empty((cloud.shape[0],len(lev_out)))
     T_p = np.empty((T.shape[0],len(lev_out)))
@@ -120,17 +170,19 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     RH_p = np.empty((RH.shape[0],len(lev_out)))
     theta_p = np.empty((T.shape[0],len(lev_out)))
     z_p = np.empty((T.shape[0],len(lev_out)))
-    lwc_p = np.empty((lwc.shape[0],len(lev_out)))
-    iwc_p = np.empty((iwc.shape[0],len(lev_out)))
+    if config['hydrowatercontent_output'] == True:
+        lwc_p = np.empty((lwc.shape[0],len(lev_out)))
+        iwc_p = np.empty((iwc.shape[0],len(lev_out)))
     for i in range(len(e3smtime)):
-        cloud_p[i,:] = np.interp(lev_out,levm[i,:],cloud[i,:,x_idx])
-        T_p[i,:] = np.interp(lev_out,levm[i,:],T[i,:,x_idx])
-        Q_p[i,:] = np.interp(lev_out,levm[i,:],Q[i,:,x_idx])
-        RH_p[i,:] = np.interp(lev_out,levm[i,:],RH[i,:,x_idx])
-        theta_p[i,:] = np.interp(lev_out,levm[i,:],theta[i,:,x_idx])
-        z_p[i,:] = np.interp(lev_out,levm[i,:],z3[i,:,x_idx])
-        lwc_p[i,:] = np.interp(lev_out,levm[i,:],lwc[i,:,x_idx])
-        iwc_p[i,:] = np.interp(lev_out,levm[i,:],iwc[i,:,x_idx])
+        cloud_p[i,:] = np.interp(lev_out,levm[i,:],cloud[i,:])
+        T_p[i,:] = np.interp(lev_out,levm[i,:],T[i,:])
+        Q_p[i,:] = np.interp(lev_out,levm[i,:],Q[i,:])
+        RH_p[i,:] = np.interp(lev_out,levm[i,:],RH[i,:])
+        theta_p[i,:] = np.interp(lev_out,levm[i,:],theta[i,:])
+        z_p[i,:] = np.interp(lev_out,levm[i,:],z3[i,:])
+        if config['hydrowatercontent_output'] == True:
+            lwc_p[i,:] = np.interp(lev_out,levm[i,:],lwc[i,:])
+            iwc_p[i,:] = np.interp(lev_out,levm[i,:],iwc[i,:])
             
     # interpolate data into height coordinate. flip model data since numpy.interp only works for increasing dimension
     cloud_z = np.empty((len(e3smtime),len(height_out)))
@@ -139,39 +191,48 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     theta_z = np.empty((len(e3smtime),len(height_out)))
     Q_z = np.empty((len(e3smtime),len(height_out)))
     p_z = np.empty((len(e3smtime),len(height_out)))
-    lwc_z = np.empty((len(e3smtime),len(height_out)))
-    iwc_z = np.empty((len(e3smtime),len(height_out)))
+    if config['hydrowatercontent_output'] == True:
+        lwc_z = np.empty((len(e3smtime),len(height_out)))
+        iwc_z = np.empty((len(e3smtime),len(height_out)))
     for i in range(len(e3smtime)):
-        cloud_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(cloud[i,:,x_idx]))
-        T_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(T[i,:,x_idx]))
-        RH_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(RH[i,:,x_idx]))
-        theta_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(theta[i,:,x_idx]))
-        Q_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(Q[i,:,x_idx]))
-        p_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(levm[i,:]))
-        lwc_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(lwc[i,:,x_idx]))
-        iwc_z[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(iwc[i,:,x_idx]))
+        cloud_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(cloud[i,:]))
+        T_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(T[i,:]))
+        RH_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(RH[i,:]))
+        theta_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(theta[i,:]))
+        Q_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(Q[i,:,]))
+        p_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(levm[i,:]))
+        if config['hydrowatercontent_output'] == True:
+            lwc_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(lwc[i,:]))
+            iwc_z[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(iwc[i,:]))
         
     # lower tropospheric stability (theta diff between sfc and 700hPa)
-    idx700 = 27
-    if lev_out[idx700]!=700:
-        print(lev_out[idx700])
-        raise ValueError('the index of 700hPa has changed! check idx')
-    LTS700 = theta_p[:, idx700] - theta_s    
-    idx850 = 33
-    if lev_out[idx850]!=850:
-        print(lev_out[idx850])
-        raise ValueError('the index of 850hPa has changed! check idx')
-    LTS850 = theta_p[:, idx850] - theta_s  
+    if config['midlevel_thermo_output'] == False:
+        idx700 = 27
+        if lev_out[idx700]!=700:
+            print(lev_out[idx700])
+            raise ValueError('the index of 700hPa has changed! check idx')
+        LTS700 = theta_p[:, idx700] - theta_s    
+        idx850 = 33
+        if lev_out[idx850]!=850:
+            print(lev_out[idx850])
+            raise ValueError('the index of 850hPa has changed! check idx')
+        LTS850 = theta_p[:, idx850] - theta_s  
+    if config['midlevel_thermo_output'] == True:
+        LTS700 = theta700 - theta_s
+        LTS850 = theta850 - theta_s 
     
     # mid-level T, P, z
-    Tmid = 0.5*(T[:,0:-1,x_idx].data + T[:,1:,x_idx].data)
-    Pmid = 0.5*(Pres[:,0:-1,x_idx].data + Pres[:,1:,x_idx].data)
+    Tmid = 0.5*(T[:,0:-1].data + T[:,1:].data)
+    # Pmid = 0.5*(Pres[:,0:-1].data + Pres[:,1:].data)
+    Pmid = 0.5*(levm[:,0:-1].data + levm[:,1:].data)
+                        
     # cloud base
-    cf_sum_base = np.cumsum(cloud[:, ::-1,x_idx].data, axis=1)
+    cf_sum_base = np.cumsum(cloud[:, ::-1].data, axis=1)
     cf_sum_base[cf_sum_base > 1] = 1
     cf_sum_base_diff = cf_sum_base[:,1:] - cf_sum_base[:,0:-1]
     p_cldbase = np.sum(Pmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
     T_cldbase = np.sum(Tmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
+                        
     # normalize cloud fraction when not 100%
     p_cldbase = p_cldbase / cf_sum_base[:,-1]
     T_cldbase = T_cldbase / cf_sum_base[:,-1]
@@ -179,33 +240,71 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     thetadiff_cb = theta_cb - theta_s
     
     #%%  add data for each day
-    for file in lst[1:]:
-        print(file)
-        e3smdata = xr.open_dataset(file)
-        e3smtime_i = e3smdata.indexes['time'].to_datetimeindex()
+    # for file in lst[1:]:
+    for ii in np.arange(len(lst3d[1:]))+1:
+        # print(file)
+        # e3smdata = xr.open_dataset(file)
+        e3smdata3d = xr.open_dataset(lst3d[ii])
+        e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+        e3smdata2d = xr.open_dataset(lst2d[ii])
+        e3smdata2d = e3smdata2d.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
+      
+        e3smtime_i = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
         e3smtime = np.hstack((e3smtime, e3smtime_i))
         
-        z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
-        ps = e3smdata['PS'+'_'+E3SMdomain_range].load()
-        Ts = e3smdata['TREFHT'+'_'+E3SMdomain_range].load()
-        T = e3smdata['T'+'_'+E3SMdomain_range].load()
-        Q = e3smdata['Q'+'_'+E3SMdomain_range].load()
-        U = e3smdata['U'+'_'+E3SMdomain_range].load()
-        V = e3smdata['V'+'_'+E3SMdomain_range].load()
-        RH = e3smdata['RELHUM'+'_'+E3SMdomain_range].load()
-        cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
-        lwc = e3smdata['LWC'+'_'+E3SMdomain_range].load()
-        iwc = e3smdata['IWC'+'_'+E3SMdomain_range].load()
-        e3smdata.close()
+        # z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
+        # ps = e3smdata['PS'+'_'+E3SMdomain_range].load()
+        # Ts = e3smdata['TREFHT'+'_'+E3SMdomain_range].load()
+        # T = e3smdata['T'+'_'+E3SMdomain_range].load()
+        # Q = e3smdata['Q'+'_'+E3SMdomain_range].load()
+        # U = e3smdata['U'+'_'+E3SMdomain_range].load()
+        # V = e3smdata['V'+'_'+E3SMdomain_range].load()
+        # RH = e3smdata['RELHUM'+'_'+E3SMdomain_range].load()
+        # cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
+        # lwc = e3smdata['LWC'+'_'+E3SMdomain_range].load()
+        # iwc = e3smdata['IWC'+'_'+E3SMdomain_range].load()
+        # e3smdata.close()
         
-        Pres = np.nan*T
-        zlen = T.shape[1]
-        for kk in range(zlen):
-            Pres[:, kk, :] = hyam[kk]*p0  +  hybm[kk]*ps
-        levm = 0.01* (ps[:,x_idx]*hybm + hyam*p0)  # hPa
+        # Pres = np.nan*T
+        # zlen = T.shape[1]
+        # for kk in range(zlen):
+        #     Pres[:, kk, :] = hyam[kk]*p0  +  hybm[kk]*ps
+        # levm = 0.01* (ps[:,x_idx]*hybm + hyam*p0)  # hPa
+        # # calculate theta
+        # theta = T * (1000./levm)**0.286
+        # theta_s2 = Ts[:, x_idx] * (100000./ps[:, x_idx])**0.286
+        z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,x_idx].load()
+        T = e3smdata3d[config['T']+E3SMdomain_range][:,:,x_idx].load()
+        Q = e3smdata3d[config['Q']+E3SMdomain_range][:,:,x_idx].load()
+        U = e3smdata3d[config['U']+E3SMdomain_range][:,:,x_idx].load()
+        V = e3smdata3d[config['V']+E3SMdomain_range][:,:,x_idx].load()
+        RH = e3smdata3d[config['RH']+E3SMdomain_range][:,:,x_idx].load()
+        if config['cloudfraction3d_legit'] == True:
+            cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
+        else:
+            cloud = e3smdata3d[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load() + e3smdata3d[config['CFICE']+E3SMdomain_range][:,:,x_idx].load()
+            cloud = cloud.where(cloud <= 1, 1) # make sure CF doesn't exceed 100%
+        if config['hydrowatercontent_output'] == True:
+            lwc = e3smdata3d[config['LWC']+E3SMdomain_range][:,:,x_idx].load()
+            iwc = e3smdata3d[config['IWC']+E3SMdomain_range][:,:,x_idx].load()
+      
+        ps = e3smdata2d[config['PS']+E3SMdomain_range][:, x_idx].load()
+        Ts = e3smdata2d[config['TS']+E3SMdomain_range][:, x_idx].load()
+        if config['midlevel_thermo_output'] == True:
+            theta700_2 = e3smdata2d[config['THETA700']+E3SMdomain_range][:,x_idx].load()
+            theta850_2 = e3smdata2d[config['THETA850']+E3SMdomain_range][:,x_idx].load()
+      
+        if config['pres_output'] == False:
+            levm = 0.01* (ps*hybm + hyam*p0)  # hPa
+        else:
+            levm = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,x_idx].load()
+
+        e3smdata3d.close()
+        e3smdata2d.close()    
+          
         # calculate theta
         theta = T * (1000./levm)**0.286
-        theta_s2 = Ts[:, x_idx] * (100000./ps[:, x_idx])**0.286
+        theta_s2 = Ts * (100000./ps)**0.286
     
         # interpolate data into pressure coordinate
         cloud_p2 = np.empty((len(e3smtime_i),len(lev_out)))
@@ -214,17 +313,19 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
         RH_p2 = np.empty((len(e3smtime_i),len(lev_out)))
         theta_p2 = np.empty((len(e3smtime_i),len(lev_out)))
         z_p2 = np.empty((T.shape[0],len(lev_out)))
-        lwc_p2 = np.empty((lwc.shape[0],len(lev_out)))
-        iwc_p2 = np.empty((iwc.shape[0],len(lev_out)))
+        if config['hydrowatercontent_output'] == True:
+            lwc_p2 = np.empty((lwc.shape[0],len(lev_out)))
+            iwc_p2 = np.empty((iwc.shape[0],len(lev_out)))
         for i in range(len(e3smtime_i)):
-            cloud_p2[i,:] = np.interp(lev_out,levm[i,:],cloud[i,:,x_idx])
-            T_p2[i,:] = np.interp(lev_out,levm[i,:],T[i,:,x_idx])
-            Q_p2[i,:] = np.interp(lev_out,levm[i,:],Q[i,:,x_idx])
-            RH_p2[i,:] = np.interp(lev_out,levm[i,:],RH[i,:,x_idx])
-            theta_p2[i,:] = np.interp(lev_out,levm[i,:],theta[i,:,x_idx])
-            z_p2[i,:] = np.interp(lev_out,levm[i,:],z3[i,:,x_idx])
-            lwc_p2[i,:] = np.interp(lev_out,levm[i,:],lwc[i,:,x_idx])
-            iwc_p2[i,:] = np.interp(lev_out,levm[i,:],iwc[i,:,x_idx])
+            cloud_p2[i,:] = np.interp(lev_out,levm[i,:],cloud[i,:])
+            T_p2[i,:] = np.interp(lev_out,levm[i,:],T[i,:])
+            Q_p2[i,:] = np.interp(lev_out,levm[i,:],Q[i,:])
+            RH_p2[i,:] = np.interp(lev_out,levm[i,:],RH[i,:])
+            theta_p2[i,:] = np.interp(lev_out,levm[i,:],theta[i,:])
+            z_p2[i,:] = np.interp(lev_out,levm[i,:],z3[i,:])
+            if config['hydrowatercontent_output'] == True:
+                lwc_p2[i,:] = np.interp(lev_out,levm[i,:],lwc[i,:])
+                iwc_p2[i,:] = np.interp(lev_out,levm[i,:],iwc[i,:])
         
         # interpolate data into height coordinate
         cloud_z2 = np.empty((len(e3smtime_i),len(height_out)))
@@ -233,35 +334,44 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
         theta_z2 = np.empty((len(e3smtime_i),len(height_out)))
         Q_z2 = np.empty((len(e3smtime_i),len(height_out)))
         p_z2 = np.empty((len(e3smtime_i),len(height_out)))
-        lwc_z2 = np.empty((len(e3smtime_i),len(height_out)))
-        iwc_z2 = np.empty((len(e3smtime_i),len(height_out)))
+        if config['hydrowatercontent_output'] == True:
+            lwc_z2 = np.empty((len(e3smtime_i),len(height_out)))
+            iwc_z2 = np.empty((len(e3smtime_i),len(height_out)))
         for i in range(len(e3smtime_i)):
-            cloud_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(cloud[i,:,x_idx]))
-            T_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(T[i,:,x_idx]))
-            RH_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(RH[i,:,x_idx]))
-            theta_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(theta[i,:,x_idx]))
-            Q_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(Q[i,:,x_idx]))
-            p_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(levm[i,:]))
-            lwc_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(lwc[i,:,x_idx]))
-            iwc_z2[i,:] = np.interp(height_out,np.flip(z3[i,:,x_idx]),np.flip(iwc[i,:,x_idx]))
+            cloud_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(cloud[i,:]))
+            T_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(T[i,:]))
+            RH_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(RH[i,:]))
+            theta_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(theta[i,:]))
+            Q_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(Q[i,:]))
+            p_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(levm[i,:]))
+            if config['hydrowatercontent_output'] == True:
+                lwc_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(lwc[i,:]))
+                iwc_z2[i,:] = np.interp(height_out,np.flip(z3[i,:]),np.flip(iwc[i,:]))
             
         # lower tropospheric stability (theta diff between sfc and 700hPa)
-        LTS700_2 = theta_p2[:, idx700] - theta_s2   
-        LTS850_2 = theta_p2[:, idx850] - theta_s2  
+        if config['midlevel_thermo_output'] == False:
+            LTS700_2 = theta_p2[:, idx700] - theta_s2   
+            LTS850_2 = theta_p2[:, idx850] - theta_s2  
+        if config['midlevel_thermo_output'] == True:
+            LTS700_2 = theta700_2 - theta_s2   
+            LTS850_2 = theta850_2 - theta_s2
            
         # mid-level T, P, z
-        Tmid = 0.5*(T[:,0:-1,x_idx].data + T[:,1:,x_idx].data)
-        Pmid = 0.5*(Pres[:,0:-1,x_idx].data + Pres[:,1:,x_idx].data)
+        Tmid = 0.5*(T[:,0:-1,x_idx].data + T[:,1:].data)
+        # Pmid = 0.5*(Pres[:,0:-1,x_idx].data + Pres[:,1:].data)
+        Pmid = 0.5*(levm[:,0:-1,x_idx].data + levm[:,1:].data)
+      
         # cloud base
-        cf_sum_base = np.cumsum(cloud[:, ::-1,x_idx].data, axis=1)
+        cf_sum_base = np.cumsum(cloud[:, ::-1].data, axis=1)
         cf_sum_base[cf_sum_base > 1] = 1
         cf_sum_base_diff = cf_sum_base[:,1:] - cf_sum_base[:,0:-1]
         p_cldbase = np.sum(Pmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
         T_cldbase = np.sum(Tmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
+      
         # normalize cloud fraction when not 100%
         p_cldbase = p_cldbase / cf_sum_base[:,-1]
         T_cldbase = T_cldbase / cf_sum_base[:,-1]
-        theta_cb_2 = T_cldbase * (100000./p_cldbase)**0.286 
+        theta_cb_2 = T_cldbase * (100000./p_cldbase)**0.286
         
         # combine data
         cloud_p = np.vstack((cloud_p,cloud_p2))
@@ -270,19 +380,21 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
         RH_p = np.vstack((RH_p,RH_p2))
         theta_p = np.vstack((theta_p,theta_p2))
         z_p = np.vstack((z_p,z_p2))
-        lwc_p = np.vstack((lwc_p,lwc_p2))
-        iwc_p = np.vstack((iwc_p,iwc_p2))
         cloud_z = np.vstack((cloud_z,cloud_z2))
         T_z = np.vstack((T_z,T_z2))
         RH_z = np.vstack((RH_z,RH_z2))
         theta_z = np.vstack((theta_z,theta_z2))
         Q_z = np.vstack((Q_z,Q_z2))
         p_z = np.vstack((p_z,p_z2))
-        lwc_z = np.vstack((lwc_z,lwc_z2))
-        iwc_z = np.vstack((iwc_z,iwc_z2))
+
         LTS700 = np.hstack((LTS700,LTS700_2))
         LTS850 = np.hstack((LTS850,LTS850_2))
         thetadiff_cb = np.hstack((thetadiff_cb, theta_cb_2-theta_s2))
+        if config['hydrowatercontent_output'] == True:
+            lwc_p = np.vstack((lwc_p,lwc_p2))
+            iwc_p = np.vstack((iwc_p,iwc_p2))      
+            lwc_z = np.vstack((lwc_z,lwc_z2))
+            iwc_z = np.vstack((iwc_z,iwc_z2))
         
     #%% re-shape the data into pre-defined resolution
     
@@ -299,10 +411,6 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     theta_p_new = f(np.int64(time_new))
     f = interp1d(np.int64(e3smtime), z_p, axis=0, bounds_error=False)
     z_p_new = f(np.int64(time_new))
-    f = interp1d(np.int64(e3smtime), lwc_p, axis=0, bounds_error=False)
-    lwc_p_new = f(np.int64(time_new))
-    f = interp1d(np.int64(e3smtime), iwc_p, axis=0, bounds_error=False)
-    iwc_p_new = f(np.int64(time_new))
     f = interp1d(np.int64(e3smtime), cloud_z, axis=0, bounds_error=False)
     cloud_z_new = f(np.int64(time_new))
     f = interp1d(np.int64(e3smtime), T_z, axis=0, bounds_error=False)
@@ -315,102 +423,120 @@ def prep_E3SM_profiles(input_path, input_filehead, output_path, output_filehead,
     theta_z_new = f(np.int64(time_new))
     f = interp1d(np.int64(e3smtime), p_z, axis=0, bounds_error=False)
     p_z_new = f(np.int64(time_new))
-    f = interp1d(np.int64(e3smtime), lwc_z, axis=0, bounds_error=False)
-    lwc_z_new = f(np.int64(time_new))
-    f = interp1d(np.int64(e3smtime), iwc_z, axis=0, bounds_error=False)
-    iwc_z_new = f(np.int64(time_new))
+
     f = interp1d(np.int64(e3smtime), LTS700, axis=0, bounds_error=False)
     LTS700_new = f(np.int64(time_new))
     f = interp1d(np.int64(e3smtime), LTS850, axis=0, bounds_error=False)
     LTS850_new = f(np.int64(time_new))
     f = interp1d(np.int64(e3smtime), thetadiff_cb, axis=0, bounds_error=False)
     thetadiff_cb_new = f(np.int64(time_new))
+    if config['hydrowatercontent_output'] == True:
+        f = interp1d(np.int64(e3smtime), lwc_p, axis=0, bounds_error=False)
+        lwc_p_new = f(np.int64(time_new))
+        f = interp1d(np.int64(e3smtime), iwc_p, axis=0, bounds_error=False)
+        iwc_p_new = f(np.int64(time_new))
+        f = interp1d(np.int64(e3smtime), lwc_z, axis=0, bounds_error=False)
+        lwc_z_new = f(np.int64(time_new))
+        f = interp1d(np.int64(e3smtime), iwc_z, axis=0, bounds_error=False)
+        iwc_z_new = f(np.int64(time_new))
         
     # put all variables into the list
     # p-level
-    cp = xr.DataArray(data=cloud_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    cp = xr.DataArray(data=cloud_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=cloud.long_name, units=cloud.units),)
-    tp = xr.DataArray(data=T_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    tp = xr.DataArray(data=T_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=T.long_name, units=T.units),)
-    qp = xr.DataArray(data=Q_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    qp = xr.DataArray(data=Q_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=Q.long_name, units=Q.units),)
-    rhp = xr.DataArray(data=RH_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    rhp = xr.DataArray(data=RH_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=RH.long_name, units=RH.units),)
-    thp = xr.DataArray(data=theta_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    thp = xr.DataArray(data=theta_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='Potential Temperature', units='K'),)
-    zp = xr.DataArray(data=z_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
+    zp = xr.DataArray(data=z_p_new,  dims=[config['time_dim'],config['vert_dim']],
+        coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=z3.long_name, units=z3.units),)
-    lp = xr.DataArray(data=lwc_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
-        attrs=dict(long_name=lwc.long_name, units=lwc.units),)
-    ip = xr.DataArray(data=iwc_p_new,  dims=["time","lev"],
-        coords=dict(lev=(["lev"], lev_out), time=(["time"], time_new), ),
-        attrs=dict(long_name=iwc.long_name, units=iwc.units),)
-    varnames_p = [ 'cloud_p', 'T_p', 'Q_p', 'RH_p', 'theta_p', 'Z_p', 'LWC_p', 'IWC_p']
-    variables_p = [   cp,      tp,     qp,    rhp,    thp,    zp,       lp,     ip]
+    if config['hydrowatercontent_output'] == True:
+        lp = xr.DataArray(data=lwc_p_new,  dims=[config['time_dim'],config['vert_dim']],
+            coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
+            attrs=dict(long_name=lwc.long_name, units=lwc.units),)
+        ip = xr.DataArray(data=iwc_p_new,  dims=[config['time_dim'],config['vert_dim']],
+            coords=dict(lev=([config['vert_dim']], lev_out), time=([config['time_dim']], time_new), ),
+            attrs=dict(long_name=iwc.long_name, units=iwc.units),)
+    if config['hydrowatercontent_output'] == True:
+        varnames_p = ['cloud_p', 'T_p', 'Q_p', 'RH_p', 'theta_p', 'Z_p', 'LWC_p', 'IWC_p']
+        variables_p = [cp, tp, qp, rhp, thp, zp, lp, ip]
+    else:
+        varnames_p = ['cloud_p', 'T_p', 'Q_p', 'RH_p', 'theta_p', 'Z_p']
+        variables_p = [cp, tp, qp, rhp, thp, zp]
+      
     # z-level
-    cz = xr.DataArray(data=cloud_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    cz = xr.DataArray(data=cloud_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=cloud.long_name, units=cloud.units),)
-    tz = xr.DataArray(data=T_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    tz = xr.DataArray(data=T_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=T.long_name, units=T.units),)
-    qz = xr.DataArray(data=Q_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    qz = xr.DataArray(data=Q_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=Q.long_name, units=Q.units),)
-    rhz = xr.DataArray(data=RH_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    rhz = xr.DataArray(data=RH_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name=RH.long_name, units=RH.units),)
-    thz = xr.DataArray(data=theta_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    thz = xr.DataArray(data=theta_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='Potential Temperature', units='K'),)
-    pz = xr.DataArray(data=p_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
+    pz = xr.DataArray(data=p_z_new,  dims=[config['time_dim'],"height"],
+        coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='Pressure', units='hPa'),)
-    lz = xr.DataArray(data=lwc_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
-        attrs=dict(long_name=lwc.long_name, units=lwc.units),)
-    iz = xr.DataArray(data=iwc_z_new,  dims=["time","height"],
-        coords=dict(height=(["height"], height_out), time=(["time"], time_new), ),
-        attrs=dict(long_name=iwc.long_name, units=iwc.units),)
-    varnames_z = [ 'cloud_z', 'T_z', 'Q_z', 'RH_z', 'theta_z', 'P_z', 'LWC_z', 'IWC_z']
-    variables_z = [   cz,      tz,     qz,    rhz,    thz,    pz,       lz,     iz]
+    if config['hydrowatercontent_output'] == True:
+        lz = xr.DataArray(data=lwc_z_new,  dims=[config['time_dim'],"height"],
+            coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
+            attrs=dict(long_name=lwc.long_name, units=lwc.units),)
+        iz = xr.DataArray(data=iwc_z_new,  dims=[config['time_dim'],"height"],
+            coords=dict(height=(["height"], height_out), time=([config['time_dim']], time_new), ),
+            attrs=dict(long_name=iwc.long_name, units=iwc.units),)
+    if config['hydrowatercontent_output'] == True:
+        varnames_z = ['cloud_z', 'T_z', 'Q_z', 'RH_z', 'theta_z', 'P_z', 'LWC_z', 'IWC_z']
+        variables_z = [cz, tz, qz, rhz, thz, pz, lz, iz]
+    else:
+        varnames_z = ['cloud_z', 'T_z', 'Q_z', 'RH_z', 'theta_z', 'P_z']
+        variables_z = [cz, tz, qz, rhz, thz, pz]
+      
     #
-    l700 = xr.DataArray(data=LTS700_new,  dims=["time"],
-        coords=dict(time=(["time"], time_new), ),
+    l700 = xr.DataArray(data=LTS700_new,  dims=[config['time_dim']],
+        coords=dict(time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='lower troposphere stability (700hPa theta - surface theta)', units='K'),)
-    l850 = xr.DataArray(data=LTS850_new,  dims=["time"],
-        coords=dict(time=(["time"], time_new), ),
+    l850 = xr.DataArray(data=LTS850_new,  dims=[config['time_dim']],
+        coords=dict(time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='lower troposphere stability (850hPa theta - surface theta)', units='K'),)
-    thetadiff_cb = xr.DataArray(data=thetadiff_cb_new,  dims=["time"],
-        coords=dict(time=(["time"], time_new), ),
+    thetadiff_cb = xr.DataArray(data=thetadiff_cb_new,  dims=[config['time_dim']],
+        coords=dict(time=([config['time_dim']], time_new), ),
         attrs=dict(long_name='Theta difference between cloud base and surface', units='K'),)
     varnames_1d = [ 'LTS700', 'LTS850', 'thetadiff_cb']
     variables_1d = [l700, l850, thetadiff_cb]
     
     # %% output extacted file
     varall_p = {
-            varnames_p[vv]: (['time','lev',], np.float32(variables_p[vv])) for vv in range(len(varnames_p))
+            varnames_p[vv]: ([config['time_dim'],config['vert_dim'],], np.float32(variables_p[vv])) for vv in range(len(varnames_p))
     }
     varall_z = {
-            varnames_z[vv]: (['time','height',], np.float32(variables_z[vv])) for vv in range(len(varnames_z))
+            varnames_z[vv]: ([config['time_dim'],'height',], np.float32(variables_z[vv])) for vv in range(len(varnames_z))
     }
     varall_1d = {
-            varnames_1d[vv]: (['time',], np.float32(variables_1d[vv])) for vv in range(len(varnames_1d))
+            varnames_1d[vv]: ([config['time_dim'],], np.float32(variables_1d[vv])) for vv in range(len(varnames_1d))
     }
     varall_1d.update(varall_p)
     varall_1d.update(varall_z)
     outfile = output_path + output_filehead + '_profiles.nc'
     print('output file '+outfile)
     ds = xr.Dataset( varall_1d,
-                     coords={'time' : ('time', time_new), 
-                             'lev' : ('lev', lev_out), 
+                     coords={config['time_dim'] : (config['time_dim'], time_new), 
+                             config['vert_dim'] : (config['vert_dim'], lev_out), 
                              'height' : ('height', height_out),
                              })
     #assign attributes
