@@ -518,6 +518,3 @@ def prep_Nd(RFpath, prep_data_path, dt=60):
         f.create_time = ttt.ctime(ttt.time())
         
         f.close()
-        
-# prep_Nd(RFpath, prep_data_path, dt=60)
-# prep_CNsize(RFpath, prep_data_path, dt=60)
