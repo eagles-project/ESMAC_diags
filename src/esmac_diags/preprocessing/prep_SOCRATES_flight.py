@@ -287,27 +287,6 @@ def prep_CNsize(RFpath, prep_data_path, dt=60):
         # uhsas1 = median_time_2d(time, uhsas, time_new)
         # uhsas1 = median_time_forflight_2d(time, uhsas, time_new, height)
         
-#     #%% 
-#     import matplotlib.pyplot as plt
-#     # fig = plt.figure(figsize=(8,2))
-#     # ax1 = fig.add_subplot(1, 1, 1)
-#     # ax1.plot(time/3600, lwcobs)
-#     # ax1.plot(time_new/3600, lwc, color='r', marker='.',linewidth=2)
-#     # ax1.set_ylim(-0.01, 0.8)
-#     # ax2 = fig.add_subplot(2, 1, 2)
-#     # ax2.plot(time/3600, uhsas100)
-#     # ax2.plot(time_new/3600, uhsas, color='r', marker='.',linewidth=2)
-#     # ax2.set_ylim(-50, 5000)
-    
-#     fig = plt.figure(figsize=(8,5))
-#     ax1 = fig.add_subplot(2, 1, 1)
-#     h1=ax1.contourf(time/3600, size, uhsas.T, np.arange(0,160, 10))
-#     fig.colorbar(h1)
-#     ax2 = fig.add_subplot(2, 1, 2)
-#     h2=ax2.contourf(time_new/3600, size, uhsas1.T, np.arange(0,160, 10))
-#     ax1.set_yscale('log')
-#     ax2.set_yscale('log')
-#     fig.colorbar(h2)
     
         #%% output data
         outfile = prep_data_path + 'UHSASsize_SOCRATES_' + date + '.nc'
@@ -672,85 +651,6 @@ def prep_Nd(RFpath, prep_data_path, dt=60):
         # nd_2ds_v = avg_time_2d(time, c2ds2v, time_new)
         ndall = avg_time_1d(time, ndall_cdp, time_new)
             
-        #%% 
-        # import matplotlib.pyplot as plt
-        # fig,(ax1,ax2,ax3,ax4,ax5,ax6) = plt.subplots(6,1,figsize=(8,9))
-        # h1=ax1.contourf(time_new, cdpsize, np.log(nd_cdp.T), np.arange(1,10))
-        # h2=ax2.contourf(time_new, c2ds2hsize, np.log(nd_2ds_h.T), np.arange(1,10))
-        # h3=ax3.contourf(time_new, c2ds2vsize, np.log(nd_2ds_v.T), np.arange(1,10))
-        # h4=ax4.contourf(time_new, c1dcsize, np.log(nd_1dc.T), np.arange(-6,3))
-        # h5=ax5.contourf(time_new, c2dcsize, np.log(nd_2dc.T), np.arange(-6,3))
-        # h6=ax6.contourf(time_new, cpipsize, np.log(nd_pip.T), np.arange(-6,3))
-        # ax1.set_ylabel('cdp')
-        # ax2.set_ylabel('2DS-2H')
-        # ax3.set_ylabel('2DS-2V')
-        # ax4.set_ylabel('1DC')
-        # ax5.set_ylabel('2DC')
-        # ax6.set_ylabel('PIP')
-        # ax1.set_yscale('log')
-        # ax2.set_yscale('log')
-        # ax3.set_yscale('log')
-        # ax4.set_yscale('log')
-        # ax5.set_yscale('log')
-        # ax6.set_yscale('log')
-        # ax1.set_title(date)
-        # cax = plt.axes([0.92, 0.55, 0.02, 0.3])
-        # fig.colorbar(h1,cax=cax)
-        # cax = plt.axes([0.92, 0.15, 0.02, 0.3])
-        # fig.colorbar(h6,cax=cax)
-        # ax1.set_ylim(1,5000)
-        # ax2.set_ylim(1,5000)
-        # ax3.set_ylim(1,5000)
-        # ax4.set_ylim(1,5000)
-        # ax5.set_ylim(1,5000)
-        # ax6.set_ylim(1,5000)
-        
-        # # fig,(ax1,ax2) = plt.subplots(2,1,figsize=(8,4))
-        # # h1=ax1.contourf(time, c1dcsize, np.log(c1dc.T), np.arange(-6,3))
-        # # h2=ax2.contourf(time_new, c1dcsize, np.log(nd_1dc.T), np.arange(-6,3))
-        # # h1=ax1.contourf(time, cdpsize, np.log(cdp.T), np.arange(-6,3))
-        # # h2=ax2.contourf(time_new, cdpsize, np.log(nd_cdp.T), np.arange(-6,3))
-        # # h1=ax1.contourf(time, c2dcsize, np.log(c2dc.T), np.arange(-6,3))
-        # # h2=ax2.contourf(time_new, c2dcsize, np.log(nd_2dc.T), np.arange(-6,3))
-        # # h1=ax1.contourf(time_new, c2ds2hsize, np.log(nd_2ds_h.T))
-        # # h2=ax2.contourf(time_new, c2ds2vsize, np.log(nd_2ds_v.T))
-        # # ax1.set_yscale('log')
-        # # ax2.set_yscale('log')
-        # # ax1.set_title(date)
-        # # cax = plt.axes([0.92, 0.2, 0.02, 0.6])
-        # # fig.colorbar(h1,cax=cax)
-        # # ax1.set_ylim(1,5000)
-        # # ax2.set_ylim(1,5000)
-        
-        # dp_1dc = c1dcsize[1:]-c1dcsize[0:-1]
-        # dp_2dc = c2dcsize[1:]-c2dcsize[0:-1]
-        # dp_pip = cpipsize[1:]-cpipsize[0:-1]
-        # dp_2ds = c2ds2hsize[1:]-c2ds2hsize[0:-1]
-        # dp_cdp = cdpsize[1:]-cdpsize[0:-1]
-        # dp_cdp = np.hstack((1, dp_cdp))
-        
-        # fig,(ax1,ax2) = plt.subplots(1,2,figsize=(12,5))
-        # ax1.plot(c1dcsize, np.nanmean(c1dc,0)/dp_1dc[0],'r')
-        # ax1.plot(cdpsize, np.nanmean(cdp,0)/dp_cdp,'m')
-        # ax1.plot(c2dcsize, np.nanmean(c2dc,0)/dp_2dc[0],'b')
-        # ax1.plot(cpipsize, np.nanmean(cpip,0)/dp_pip[0],'g')
-        # ax1.plot(c2ds2hsize, np.nanmean(c2ds2h,0)/dp_2ds[0],'k')
-        # ax1.plot(c2ds2vsize, np.nanmean(c2ds2v,0)/dp_2ds[0],'gray')
-        # ax1.set_xscale('log')
-        # ax1.set_yscale('log')
-        # ax2.plot(c1dcsize, np.nanmean(nd_1dc,0)/dp_1dc[0],'r',label='C1DC_RWOI')
-        # ax2.plot(cdpsize, np.nanmean(nd_cdp,0)/dp_cdp,'m',label='CCDP_RWIO')
-        # ax2.plot(c2dcsize, np.nanmean(nd_2dc,0)/dp_2dc[0],'b',label='C2DCA_RWOI')
-        # ax2.plot(cpipsize, np.nanmean(nd_pip,0)/dp_pip[0],'g',label='CPIP_RWII')
-        # ax2.plot(c2ds2hsize, np.nanmean(nd_2ds_h,0)/dp_2ds[0],'k',label='C2DSA_2H')
-        # ax2.plot(c2ds2vsize, np.nanmean(nd_2ds_v,0)/dp_2ds[0],'gray',label='C2DSA_2V')
-        # ax2.set_xscale('log')
-        # ax2.set_yscale('log')
-        # ax2.legend()
-        # ax2.set_xlabel('size(um)')
-        # ax2.set_ylabel('dNd/Dp (#/L)')
-        # ax2.set_title(date)
-        # e
     
         #%% output data
         outfile = prep_data_path + 'Nd_size_SOCRATES_' + date + '.nc'
@@ -832,5 +732,3 @@ def prep_Nd(RFpath, prep_data_path, dt=60):
         f.create_time = ttt.ctime(ttt.time())
         
         f.close()
-# prep_Nd(RFpath, prep_data_path, dt=60)        
-# prep_CNsize(RFpath, prep_data_path, dt=60)
