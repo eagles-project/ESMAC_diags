@@ -26,6 +26,8 @@ input3d_filehead = config['model_3d_input_filehead']
 input3d_dryaerosol_filehead = config['model_3d_dryaerosol_input_filehead']
 input3d_cloudaerosol_filehead = config['model_3d_cloudaerosol_input_filehead']
 input_cosp_filehead = config['model_cosp_input_filehead']
+# input_path = '../raw_data/model/'
+# input_filehead = 'E3SMv1_SGP_ENA_2011_2020'
 
 output_path = '/pscratch/sd/a/avarble/eagles/ESMAC_DIAG/prep_data/ACEENA/model/ne256mam/'
 output_filehead = 'ACEENA'
