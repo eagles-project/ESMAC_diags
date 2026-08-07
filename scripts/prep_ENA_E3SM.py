@@ -42,7 +42,6 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
                     10000,10500,11000,11500,12000,12500,13000,14000,15000,16000,17000,18000])
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# output time in 1hr (dt=3600s) for other data
 prep.prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaerosol_filehead, input3d_cloudaerosol_filehead, input_cosp_filehead, output_path+'sfc_prof/'+str(surface_dt)+'s/', output_filehead, dt=surface_dt, config=config)
 prep.prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_path+'sfc_prof/'+str(profile_dt)+'s/', output_filehead, height_out, lev_out=lev_out, dt=profile_dt, config=config)
 
