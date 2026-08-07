@@ -81,15 +81,6 @@ def prep_ACSM(acsmpath, predatapath, dt=3600):
     nh4_new = median_time_1d(time, nh4, time_new, arraytype='xarray')
     chl_new = median_time_1d(time, chl, time_new, arraytype='xarray')
     
-    #%%
-    # import matplotlib.pyplot as plt
-    # fig,(ax1,ax2) = plt.subplots(2,1,figsize=(8,4))
-    # ax1.plot(time, cod)
-    # ax1.plot(time_new, cod_new, color='r', marker='.', linewidth=2)
-    # ax2.plot(time, cod)
-    # ax2.plot(time_new, cod_new, color='r', marker='.', linewidth=2)
-    # ax1.set_xlim(16913,16955)
-    # ax2.set_xlim(17040,17066)
 
     #%% output file
     outfile = predatapath + 'sfc_ACSM_HISCALE.nc'
