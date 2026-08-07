@@ -159,37 +159,6 @@ def prep_AMS(amspath, iwgpath, prep_data_path, dt=60):
         # nh4 = median_time_forflight_1d(time2, nh4aaf, time_new, height2)
         # chl = median_time_forflight_1d(time2, chlaaf, time_new, height2)
         
-        #%% 
-        # import matplotlib.pyplot as plt
-        # fig = plt.figure(figsize=(8,8))
-        # ax1 = fig.add_subplot(5, 1, 1)
-        # ax1.plot(time2/3600, orgaaf)
-        # ax1.plot(time_new/3600, org, color='r', marker='.',linewidth=2)
-        # # ax1.set_ylim(-50, 5000)
-        # ax2 = fig.add_subplot(5, 1, 2)
-        # ax2.plot(time2/3600, no3aaf)
-        # ax2.plot(time_new/3600, no3, color='r', marker='.',linewidth=2)
-        # # ax2.set_ylim(-50, 5000)
-        # ax3 = fig.add_subplot(5, 1, 3)
-        # ax3.plot(time2/3600, so4aaf)
-        # ax3.plot(time_new/3600, so4, color='r', marker='.',linewidth=2)
-        # ax4 = fig.add_subplot(5, 1, 4)
-        # ax4.plot(time2/3600, nh4aaf)
-        # ax4.plot(time_new/3600, nh4, color='r', marker='.',linewidth=2)
-        # ax5 = fig.add_subplot(5, 1, 5)
-        # ax5.plot(time2/3600, chlaaf)
-        # ax5.plot(time_new/3600, chl, color='r', marker='.',linewidth=2)
-        
-        # # h1=ax1.contourf(time/3600, d_merge, conc_merge.T, np.arange(0,160, 10))
-        # # fig.colorbar(h1)
-        # # ax2 = fig.add_subplot(2, 1, 2)
-        # # h2=ax2.contourf(time_new/3600, d_merge, merge1.T, np.arange(0,160, 10))
-        # # ax1.set_yscale('log')
-        # # ax2.set_yscale('log')
-        # # fig.colorbar(h2)
-        
-        # ax1.set_title(date)
-        
         #%% output data
         outfile = prep_data_path + 'AMS_ACEENA_' + date + '.nc'
         
