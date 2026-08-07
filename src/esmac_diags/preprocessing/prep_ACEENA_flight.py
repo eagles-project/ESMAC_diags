@@ -832,22 +832,6 @@ def prep_mergeSD(mergeSDpath, iwgpath, prep_data_path, dt=60):
         Nd1 = avg_time_1d(time2, Nd, time_new)
         merge1 = avg_time_2d(time2, Ndsize.T, time_new)
         
-        #%% 
-        # import matplotlib.pyplot as plt
-        # fig,(ax1,ax2) = plt.subplots(2,1,figsize=(8,4))
-        # ax1.contourf(time2, dmean, np.log(Ndsize))
-        # ax2.contourf(time_new, dmean, np.log(merge1.T))
-        # ax1.set_yscale('log')
-        # ax2.set_yscale('log')
-        # ax1.set_title(date)
-        
-        # fig,ax=plt.subplots(figsize=(4,3))
-        # ax.plot(dmean,np.nanmean(Ndsize,1))
-        # ax.plot(dmean,np.nanmean(merge1,0),'r.')
-        # ax.set_xscale('log')
-        # ax.set_yscale('log')
-        # ax.set_title(date)
-        # # e
     
         #%% output data
         outfile = prep_data_path + 'mergedSD_ACEENA_' + date + '.nc'
@@ -2209,5 +2193,3 @@ def prep_WCM(wcmpath, iwgpath, prep_data_path, dt=60):
         f.create_time = ttt.ctime(ttt.time())
         
         f.close()
-# prep_beasd(beasdpath,iwgpath, prep_data_path, dt=60)
-# prep_mergeSD(mergeSDpath, iwgpath, prep_data_path, dt=60)
