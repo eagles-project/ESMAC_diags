@@ -22,11 +22,15 @@ stream = open(config_file, "r")
 config = yaml.full_load(stream)
 
 input_path = config['model_input_path']
-input_filehead = config['model_input_filehead']
+input2d_filehead = config['model_2d_input_filehead']
+input3d_filehead = config['model_3d_input_filehead']
+input3d_dryaerosol_filehead = config['model_3d_dryaerosol_input_filehead']
+input3d_cloudaerosol_filehead = config['model_3d_cloudaerosol_input_filehead']
 # input_path = '../raw_data/model/'
 # input_filehead = 'E3SMv2_SO'
+
 output_path = '../prep_data/SOCRATES/model/'
-output_filehead = 'E3SMv2_SOCRATES'
+output_filehead = 'SOCRATES'
 
 # flight data path
 obs_input_path = config['obs_input_path']
@@ -36,4 +40,4 @@ RFpath = obs_input_path + 'SOCRATES/aircraft/aircraft_lowrate/'
 aircraft_dt = config['model_aircraft_dt']
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-prep.prep_E3SM_flight(input_path, input_filehead, output_path, output_filehead, RFpath, dt=aircraft_dt)
+prep.prep_E3SM_flight(input_path, input2d_filehead, input3d_filehead, input3d_dryaerosol_filehead, input3d_cloudaerosol_filehead, output_path+'flight/'+str(aircraft_dt)+'s/', output_filehead, RFpath, dt=aircraft_dt, config=config)
