@@ -89,13 +89,13 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
-    lon1 = median_time_1d(time, lon, time_new, arraytype='nunpy')
-    lat1 = median_time_1d(time, lat, time_new, arraytype='nunpy')
-    ccn1 = median_time_1d(time2, ccn_1s, time_new, arraytype='nunpy')
-    ccn2 = median_time_1d(time2, ccn_2s, time_new, arraytype='nunpy')
-    ccn3 = median_time_1d(time2, ccn_3s, time_new, arraytype='nunpy')
-    ccn5 = median_time_1d(time2, ccn_5s, time_new, arraytype='nunpy')
-    ccn6 = median_time_1d(time2, ccn_6s, time_new, arraytype='nunpy')
+    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    ccn1 = median_time_1d(time2, ccn_1s, time_new, arraytype='numpy')
+    ccn2 = median_time_1d(time2, ccn_2s, time_new, arraytype='numpy')
+    ccn3 = median_time_1d(time2, ccn_3s, time_new, arraytype='numpy')
+    ccn5 = median_time_1d(time2, ccn_5s, time_new, arraytype='numpy')
+    ccn6 = median_time_1d(time2, ccn_6s, time_new, arraytype='numpy')
     
     #%% output file
     outfile = prep_data_path + 'CCN_MARCUS.nc'
@@ -191,11 +191,11 @@ exhaustfreepath : str
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
-    lon1 = median_time_1d(time, lon, time_new, arraytype='nunpy')
-    lat1 = median_time_1d(time, lat, time_new, arraytype='nunpy')
-    ccn1 = median_time_1d(time2, ccn1s, time_new, arraytype='nunpy')
-    ccn2 = median_time_1d(time2, ccn2s, time_new, arraytype='nunpy')
-    ccn5 = median_time_1d(time2, ccn5s, time_new, arraytype='nunpy')
+    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    ccn1 = median_time_1d(time2, ccn1s, time_new, arraytype='numpy')
+    ccn2 = median_time_1d(time2, ccn2s, time_new, arraytype='numpy')
+    ccn5 = median_time_1d(time2, ccn5s, time_new, arraytype='numpy')
 
     #%% output file
     outfile = prep_data_path + 'CCN_MARCUS_exhaustfree.nc'
