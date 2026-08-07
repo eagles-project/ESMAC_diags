@@ -767,25 +767,6 @@ def prep_mergeSD(mergeSDpath, iwgpath, prep_data_path, dt=60):
         Nd1 = avg_time_1d(time2, Nd, time_new)
         merge1 = avg_time_2d(time2, Ndsize.T, time_new)
         
-            
-        #%% 
-        # import matplotlib.pyplot as plt
-        # fig,(ax1,ax2) = plt.subplots(2,1,figsize=(8,4))
-        # h1=ax1.contourf(time2, dmean, np.log(Ndsize), np.arange(-10,13))
-        # h2=ax2.contourf(time_new, dmean, np.log(merge1.T), np.arange(-10,13))
-        # ax1.set_yscale('log')
-        # ax2.set_yscale('log')
-        # ax1.set_title(date)
-        # cax = plt.axes([0.92, 0.2, 0.02, 0.6])
-        # fig.colorbar(h1,cax=cax)
-        # ax1.set_xlim(ax2.get_xlim())
-        
-        # fig,ax=plt.subplots(figsize=(4,3))
-        # ax.plot(dmean,np.nanmean(Ndsize,1))
-        # ax.plot(dmean,np.nanmean(merge1,0),'r.')
-        # ax.set_xscale('log')
-        # ax.set_yscale('log')
-        # ax.set_title(date)
     
         #%% output data
         outfile = prep_data_path + 'mergedSD_HISCALE_' + date + '.nc'
@@ -1898,15 +1879,3 @@ def prep_WCM(wcmpath, iwgpath, prep_data_path, dt=60):
         f.create_time = ttt.ctime(ttt.time())
         
         f.close()
-
-#%% main for all        
-# prep_AMS(amspath, iwgpath, prep_data_path)        
-# prep_beasd(beasdpath,iwgpath, prep_data_path)        
-# prep_CCN(ccnpath, iwgpath, prep_data_path)
-# prep_CPC(cpcpath, iwgpath, prep_data_path)
-# prep_mergeSD(mergeSDpath, iwgpath, prep_data_path)
-# prep_mergesize_HISCALE(fimspath, pcasppath, iwgpath, cvipath, merged_size_path)
-# prep_mergesize_HISCALE_withCPC(cpcpath, fimspath, pcasppath, iwgpath, cvipath, merged_size_path)
-# prep_PCASP100(pcasppath, iwgpath, prep_data_path)
-# prep_WCM(wcmpath, iwgpath, prep_data_path)
-# prep_mergeSD(mergeSDpath, iwgpath, prep_data_path)
