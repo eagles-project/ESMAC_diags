@@ -562,7 +562,7 @@ def prep_E3SM_profiles(input_path, input2d_filehead, input3d_filehead, output_pa
 
      
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3600):
+def prep_E3SM_sfc(input_path, input2d_filehead, input3d_filehead, input3d_dryaerosol_filehead, input3d_cloudaerosol_filehead, input_cosp_filehead, output_path, output_filehead, dt=3600, config=config):
     """
     prepare surface (include TOA and vertical integrated) variables from E3SM output
     choose the grid nearest to the ARM site
@@ -594,199 +594,148 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     # ENA
     lat0 = 39.09527
     lon0 = -28.0339
-    E3SMdomain_range = '330e_to_335e_37n_to_42n'    # domain range in E3SM regional output
+    E3SMdomain_range = config['E3SMdomain_range']    # domain range in E3SM regional output
     
     # output time range and resolution
     time_new = pd.date_range(start='2016-01-01', end='2018-12-31 23:59:00', freq=str(int(dt))+"s")  # ENA time period
-    print(len(time_new))
     
     #%% read in data
     variable_names = list()
     variables = list()
     
-    lst = glob.glob(input_path + input_filehead+'.*.h?.*2016-*-00000.nc') + \
-            glob.glob(input_path + input_filehead+'.*.h?.*2017-*-00000.nc') + \
-            glob.glob(input_path + input_filehead+'.*.h?.*2018-*-00000.nc')
-    lst.sort()
+    # lst = glob.glob(input_path + input_filehead+'.*.h?.*2016-*-00000.nc') + \
+    #         glob.glob(input_path + input_filehead+'.*.h?.*2017-*-00000.nc') + \
+    #         glob.glob(input_path + input_filehead+'.*.h?.*2018-*-00000.nc')
+    # lst.sort()
+    lst3d = glob.glob(input_path + input3d_filehead+'.*20??-??-??-*.nc')
+    lst3d_dryaer = glob.glob(input_path + input3d_dryaerosol_filehead+'.*20??-??-??-*.nc')
+    lst3d_wetaer = glob.glob(input_path + input3d_cloudaerosol_filehead+'.*20??-??-??-*.nc')
+    lst2d = glob.glob(input_path + input2d_filehead+'.*20??-??-??-*.nc')
+    lstcosp = glob.glob(input_path + input_cosp_filehead+'.*20??-??-??-*.nc')
+    lst3d.sort()
+    lst3d_dryaer.sort()
+    lst3d_wetaer.sort()
+    lst2d.sort()
+    lstcosp.sort()
+  
     # first data
-    e3smdata = xr.open_dataset(lst[0])
-    e3smtime = e3smdata.indexes['time'].to_datetimeindex()
-    lonm = e3smdata['lon'+'_'+E3SMdomain_range].load()
-    latm = e3smdata['lat'+'_'+E3SMdomain_range].load()
-    P0 = e3smdata['P0'].load()
-    hyam = e3smdata['hyam'].load()
-    hybm = e3smdata['hybm'].load()
-    T = e3smdata['T'+'_'+E3SMdomain_range].load()
-    PS = e3smdata['PS'+'_'+E3SMdomain_range].load()
-    # getting column and levels
-    len_ncol = len(e3smdata['ncol_'+E3SMdomain_range])
-    len_lev = len(e3smdata['lev'])
+    print(lst3d[0])
+    e3smdata3d = xr.open_dataset(lst3d[0])
+    e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+    dimensions3d = (config['time_dim'], config['vert_dim'], config['latlon_dim']+E3SMdomain_range)
+    variables3d = []
+    for var_name, var_data in e3smdata3d.data_vars.items():
+        if set(var_data.dims) == set(dimensions3d):
+            variables3d.append(var_name)
+          
+    e3smdata2d = xr.open_dataset(lst2d[0])
+    e3smdata2d = e3smdata2d.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
+    dimensions2d = (config['time_dim'], config['latlon_dim']+E3SMdomain_range)
+    variables2d = []
+    for var_name, var_data in e3smdata2d.data_vars.items():
+        if set(var_data.dims) == set(dimensions2d):
+            variables2d.append(var_name)
+
+    e3smdatacosp = xr.open_dataset(lstcosp[0])
+    e3smdatacosp = e3smdatacosp.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
+    dimensions2d = (config['time_dim'], config['latlon_dim']+E3SMdomain_range)
+    variablescosp = []
+    for var_name, var_data in e3smdatacosp.data_vars.items():
+        if set(var_data.dims) == set(dimensions2d):
+            variablescosp.append(var_name)
+          
+    e3smtime = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
+    lonm = e3smdata3d[config['LON']+E3SMdomain_range].load()
+    latm = e3smdata3d[config['LAT']+E3SMdomain_range].load()
+
     # only extract the model column at the site
     if lon0<0:
         lon0=lon0+360   # make longitude consistent with E3SM from 0 to 360
     x_idx = find_nearest(lonm,latm,lon0,lat0)
-    
-    # Get all simulated variables
-    vlist = list(e3smdata.variables.keys())
-    av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
-    
-    # aerosol composition
-    req_vlist = ['bc_a1', 'bc_a3', 'bc_a4', 'dst_a1', 'dst_a3', 'mom_a1', \
-                 'mom_a2', 'mom_a3', 'mom_a4', 'ncl_a1', 'ncl_a2', 'ncl_a3', \
-                 'pom_a1', 'pom_a3', 'pom_a4', 'so4_a1', 'so4_a2', 'so4_a3', \
-                 'soa_a1', 'soa_a2', 'soa_a3']
-    req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
-    matched_vlist = list(set(av_vars).intersection(req_vlist))
-    
-    if len(matched_vlist) == len(req_vlist):
-        bc_a1 = e3smdata['bc_a1'+'_'+E3SMdomain_range].load()
-        bc_a3 = e3smdata['bc_a3'+'_'+E3SMdomain_range].load()
-        bc_a4 = e3smdata['bc_a4'+'_'+E3SMdomain_range].load()
-        dst_a1 = e3smdata['dst_a1'+'_'+E3SMdomain_range].load()
-        dst_a3 = e3smdata['dst_a3'+'_'+E3SMdomain_range].load()
-        mom_a1 = e3smdata['mom_a1'+'_'+E3SMdomain_range].load()
-        mom_a2 = e3smdata['mom_a2'+'_'+E3SMdomain_range].load()
-        mom_a3 = e3smdata['mom_a3'+'_'+E3SMdomain_range].load()
-        mom_a4 = e3smdata['mom_a4'+'_'+E3SMdomain_range].load()
-        ncl_a1 = e3smdata['ncl_a1'+'_'+E3SMdomain_range].load()
-        ncl_a2 = e3smdata['ncl_a2'+'_'+E3SMdomain_range].load()
-        ncl_a3 = e3smdata['ncl_a3'+'_'+E3SMdomain_range].load()
-        pom_a1 = e3smdata['pom_a1'+'_'+E3SMdomain_range].load()
-        pom_a3 = e3smdata['pom_a3'+'_'+E3SMdomain_range].load()
-        pom_a4 = e3smdata['pom_a4'+'_'+E3SMdomain_range].load()
-        so4_a1 = e3smdata['so4_a1'+'_'+E3SMdomain_range].load()
-        so4_a2 = e3smdata['so4_a2'+'_'+E3SMdomain_range].load()
-        so4_a3 = e3smdata['so4_a3'+'_'+E3SMdomain_range].load()
-        soa_a1 = e3smdata['soa_a1'+'_'+E3SMdomain_range].load()
-        soa_a2 = e3smdata['soa_a2'+'_'+E3SMdomain_range].load()
-        soa_a3 = e3smdata['soa_a3'+'_'+E3SMdomain_range].load()
-        bc_all  = bc_a1[:,-1,x_idx] +                       bc_a3[:,-1,x_idx] + bc_a4[:,-1,x_idx]
-        dst_all = dst_a1[:,-1,x_idx] +                      dst_a3[:,-1,x_idx]
-        mom_all = mom_a1[:,-1,x_idx] + mom_a2[:,-1,x_idx] + mom_a3[:,-1,x_idx] + mom_a4[:,-1,x_idx]
-        ncl_all = ncl_a1[:,-1,x_idx] + ncl_a2[:,-1,x_idx] + ncl_a3[:,-1,x_idx]
-        pom_all = pom_a1[:,-1,x_idx] +                    + pom_a3[:,-1,x_idx] + pom_a4[:,-1,x_idx]
-        so4_all = so4_a1[:,-1,x_idx] + so4_a2[:,-1,x_idx] + so4_a3[:,-1,x_idx]
-        soa_all = soa_a1[:,-1,x_idx] + soa_a2[:,-1,x_idx] + soa_a3[:,-1,x_idx]
-        bc_all.attrs['units'] = bc_a1.units
-        bc_all.attrs['long_name'] = 'black carbon concentration'
-        dst_all.attrs['units'] = dst_a1.units
-        dst_all.attrs['long_name'] = 'dust concentration'
-        mom_all.attrs['units'] = mom_a1.units
-        mom_all.attrs['long_name'] = 'marine organic matter concentration'
-        ncl_all.attrs['units'] = ncl_a1.units
-        ncl_all.attrs['long_name'] = 'sea salt concentration'
-        pom_all.attrs['units'] = pom_a1.units
-        pom_all.attrs['long_name'] = 'primary organic matter concentration'
-        so4_all.attrs['units'] = so4_a1.units
-        so4_all.attrs['long_name'] = 'sulfate concentration'
-        soa_all.attrs['units'] = soa_a1.units
-        soa_all.attrs['long_name'] = 'secondary organic aerosol concentration'
-        # change time to standard datetime64 format
-        bc_all.coords['time'] = bc_all.indexes['time'].to_datetimeindex()
-        dst_all.coords['time'] = dst_all.indexes['time'].to_datetimeindex()
-        mom_all.coords['time'] = mom_all.indexes['time'].to_datetimeindex()
-        ncl_all.coords['time'] = ncl_all.indexes['time'].to_datetimeindex()
-        pom_all.coords['time'] = pom_all.indexes['time'].to_datetimeindex()
-        so4_all.coords['time'] = so4_all.indexes['time'].to_datetimeindex()
-        soa_all.coords['time'] = soa_all.indexes['time'].to_datetimeindex()
-    else:
-        bc_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        dst_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        mom_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        ncl_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        pom_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        so4_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        soa_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-    
-    # aerosol size
-    req_vlist = ['num_a1', 'num_a2', 'num_a3', 'num_a4', 'dgnd_a01', 'dgnd_a02', \
-                 'dgnd_a03', 'dgnd_a04']
-    req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
-    matched_vlist = list(set(av_vars).intersection(req_vlist))
-    
-    if len(matched_vlist) == len(req_vlist):
-        num_a1 = e3smdata['num_a1'+'_'+E3SMdomain_range].load()
-        num_a2 = e3smdata['num_a2'+'_'+E3SMdomain_range].load()
-        num_a3 = e3smdata['num_a3'+'_'+E3SMdomain_range].load()
-        num_a4 = e3smdata['num_a4'+'_'+E3SMdomain_range].load()
-        dn1 = e3smdata['dgnd_a01'+'_'+E3SMdomain_range].load()
-        dn2 = e3smdata['dgnd_a02'+'_'+E3SMdomain_range].load()
-        dn3 = e3smdata['dgnd_a03'+'_'+E3SMdomain_range].load()
-        dn4 = e3smdata['dgnd_a04'+'_'+E3SMdomain_range].load()
+
+    if config['pres_output'] == False:
+        P0 = e3smdata3d[config['P0']].load()
+        hyam = e3smdata3d[config['HYAM']].load()
+        hybm = e3smdata3d[config['HYBM']].load()
+        PS = e3smdata3d[config['PS']+E3SMdomain_range][:,x_idx].load()
         Pres = np.nan*T
         zlen = T.shape[1]
         for kk in range(zlen):
-            Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
-        numall = [num_a1[:, -1, x_idx].data, num_a2[:, -1, x_idx].data, num_a3[:, -1, x_idx].data, num_a4[:, -1, x_idx].data]
-        dnall  = [dn1[:, -1, x_idx].data,    dn2[:, -1, x_idx].data,    dn3[:, -1, x_idx].data,    dn4[:, -1, x_idx].data]
-        NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1, x_idx].data, Pres[:, -1, x_idx].data)
-        NCNall = xr.DataArray(data=NCN,  dims=["size", "time"],
-            coords=dict(time=(["time"], e3smtime),size=(["size"], np.arange(1,3001))),
-            attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
+            Pres[:, kk] = hyam[kk]*P0  +  hybm[kk]*PS
     else:
-        NCNall = xr.DataArray(np.zeros((3000,len(e3smtime)))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+        Pres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,x_idx].load()
     
+    # getting column and levels
+    len_ncol = len(e3smdata3d[config['latlon_dim']+E3SMdomain_range])
+    len_lev = len(e3smdata3d[config['vert_dim']])
+
+    # Get all simulated variables
+    # vlist = list(e3smdata.variables.keys())
+    # av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
+    vlist3d = variables3d
+    av_vars3d = fnmatch.filter(vlist3d,'*'+E3SMdomain_range)
+
+    # vlist2d = list(e3smdata2d.variables.keys())
+    vlist2d = variables2d
+    av_vars2d = fnmatch.filter(vlist2d,'*'+E3SMdomain_range)
+
+    vlistcosp = variablescosp
+    av_varscosp = fnmatch.filter(vlistcosp,'*'+E3SMdomain_range)
+
     # variables to calculate Reff and Nd
-    req_vlist = ['Z3', 'CLOUD']
-    req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
-    matched_vlist = list(set(av_vars).intersection(req_vlist))
-    
+    req_vlist = [config['Z'], config['CF']]
+    req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+    matched_vlist = list(set(av_vars3d).intersection(req_vlist))
+
     if len(matched_vlist) == len(req_vlist):
-        z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
-        cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
-        z3 = z3[:,:,x_idx]
-        cloud = cloud[:,:,x_idx]
+        print('\nAnalyzing cloud base, top, and depth')
+        z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,x_idx].load()
+        if config['cloudfraction3d_legit'] == True:
+            cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
+        else:
+            cloud = e3smdata3d[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load() + e3smdata3d[config['CFICE']+E3SMdomain_range][:,:,x_idx].load()
+            cloud = cloud.where(cloud <= 1, 1) # make sure CF doesn't exceed 100%
         dz = (z3[:,:-2].data - z3[:,2:].data)/2
         dz = np.append(dz, (z3[:,-2:-1].data+z3[:,-1:].data)/2, axis=1)
         dz = np.insert(dz,0,dz[:,0],axis=1)
-        weight = cloud.data*dz
+        
         # mid-level T, P, z
-        Tmid = 0.5*(T[:,0:-1,x_idx].data + T[:,1:,x_idx].data)
-        Pmid = 0.5*(Pres[:,0:-1,x_idx].data + Pres[:,1:,x_idx].data)
+        Tmid = 0.5*(T[:,0:-1].data + T[:,1:].data)
+        Pmid = 0.5*(Pres[:,0:-1].data + Pres[:,1:].data)
         Zmid = 0.5*(z3[:,0:-1].data + z3[:,1:].data)
         # cloud top
         cf_sum_top = np.cumsum(cloud.data, axis=1)
         cf_sum_top[cf_sum_top > 1] = 1
         cf_sum_top_diff = cf_sum_top[:,1:] - cf_sum_top[:,0:-1]
-        z_cldtop = np.sum(Zmid[:,:]*cf_sum_top_diff[:,:], axis=1)
-        T_cldtop = np.sum(Tmid[:,:]*cf_sum_top_diff[:,:], axis=1)
+        z_cldtop = np.sum(Zmid*cf_sum_top_diff, axis=1)
+        T_cldtop = np.sum(Tmid*cf_sum_top_diff, axis=1)
         # cloud base
         cf_sum_base = np.cumsum(cloud[:, ::-1].data, axis=1)
         cf_sum_base[cf_sum_base > 1] = 1
         cf_sum_base_diff = cf_sum_base[:,1:] - cf_sum_base[:,0:-1]
-        z_cldbase = np.sum(Zmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
-        T_cldbase = np.sum(Tmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
+        z_cldbase = np.sum(Zmid[:,::-1]*cf_sum_base_diff, axis=1)
+        T_cldbase = np.sum(Tmid[:,::-1]*cf_sum_base_diff, axis=1)
         # normalize cloud fraction when not 100%
         z_cldtop = z_cldtop / cf_sum_top[:,-1]
         T_cldtop = T_cldtop / cf_sum_top[:,-1]
         z_cldbase = z_cldbase / cf_sum_base[:,-1]
         T_cldbase = T_cldbase / cf_sum_base[:,-1]
         e3sm_cloud_depth = z_cldtop - z_cldbase
-        # # alternatively, one can assume a minimum cloud depth in which the full mass levels are used instead of half levels
-        # e3sm_z2 = z3[:,:-1].data
-        # e3sm_z3 = z3[:,1:].data
-        # e3sm_t2 = T[:,:-1,x_idx].data
-        # e3sm_t3 = T[:,1:,x_idx].data
-        # #cloud base and top calculations for minimum cloud depth
-        # z_cldbase2 = np.sum(e3sm_z2[:,::-1]*cf_sum_base_diff[:,:], axis=1)
-        # T_cldbase2 = np.sum(e3sm_t2[:,::-1]*cf_sum_base_diff[:,:], axis=1)
-        # z_cldtop2 = np.sum(e3sm_z3[:,:]*cf_sum_top_diff[:,:], axis=1)
-        # T_cldtop2 = np.sum(e3sm_t3[:,:]*cf_sum_top_diff[:,:], axis=1)
-        # e3sm_cloud_depth2 = z_cldtop2 - z_cldbase2
-        cloud_depth = xr.DataArray(data=e3sm_cloud_depth,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
+
+        cloud_depth = xr.DataArray(data=e3sm_cloud_depth,  dims=[config['time_dim']],
+            coords=dict(time=([config['time_dim']], e3smtime)),
             attrs=dict(long_name="cloud depth",units="m"),)
-        cbh = xr.DataArray(data=z_cldbase,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
+        cbh = xr.DataArray(data=z_cldbase,  dims=[config['time_dim']],
+            coords=dict(time=([config['time_dim']], e3smtime)),
             attrs=dict(long_name="cloud base height",units="m"),)
-        cth = xr.DataArray(data=z_cldtop,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
+        cth = xr.DataArray(data=z_cldtop,  dims=[config['time_dim']],
+            coords=dict(time=([config['time_dim']], e3smtime)),
             attrs=dict(long_name="cloud top height",units="m"),)
-        cbt = xr.DataArray(data=T_cldbase,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
+        cbt = xr.DataArray(data=T_cldbase,  dims=[config['time_dim']],
+            coords=dict(time=([config['time_dim']], e3smtime)),
             attrs=dict(long_name="cloud base temperature",units="K"),)
-        ctt = xr.DataArray(data=T_cldtop,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
+        ctt = xr.DataArray(data=T_cldtop,  dims=[config['time_dim']],
+            coords=dict(time=([config['time_dim']], e3smtime)),
             attrs=dict(long_name="cloud top temperature",units="K"),)
     else:
         cloud_depth = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
@@ -794,446 +743,1029 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
         cth = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
         cbt = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
         ctt = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-    
+  
     # cloud optical depth and effective radius
-    req_vlist = ['REL', 'FREQL', 'ICWNC', 'TOT_CLD_VISTAU', 'TAUWMODIS', 'SOLIN']
-    req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
-    matched_vlist = list(set(av_vars).intersection(req_vlist))
+    if config['reff_output'] == True:
+        req_vlist = [config['REL'], config['CFLIQ'], config['NC']]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+        matched_vlist = list(set(av_vars3d).intersection(req_vlist))
+  
+        if len(matched_vlist) == len(req_vlist):
+          print('\nAnalyzing effective radius')
+          rel = e3smdata3d[config['REL']+E3SMdomain_range][:,:,x_idx].load()
+          freql = e3smdata3d[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load()
+          icwnc = e3smdata3d[config['NC']+E3SMdomain_range][:,:,x_idx].load()
+  
+          # calculate mean effective radius. 
+          reff = calc_Reff_from_REL(rel.data, dz, freql.data, icwnc.data)
+          reff[reff==0] = np.nan
     
-    if len(matched_vlist) == len(req_vlist):
-        rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
-        freql = e3smdata['FREQL'+'_'+E3SMdomain_range].load()
-        icwnc = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
-        cod_a = e3smdata['TOT_CLD_VISTAU'+'_'+E3SMdomain_range].load()
-        cod_m = e3smdata['TAUWMODIS'+'_'+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
-        solin = e3smdata['SOLIN'+'_'+E3SMdomain_range].load()
-        rel = rel[:,:,x_idx]
-        freql = freql[:,:,x_idx]
-        icwnc = icwnc[:,:,x_idx]
-        cod_a = cod_a[:,:,x_idx]
-        solin = solin[:,x_idx]
-        # calculate mean effective radius. 
-        reff = calc_Reff_from_REL(rel.data, dz, freql.data, icwnc.data)
-        reff[reff==0] = np.nan
-        # calculate mean optical depth
-        cod = np.sum(cod_a.data,axis=1)
-        # cod[solin==0] = np.nan
-        # cod from MODIS simulator
-        cod_m = cod_m[:,x_idx]
-        reff_mean = xr.DataArray(data=reff,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
-            attrs=dict(long_name="mean cloud liquid effective radius",units="um"),)
-        cod_mean = xr.DataArray(data=cod,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
-            attrs=dict(long_name="column-total cloud optical depth",units="N/A"),)
-    else:
-        cod_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cod',attrs={'units':'dummy_unit','long_name':'Dummy'})
-        reff_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='reff',attrs={'units':'dummy_unit','long_name':'Dummy'})
-        cod_m = xr.DataArray(np.zeros(len(e3smtime))*np.nan)
+          reff_mean = xr.DataArray(data=reff,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime)),
+                attrs=dict(long_name="mean cloud liquid effective radius",units="um"),)
+        else:
+            reff_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='reff',attrs={'units':'dummy_unit','long_name':'Dummy'})
+    
+    if config['tau3d_output'] == True:
+        req_vlist3d = [config['TAU3D']]
+        req_vlist2d = [config['SWDOWNTOA']]
+        req_vlist3d = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist3d]
+        req_vlist2d = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist2d]
+        matched_vlist3d = list(set(av_vars3d).intersection(req_vlist3d))
+        matched_vlist2d = list(set(av_vars2d).intersection(req_vlist2d))
+        
+        if np.logical_and(len(matched_vlist3d) == len(req_vlist3d), len(matched_vlist2d) == len(req_vlist2d)):
+            print('\nAnalyzing cloud optical depth')
+            cod_a = e3smdata3d[config['TAU3D']+E3SMdomain_range][:,:,x_idx].load()
+            solin = e3smdata2d[config['SWDOWNTOA']+E3SMdomain_range][:,x_idx].load()
+          
+            # calculate mean optical depth
+            cod = np.sum(cod_a.data,axis=1)
+            # cod[solin==0] = np.nan        
+            
+            cod_mean = xr.DataArray(data=cod,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime)),
+                attrs=dict(long_name="column-total cloud optical depth",units="N/A"),)
+        else:
+            cod_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cod',attrs={'units':'dummy_unit','long_name':'Dummy'})
+
+    if config['cosp_output'] == True:   
+        req_vlist = [config['TAULIQMODIS']]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+        matched_vlist = list(set(av_varscosp).intersection(req_vlist))
+        
+        if len(matched_vlist) == len(req_vlist):
+            print('\nAnalyzing MODIS simulator cloud optical depth')
+            cod_m = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx]
+            cod_m[:] = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
+        else:
+            cod_m = xr.DataArray(np.zeros(len(e3smtime))*np.nan)
     
     # mean cloud droplet number concentration
-    req_vlist = ['CDNUMC']
-    req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
-    matched_vlist = list(set(av_vars).intersection(req_vlist))
-    
-    if len(matched_vlist) == len(req_vlist):
-        cdnc_col = e3smdata['CDNUMC'+'_'+E3SMdomain_range].load()
-        cdnc_col = cdnc_col[:,x_idx]
-        cdnc_mean = cdnc_col/np.sum(weight,axis=1)
-        cdnc_mean[cdnc_mean >2e9] = np.nan
-        cdnc_mean = xr.DataArray(data=cdnc_mean,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
-            attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
+    if config['colnc_output'] == True:
+        req_vlist = [config['NC2D']]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+        matched_vlist = list(set(av_vars2d).intersection(req_vlist))
+        
+        if len(matched_vlist) == len(req_vlist):
+            print('\nAnalyzing mean cloud droplet number concentration')
+            cdnc_col = e3smdata3d[config['NC2D']+E3SMdomain_range][:,x_idx].load()
+            weight = cloud*dz
+            cdnc_mean = cdnc_col/weight.sum(dim=config['vert_dim'])
+            cdnc_mean[cdnc_mean >2e9] = np.nan
+            cdnc_mean = xr.DataArray(data=cdnc_mean,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime)),
+                attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
+        else:
+            cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
     else:
-        cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+        req_vlist = [config['NC']]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+        matched_vlist = list(set(av_vars3d).intersection(req_vlist))
+      
+        if len(matched_vlist) == len(req_vlist):
+            print('\nAnalyzing mean cloud droplet number concentration')
+            #compute cloud layer mean CDNC from 3D NC (note that if NC is not in-cloud only, one needs to divide by cloud fraction)
+            nc3d = e3smdata3d[config['NC']+E3SMdomain_range][:,:,x_idx].load()      
+            if nc3d.attrs['units'] == '1/kg':
+              rho = np.array(Pres/T/287.06)
+              cdnc_rel = nc3d*rho/cloud
+            if nc3d.attrs['units'] == 'm-3':
+              cdnc_rel = nc3d/cloud
+            cdnc_rel = cdnc_rel.where(cloud > 0, other = 0)
+            weight = cloud*dz
+            weight_column = weight.sum(dim=config['vert_dim'])
+            cdnc_rel_avg = cdnc_rel.dot(weight, dims=config['vert_dim'])
+            cdnc_mean = np.divide(cdnc_rel_avg, weight_column)
+            
+            cdnc_mean = xr.DataArray(data=cdnc_mean,  dims=[config['time_dim']],
+                    coords=dict(time=([config['time_dim']], e3smtime)),
+                    attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
+        else:
+          cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
     
     # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
-    req_vlist = ['TGCLDLWP']
-    req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
-    matched_vlist = list(set(av_vars).intersection(req_vlist))
-    
-    if len(matched_vlist) == len(req_vlist):
-        lwp = e3smdata['TGCLDLWP'+'_'+E3SMdomain_range][:,x_idx].data
-        e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
-        T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
-        nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
-        nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m, adiabaticity=0.8)
-        cdnc_arm = xr.DataArray(data=nd_arm*1e6,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
-            attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
-                        description='Retrieved using ARM Ndrop algorithm'),)
-        cdnc_sat = xr.DataArray(data=nd_sat*1e6,  dims=["time"],
-            coords=dict(time=(["time"], e3smtime)),
-            attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
-                        description='Retrieved using Bennartz(2007) algorithm, also used for VISST data'),)
-    else:
-        cdnc_arm = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        cdnc_sat = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+    if config['tau3d_output'] == True:
+        req_vlist = [config['LWP']]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+        matched_vlist = list(set(av_vars2d).intersection(req_vlist))
+        
+        if len(matched_vlist) == len(req_vlist):
+            print('\nAnalyzing cloud droplet number concentration retrieved like Ndrop')
+            lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
+            e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+            nd_arm = calc_cdnc_ARM(lwp, cod, e3sm_cloud_depth)
+          
+            cdnc_arm = xr.DataArray(data=nd_arm*1e6,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime)),
+                attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                            description='Retrieved using ARM Ndrop algorithm'),)
+        else:
+            cdnc_arm = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+    elif config['tau3d_output'] == False and config['cosp_output'] == True:
+        req_vlist = [config['LWP']]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+        matched_vlist = list(set(av_vars2d).intersection(req_vlist))
+        
+        if len(matched_vlist) == len(req_vlist):
+            print('\nAnalyzing cloud droplet number concentration retrieved like Ndrop')
+            lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
+            e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+            nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
+          
+            cdnc_arm = xr.DataArray(data=nd_arm*1e6,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime)),
+                attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                            description='Retrieved using ARM Ndrop algorithm'),)
+        else:
+            cdnc_arm = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+
+    if config['cosp_output'] == True:
+        # req_vlist = [config['LWP']]
+        req_vlist = [config['LWPMODIS']]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+        matched_vlist = list(set(av_varscosp).intersection(req_vlist))
+        
+        if len(matched_vlist) == len(req_vlist):
+            print('\nAnalyzing cloud droplet number concentration retrieved like MODIS')
+            # lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
+            lwp = e3smdatacosp[config['LWPMODIS']+E3SMdomain_range][:,x_idx]
+            lwp[:] = e3smdatacosp[config['LWPMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
+            T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+            nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m, adiabaticity=0.8)
+          
+            cdnc_sat = xr.DataArray(data=nd_sat*1e6,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime)),
+                attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                            description='Retrieved using Bennartz(2007) algorithm, also used for VISST data'),)
+        else:
+            cdnc_sat = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
     
     # all other 2D (surface and vertical integrated) variables
-    variable2d_names = ['AODABS', 'AODALL', 'CDNUMC', 'CLDHGH', 'CLDMED', 'CLDLOW', 'CLDTOT', 
-                        'FLDS', 'FLNS', 'FLNT', 'FLUT', 'FSDS', 'FSNS', 'FSNT', 'FSUTOA', 'SOLIN', 
-                        'LHFLX', 'SHFLX', 'LWCF', 'SWCF', "TGCLDLWP", "TGCLDIWP", 
-                        'IWPMODIS', 'LWPMODIS', 'REFFCLWMODIS', 'TAUIMODIS', 'TAUTMODIS', 'TAUWMODIS', 
-                        #'MEANPTOP_ISCCP', 'MEANCLDALB_ISCCP', 'MEANTAU_ISCCP',
-                        'PBLH', 'PRECT', 'PRECL', 'PRECC', 'PS', 'TREFHT', ]
+    variable2d_names = [config['AOD'], config['CLDTOT'], 
+                        config['LWDOWNSFC'], config['LWUPTOA'],
+                        config['SWDOWNSFC'], config['SWUPTOA'], config['SWDOWNTOA'], 
+                        config['LWCF'], config['SWCF'], config['LWP'], config['IWP'], 
+                        config['PBLH'], config['PS'], config['TS']]
+
+    if config['netradiation_output'] == True:
+        variable2d_names.append(config['LWNETSFC'])
+        variable2d_names.append(config['LWNETTOA'])
+        variable2d_names.append(config['SWNETSFC'])
+        variable2d_names.append(config['SWNETTOA'])
+    else:
+        variable2d_names.append(config['LWUPSFC'])
+        variable2d_names.append(config['LWDOWNTOA'])
+        variable2d_names.append(config['SWUPSFC'])
+
+    if config['clrskyradiation_output'] == True:
+        variable2d_names.append(config['SWUPTOACLR'])
+        variable2d_names.append(config['LWUPTOACLR'])
+        variable2d_names.append(config['SWDOWNSFCCLR'])
+        variable2d_names.append(config['LWDOWNSFCLR'])
+
+    if config['convectiveparam'] == True:
+        variable2d_names.append(config['PRECIPSFCTOT'])
+        variable2d_names.append(config['PRECIPSFCSTRAT'])
+        variable2d_names.append(config['PRECIPSFCCONV'])
+    else:
+        variable2d_names.append(config['PRECIPSFCLIQ'])
+        variable2d_names.append(config['PRECIPSFCICE'])
     
+    if config['colnc_output'] == True:
+        variable2d_names.append(config['NC2D'])
+
+    if config['aodabs_output'] == True:
+        variable2d_names.append(config['AODABS'])
+
+    if config['cosp_output'] == True:
+        variablecosp_names = []
+        variablecosp_names.append(config['IWPMODIS'])
+        variablecosp_names.append(config['LWPMODIS'])
+        variablecosp_names.append(config['REFFLIQMODIS'])
+        variablecosp_names.append(config['REFFICEMODIS'])
+        variablecosp_names.append(config['TAUICEMODIS'])
+        variablecosp_names.append(config['TAUTOTMODIS'])
+        variablecosp_names.append(config['TAULIQMODIS'])
+        variablecosp_names.append(config['NDMODIS'])
+        variablecosp_names.append(config['CFLIQMODIS'])
+        variablecosp_names.append(config['CFICEMODIS'])
+        variablecosp_names.append(config['CFTOTMODIS'])
+
+    if config['cloudfraction_layers_output'] == True:
+        variable2d_names.append(config['CLDHGH'])
+        variable2d_names.append(config['CLDMED'])
+        variable2d_names.append(config['CLDLOW'])
+
+    if config['surfaceflux_output'] == True:
+        variable2d_names.append(config['LHFLX'])
+        variable2d_names.append(config['SHFLX'])
+
     for varname in variable2d_names:
         try:
-            var = e3smdata[varname + '_'+E3SMdomain_range].load()
-            var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
+            var = e3smdata2d[varname + E3SMdomain_range][:,x_idx].load()
+            var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
         except:
-            var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
-                               dims=["time","ncol_"+E3SMdomain_range],coords={"time":e3smtime,"ncol_"+E3SMdomain_range:np.arange(len_ncol)},\
+            # var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
+            #                    dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime,config['latlon_dim']+E3SMdomain_range:np.arange(len_ncol)},\
+            #                    attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+            var = xr.DataArray(np.zeros((len(e3smtime)))*np.nan,name=varname,\
+                               dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
-        if varname=='AODABS' or varname=='AODALL':
+        if varname==config['AODABS'] + E3SMdomain_range or varname==config['AOD'] + E3SMdomain_range:
             var.attrs['units']='N/A'
         variable_names.append(varname)
-        variables.append(var[:,x_idx])
+        variables.append(var)
+
+    for varname in variablecosp_names:
+        try:
+            var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx]
+            var[:] = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
+            if varname == config['IWPMODIS'] + E3SMdomain_range or varname == config['REFFICEMODIS'] + E3SMdomain_range or varname == config['TAUICEMODIS'] + E3SMdomain_range:
+                var[:] = var/e3smdatacosp[config['CFICEMODIS'] + E3SMdomain_range][:,x_idx].values
+            if varname == config['TAUTOTMODIS'] + E3SMdomain_range:
+                var[:] = var/e3smdatacosp[config['CFTOTMODIS'] + E3SMdomain_range][:,x_idx].values
+            var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
+        except:
+            # var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
+            #                    dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime,config['latlon_dim']+E3SMdomain_range:np.arange(len_ncol)},\
+            #                    attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+            var = xr.DataArray(np.zeros((len(e3smtime)))*np.nan,name=varname,\
+                               dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime},\
+                               attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+        variable_names.append(varname)
+        variables.append(var)
     
     # all other 3D (with vertical level) variables at the lowest model level
-    variable3d_names = ['CCN1', 'CCN3', 'CCN4', 'CCN5', 'Q', 'T', 'RELHUM', 'U', 'V'] 
+    # variable3d_names = [config['Q'], config['T'], config['RH'], config['U'], config['V']] 
+    variable3d_names = [config['T']]
+    # if config['ccn_output'] == True:
+    #     variable3d_names.append(config['CCN1'])
+    #     variable3d_names.append(config['CCN2'])
+    #     variable3d_names.append(config['CCN5'])
+    #     variable3d_names.append(config['CCN10'])
+
     for varname in variable3d_names:
         try:
-            var = e3smdata[varname + '_'+E3SMdomain_range].load()
-            var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
+            var = e3smdata3d[varname + E3SMdomain_range][:,-1,x_idx].load()
+            var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
         except:
-            var = xr.DataArray(np.zeros((len(e3smtime),len_lev,len_ncol))*np.nan,name=varname,\
-                               dims=["time","lev","ncol_"+E3SMdomain_range],coords={"time":e3smtime,"lev":e3smdata['lev'],"ncol_"+E3SMdomain_range:e3smdata['ncol_'+E3SMdomain_range]},\
+            # var = xr.DataArray(np.zeros((len(e3smtime),len_lev,len_ncol))*np.nan,name=varname,\
+            #                    dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime,config['vert_dim']:e3smdata3d[config['vert_dim']],config['latlon_dim']+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
+            #                    attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+            var = xr.DataArray(np.zeros((len(e3smtime),len_lev))*np.nan,name=varname,\
+                               dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime,config['vert_dim']:e3smdata3d[config['vert_dim']]},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
-        variables.append(var[:,-1,x_idx])
+        variables.append(var)
         variable_names.append(varname)
     
-    e3smdata.close()
+    e3smdata3d.close()
+    e3smdata2d.close()
+
+    # aerosol composition
+    if config['aerosol_output'] == True:
+      print(lst3d_dryaer[0])
+      e3smdata3d_dryaer = xr.open_dataset(lst3d_dryaer[0])
+      e3smdata3d_dryaer = e3smdata3d_dryaer.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+
+      vlist = list(e3smdata3d_dryaer.variables.keys())
+      av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
+
+      if config['composition_output'] == True:
+          req_vlist = [config['bc_a1'], config['bc_a3'], config['bc_a4'], config['dst_a1'], config['dst_a3'], config['mom_a1'], \
+                       config['mom_a2'], config['mom_a3'], config['mom_a4'], config['ncl_a1'], config['ncl_a2'], config['ncl_a3'], \
+                       config['pom_a1'], config['pom_a3'], config['pom_a4'], config['so4_a1'], config['so4_a2'], config['so4_a3'], \
+                       config['soa_a1'], config['soa_a2'], config['soa_a3']]
+          req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+          matched_vlist = list(set(av_vars).intersection(req_vlist))
+    
+          if len(matched_vlist) == len(req_vlist):
+              print('\nAnalyzing aerosol composition')
+              bc_a1 = e3smdata3d_dryaer[config['bc_a1']+E3SMdomain_range][:,-1,x_idx].load()
+              bc_a3 = e3smdata3d_dryaer[config['bc_a3']+E3SMdomain_range][:,-1,x_idx].load()
+              bc_a4 = e3smdata3d_dryaer[config['bc_a4']+E3SMdomain_range][:,-1,x_idx].load()
+              dst_a1 = e3smdata3d_dryaer[config['dst_a1']+E3SMdomain_range][:,-1,x_idx].load()
+              dst_a3 = e3smdata3d_dryaer[config['dst_a3']+E3SMdomain_range][:,-1,x_idx].load()
+              mom_a1 = e3smdata3d_dryaer[config['mom_a1']+E3SMdomain_range][:,-1,x_idx].load()
+              mom_a2 = e3smdata3d_dryaer[config['mom_a2']+E3SMdomain_range][:,-1,x_idx].load()
+              mom_a3 = e3smdata3d_dryaer[config['mom_a3']+E3SMdomain_range][:,-1,x_idx].load()
+              mom_a4 = e3smdata3d_dryaer[config['mom_a4']+E3SMdomain_range][:,-1,x_idx].load()
+              ncl_a1 = e3smdata3d_dryaer[config['ncl_a1']+E3SMdomain_range][:,-1,x_idx].load()
+              ncl_a2 = e3smdata3d_dryaer[config['ncl_a2']+E3SMdomain_range][:,-1,x_idx].load()
+              ncl_a3 = e3smdata3d_dryaer[config['ncl_a3']+E3SMdomain_range][:,-1,x_idx].load()
+              pom_a1 = e3smdata3d_dryaer[config['pom_a1']+E3SMdomain_range][:,-1,x_idx].load()
+              pom_a3 = e3smdata3d_dryaer[config['pom_a3']+E3SMdomain_range][:,-1,x_idx].load()
+              pom_a4 = e3smdata3d_dryaer[config['pom_a4']+E3SMdomain_range][:,-1,x_idx].load()
+              so4_a1 = e3smdata3d_dryaer[config['so4_a1']+E3SMdomain_range][:,-1,x_idx].load()
+              so4_a2 = e3smdata3d_dryaer[config['so4_a2']+E3SMdomain_range][:,-1,x_idx].load()
+              so4_a3 = e3smdata3d_dryaer[config['so4_a3']+E3SMdomain_range][:,-1,x_idx].load()
+              soa_a1 = e3smdata3d_dryaer[config['soa_a1']+E3SMdomain_range][:,-1,x_idx].load()
+              soa_a2 = e3smdata3d_dryaer[config['soa_a2']+E3SMdomain_range][:,-1,x_idx].load()
+              soa_a3 = e3smdata3d_dryaer[config['soa_a3']+E3SMdomain_range][:,-1,x_idx].load()
+              bc_all  = bc_a1 +  bc_a3 + bc_a4
+              dst_all = dst_a1 +  dst_a3
+              mom_all = mom_a1 + mom_a2 + mom_a3 + mom_a4
+              ncl_all = ncl_a1 + ncl_a2 + ncl_a3
+              pom_all = pom_a1 + pom_a3 + pom_a4
+              so4_all = so4_a1 + so4_a2 + so4_a3
+              soa_all = soa_a1 + soa_a2 + soa_a3
+              bc_all.attrs['units'] = bc_a1.units
+              bc_all.attrs['long_name'] = 'black carbon concentration'
+              dst_all.attrs['units'] = dst_a1.units
+              dst_all.attrs['long_name'] = 'dust concentration'
+              mom_all.attrs['units'] = mom_a1.units
+              mom_all.attrs['long_name'] = 'marine organic matter concentration'
+              ncl_all.attrs['units'] = ncl_a1.units
+              ncl_all.attrs['long_name'] = 'sea salt concentration'
+              pom_all.attrs['units'] = pom_a1.units
+              pom_all.attrs['long_name'] = 'primary organic matter concentration'
+              so4_all.attrs['units'] = so4_a1.units
+              so4_all.attrs['long_name'] = 'sulfate concentration'
+              soa_all.attrs['units'] = soa_a1.units
+              soa_all.attrs['long_name'] = 'secondary organic aerosol concentration'
+              # change time to standard datetime64 format
+              bc_all.coords[config['time_dim']] = bc_all.indexes[config['time_dim']].to_datetimeindex()
+              dst_all.coords[config['time_dim']] = dst_all.indexes[config['time_dim']].to_datetimeindex()
+              mom_all.coords[config['time_dim']] = mom_all.indexes[config['time_dim']].to_datetimeindex()
+              ncl_all.coords[config['time_dim']] = ncl_all.indexes[config['time_dim']].to_datetimeindex()
+              pom_all.coords[config['time_dim']] = pom_all.indexes[config['time_dim']].to_datetimeindex()
+              so4_all.coords[config['time_dim']] = so4_all.indexes[config['time_dim']].to_datetimeindex()
+              soa_all.coords[config['time_dim']] = soa_all.indexes[config['time_dim']].to_datetimeindex()
+          else:
+              bc_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              dst_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              mom_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              ncl_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              pom_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              so4_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+              soa_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+    
+      # aerosol size
+      if config['dgnum_output_combined'] == False:
+          req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], \
+                       config['dgnd_a01'], config['dgnd_a02'], config['dgnd_a03'], config['dgnd_a04']]
+          req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+          matched_vlist = list(set(av_vars).intersection(req_vlist))
+          if len(matched_vlist) == len(req_vlist):
+              print('\nAnalyzing aerosol size')
+              num_a1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:, -1, x_idx].load()
+              num_a2 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:, -1, x_idx].load()
+              num_a3 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:, -1, x_idx].load()
+              num_a4 = e3smdata3d_dryaer[config['num_a4']+E3SMdomain_range][:, -1, x_idx].load()
+              numall = [num_a1.data, num_a2.data, num_a3.data, num_a4.data]
+              num_dn1 = e3smdata3d_dryaer[config['dgnd_a01']+E3SMdomain_range][:, -1, x_idx].load()
+              num_dn2 = e3smdata3d_dryaer[config['dgnd_a02']+E3SMdomain_range][:, -1, x_idx].load()
+              num_dn3 = e3smdata3d_dryaer[config['dgnd_a03']+E3SMdomain_range][:, -1, x_idx].load()
+              num_dn4 = e3smdata3d_dryaer[config['dgnd_a04']+E3SMdomain_range][:, -1, x_idx].load()
+              dnall  = [num_dn1.data,    num_dn2.data,    num_dn3.data,    num_dn4.data]
+              NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1].data, Pres[:, -1].data)
+              NCNall = xr.DataArray(data=NCN,  dims=["size", "time"],
+                  coords=dict(time=([config['time_dim']], e3smtime),size=(["size"], np.arange(1,3001))),
+                  attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
+          else:
+              NCNall = xr.DataArray(np.zeros((3000,len(e3smtime)))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+      else:
+          req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], \
+                       config['dgnum']]
+          req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+          matched_vlist = list(set(av_vars).intersection(req_vlist))
+          if len(matched_vlist) == len(req_vlist):
+              print('\nAnalyzing for aerosol size')
+              num_a1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:, -1, x_idx].load()
+              num_a2 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:, -1, x_idx].load()
+              num_a3 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:, -1, x_idx].load()
+              num_a4 = e3smdata3d_dryaer[config['num_a4']+E3SMdomain_range][:, -1, x_idx].load()
+              numall = [num_a1.data, num_a2.data, num_a3.data, num_a4.data]
+              num_dn1 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:, -1, x_idx, 0].load()
+              num_dn2 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:, -1, x_idx, 1].load()
+              num_dn3 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:, -1, x_idx, 2].load()
+              num_dn4 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:, -1, x_idx, 3].load()
+              dnall  = [num_dn1.data,    num_dn2.data,    num_dn3.data,    num_dn4.data]
+              NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1].data, Pres[:, -1].data)
+              NCNall = xr.DataArray(data=NCN,  dims=["size", "time"],
+                  coords=dict(time=([config['time_dim']], e3smtime),size=(["size"], np.arange(1,3001))),
+                  attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
+          else:
+              NCNall = xr.DataArray(np.zeros((3000,len(e3smtime)))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+            
+    #CCN
+    if config['ccn_output'] == True:
+        print(lst3d_wetaer[0])
+        e3smdata3d_wetaer = xr.open_dataset(lst3d_wetaer[0])
+        e3smdata3d_wetaer = e3smdata3d_wetaer.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+
+        vlist = list(e3smdata3d_wetaer.variables.keys())
+        av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
+
+        req_vlist = [config['CCN1'], config['CCN2']]#, config['CCN5'], config['CCN10']]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+        matched_vlist = list(set(av_vars).intersection(req_vlist))
+      
+        if len(matched_vlist) == len(req_vlist):
+            print('\nAnalyzing CCN')
+            ccn1_all = e3smdata3d_wetaer[config['CCN1']+E3SMdomain_range][:,-1,x_idx].load()
+            ccn2_all = e3smdata3d_wetaer[config['CCN2']+E3SMdomain_range][:,-1,x_idx].load()
+            # ccn5_all = e3smdata3d_wetaer[config['CCN5']+E3SMdomain_range][:,-1,x_idx].load()
+            # ccn10_all = e3smdata3d_wetaer[config['CCN10']+E3SMdomain_range][:,-1,x_idx].load()
+        else:
+            ccn1_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+            ccn2_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+            # ccn5_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+            # ccn10_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
+
     
     #%%  add data for each day
-    for file in lst[1:]:
-        print(file)
-        e3smdata = xr.open_dataset(file)
-        e3smtime_i = e3smdata.indexes['time'].to_datetimeindex()
+    # for file in lst[1:]:
+    for ii in np.arange(len(lst3d[1:]))+1:
+        print(lst3d[ii])
+        # e3smdata = xr.open_dataset(file)
+        e3smdata3d = xr.open_dataset(lst3d[ii])
+        e3smdata3d = e3smdata3d.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+        dimensions3d = (config['time_dim'], config['vert_dim'], config['latlon_dim']+E3SMdomain_range)
+        variables3d = []
+        for var_name, var_data in e3smdata3d.data_vars.items():
+            if set(var_data.dims) == set(dimensions3d):
+                variables3d.append(var_name)
+      
+        e3smdata2d = xr.open_dataset(lst2d[ii])
+        e3smdata2d = e3smdata2d.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
+        dimensions2d = (config['time_dim'], config['latlon_dim']+E3SMdomain_range)
+        variables2d = []
+        for var_name, var_data in e3smdata2d.data_vars.items():
+            if set(var_data.dims) == set(dimensions2d):
+                variables2d.append(var_name)
+
+        e3smdatacosp = xr.open_dataset(lstcosp[ii])
+        e3smdatacosp = e3smdatacosp.transpose(config['time_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time and location
+        dimensions2d = (config['time_dim'], config['latlon_dim']+E3SMdomain_range)
+        variablescosp = []
+        for var_name, var_data in e3smdatacosp.data_vars.items():
+            if set(var_data.dims) == set(dimensions2d):
+                variablescosp.append(var_name)
+          
+        e3smtime_i = e3smdata3d.indexes[config['time_dim']].to_datetimeindex()
         e3smtime = np.hstack((e3smtime, e3smtime_i))
+      
         
-        # aerosol composition
-        req_vlist = ['bc_a1', 'bc_a3', 'bc_a4', 'dst_a1', 'dst_a3', 'mom_a1', \
-                     'mom_a2', 'mom_a3', 'mom_a4', 'ncl_a1', 'ncl_a2', 'ncl_a3', \
-                     'pom_a1', 'pom_a3', 'pom_a4', 'so4_a1', 'so4_a2', 'so4_a3', \
-                     'soa_a1', 'soa_a2', 'soa_a3']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
-        matched_vlist = list(set(av_vars).intersection(req_vlist))
-        
-        if len(matched_vlist) == len(req_vlist):
-            bc_a1 = e3smdata['bc_a1'+'_'+E3SMdomain_range].load()
-            bc_a3 = e3smdata['bc_a3'+'_'+E3SMdomain_range].load()
-            bc_a4 = e3smdata['bc_a4'+'_'+E3SMdomain_range].load()
-            dst_a1 = e3smdata['dst_a1'+'_'+E3SMdomain_range].load()
-            dst_a3 = e3smdata['dst_a3'+'_'+E3SMdomain_range].load()
-            mom_a1 = e3smdata['mom_a1'+'_'+E3SMdomain_range].load()
-            mom_a2 = e3smdata['mom_a2'+'_'+E3SMdomain_range].load()
-            mom_a3 = e3smdata['mom_a3'+'_'+E3SMdomain_range].load()
-            mom_a4 = e3smdata['mom_a4'+'_'+E3SMdomain_range].load()
-            ncl_a1 = e3smdata['ncl_a1'+'_'+E3SMdomain_range].load()
-            ncl_a2 = e3smdata['ncl_a2'+'_'+E3SMdomain_range].load()
-            ncl_a3 = e3smdata['ncl_a3'+'_'+E3SMdomain_range].load()
-            pom_a1 = e3smdata['pom_a1'+'_'+E3SMdomain_range].load()
-            pom_a3 = e3smdata['pom_a3'+'_'+E3SMdomain_range].load()
-            pom_a4 = e3smdata['pom_a4'+'_'+E3SMdomain_range].load()
-            so4_a1 = e3smdata['so4_a1'+'_'+E3SMdomain_range].load()
-            so4_a2 = e3smdata['so4_a2'+'_'+E3SMdomain_range].load()
-            so4_a3 = e3smdata['so4_a3'+'_'+E3SMdomain_range].load()
-            soa_a1 = e3smdata['soa_a1'+'_'+E3SMdomain_range].load()
-            soa_a2 = e3smdata['soa_a2'+'_'+E3SMdomain_range].load()
-            soa_a3 = e3smdata['soa_a3'+'_'+E3SMdomain_range].load()
-            bc  = bc_a1[:,-1,x_idx] +                       bc_a3[:,-1,x_idx] + bc_a4[:,-1,x_idx]
-            dst = dst_a1[:,-1,x_idx] +                      dst_a3[:,-1,x_idx]
-            mom = mom_a1[:,-1,x_idx] + mom_a2[:,-1,x_idx] + mom_a3[:,-1,x_idx] + mom_a4[:,-1,x_idx]
-            ncl = ncl_a1[:,-1,x_idx] + ncl_a2[:,-1,x_idx] + ncl_a3[:,-1,x_idx]
-            pom = pom_a1[:,-1,x_idx] +                    + pom_a3[:,-1,x_idx] + pom_a4[:,-1,x_idx]
-            so4 = so4_a1[:,-1,x_idx] + so4_a2[:,-1,x_idx] + so4_a3[:,-1,x_idx]
-            soa = soa_a1[:,-1,x_idx] + soa_a2[:,-1,x_idx] + soa_a3[:,-1,x_idx]
-            # change time to standard datetime64 format
-            bc.coords['time'] = bc.indexes['time'].to_datetimeindex()
-            dst.coords['time'] = dst.indexes['time'].to_datetimeindex()
-            mom.coords['time'] = mom.indexes['time'].to_datetimeindex()
-            ncl.coords['time'] = ncl.indexes['time'].to_datetimeindex()
-            pom.coords['time'] = pom.indexes['time'].to_datetimeindex()
-            so4.coords['time'] = so4.indexes['time'].to_datetimeindex()
-            soa.coords['time'] = soa.indexes['time'].to_datetimeindex()
-            bc_all = xr.concat([bc_all, bc], dim="time")
-            dst_all = xr.concat([dst_all, dst], dim="time")
-            mom_all = xr.concat([mom_all, mom], dim="time")
-            ncl_all = xr.concat([ncl_all, ncl], dim="time")
-            pom_all = xr.concat([pom_all, pom], dim="time")
-            so4_all = xr.concat([so4_all, so4], dim="time")
-            soa_all = xr.concat([soa_all, soa], dim="time")
-        else:
-            bc_all  = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='bc_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            dst_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='dst_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            mom_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='mom_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            ncl_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='ncl_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            pom_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='pom_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            so4_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='so4_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            soa_all = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='soa_all',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            
-        # aerosol size
-        req_vlist = ['num_a1', 'num_a2', 'num_a3', 'num_a4', 'dgnd_a01', 'dgnd_a02', \
-                     'dgnd_a03', 'dgnd_a04']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
-        matched_vlist = list(set(av_vars).intersection(req_vlist))
-        
-        if len(matched_vlist) == len(req_vlist):
-            num_a1 = e3smdata['num_a1'+'_'+E3SMdomain_range].load()
-            num_a2 = e3smdata['num_a2'+'_'+E3SMdomain_range].load()
-            num_a3 = e3smdata['num_a3'+'_'+E3SMdomain_range].load()
-            num_a4 = e3smdata['num_a4'+'_'+E3SMdomain_range].load()
-            dn1 = e3smdata['dgnd_a01'+'_'+E3SMdomain_range].load()
-            dn2 = e3smdata['dgnd_a02'+'_'+E3SMdomain_range].load()
-            dn3 = e3smdata['dgnd_a03'+'_'+E3SMdomain_range].load()
-            dn4 = e3smdata['dgnd_a04'+'_'+E3SMdomain_range].load()
-            P0 = e3smdata['P0'].load()
-            hyam = e3smdata['hyam'].load()
-            hybm = e3smdata['hybm'].load()
-            T = e3smdata['T'+'_'+E3SMdomain_range].load()
-            PS = e3smdata['PS'+'_'+E3SMdomain_range].load()
+        T = e3smdata3d[config['T']+E3SMdomain_range][:,:,x_idx].load()
+
+        if config['pres_output'] == False:
+            PS = e3smdata3d[config['PS']+E3SMdomain_range][:,x_idx].load()
             Pres = np.nan*T
             zlen = T.shape[1]
             for kk in range(zlen):
-                Pres[:, kk, :] = hyam[kk]*P0  +  hybm[kk]*PS
-            numall = [num_a1[:, -1, x_idx].data, num_a2[:, -1, x_idx].data, num_a3[:, -1, x_idx].data, num_a4[:, -1, x_idx].data]
-            dnall  = [dn1[:, -1, x_idx].data,    dn2[:, -1, x_idx].data,    dn3[:, -1, x_idx].data,    dn4[:, -1, x_idx].data]
-            NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1, x_idx].data, Pres[:, -1, x_idx].data)
-            NCN2 = xr.DataArray(data=NCN,  dims=["size", "time"],
-                coords=dict(time=(["time"], e3smtime_i),size=(["size"], np.arange(1,3001))),
-                attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
-            NCNall = xr.concat([NCNall, NCN2], dim="time")
+              Pres[:, kk] = hyam[kk]*P0  +  hybm[kk]*PS
         else:
-            NCNall = xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name='NCNall',attrs={'units':'dummy_unit','long_name':'Dummy'})
+            Pres = e3smdata3d[config['PRES']+E3SMdomain_range][:,:,x_idx].load()
+
+        # vlist3d = list(e3smdata3d.variables.keys())
+        vlist3d = variables3d
+        av_vars3d = fnmatch.filter(vlist3d,'*'+E3SMdomain_range)
     
+        # vlist2d = list(e3smdata2d.variables.keys())
+        vlist2d = variables2d
+        av_vars2d = fnmatch.filter(vlist2d,'*'+E3SMdomain_range)
+
+        vlistcosp = variablescosp
+        av_varscosp = fnmatch.filter(vlistcosp,'*'+E3SMdomain_range)
+
         # variables to calculate cloud heights and depth
-        req_vlist = ['Z3', 'CLOUD']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
-        matched_vlist = list(set(av_vars).intersection(req_vlist))
+        print('\nAnalyzing cloud base, top, and depth')
+        req_vlist = [config['Z'], config['CF']]
+        req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+        matched_vlist = list(set(av_vars3d).intersection(req_vlist))
         
         if len(matched_vlist) == len(req_vlist):
-            z3 = e3smdata['Z3'+'_'+E3SMdomain_range].load()
-            cloud = e3smdata['CLOUD'+'_'+E3SMdomain_range].load()
-            z3 = z3[:,:,x_idx]
-            cloud = cloud[:,:,x_idx]
+            print('\nAnalyzing cloud base, top, and depth')
+            z3 = e3smdata3d[config['Z']+E3SMdomain_range][:,:,x_idx].load()
+            if config['cloudfraction3d_legit'] == True:
+                cloud = e3smdata3d[config['CF']+E3SMdomain_range][:,:,x_idx].load()
+            else:
+                cloud = e3smdata3d[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load() + e3smdata3d[config['CFICE']+E3SMdomain_range][:,:,x_idx].load()
+                cloud = cloud.where(cloud <= 1, 1) # make sure CF doesn't exceed 100%
             dz = (z3[:,:-2].data - z3[:,2:].data)/2
             dz = np.append(dz, (z3[:,-2:-1].data+z3[:,-1:].data)/2, axis=1)
             dz = np.insert(dz,0,dz[:,0],axis=1)
-            weight = cloud.data*dz
+            
             # mid-level T, P, z
-            Tmid = 0.5*(T[:,0:-1,x_idx].data + T[:,1:,x_idx].data)
-            Pmid = 0.5*(Pres[:,0:-1,x_idx].data + Pres[:,1:,x_idx].data)
+            Tmid = 0.5*(T[:,0:-1].data + T[:,1:].data)
+            Pmid = 0.5*(Pres[:,0:-1].data + Pres[:,1:].data)
             Zmid = 0.5*(z3[:,0:-1].data + z3[:,1:].data)
             # cloud top
             cf_sum_top = np.cumsum(cloud.data, axis=1)
             cf_sum_top[cf_sum_top > 1] = 1
             cf_sum_top_diff = cf_sum_top[:,1:] - cf_sum_top[:,0:-1]
-            z_cldtop = np.sum(Zmid[:,:]*cf_sum_top_diff[:,:], axis=1)
-            T_cldtop = np.sum(Tmid[:,:]*cf_sum_top_diff[:,:], axis=1)
+            z_cldtop = np.sum(Zmid*cf_sum_top_diff, axis=1)
+            T_cldtop = np.sum(Tmid*cf_sum_top_diff, axis=1)
             # cloud base
             cf_sum_base = np.cumsum(cloud[:, ::-1].data, axis=1)
             cf_sum_base[cf_sum_base > 1] = 1
             cf_sum_base_diff = cf_sum_base[:,1:] - cf_sum_base[:,0:-1]
-            z_cldbase = np.sum(Zmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
-            T_cldbase = np.sum(Tmid[:,::-1]*cf_sum_base_diff[:,:], axis=1)
+            z_cldbase = np.sum(Zmid[:,::-1]*cf_sum_base_diff, axis=1)
+            T_cldbase = np.sum(Tmid[:,::-1]*cf_sum_base_diff, axis=1)
             # normalize cloud fraction when not 100%
             z_cldtop = z_cldtop / cf_sum_top[:,-1]
             T_cldtop = T_cldtop / cf_sum_top[:,-1]
             z_cldbase = z_cldbase / cf_sum_base[:,-1]
             T_cldbase = T_cldbase / cf_sum_base[:,-1]
             e3sm_cloud_depth = z_cldtop - z_cldbase
-            cloud_depth_2 = xr.DataArray(data=e3sm_cloud_depth,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
+            cloud_depth_2 = xr.DataArray(data=e3sm_cloud_depth,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime_i)),
                 attrs=dict(long_name="cloud depth",units="m"),)
-            cbh_2 = xr.DataArray(data=z_cldbase,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
+            cbh_2 = xr.DataArray(data=z_cldbase,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime_i)),
                 attrs=dict(long_name="cloud base height",units="m"),)
-            cth_2 = xr.DataArray(data=z_cldtop,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
+            cth_2 = xr.DataArray(data=z_cldtop,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime_i)),
                 attrs=dict(long_name="cloud top height",units="m"),)
-            cbt_2 = xr.DataArray(data=T_cldbase,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
+            cbt_2 = xr.DataArray(data=T_cldbase,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime_i)),
                 attrs=dict(long_name="cloud base temperature",units="K"),)
-            ctt_2 = xr.DataArray(data=T_cldtop,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
+            ctt_2 = xr.DataArray(data=T_cldtop,  dims=[config['time_dim']],
+                coords=dict(time=([config['time_dim']], e3smtime_i)),
                 attrs=dict(long_name="cloud top temperature",units="K"),)
-            cbh = xr.concat([cbh, cbh_2], dim="time")
-            cth = xr.concat([cth, cth_2], dim="time")
-            cbt = xr.concat([cbt, cbt_2], dim="time")
-            ctt = xr.concat([ctt, ctt_2], dim="time")
-            cloud_depth = xr.concat([cloud_depth, cloud_depth_2], dim="time")
+            cbh = xr.concat([cbh, cbh_2], dim=config['time_dim'])
+            cth = xr.concat([cth, cth_2], dim=config['time_dim'])
+            cbt = xr.concat([cbt, cbt_2], dim=config['time_dim'])
+            ctt = xr.concat([ctt, ctt_2], dim=config['time_dim'])
+            cloud_depth = xr.concat([cloud_depth, cloud_depth_2], dim=config['time_dim'])
         else:
-            cloud_depth = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cloud_depth',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            cbh = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cbh',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            cth = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cth',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            cbt = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cbt',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            ctt = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='ctt',attrs={'units':'dummy_unit','long_name':'Dummy'})
+            cloud_depth = xr.concat([cloud_depth, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cloud_depth',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+            cbh = xr.concat([cbh, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cbh',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+            cth = xr.concat([cth, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cth',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+            cbt = xr.concat([cbt, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cbt',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+            ctt = xr.concat([ctt, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='ctt',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+        
     
         # cloud optical depth and effective radius
-        req_vlist = ['REL', 'FREQL', 'ICWNC', 'TOT_CLD_VISTAU', 'TAUWMODIS', 'SOLIN']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
-        matched_vlist = list(set(av_vars).intersection(req_vlist))
+        if config['reff_output'] == True:
+            req_vlist = [config['REL'], config['CFLIQ'], config['NC']]
+            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+            matched_vlist = list(set(av_vars3d).intersection(req_vlist))
+      
+            if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing effective radius')
+                rel = e3smdata3d[config['REL']+E3SMdomain_range][:,:,x_idx].load()
+                freql = e3smdata3d[config['CFLIQ']+E3SMdomain_range][:,:,x_idx].load()
+                icwnc = e3smdata3d[config['NC']+E3SMdomain_range][:,:,x_idx].load()
         
-        if len(matched_vlist) == len(req_vlist):
-            rel = e3smdata['REL'+'_'+E3SMdomain_range].load()
-            freql = e3smdata['FREQL'+'_'+E3SMdomain_range].load()
-            icwnc = e3smdata['ICWNC'+'_'+E3SMdomain_range].load()
-            cod_a = e3smdata['TOT_CLD_VISTAU'+'_'+E3SMdomain_range].load()
-            cod_m = e3smdata['TAUWMODIS'+'_'+E3SMdomain_range].load()*0.01   # cloud fraction is treated as 1 but is 100
-            solin = e3smdata['SOLIN'+'_'+E3SMdomain_range].load()
-            rel = rel[:,:,x_idx]
-            freql = freql[:,:,x_idx]
-            icwnc = icwnc[:,:,x_idx]
-            cod_a = cod_a[:,:,x_idx]
-            solin = solin[:,x_idx]
-            # calculate mean effective radius. 
-            reff = calc_Reff_from_REL(rel.data, dz, freql.data, icwnc.data)
-            reff[reff==0] = np.nan
-            # calculate mean optical depth
-            cod = np.sum(cod_a.data,axis=1)
-            # cod[solin==0] = np.nan
-            # cod from MODIS simulator
-            cod_m = cod_m[:,x_idx]
+                # calculate mean effective radius. 
+                reff = calc_Reff_from_REL(rel.data, dz, freql.data, icwnc.data)
+                reff[reff==0] = np.nan
+          
+                reff_2 = xr.DataArray(data=reff,  dims=[config['time_dim']],
+                    coords=dict(time=([config['time_dim']], e3smtime_i)),
+                    attrs=dict(long_name="mean cloud liquid effective radius",units="um"),)
+                reff_mean = xr.concat([reff_mean, reff_2], dim=config['time_dim'])
+            else:
+                reff_mean = xr.concat([reff_mean, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='reff',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+        
+        if config['tau3d_output'] == True:
+            req_vlist3d = [config['TAU3D']]
+            req_vlist2d = [config['SWDOWNTOA']]
+            req_vlist3d = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist3d]
+            req_vlist2d = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist2d]
+            matched_vlist3d = list(set(av_vars3d).intersection(req_vlist3d))
+            matched_vlist2d = list(set(av_vars2d).intersection(req_vlist2d))
+        
+            if np.logical_and(len(matched_vlist3d) == len(req_vlist3d), len(matched_vlist2d) == len(req_vlist2d)):
+                print('\nAnalyzing cloud optical depth')
+                cod_a = e3smdata3d[config['TAU3D']+E3SMdomain_range][:,:,x_idx].load()
+                solin = e3smdata2d[config['SWDOWNTOA']+E3SMdomain_range][:,x_idx].load()
+              
+                # calculate mean optical depth
+                cod = np.sum(cod_a.data,axis=1)
+                # cod[solin==0] = np.nan        
+                
+                cod_2 = xr.DataArray(data=cod,  dims=[config['time_dim']],
+                  coords=dict(time=([config['time_dim']], e3smtime_i)),
+                  attrs=dict(long_name="column-total cloud optical depth",units="N/A"),)
+                cod_mean = xr.concat([cod_mean, cod_2], dim=config['time_dim'])
+            else:
+                cod_mean = xr.concat([cod_mean, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cod',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+
+        if config['cosp_output'] == True:   
+            req_vlist = [config['TAULIQMODIS']]
+            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+            matched_vlist = list(set(av_varscosp).intersection(req_vlist))
             
-            reff_2 = xr.DataArray(data=reff,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
-                attrs=dict(long_name="mean cloud liquid effective radius",units="um"),)
-            cod_2 = xr.DataArray(data=cod,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
-                attrs=dict(long_name="column-total cloud optical depth",units="N/A"),)
-            reff_mean = xr.concat([reff_mean, reff_2], dim="time")
-            cod_mean = xr.concat([cod_mean, cod_2], dim="time")
-        else:
-            cod_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cod',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            reff_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='reff',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            cod_m = xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})
-        
+            if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing MODIS simulator cloud optical depth')
+                cod_m2 = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx]
+                cod_m2[:] = e3smdatacosp[config['TAULIQMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
+                cod_m = xr.concat([cod_m, cod_m2], dim=config['time_dim'])
+            else:
+                cod_m = xr.concat([cod_m, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+
         # mean cloud droplet number concentration
-        req_vlist = ['CDNUMC']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
-        matched_vlist = list(set(av_vars).intersection(req_vlist))
-        
-        if len(matched_vlist) == len(req_vlist):
-            cdnc_col = e3smdata['CDNUMC'+'_'+E3SMdomain_range].load()
-            cdnc_col = cdnc_col[:,x_idx]
-            cdnc = cdnc_col/np.sum(weight,axis=1)
-            cdnc[cdnc >2e9] = np.nan
-            cdnc = xr.DataArray(data=cdnc,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
-                attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
-            cdnc_mean = xr.concat([cdnc_mean, cdnc], dim="time")
+        if config['colnc_output'] == True:
+            req_vlist = [config['NC2D']]
+            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+            matched_vlist = list(set(av_vars2d).intersection(req_vlist))
+            
+            if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing mean cloud droplet number concentration')
+                cdnc_col = e3smdata3d[config['NC2D']+E3SMdomain_range][:,x_idx].load()
+                weight = cloud*dz
+                cdnc = cdnc_col/np.sum(weight,axis=1)
+                cdnc[cdnc >2e9] = np.nan
+                cdnc = xr.DataArray(data=cdnc,  dims=[config['time_dim']],
+                    coords=dict(time=([config['time_dim']], e3smtime_i)),
+                    attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
+                cdnc_mean = xr.concat([cdnc_mean, cdnc], dim=config['time_dim'])
+            else:
+                cdnc_mean = xr.concat([cdnc_mean, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cdnc_mean',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
         else:
-            cdnc_mean = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_mean',attrs={'units':'dummy_unit','long_name':'Dummy'})
-        
+            req_vlist = [config['NC']]
+            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+            matched_vlist = list(set(av_vars3d).intersection(req_vlist))
+          
+            if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing mean cloud droplet number concentration')
+                #compute cloud layer mean CDNC from 3D NC (note that if NC is not in-cloud only, one needs to divide by cloud fraction)
+                nc3d = e3smdata3d[config['NC']+E3SMdomain_range][:,:,x_idx].load()   
+                if nc3d.attrs['units'] == '1/kg':
+                  rho = np.array(Pres/T/287.06)
+                  cdnc_rel = nc3d*rho/cloud
+                if nc3d.attrs['units'] == 'm-3':
+                  cdnc_rel = nc3d/cloud
+                cdnc_rel = cdnc_rel.where(cloud > 0, other = 0)
+                weight = cloud*dz
+                weight_column = weight.sum(dim=config['vert_dim'])
+                cdnc_rel_avg = cdnc_rel.dot(weight, dims=config['vert_dim'])
+                cdnc = np.divide(cdnc_rel_avg, weight_column)
+                cdnc = xr.DataArray(data=cdnc,  dims=[config['time_dim']],
+                        coords=dict(time=([config['time_dim']], e3smtime_i)),
+                        attrs=dict(long_name="mean cloud water number concentration",units="#/m3"),)
+                cdnc_mean = xr.concat([cdnc_mean, cdnc], dim=config['time_dim'])
+            else:
+                cdnc_mean = r.concat([cdnc_mean, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+            
         # cloud droplet number concentration retrieved like Ndrop and Bennartz 2007
-        req_vlist = ['TGCLDLWP']
-        req_vlist = ["{}_{}".format(i,E3SMdomain_range) for i in req_vlist]
-        matched_vlist = list(set(av_vars).intersection(req_vlist))
-        
-        if len(matched_vlist) == len(req_vlist):
-            lwp = e3smdata['TGCLDLWP'+'_'+E3SMdomain_range][:,x_idx].data
-            e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
-            T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
-            nd_arm = calc_cdnc_ARM(lwp, cod_m, e3sm_cloud_depth)
-            nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m, adiabaticity=0.8)
-            nd_arm = xr.DataArray(data=nd_arm*1e6,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
-                attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
-                            description='Retrieved using ARM Ndrop algorithm'),)
-            nd_sat = xr.DataArray(data=nd_sat*1e6,  dims=["time"],
-                coords=dict(time=(["time"], e3smtime_i)),
-                attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
-                            description='Retrieved using Bennartz(2007) algorithm, also used for VISST data'),)
-            cdnc_arm = xr.concat([cdnc_arm, nd_arm], dim="time")
-            cdnc_sat = xr.concat([cdnc_sat, nd_sat], dim="time")
-        else:
-            cdnc_arm = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_arm',attrs={'units':'dummy_unit','long_name':'Dummy'})
-            cdnc_sat = xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_sat',attrs={'units':'dummy_unit','long_name':'Dummy'})
+        if config['tau3d_output'] == True:
+            req_vlist = [config['LWP']]
+            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+            matched_vlist = list(set(av_vars2d).intersection(req_vlist))
+            
+            if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop')
+                lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
+                e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+                nd_arm = calc_cdnc_ARM(lwp, cod_2, e3sm_cloud_depth)
+                nd_arm = xr.DataArray(data=nd_arm*1e6,  dims=[config['time_dim']],
+                    coords=dict(time=([config['time_dim']], e3smtime_i)),
+                    attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                                description='Retrieved using ARM Ndrop algorithm'),)
+                cdnc_arm = xr.concat([cdnc_arm, nd_arm], dim=config['time_dim'])
+            else:
+                cdnc_arm = xr.concat([cdnc_arm, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cdnc_arm',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+          
+        elif config['tau3d_output'] == False and config['cosp_output'] == True:
+            req_vlist = [config['LWP']]
+            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+            matched_vlist = list(set(av_vars2d).intersection(req_vlist))
+            
+            if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing for cloud droplet number concentration retrieved like Ndrop')
+                lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
+                e3sm_cloud_depth[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+                nd_arm = calc_cdnc_ARM(lwp, cod_m2, e3sm_cloud_depth)
+                nd_arm = xr.DataArray(data=nd_arm*1e6,  dims=[config['time_dim']],
+                    coords=dict(time=([config['time_dim']], e3smtime_i)),
+                    attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                                description='Retrieved using ARM Ndrop algorithm'),)
+                cdnc_arm = xr.concat([cdnc_arm, nd_arm], dim=config['time_dim'])
+            else:
+                cdnc_arm = xr.concat([cdnc_arm, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='cdnc_arm',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
     
+        if config['cosp_output'] == True:
+            # req_vlist = [config['LWP']]
+            req_vlist = [config['LWPMODIS']]
+            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+            matched_vlist = list(set(av_varscosp).intersection(req_vlist))
+            
+            if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing cloud droplet number concentration retrieved like MODIS')
+                # lwp = e3smdata2d[config['LWP']+E3SMdomain_range][:,x_idx].data
+                lwp = e3smdatacosp[config['LWPMODIS']+E3SMdomain_range][:,x_idx]
+                lwp[:] = e3smdatacosp[config['LWPMODIS']+E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
+                T_cldtop[z_cldtop>5000] = np.nan  # remove deep clouds with cloud top >5km
+                nd_sat = calc_cdnc_VISST(lwp, T_cldtop, cod_m2, adiabaticity=0.8)
+                nd_sat = xr.DataArray(data=nd_sat*1e6,  dims=[config['time_dim']],
+                    coords=dict(time=([config['time_dim']], e3smtime_i)),
+                    attrs=dict(long_name="mean cloud water number concentration",units="#/m3",\
+                                description='Retrieved using Bennartz(2007) algorithm, also used for VISST data'),)
+                cdnc_sat = xr.concat([cdnc_sat, nd_sat], dim=config['time_dim'])
+            else:
+                cdnc_sat = xr.concat([cdnc_sat, xr.DataArray(np.zeros(len(e3smtime))*np.nan,name='cdnc_sat',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+        
         # all other 2D (surface and vertical integrated) variables
         for varname in variable2d_names:
             try:
-                var = e3smdata[varname + '_'+E3SMdomain_range].load()
-                var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
+                var = e3smdata2d[varname + E3SMdomain_range][:,x_idx].load()
+                var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
             except:
-                var = xr.DataArray(np.zeros((len(e3smtime_i),len_ncol))*np.nan,name=varname,\
-                               dims=["time","ncol_"+E3SMdomain_range],coords={"time":e3smtime_i,"ncol_"+E3SMdomain_range:np.arange(len_ncol)},\
+                # var = xr.DataArray(np.zeros((len(e3smtime_i),len_ncol))*np.nan,name=varname,\
+                #                dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i,config['latlon_dim']+E3SMdomain_range:np.arange(len_ncol)},\
+                #                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+                var = xr.DataArray(np.zeros((len(e3smtime_i)))*np.nan,name=varname,\
+                               dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             vv = variable_names.index(varname)
-            variables[vv] = xr.concat([variables[vv], var[:,x_idx]],dim='time')
+            variables[vv] = xr.concat([variables[vv], var],dim=config['time_dim'])
+
+        for varname in variablecosp_names:
+          try:
+              var = e3smdatacosp[varname + E3SMdomain_range][:,x_idx]
+              var[:] = e3smdatacosp[varname + E3SMdomain_range][:,x_idx].load()/e3smdatacosp[config['SUNLIT']+E3SMdomain_range][:,x_idx].values
+              if varname == config['IWPMODIS'] + E3SMdomain_range or varname == config['REFFICEMODIS'] + E3SMdomain_range or varname == config['TAUICEMODIS'] + E3SMdomain_range:
+                  var[:] = var/e3smdatacosp[config['CFICEMODIS'] + E3SMdomain_range][:,x_idx].values
+              if varname == config['TAUTOTMODIS'] + E3SMdomain_range:
+                  var[:] = var/e3smdatacosp[config['CFTOTMODIS'] + E3SMdomain_range][:,x_idx].values
+              var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
+          except:
+              # var = xr.DataArray(np.zeros((len(e3smtime),len_ncol))*np.nan,name=varname,\
+              #                    dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime,config['latlon_dim']+E3SMdomain_range:np.arange(len_ncol)},\
+              #                    attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+              var = xr.DataArray(np.zeros((len(e3smtime)))*np.nan,name=varname,\
+                                 dims=[config['time_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime},\
+                                 attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+          vv = variable_names.index(varname)
+          variables[vv] = xr.concat([variables[vv], var],dim=config['time_dim'])
         
         # all other 3D (with vertical level) variables at the lowest model level
         for varname in variable3d_names:
             try:
-                var = e3smdata[varname + '_'+E3SMdomain_range].load()
-                var.coords['time'] = var.indexes['time'].to_datetimeindex() # change time to standard datetime64 format
+                var = e3smdata3d[varname + E3SMdomain_range][:,-1,x_idx].load()
+                var.coords[config['time_dim']] = var.indexes[config['time_dim']].to_datetimeindex() # change time to standard datetime64 format
             except:
-                var = xr.DataArray(np.zeros((len(e3smtime_i),len_lev,len_ncol))*np.nan,name=varname,\
-                               dims=["time","lev","ncol_"+E3SMdomain_range],coords={"time":e3smtime_i,"lev":e3smdata['lev'],"ncol_"+E3SMdomain_range:e3smdata['ncol_'+E3SMdomain_range]},\
+                # var = xr.DataArray(np.zeros((len(e3smtime_i),len_lev,len_ncol))*np.nan,name=varname,\
+                #                dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i,config['vert_dim']:e3smdata3d[config['vert_dim']],config['latlon_dim']+E3SMdomain_range:e3smdata3d[config['latlon_dim']+E3SMdomain_range]},\
+                #                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
+                var = xr.DataArray(np.zeros((len(e3smtime_i),len_lev))*np.nan,name=varname,\
+                               dims=[config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range],coords={config['time_dim']:e3smtime_i,config['vert_dim']:e3smdata3d[config['vert_dim']]},\
                                attrs={'units':'dummy_unit','long_name':'dummy_long_name'})
             vv = variable_names.index(varname)
-            variables[vv] = xr.concat([variables[vv], var[:,-1,x_idx]],dim='time')
+            variables[vv] = xr.concat([variables[vv], var],dim=config['time_dim'])
+    
+        e3smdata3d.close()
+        e3smdata2d.close()
+      
+        if config['aerosol_output'] == True:
+            print(lst3d_dryaer[ii])
+            e3smdata3d_dryaer = xr.open_dataset(lst3d_dryaer[ii])
+            e3smdata3d_dryaer = e3smdata3d_dryaer.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+
+            vlist = list(e3smdata3d_dryaer.variables.keys())
+            av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
+
+            if config['composition_output'] == True:
+                # aerosol composition
+                req_vlist = [config['bc_a1'], config['bc_a3'], config['bc_a4'], config['dst_a1'], config['dst_a3'], config['mom_a1'], \
+                           config['mom_a2'], config['mom_a3'], config['mom_a4'], config['ncl_a1'], config['ncl_a2'], config['ncl_a3'], \
+                           config['pom_a1'], config['pom_a3'], config['pom_a4'], config['so4_a1'], config['so4_a2'], config['so4_a3'], \
+                           config['soa_a1'], config['soa_a2'], config['soa_a3']]
+                req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                matched_vlist = list(set(av_vars).intersection(req_vlist))
+              
+                if len(matched_vlist) == len(req_vlist):
+                    print('\nAnalyzing aerosol composition')
+                    bc_a1 = e3smdata3d_dryaer[config['bc_a1']+E3SMdomain_range][:,-1,x_idx].load()
+                    bc_a3 = e3smdata3d_dryaer[config['bc_a3']+E3SMdomain_range][:,-1,x_idx].load()
+                    bc_a4 = e3smdata3d_dryaer[config['bc_a4']+E3SMdomain_range][:,-1,x_idx].load()
+                    dst_a1 = e3smdata3d_dryaer[config['dst_a1']+E3SMdomain_range][:,-1,x_idx].load()
+                    dst_a3 = e3smdata3d_dryaer[config['dst_a3']+E3SMdomain_range][:,-1,x_idx].load()
+                    mom_a1 = e3smdata3d_dryaer[config['mom_a1']+E3SMdomain_range][:,-1,x_idx].load()
+                    mom_a2 = e3smdata3d_dryaer[config['mom_a2']+E3SMdomain_range][:,-1,x_idx].load()
+                    mom_a3 = e3smdata3d_dryaer[config['mom_a3']+E3SMdomain_range][:,-1,x_idx].load()
+                    mom_a4 = e3smdata3d_dryaer[config['mom_a4']+E3SMdomain_range][:,-1,x_idx].load()
+                    ncl_a1 = e3smdata3d_dryaer[config['ncl_a1']+E3SMdomain_range][:,-1,x_idx].load()
+                    ncl_a2 = e3smdata3d_dryaer[config['ncl_a2']+E3SMdomain_range][:,-1,x_idx].load()
+                    ncl_a3 = e3smdata3d_dryaer[config['ncl_a3']+E3SMdomain_range][:,-1,x_idx].load()
+                    pom_a1 = e3smdata3d_dryaer[config['pom_a1']+E3SMdomain_range][:,-1,x_idx].load()
+                    pom_a3 = e3smdata3d_dryaer[config['pom_a3']+E3SMdomain_range][:,-1,x_idx].load()
+                    pom_a4 = e3smdata3d_dryaer[config['pom_a4']+E3SMdomain_range][:,-1,x_idx].load()
+                    so4_a1 = e3smdata3d_dryaer[config['so4_a1']+E3SMdomain_range][:,-1,x_idx].load()
+                    so4_a2 = e3smdata3d_dryaer[config['so4_a2']+E3SMdomain_range][:,-1,x_idx].load()
+                    so4_a3 = e3smdata3d_dryaer[config['so4_a3']+E3SMdomain_range][:,-1,x_idx].load()
+                    soa_a1 = e3smdata3d_dryaer[config['soa_a1']+E3SMdomain_range][:,-1,x_idx].load()
+                    soa_a2 = e3smdata3d_dryaer[config['soa_a2']+E3SMdomain_range][:,-1,x_idx].load()
+                    soa_a3 = e3smdata3d_dryaer[config['soa_a3']+E3SMdomain_range][:,-1,x_idx].load()
+                    bc  = bc_a1 + bc_a3 + bc_a4
+                    dst = dst_a1 + dst_a3
+                    mom = mom_a1 + mom_a2 + mom_a3 + mom_a4
+                    ncl = ncl_a1 + ncl_a2 + ncl_a3
+                    pom = pom_a1 + pom_a3 + pom_a4
+                    so4 = so4_a1 + so4_a2 + so4_a3
+                    soa = soa_a1 + soa_a2 + soa_a3
+                    # change time to standard datetime64 format
+                    bc.coords[config['time_dim']] = bc.indexes[config['time_dim']].to_datetimeindex()
+                    dst.coords[config['time_dim']] = dst.indexes[config['time_dim']].to_datetimeindex()
+                    mom.coords[config['time_dim']] = mom.indexes[config['time_dim']].to_datetimeindex()
+                    ncl.coords[config['time_dim']] = ncl.indexes[config['time_dim']].to_datetimeindex()
+                    pom.coords[config['time_dim']] = pom.indexes[config['time_dim']].to_datetimeindex()
+                    so4.coords[config['time_dim']] = so4.indexes[config['time_dim']].to_datetimeindex()
+                    soa.coords[config['time_dim']] = soa.indexes[config['time_dim']].to_datetimeindex()
+                    bc_all = xr.concat([bc_all, bc], dim=config['time_dim'])
+                    dst_all = xr.concat([dst_all, dst], dim=config['time_dim'])
+                    mom_all = xr.concat([mom_all, mom], dim=config['time_dim'])
+                    ncl_all = xr.concat([ncl_all, ncl], dim=config['time_dim'])
+                    pom_all = xr.concat([pom_all, pom], dim=config['time_dim'])
+                    so4_all = xr.concat([so4_all, so4], dim=config['time_dim'])
+                    soa_all = xr.concat([soa_all, soa], dim=config['time_dim'])
+                else:
+                    bc_all  = xr.concat([bc_all, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='bc_all',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+                    dst_all = xr.concat([dst_all, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='dst_all',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+                    mom_all = xr.concat([mom_all, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='mom_all',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+                    ncl_all = xr.concat([ncl_all, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='ncl_all',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+                    pom_all = xr.concat([pom_all, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='pom_all',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+                    so4_all = xr.concat([so4_all, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='so4_all',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+                    soa_all = xr.concat([soa_all, xr.DataArray(np.zeros(len(e3smtime_i))*np.nan,name='soa_all',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
             
-        e3smdata.close()
+            # aerosol size
+            if config['dgnum_output_combined'] == False:
+                req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], \
+                             config['dgnd_a01'], config['dgnd_a02'], config['dgnd_a03'], config['dgnd_a04']]
+                req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                matched_vlist = list(set(av_vars).intersection(req_vlist))
+            
+                if len(matched_vlist) == len(req_vlist):
+                    print('\nAnalyzing aerosol size')
+                    num_a1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_a2 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_a3 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_a4 = e3smdata3d_dryaer[config['num_a4']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_dn1 = e3smdata3d_dryaer[config['dgnd_a01']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_dn2 = e3smdata3d_dryaer[config['dgnd_a02']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_dn3 = e3smdata3d_dryaer[config['dgnd_a03']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_dn4 = e3smdata3d_dryaer[config['dgnd_a04']+E3SMdomain_range][:, -1, x_idx].load()
+                    numall = [num_a1.data, num_a2.data, num_a3.data, num_a4.data]
+                    dnall  = [num_dn1.data,    num_dn2.data,    num_dn3.data,    num_dn4.data]
+                    NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1].data, Pres[:, -1].data)
+                    NCN2 = xr.DataArray(data=NCN,  dims=["size", config['time_dim']],
+                        coords=dict(time=([config['time_dim']], e3smtime_i),size=(["size"], np.arange(1,3001))),
+                        attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
+                    NCNall = xr.concat([NCNall, NCN2], dim=config['time_dim'])
+                else:
+                    NCNall = xr.concat([NCNall, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name='NCNall',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+            else:
+                req_vlist = [config['num_a1'], config['num_a2'], config['num_a3'], config['num_a4'], \
+                             config['dgnum']]
+                req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+                matched_vlist = list(set(av_vars).intersection(req_vlist))
+            
+                if len(matched_vlist) == len(req_vlist):
+                    print('\nAnalyzing aerosol size')
+                    num_a1 = e3smdata3d_dryaer[config['num_a1']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_a2 = e3smdata3d_dryaer[config['num_a2']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_a3 = e3smdata3d_dryaer[config['num_a3']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_a4 = e3smdata3d_dryaer[config['num_a4']+E3SMdomain_range][:, -1, x_idx].load()
+                    num_dn1 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:, -1, x_idx, 0].load()
+                    num_dn2 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:, -1, x_idx, 1].load()
+                    num_dn3 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:, -1, x_idx, 2].load()
+                    num_dn4 = e3smdata3d_dryaer[config['dgnum']+E3SMdomain_range][:, -1, x_idx, 3].load()
+                    numall = [num_a1.data, num_a2.data, num_a3.data, num_a4.data]
+                    dnall  = [num_dn1.data,    num_dn2.data,    num_dn3.data,    num_dn4.data]
+                    NCN = calc_CNsize_cutoff_0_3000nm(dnall, numall, T[:, -1].data, Pres[:, -1].data)
+                    NCN2 = xr.DataArray(data=NCN,  dims=["size", config['time_dim']],
+                        coords=dict(time=([config['time_dim']], e3smtime_i),size=(["size"], np.arange(1,3001))),
+                        attrs=dict(long_name="Aerosol number size distribution",units="#/m3"),)
+                    NCNall = xr.concat([NCNall, NCN2], dim=config['time_dim'])
+                else:
+                    NCNall = xr.concat([NCNall, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name='NCNall',attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+      
+        #CCN
+        if config['ccn_output'] == True:
+            print(lst3d_wetaer[ii])
+            e3smdata3d_wetaer = xr.open_dataset(lst3d_wetaer[ii])
+            e3smdata3d_wetaer = e3smdata3d_wetaer.transpose(config['time_dim'],config['vert_dim'],config['latlon_dim']+E3SMdomain_range,...) # ensure ordering of time, height, and location
+    
+            vlist = list(e3smdata3d_wetaer.variables.keys())
+            av_vars = fnmatch.filter(vlist,'*'+E3SMdomain_range)
+          
+            req_vlist = [config['CCN1'], config['CCN2']]#, config['CCN5'], config['CCN10']]
+            req_vlist = ["{}{}".format(i,E3SMdomain_range) for i in req_vlist]
+            matched_vlist = list(set(av_vars).intersection(req_vlist))
+          
+            if len(matched_vlist) == len(req_vlist):
+                print('\nAnalyzing CCN')
+                ccn1 = e3smdata3d_wetaer[config['CCN1']+E3SMdomain_range][:,-1,x_idx].load()
+                ccn2 = e3smdata3d_wetaer[config['CCN2']+E3SMdomain_range][:,-1,x_idx].load()
+                # ccn5 = e3smdata3d_wetaer[config['CCN5']+E3SMdomain_range][:,-1,x_idx].load()
+                # ccn10 = e3smdata3d_wetaer[config['CCN10']+E3SMdomain_range][:,-1,x_idx].load()
+                ccn1_all = xr.concat([ccn1_all, ccn1], dim=config['time_dim'])
+                ccn2_all = xr.concat([ccn2_all, ccn2], dim=config['time_dim'])
+                # ccn5_all = xr.concat([ccn5_all, ccn5], dim=config['time_dim'])
+                # ccn10_all = xr.concat([ccn10_all, ccn10], dim=config['time_dim'])
+            else:
+                ccn1_all = xr.concat([ccn1_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN1'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+                ccn2_all = xr.concat([ccn2_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN2'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+                # ccn5_all = xr.concat([ccn5_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN5'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+                # ccn10_all = xr.concat([ccn10_all, xr.DataArray(np.zeros((3000,len(e3smtime_i)))*np.nan,name=config['CCN10'],attrs={'units':'dummy_unit','long_name':'Dummy'})], dim=config['time_dim'])
+
            
     # put all variables into the list
-    # aerosol composition    
-    variable_names = variable_names + ['bc','dst','mom','ncl','pom','so4','soa']
-    variables = variables + [bc_all,dst_all,mom_all,ncl_all,pom_all,so4_all,soa_all]
-    # aerosol size and number
-    NCN3 = xr.DataArray(data=np.nansum(NCNall[3:, :], 0),  dims=["time"],
-        coords=dict(time=(["time"], e3smtime)),
-        attrs=dict(long_name="Aerosol number concentration for size >3nm",units="#/m3"),)    # >3nm
-    NCN10 = xr.DataArray(data=np.nansum(NCNall[10:, :], 0),  dims=["time"],
-        coords=dict(time=(["time"], e3smtime)),
-        attrs=dict(long_name="Aerosol number concentration for size >10nm",units="#/m3"),)     # >10nm
-    NCN100 = xr.DataArray(data=np.nansum(NCNall[100:, :], 0),  dims=["time"],
-        coords=dict(time=(["time"], e3smtime)),
-        attrs=dict(long_name="Aerosol number concentration for size >100nm",units="#/m3"),)     # >100nm
-    variable_names = variable_names + [ 'NCN3', 'NCN10', 'NCN100']
-    variables = variables + [NCN3, NCN10, NCN100]  # size distribution data will be added later
-    # mean cloud droplet number concentration
-    variable_names = variable_names + ['Nd_mean', 'Nd_ARM', 'Nd_VISST']
-    variables = variables + [cdnc_mean, cdnc_arm, cdnc_sat]
-    # mean cloud optical depth and effective radius
-    variable_names = variable_names + ['reff','cod']
-    variables = variables + [reff_mean, cod_mean]
+    # aerosols    
+    if config['composition_output'] == True:
+        # aerosol composition    
+        variable_names = variable_names + ['bc', 'dst', 'mom', 'ncl', 'pom', 'so4', 'soa']
+        variables = variables + [bc_all, dst_all, mom_all, ncl_all, pom_all, so4_all, soa_all]
+    if config['aerosol_output'] == True:
+        # aerosol size and number
+        NCN3 = xr.DataArray(data=np.nansum(NCNall[3:, :], 0),  dims=[config['time_dim']],
+            coords=dict(time=([config['time_dim']], e3smtime)),
+            attrs=dict(long_name="Aerosol number concentration for size >3nm",units="#/m3"),)    # >3nm
+        NCN10 = xr.DataArray(data=np.nansum(NCNall[10:, :], 0),  dims=[config['time_dim']],
+            coords=dict(time=([config['time_dim']], e3smtime)),
+            attrs=dict(long_name="Aerosol number concentration for size >10nm",units="#/m3"),)     # >10nm
+        NCN100 = xr.DataArray(data=np.nansum(NCNall[100:, :], 0),  dims=[config['time_dim']],
+            coords=dict(time=([config['time_dim']], e3smtime)),
+            attrs=dict(long_name="Aerosol number concentration for size >100nm",units="#/m3"),)     # >100nm
+        variable_names = variable_names + [ 'NCN3', 'NCN10', 'NCN100']
+        variables = variables + [NCN3, NCN10, NCN100]  # size distribution data will be added later
+    if config['ccn_output'] == True:
+        variable_names = variable_names + [ 'CCN1', 'CCN2']#, 'CCN5', 'CCN10']
+        variables = variables + [ccn1_all, ccn2_all]#, ccn5_all, ccn10_all]
+      
+    # mean cloud droplet number concentration, COD, and Reff
+    variable_names = variable_names + ['Nd_mean']
+    variables = variables + [cdnc_mean]
+    if config['tau3d_output'] == True:
+        variable_names = variable_names + ['cod']
+        variables = variables + [cod_mean]
+        variable_names = variable_names + ['Nd_ARM']
+        variables = variables + [cdnc_arm]
+    elif config['tau3d_output'] == False and config['cosp_output'] == True:
+        variable_names = variable_names + ['Nd_ARM']
+        variables = variables + [cdnc_arm]
+    if config['cosp_output'] == True:
+        # variable_names = variable_names + ['cod_VISST']
+        # variables = variables + [cod_m]
+        variable_names = variable_names + ['Nd_VISST']
+        variables = variables + [cdnc_sat]
+    if config['reff_output'] == True:
+        variable_names = variable_names + ['reff']
+        variables = variables + [reff_mean]
+    
     # cloud depth
     variable_names = variable_names + ['cbt','ctt','cbh','cth','clddepth']
     variables = variables + [cbt, ctt, cbh, cth, cloud_depth]
     
     #%% change some units
-    # composition
-    T = variables[variable_names.index('T')]
-    ps = variables[variable_names.index('PS')]
-    rho = np.array(ps/T/287.06)
-    for vv in ['bc','dst','mom','ncl','pom','so4','soa']:
-        variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *1e9*rho
-        variables[variable_names.index(vv)].attrs['units']='ug/m3'
-    # aerosol number
-    NCNall.data = NCNall.data * 1e-6
-    NCNall.attrs['units']='#/cm3'
-    for vv in ['NCN3', 'NCN10', 'NCN100', 'Nd_mean', 'Nd_ARM', 'Nd_VISST']:
+    for vv in ['Nd_mean']:
         variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data * 1e-6
         variables[variable_names.index(vv)].attrs['units']='#/cm3'
+    if config['aerosol_output'] == True:
+        # composition
+        T = variables[variable_names.index(config['T'])]
+        ps = variables[variable_names.index(config['PS'])]
+        rho = np.array(ps/T/287.06)
+        if config['composition_output'] == True:
+            for vv in ['bc','dst','mom','ncl','pom','so4','soa']:
+                variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *1e9*rho
+                variables[variable_names.index(vv)].attrs['units']='ug/m3'
+        # aerosol number
+        NCNall.data = NCNall.data * 1e-6
+        NCNall.attrs['units']='#/cm3'
+        for vv in ['NCN3', 'NCN10', 'NCN100']:
+            variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data * 1e-6
+            variables[variable_names.index(vv)].attrs['units']='#/cm3'
+    if config['cosp_output'] == True:
+        for vv in ['Nd_VISST']:
+            variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data * 1e-6
+            variables[variable_names.index(vv)].attrs['units']='#/cm3'
+    if config['tau3d_output'] == True:
+        for vv in ['Nd_ARM']:
+            variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data * 1e-6
+            variables[variable_names.index(vv)].attrs['units']='#/cm3'
+          
     # LWC and IWC
-    varbls = ['TGCLDIWP','TGCLDLWP']
-    varbls = ["{}_{}".format(i,E3SMdomain_range) for i in varbls]
+    varbls = [config['IWP'],config['LWP']]
+    varbls = ["{}{}".format(i,E3SMdomain_range) for i in varbls]
     varbls = list(set(av_vars).intersection(varbls))
     if len(varbls) > 0:
-        for vv in ['TGCLDIWP','TGCLDLWP']:
+        for vv in [config['IWP'],config['LWP']]:
             variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *1000
             variables[variable_names.index(vv)].attrs['units']='g/m2'
+          
     # cloud fraction
-    varbls = ['CLDTOT','CLDLOW','CLDMED','CLDHGH']
-    varbls = ["{}_{}".format(i,E3SMdomain_range) for i in varbls]
+    varbls = [config['CLDTOT']]#,config['CLDLOW'],config['CLDMED'],config['CLDHGH']]
+    varbls = ["{}{}".format(i,E3SMdomain_range) for i in varbls]
     varbls = list(set(av_vars).intersection(varbls))
     if len(varbls) > 0:
-        for vv in ['CLDTOT','CLDLOW','CLDMED','CLDHGH']:
-            variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data *100
-            variables[variable_names.index(vv)].attrs['units']='%'
+        for vv in [config['CLDTOT']]:#,config['CLDLOW'],config['CLDMED'],config['CLDHGH']]:
+            if variables[variable_names.index(vv)].ndim == 1:
+                variables[variable_names.index(vv)].data = variables[variable_names.index(vv)].data*100
+                variables[variable_names.index(vv)].attrs['long_name']='max cloud fraction in column'
+                variables[variable_names.index(vv)].attrs['standard_name']='cloud fraction'
+                variables[variable_names.index(vv)].attrs['units']='%'
+            if variables[variable_names.index(vv)].ndim == 2:
+                var2dto1d = variables[variable_names.index(vv)].max(dim=config['vert_dim'])*100 #max cloud fraction in the column
+                variables[variable_names.index(vv)] = variables[variable_names.index(vv)][:,0] #retain only time dimension (time is first dimension based on dimension reordering earlier)
+                variables[variable_names.index(vv)] = var2dto1d
+                variables[variable_names.index(vv)].attrs['long_name']='max cloud fraction in column'
+                variables[variable_names.index(vv)].attrs['standard_name']='cloud fraction'
+                variables[variable_names.index(vv)].attrs['units']='%'
     
     #%% re-shape the data into pre-defined resolution
     variables_new = list()
@@ -1241,32 +1773,36 @@ def prep_E3SM_sfc(input_path, input_filehead, output_path, output_filehead, dt=3
     for var in variables:
         var_new = np.interp(np.int64(time_new), np.int64(e3smtime), var, left=np.nan, right=np.nan)
         variables_new.append(var_new)
-    # treat variables with other dimensions (e.g., size distribution)    
-    f = interp1d(np.int64(e3smtime), NCNall, bounds_error=False)
-    NCNall_new = f(np.int64(time_new))
+    # treat variables with other dimensions (e.g., size distribution)
+    if config['aerosol_output'] == True:
+        f = interp1d(np.int64(e3smtime), NCNall, bounds_error=False)
+        NCNall_new = f(np.int64(time_new))
     
     # %% output extacted file
+    print('\nWriting file')
     varall_1d = {
-            variable_names[vv]: ('time', np.float32(variables_new[vv])) for vv in range(len(variable_names))
-    }
-    varall_2d = {
-            'NCNall': (['size','time',], np.float32(NCNall_new))
-    }
-    varall_1d.update(varall_2d)
+            variable_names[vv]: (config['time_dim'], np.float32(variables_new[vv])) for vv in range(len(variable_names))
+        }
+    if config['aerosol_output'] == True:
+        varall_2d = {
+                'NCNall': (['size',config['time_dim'],], np.float32(NCNall_new))
+        }
+        varall_1d.update(varall_2d)
     outfile = output_path + output_filehead + '_sfc.nc'
     print('output file '+outfile)
     ds = xr.Dataset( varall_1d,
-                      coords={'time': ('time', time_new), 'size':('size', np.arange(1,3001))})
+                      coords={config['time_dim']: (config['time_dim'], time_new), 'size':('size', np.arange(1,3001))})
     #assign attributes
-    ds['time'].attrs["long_name"] = "Time"
-    ds['time'].attrs["standard_name"] = "time"
+    ds[config['time_dim']].attrs["long_name"] = "Time"
+    ds[config['time_dim']].attrs["standard_name"] = "time"
     for vv in range(len(variable_names)):
         ds[variable_names[vv]].attrs["long_name"] = variables[vv].long_name
         ds[variable_names[vv]].attrs["units"] = variables[vv].units
         ds[variable_names[vv]].attrs["description"] = "variables at surface, TOA or the lowest model level"
-    ds['NCNall'].attrs["long_name"] = NCNall.long_name
-    ds['NCNall'].attrs["units"] = NCNall.units
-    ds['NCNall'].attrs["description"] = 'calculated from modal information into 1nm increment'
+    if config['aerosol_output'] == True:
+        ds['NCNall'].attrs["long_name"] = NCNall.long_name
+        ds['NCNall'].attrs["units"] = NCNall.units
+        ds['NCNall'].attrs["description"] = 'calculated from modal information into 1nm increment'
     
     ds.attrs["title"] = 'preprocessed E3SM data at surface, TOA or the lowest model level'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
