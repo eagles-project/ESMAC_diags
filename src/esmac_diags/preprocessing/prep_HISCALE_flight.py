@@ -148,25 +148,6 @@ def prep_AMS(amspath, iwgpath, prep_data_path, dt=60):
         so4 = median_time_1d(time2, so4aaf, time_new)
         nh4 = median_time_1d(time2, nh4aaf, time_new)
         chl = median_time_1d(time2, chlaaf, time_new)
-        
-        #%%
-        # import matplotlib.pyplot as plt
-        # fig,(ax1,ax2) = plt.subplots(2,1,figsize=(8,4))
-        # ax1.plot(time/3600, lwcobs)
-        # ax1.plot(time_new/3600, lwc, color='r', marker='.', linewidth=2)
-        # # ax1.set_ylim(0, 2e4)
-        # ax2.plot(time/3600, twcobs)
-        # ax2.plot(time_new/3600, twc, color='r', marker='.', linewidth=2)
-        # ax1.set_ylim(-0.01, 0.1)
-        # ax1.set_title(date)
-        # e
-        
-        # fig,ax = plt.subplots(1,1,figsize=(6,4))
-        # ax.plot(d_merge, np.nanmean(conc_merge,axis=0))
-        # ax.set_xscale('log')
-        # ax.set_yscale('log')
-        # ax.set_xlim(10,2000)
-        # plt.grid(True,linestyle=':')
 
         #%% output data
         outfile = prep_data_path + 'AMS_HISCALE_' + date + '.nc'
