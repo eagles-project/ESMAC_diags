@@ -110,5 +110,5 @@ sfc.prep_ccn(ccnsfcpath, prep_data_path+'surface/', dt=surface_dt)              
 
 # prepare satellite data. output time in satellite_dt resolution
 # print('prepare satellite data:')
-# sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/', dt=satellite_dt)     # VISST 0.5x0.5 degree gridded data
-# sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/', dt=satellite_dt)     # VISST 4km pixel-level data
+# sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/', dx=0.5, dt=satellite_dt)     # VISST 0.5x0.5 degree gridded data
+# sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/', dx=4, dt=satellite_dt)     # VISST 4km pixel-level data
