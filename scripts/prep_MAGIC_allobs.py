@@ -48,4 +48,4 @@ satellite_dt = config['obs_satellite_dt']
 # ship.prep_Nd_Wu_etal(Ndpath, prep_data_path+'ship/', dt=surface_dt)          # cloud droplet number retrieval from Wu et al.
 
 print('prepare satellite data:')
-sat.prep_VISST_pixel(shipmetpath, visstpixpath, prep_data_path+'satellite/', dt=satellite_dt)              # CCN number concentration
+sat.prep_VISST_pixel(shipmetpath, visstpixpath, prep_data_path+'satellite/', dx=0.5, dt=satellite_dt)
