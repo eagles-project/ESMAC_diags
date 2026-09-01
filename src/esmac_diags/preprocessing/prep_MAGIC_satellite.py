@@ -27,7 +27,7 @@ from esmac_diags.subroutines.specific_data_treatment import find_nearest, insola
 # dt=3600
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def prep_VISST_pixel(shipmetpath, visstpixpath, predatapath, dt=3600):
+def prep_VISST_pixel(shipmetpath, visstpixpath, predatapath, dx=0.5, dt=3600):
     """
     prepare VISST-satellite data, average pixel level (4km) into 0.5x0.5 grid
 
@@ -39,6 +39,8 @@ def prep_VISST_pixel(shipmetpath, visstpixpath, predatapath, dt=3600):
         input datapath
     predatapath : str
         output datapath
+    dx : float
+        spatial resolution (units: km) of output (currently not used in code)
     dt : float
         time resolution (unit: sec) of output
 
