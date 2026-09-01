@@ -448,6 +448,37 @@ def interp_time_2d(time0, data0, time, arraytype='xarray'):
         raise ValueError("Array type must by numpy or xarray")
     
     return(data)
+
+#%%
+def interp_time_3d(time0, data0, time, arraytype='xarray'):
+    """
+    linearly interpolate 3d data with a time dimension to a different time array
+
+    Parameters
+    ----------
+    time0 : numpy array
+        time dimension for input data
+    data0 : xarray data array
+        input data
+    time : numpy array
+        time dimension for output data
+    arraytype : string
+        type of data array (numpy or xarray)
+
+    Returns
+    -------
+    data : output data
+
+    """
+    if data0.shape[0] != len(time0):
+        raise ValueError("the first dimension of input data must have the same size with time")
+    dt = (time[1]-time[0])/2
+    if arraytype == 'xarray':
+        data = data0.interp(time = time, kwargs={"fill_value":np.nan})
+    else:
+        raise ValueError("Array type must by xarray")
+    
+    return(data)
     
 #%%
 def interp_time_height(time0, height0, data0, time, height, arraytype='numpy'):
