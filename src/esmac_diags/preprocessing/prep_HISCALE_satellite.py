@@ -659,7 +659,7 @@ def prep_VISST_pixel(visstpixpath, predatapath, dx=4, dt=3600):
     
     #old method was averaging times but it would be more approriate to interpolate or take the nearest in time sample for comparing to model output later
     vissttime = pd.to_datetime(vissttime)
-    Nd_new = avg_time_1d(vissttime, Nd_array, time_new, arraytype='numpy')
+    Nd_new = interp_time_1d(vissttime, Nd_array, time_new, arraytype='numpy')
     H_new = interp_time_1d(vissttime, H, time_new, arraytype='numpy')
     lwp_new = interp_time_1d(vissttime, lwp, time_new, arraytype='numpy')
     iwp_new = interp_time_1d(vissttime, iwp, time_new, arraytype='numpy')
