@@ -73,5 +73,5 @@ for year in range(2018,2019):
     sfc.prep_Nd_WU(WUpath, prep_data_path+'surface/',year, dt=surface_dt)          # cloud droplet number retrieval from Wu's retrieval
     # prepare satellite data. output time in 1hr (dt=3600s) resolution
     # print('prepare satellite data:')
-    # sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/',year, dt=satellite_dt)     # VISST 0.5x0.5 degree gridded data
-    # sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/',year, dt=satellite_dt)     # VISST 4km pixel-level data
+    # sat.prep_VISST_grid(visstgridpath, prep_data_path+'satellite/',year, dx=0.5, dt=satellite_dt)     # VISST 0.5x0.5 degree gridded data
+    # sat.prep_VISST_pixel(visstpixpath, prep_data_path+'satellite/',year, dx=4, dt=satellite_dt)     # VISST 4km pixel-level data
