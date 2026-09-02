@@ -87,7 +87,7 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 # air.prep_WCM(wcmpath, iwgpath, prep_data_path+'flight/'+str(aircraft_dt)+'s/', dt=aircraft_dt)       # cloud liquid water content
 # prepare surface data. output time in 1hr (dt=3600s) resolution
 print('prepare surface data:')
-sfc.prep_ACSM(acsmpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)            # aerosol composition
+# sfc.prep_ACSM(acsmpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)            # aerosol composition
 # sfc.prep_ccn(ccnsfcpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)              # CCN number concentration
 # sfc.prep_CPC(cpcpath, cpcupath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)    # aerosol number concentration (>3 or 10nm)
 # sfc.prep_CNsize_UHSAS(uhsaspath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)   # aerosol size distribution from UHSAS
@@ -97,7 +97,7 @@ sfc.prep_ACSM(acsmpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surfa
 # sfc.prep_cloudheight_ARSCL(arsclbndpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)   # cloud height 
 # sfc.prep_totcld(armbepath, arsclbndpath, tsipath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)         # cloud fraction. from ARSCL, TSI and satellite sources
 # sfc.prep_LWP(armbepath, mwrpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt) # cloud liquid water path
-sfc.prep_Ndrop(ndroppath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)          # cloud droplet number retrieval from ARM Ndrop VAP
+# sfc.prep_Ndrop(ndroppath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)          # cloud droplet number retrieval from ARM Ndrop VAP
 sfc.prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)          # cloud droplet number retrieval from ARM Ndrop VAP
 # sfc.prep_mfrsr_cod(mfrsrpath,  prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)     # cloud optical depth from MFRSR
 # sfc.prep_mfrsr_Reff(mfrsrpath,  prep_data_path+'surface/'+str(surface_dt)+'s/', dt=surface_dt)    # cloud effective radius from MFRSR
