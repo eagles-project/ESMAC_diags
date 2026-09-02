@@ -1222,7 +1222,6 @@ def prep_LTS(armbepath, predatapath, dt=3600):
     time = obsdata['time']
     pres = obsdata['pressure'].load()
     T = obsdata['temperature_p'].load()
-    T = obsdata['temperature_p'].load()
     Ts = obsdata['temperature_sfc'].load()
     ps = obsdata['pressure_sfc'].load()
     obsdata.close()    
@@ -1793,10 +1792,15 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=3600)
     lwp[np.logical_or(lwp < 0.02, lwp > 0.3)] = np.nan # may want to revisit upper limit on LWP
     cod[np.logical_or(cod < 4, cod > 60)] = np.nan # changed lower COD limit from 2 to 4 (AV 8/6/2024)
     
-    # calculate CDNC first then average into 1hr
-    time = mfrsrtime.data
-    H_tmp = np.interp(np.int64(time), np.int64(arscltime), H)
-    nd = calc_cdnc_ARM(lwp, cod, H_tmp)
+    # calculate CDNC first then average into 1 hr
+    # use 5-min inputs rather than 20 s, which was originally used; 5-min is closer to resolution of coarsest input and 20-s is noisy
+    # time = mfrsrtime.data
+    # H_tmp = np.interp(np.int64(time), np.int64(arscltime), H)
+    time_5min = pd.date_range(start='2017-06-20', end='2018-02-21', freq=str(int(300))+"s") # make inputs every 5 min to avoid high frequency noise in nd retrieval (COD looks like it doesn't vary at timescales < ~5 min)
+    H_5min = avg_time_1d(arscltime, H, time_5min, arraytype='xarray')
+    cod_5min = avg_time_1d(mfrsrtime, cod, time_5min, arraytype='xarray')
+    lwp_5min = avg_time_1d(mwrtime, lwp, time_5min, arraytype='xarray')
+    nd = calc_cdnc_ARM(lwp_5min, cod_5min, H_5min)
     
     # exclude small values (AV removed this filter 8/6/2024)
     # nd[nd<10] = np.nan
