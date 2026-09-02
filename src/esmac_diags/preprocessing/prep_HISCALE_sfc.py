@@ -75,11 +75,19 @@ def prep_ACSM(acsmpath, predatapath, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(dt))+"s")  # HISCALE time period
     
-    org_new = median_time_1d(time, org, time_new, arraytype='xarray')
-    no3_new = median_time_1d(time, no3, time_new, arraytype='xarray')
-    so4_new = median_time_1d(time, so4, time_new, arraytype='xarray')
-    nh4_new = median_time_1d(time, nh4, time_new, arraytype='xarray')
-    chl_new = median_time_1d(time, chl, time_new, arraytype='xarray')
+    # data resolution is 30-min, so interpolate for finer resolution; a mean could also be used for coarser resolution is warranted
+    if dt >= 1800:
+        org_new = median_time_1d(time, org, time_new, arraytype='xarray')
+        no3_new = median_time_1d(time, no3, time_new, arraytype='xarray')
+        so4_new = median_time_1d(time, so4, time_new, arraytype='xarray')
+        nh4_new = median_time_1d(time, nh4, time_new, arraytype='xarray')
+        chl_new = median_time_1d(time, chl, time_new, arraytype='xarray')
+    if dt < 1800:
+        org_new = interp_time_1d(time, org, time_new, arraytype='xarray')
+        no3_new = interp_time_1d(time, no3, time_new, arraytype='xarray')
+        so4_new = interp_time_1d(time, so4, time_new, arraytype='xarray')
+        nh4_new = interp_time_1d(time, nh4, time_new, arraytype='xarray')
+        chl_new = interp_time_1d(time, chl, time_new, arraytype='xarray')
     
 
     #%% output file
