@@ -78,8 +78,8 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 # prepare flight data; output time in aircraft_dt resolution
 print('prepare aircraft data:')
-air.prep_AMS(amspath, iwgpath, prep_data_path+'flight/', dt=aircraft_dt)       # aerosol composition
-air.prep_beasd(beasdpath,iwgpath, prep_data_path+'flight/', dt=aircraft_dt)               # merged aerosol size distribution
+# air.prep_AMS(amspath, iwgpath, prep_data_path+'flight/', dt=aircraft_dt)       # aerosol composition
+# air.prep_beasd(beasdpath,iwgpath, prep_data_path+'flight/', dt=aircraft_dt)               # merged aerosol size distribution
 air.prep_CCN(ccnairpath, iwgpath, prep_data_path+'flight/', dt=aircraft_dt)       # CCN number concentration
 air.prep_CPC(cpcairpath, iwgpath, prep_data_path+'flight/', dt=aircraft_dt)       # aerosol number concentration (>3 or 10nm)
 air.prep_mergeSD(mergeSDpath, iwgpath, prep_data_path+'flight/', dt=aircraft_dt) # merged cloud size distribution
