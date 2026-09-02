@@ -1796,7 +1796,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=3600)
     # use 5-min inputs rather than 20 s, which was originally used; 5-min is closer to resolution of coarsest input and 20-s is noisy
     # time = mfrsrtime.data
     # H_tmp = np.interp(np.int64(time), np.int64(arscltime), H)
-    time_5min = pd.date_range(start='2017-06-20', end='2018-02-21', freq=str(int(300))+"s") # make inputs every 5 min to avoid high frequency noise in nd retrieval (COD looks like it doesn't vary at timescales < ~5 min)
+    time_5min = pd.date_range(start='2016-04-25', end='2016-09-23', freq=str(int(300))+"s") # make inputs every 5 min to avoid high frequency noise in nd retrieval (COD looks like it doesn't vary at timescales < ~5 min)
     H_5min = avg_time_1d(arscltime, H, time_5min, arraytype='xarray')
     cod_5min = avg_time_1d(mfrsrtime, cod, time_5min, arraytype='xarray')
     lwp_5min = avg_time_1d(mwrtime, lwp, time_5min, arraytype='xarray')
