@@ -118,7 +118,10 @@ def prep_ACSM(acsmpath, predatapath, dt=3600):
     
     ds.attrs["title"] = 'Aerosol composition from surface ACSM'
     ds.attrs["inputfile_sample"] = lst[0].split('/')[-1]
-    ds.attrs["description"] = 'median value of each time window'
+    if dt >= 1800:
+        ds.attrs["description"] = 'median value of each time window'
+    if dt < 1800:
+        ds.attrs["description"] = 'interpolated value from 30-min resolution data'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
