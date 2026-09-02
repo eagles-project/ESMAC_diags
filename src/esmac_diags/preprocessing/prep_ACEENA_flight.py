@@ -506,12 +506,12 @@ def prep_CCN(ccnpath, iwgpath, prep_data_path, dt=60):
             SSb = np.insert(SSb, np.full(int(timea[0]-time[0]),0), -9999)
             
         # quality check
+        ccna = qc_mask_cloudflag(ccna, cldflag)
+        ccnb = qc_mask_cloudflag(ccnb, cldflag)
         ccna=qc_remove_neg(ccna)
         SSa=qc_remove_neg(SSa)
         ccnb=qc_remove_neg(ccnb)
         SSb=qc_remove_neg(SSb)
-        ccna = qc_mask_cloudflag(ccna, cldflag)
-        ccnb = qc_mask_cloudflag(ccnb, cldflag)
     
         SSa_m = np.nanmean(SSa)
         SSb_m = np.nanmean(SSb)
