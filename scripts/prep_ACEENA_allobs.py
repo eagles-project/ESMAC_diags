@@ -37,7 +37,7 @@ cvipath = obs_input_path+'ACEENA/aircraft/inletcvi/'
 opcpath = obs_input_path+'ACEENA/aircraft/opciso/'
 cpcairpath = obs_input_path+'ACEENA/aircraft/cpc_aaf/'
 mergeSDpath = obs_input_path+'ACEENA/aircraft/mergedSD/'
-merged_CNsize_path = obs_input_path+'ACEENA/aircraft/merged_bin/'
+# merged_CNsize_path = obs_input_path+'ACEENA/aircraft/merged_bin/'
 
 # surface data path
 acsmpath = obs_input_path+'ACEENA/surface/arm_acsm/'
