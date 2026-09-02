@@ -1725,7 +1725,7 @@ def prep_Nd_ARMretrieval(mfrsrpath, arsclbndpath, mwrpath, predatapath, dt=3600)
         os.makedirs(predatapath)
         
     #%% read in data
-    lst1 = glob.glob(os.path.join(arsclpath, 'sgparsclkazrbnd1kolliasC1.c*.nc'))
+    lst1 = glob.glob(os.path.join(arsclbndpath, 'sgparsclkazrbnd1kolliasC1.c*.nc'))
     lst1.sort()
     arscldata = xr.open_mfdataset(lst1, combine='by_coords')
     arscltime = arscldata['time']
