@@ -517,7 +517,7 @@ def prep_CCN(ccnpath, iwgpath, prep_data_path, dt=60):
         timea = timea[timea_id]
         ccna=qc_remove_neg(ccna)
         SSa=qc_remove_neg(SSa)
-        ccna = qc_mask_cloudflag(ccna, cldflag[time_id])
+        ccna = qc_mask_cloudflag(ccna, cldflag)
 
         common_elements, time_id, timeb_id = np.intersect1d(time, timeb, return_indices=True)
         time = time[time_id]
@@ -530,7 +530,7 @@ def prep_CCN(ccnpath, iwgpath, prep_data_path, dt=60):
         timeb = timeb[timeb_id]
         ccnb=qc_remove_neg(ccnb)
         SSb=qc_remove_neg(SSb)
-        ccnb = qc_mask_cloudflag(ccnb, cldflag[time_id])
+        ccnb = qc_mask_cloudflag(ccnb, cldflag)
    
         SSa_m = np.nanmean(SSa)
         SSb_m = np.nanmean(SSb)
