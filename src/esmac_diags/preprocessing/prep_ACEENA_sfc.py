@@ -1149,7 +1149,7 @@ def prep_precip(armbepath, metpath, parspath, predatapath, dt=3600):
     precip_org = qc_mask_qcflag(precip_org, qc_precip_org)
     precip_pwd = qc_mask_qcflag(precip_pwd, qc_precip_pwd)
 
-    lst = glob.glob(os.path.join(parspath, '*.nc'))
+    lst = glob.glob(os.path.join(parspath, '*.cdf'))
     parsdata = xr.open_mfdataset(lst, combine='by_coords')
     parstime = parsdata['time']
     precip_pars = parsdata['rain_rate'].load()
