@@ -1659,8 +1659,8 @@ def prep_Nd_WU(Nd_WUpath, predatapath, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-06-21', end='2018-02-20', freq=str(int(dt))+"s")  # ACEENA time period
     
-    nd_new = median_time_1d(time, ndall, time_new, arraytype='nunpy')
-    re_new = median_time_1d(time, reall, time_new, arraytype='nunpy')
+    nd_new = median_time_1d(time, ndall, time_new, arraytype='numpy')
+    re_new = median_time_1d(time, reall, time_new, arraytype='numpy')
     
     #%% output file
     outfile = predatapath + 'Nd_Reff_Wu_etal_ACEENA.nc'
