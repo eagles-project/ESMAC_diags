@@ -1152,7 +1152,7 @@ def prep_precip(armbepath, metpath, parspath, predatapath, dt=3600):
     lst = glob.glob(os.path.join(parspath, '*.cdf'))
     parsdata = xr.open_mfdataset(lst, combine='by_coords')
     parstime = parsdata['time']
-    precip_pars = parsdata['rain_rate'].load()
+    precip_pars = parsdata['precip_rate'].load()
     parsdata.close()
   
     #%% re-shape the data into coarser resolution
