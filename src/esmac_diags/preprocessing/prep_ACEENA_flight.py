@@ -467,52 +467,59 @@ def prep_CCN(ccnpath, iwgpath, prep_data_path, dt=60):
         if any(timea != timeb):
             raise ValueError('time of CCNa and CCNb is inconsistent')
             
-        # CCN time is slightly different with IWG, change to consistent
-        if date=='20170707a':
-            ccna=np.insert(ccna,5249,-9999.)
-            ccnb=np.insert(ccnb,5249,-9999.)
-            SSa=np.insert(SSa,5249,-9999.)
-            SSb=np.insert(SSb,5249,-9999.)
-            timea = np.insert(timea,5249,(timea[5248]+timea[5249])/2)
-            timeb = np.insert(timeb,5249,(timeb[5248]+timeb[5249])/2)
-        elif date=='20180201a':
-            ccna=np.insert(ccna,3636,-9999.)
-            ccnb=np.insert(ccnb,3636,-9999.)
-            SSa=np.insert(SSa,3636,-9999.)
-            SSb=np.insert(SSb,3636,-9999.)
-            timea = np.insert(timea,3636,(timea[3635]+timea[3636])/2)
-            timeb = np.insert(timeb,3636,(timeb[3635]+timeb[3636])/2)
+        # # CCN time is slightly different with IWG, change to consistent
+        # if date=='20170707a':
+        #     ccna=np.insert(ccna,5249,-9999.)
+        #     ccnb=np.insert(ccnb,5249,-9999.)
+        #     SSa=np.insert(SSa,5249,-9999.)
+        #     SSb=np.insert(SSb,5249,-9999.)
+        #     timea = np.insert(timea,5249,(timea[5248]+timea[5249])/2)
+        #     timeb = np.insert(timeb,5249,(timeb[5248]+timeb[5249])/2)
+        # elif date=='20180201a':
+        #     ccna=np.insert(ccna,3636,-9999.)
+        #     ccnb=np.insert(ccnb,3636,-9999.)
+        #     SSa=np.insert(SSa,3636,-9999.)
+        #     SSb=np.insert(SSb,3636,-9999.)
+        #     timea = np.insert(timea,3636,(timea[3635]+timea[3636])/2)
+        #     timeb = np.insert(timeb,3636,(timeb[3635]+timeb[3636])/2)
             
-        if time[-1]>timea[-1]:
-            ccna = np.append(ccna, np.full(int(time[-1]-timea[-1]), -9999))
-            ccnb = np.append(ccnb, np.full(int(time[-1]-timea[-1]), -9999))
-            SSa = np.append(SSa, np.full(int(time[-1]-timea[-1]), -9999))
-            SSb = np.append(SSb, np.full(int(time[-1]-timea[-1]), -9999))
-        elif time[-1]<timea[-1]:
-            ccna = ccna[0:np.where(timea==time[-1])[0][0]+1]
-            ccnb = ccnb[0:np.where(timea==time[-1])[0][0]+1]
-            SSa = SSa[0:np.where(timea==time[-1])[0][0]+1]
-            SSb = SSb[0:np.where(timea==time[-1])[0][0]+1]
+        # if time[-1]>timea[-1]:
+        #     ccna = np.append(ccna, np.full(int(time[-1]-timea[-1]), -9999))
+        #     ccnb = np.append(ccnb, np.full(int(time[-1]-timea[-1]), -9999))
+        #     SSa = np.append(SSa, np.full(int(time[-1]-timea[-1]), -9999))
+        #     SSb = np.append(SSb, np.full(int(time[-1]-timea[-1]), -9999))
+        # elif time[-1]<timea[-1]:
+        #     ccna = ccna[0:np.where(timea==time[-1])[0][0]+1]
+        #     ccnb = ccnb[0:np.where(timea==time[-1])[0][0]+1]
+        #     SSa = SSa[0:np.where(timea==time[-1])[0][0]+1]
+        #     SSb = SSb[0:np.where(timea==time[-1])[0][0]+1]
     
-        if time[0]>timea[0]:
-            ccna = ccna[np.where(timea==time[0])[0][0]:]
-            ccnb = ccnb[np.where(timea==time[0])[0][0]:]
-            SSa = SSa[np.where(timea==time[0])[0][0]:]
-            SSb = SSb[np.where(timea==time[0])[0][0]:]
-        elif time[0]<timea[0]:
-            ccna = np.insert(ccna, np.full(int(timea[0]-time[0]),0), -9999)
-            ccnb = np.insert(ccnb, np.full(int(timea[0]-time[0]),0), -9999)
-            SSa = np.insert(SSa, np.full(int(timea[0]-time[0]),0), -9999)
-            SSb = np.insert(SSb, np.full(int(timea[0]-time[0]),0), -9999)
+        # if time[0]>timea[0]:
+        #     ccna = ccna[np.where(timea==time[0])[0][0]:]
+        #     ccnb = ccnb[np.where(timea==time[0])[0][0]:]
+        #     SSa = SSa[np.where(timea==time[0])[0][0]:]
+        #     SSb = SSb[np.where(timea==time[0])[0][0]:]
+        # elif time[0]<timea[0]:
+        #     ccna = np.insert(ccna, np.full(int(timea[0]-time[0]),0), -9999)
+        #     ccnb = np.insert(ccnb, np.full(int(timea[0]-time[0]),0), -9999)
+        #     SSa = np.insert(SSa, np.full(int(timea[0]-time[0]),0), -9999)
+        #     SSb = np.insert(SSb, np.full(int(timea[0]-time[0]),0), -9999)
             
         # quality check
-        ccna = qc_mask_cloudflag(ccna, cldflag)
-        ccnb = qc_mask_cloudflag(ccnb, cldflag)
+        common_elements, time_id, timea_id = np.intersect1d(time, timea, return_indices=True)
+        ccna = ccna[timea_id]
+        SSa = SSa[timea_id]
         ccna=qc_remove_neg(ccna)
         SSa=qc_remove_neg(SSa)
+        ccna = qc_mask_cloudflag(ccna, cldflag[time_id])
+
+        common_elements, time_id, timeb_id = np.intersect1d(time, timeb, return_indices=True)
+        ccnb = ccnb[timeb_id]
+        SSb = SSb[timeb_id]
         ccnb=qc_remove_neg(ccnb)
         SSb=qc_remove_neg(SSb)
-    
+        ccnb = qc_mask_cloudflag(ccnb, cldflag[time_id])
+   
         SSa_m = np.nanmean(SSa)
         SSb_m = np.nanmean(SSb)
         
