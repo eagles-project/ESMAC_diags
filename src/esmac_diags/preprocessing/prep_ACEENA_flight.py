@@ -507,15 +507,27 @@ def prep_CCN(ccnpath, iwgpath, prep_data_path, dt=60):
             
         # quality check
         common_elements, time_id, timea_id = np.intersect1d(time, timea, return_indices=True)
+        time = time[time_id]
+        cldflag = cldflag[time_id]
+        height = height[time_id]
+        lon = lon[time_id]
+        lat = lat[time_id]
         ccna = ccna[timea_id]
         SSa = SSa[timea_id]
+        timea = timea[timea_id]
         ccna=qc_remove_neg(ccna)
         SSa=qc_remove_neg(SSa)
         ccna = qc_mask_cloudflag(ccna, cldflag[time_id])
 
         common_elements, time_id, timeb_id = np.intersect1d(time, timeb, return_indices=True)
+        time = time[time_id]
+        cldflag = cldflag[time_id]
+        height = height[time_id]
+        lon = lon[time_id]
+        lat = lat[time_id]
         ccnb = ccnb[timeb_id]
         SSb = SSb[timeb_id]
+        timeb = timeb[timeb_id]
         ccnb=qc_remove_neg(ccnb)
         SSb=qc_remove_neg(SSb)
         ccnb = qc_mask_cloudflag(ccnb, cldflag[time_id])
