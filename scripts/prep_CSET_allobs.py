@@ -25,7 +25,7 @@ obs_input_path = config['obs_input_path']
 RFpath = obs_input_path+'CSET/aircraft/aircraft_lowrate/'
 
 # output data path
-prep_data_path = '../prep_data/ACEENA/'
+prep_data_path = '../prep_data/CSET/'
 
 # time frequencies
 aircraft_dt = config['obs_aircraft_dt']
