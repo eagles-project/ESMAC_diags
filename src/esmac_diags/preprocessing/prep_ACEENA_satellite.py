@@ -89,8 +89,11 @@ def prep_VISST_grid(visstgridpath, predatapath, dx=0.5, dt=3600):
     reff_liq = visstdata['particle_size'][:,y_idx,x_idx,1]
     cod_liq_linavg = visstdata['optical_depth_linear'][:,y_idx,x_idx,2]
     cod_liq_logavg = visstdata['optical_depth_log'][:,y_idx,x_idx,2]
+    ctt_all = visstdata['cloud_temperature'][:,y_idx,x_idx,0]
+    ctp_all = visstdata['cloud_pressureviss_top'][:,y_idx,x_idx,0]
+    cth_all = visstdata['cloud_height_top'][:,y_idx,x_idx,0]
     ctt_liq = visstdata['cloud_temperature'][:,y_idx,x_idx,2]
-    ctp_liq = visstdata['cloud_pressure_top'][:,y_idx,x_idx,2]
+    ctp_liq = visstdata['cloud_pressureviss_top'][:,y_idx,x_idx,2]
     cth_liq = visstdata['cloud_height_top'][:,y_idx,x_idx,2]
     cf_all = visstdata['cloud_percentage'][:,y_idx,x_idx,0]
     cf_liq = visstdata['cloud_percentage'][:,y_idx,x_idx,2]
@@ -121,6 +124,9 @@ def prep_VISST_grid(visstgridpath, predatapath, dx=0.5, dt=3600):
         reff_liq = xr.concat([reff_liq, visstdata['particle_size'][:,y_idx,x_idx,1]], dim="time")
         cod_liq_linavg = xr.concat([cod_liq_linavg, visstdata['optical_depth_linear'][:,y_idx,x_idx,2]], dim="time")
         cod_liq_logavg = xr.concat([cod_liq_logavg, visstdata['optical_depth_log'][:,y_idx,x_idx,2]], dim="time")
+        ctt_all = xr.concat([ctt_all, visstdata['cloud_temperature'][:,y_idx,x_idx,0]], dim="time")
+        ctp_all = xr.concat([ctp_all, visstdata['cloud_pressure_top'][:,y_idx,x_idx,0]], dim="time")
+        cth_all = xr.concat([cth_all, visstdata['cloud_height_top'][:,y_idx,x_idx,0]], dim="time")
         ctt_liq = xr.concat([ctt_liq, visstdata['cloud_temperature'][:,y_idx,x_idx,2]], dim="time")
         ctp_liq = xr.concat([ctp_liq, visstdata['cloud_pressure_top'][:,y_idx,x_idx,2]], dim="time")
         cth_liq = xr.concat([cth_liq, visstdata['cloud_height_top'][:,y_idx,x_idx,2]], dim="time")
@@ -363,7 +369,7 @@ def prep_VISST_grid(visstgridpath, predatapath, dx=0.5, dt=3600):
     ds.attrs["title"] = 'cloud fraction from VISST 0.5x0.5 data'
     ds.attrs["date"] = ttt.ctime(ttt.time())
     ds.to_netcdf(outfile, mode='w')
-    
+
     #
     outfile = predatapath + 'cloudtop_VISSTgrid_ACEENA.nc'
     print('output file '+outfile)
@@ -371,6 +377,30 @@ def prep_VISST_grid(visstgridpath, predatapath, dx=0.5, dt=3600):
                     'ctt': (['time'], np.float32(ctt_new)),
                     'cth': (['time'], np.float32(cth_new)),
                     'ctp': (['time'], np.float32(ctp_new)),
+                    },
+                     coords={'time': ('time', time_new)})
+    #assign attributes
+    ds['time'].attrs["long_name"] = "Time"
+    ds['time'].attrs["standard_name"] = "time"
+    ds['ctt'].attrs["long_name"] = 'cloud top temperature for all clouds'
+    ds['ctt'].attrs["units"] = 'K'
+    ds['ctp'].attrs["long_name"] = 'cloud top pressure for all clouds'
+    ds['ctp'].attrs["units"] = 'hPa'
+    ds['cth'].attrs["long_name"] = 'cloud top height for all clouds'
+    ds['cth'].attrs["units"] = 'km'
+    
+    ds.attrs["title"] = 'cloud top temperature, pressure and height from VISST 0.5x0.5 data'
+    ds.attrs["description"] = 'for liquid clouds only'
+    ds.attrs["date"] = ttt.ctime(ttt.time())
+    ds.to_netcdf(outfile, mode='w')
+    
+    #
+    outfile = predatapath + 'cloudtopliq_VISSTgrid_ACEENA.nc'
+    print('output file '+outfile)
+    ds = xr.Dataset({
+                    'ctt': (['time'], np.float32(ctt_liq_new)),
+                    'cth': (['time'], np.float32(cth_liq_new)),
+                    'ctp': (['time'], np.float32(ctp_liq_new)),
                     },
                      coords={'time': ('time', time_new)})
     #assign attributes
