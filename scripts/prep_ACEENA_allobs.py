@@ -77,7 +77,7 @@ height_out = np.array([0.,50,100,150,200,250,300,350,400,450,500,600,700,800,900
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 # prepare flight data; output time in aircraft_dt resolution
-print('prepare aircraft data:')
+# print('prepare aircraft data:')
 # air.prep_AMS(amspath, iwgpath, prep_data_path+'flight/', dt=aircraft_dt)       # aerosol composition
 # air.prep_beasd(beasdpath,iwgpath, prep_data_path+'flight/', dt=aircraft_dt)               # merged aerosol size distribution
 # air.prep_CCN(ccnairpath, iwgpath, prep_data_path+'flight/', dt=aircraft_dt)       # CCN number concentration
@@ -91,8 +91,8 @@ print('prepare aircraft data:')
 # prepare surface data. output time in surface_dt resolution
 print('prepare surface data:')
 # sfc.prep_ACSM(acsmpath, prep_data_path+'surface/', dt=surface_dt)            # aerosol composition
-sfc.prep_ccn(ccnsfcpath, prep_data_path+'surface/', dt=surface_dt)              # CCN number concentration
-sfc.prep_CPC(cpcpath, prep_data_path+'surface/', dt=surface_dt)    # aerosol number concentration (>3 or 10nm)
+# sfc.prep_ccn(ccnsfcpath, prep_data_path+'surface/', dt=surface_dt)              # CCN number concentration
+# sfc.prep_CPC(cpcpath, prep_data_path+'surface/', dt=surface_dt)    # aerosol number concentration (>3 or 10nm)
 sfc.prep_CPC_withENAmask(aerosolmaskpath, prep_data_path+'surface/', dt=surface_dt)    # aerosol mask data
 sfc.prep_CNsize_UHSAS(uhsaspath, prep_data_path+'surface/', dt=surface_dt)   # aerosol size distribution from UHSAS
 sfc.prep_cloud_2d(armbepath, arsclpath, prep_data_path+'surface/', height_out, dt=surface_dt)   # 2D cloud fraction
