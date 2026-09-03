@@ -11,7 +11,7 @@ import xarray as xr
 import pandas as pd
 import time as ttt
 import esmac_diags
-from esmac_diags.subroutines.time_resolution_change import avg_time_1d
+from esmac_diags.subroutines.time_resolution_change import avg_time_1d, interp_time_1d
 from esmac_diags.subroutines.quality_control import  qc_remove_neg, qc_mask_qcflag
 from esmac_diags.subroutines.time_format_change import datetime2cday
 from esmac_diags.subroutines.specific_data_treatment import find_nearest, insolation, \
