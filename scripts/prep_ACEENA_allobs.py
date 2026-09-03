@@ -90,7 +90,7 @@ print('prepare aircraft data:')
 
 # prepare surface data. output time in surface_dt resolution
 print('prepare surface data:')
-sfc.prep_ACSM(acsmpath, prep_data_path+'surface/', dt=surface_dt)            # aerosol composition
+# sfc.prep_ACSM(acsmpath, prep_data_path+'surface/', dt=surface_dt)            # aerosol composition
 sfc.prep_ccn(ccnsfcpath, prep_data_path+'surface/', dt=surface_dt)              # CCN number concentration
 sfc.prep_CPC(cpcpath, prep_data_path+'surface/', dt=surface_dt)    # aerosol number concentration (>3 or 10nm)
 sfc.prep_CPC_withENAmask(aerosolmaskpath, prep_data_path+'surface/', dt=surface_dt)    # aerosol mask data
