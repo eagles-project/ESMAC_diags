@@ -377,45 +377,31 @@ def prep_VISST_grid(visstgridpath, predatapath, dx=0.5, dt=3600):
                     'ctt': (['time'], np.float32(ctt_new)),
                     'cth': (['time'], np.float32(cth_new)),
                     'ctp': (['time'], np.float32(ctp_new)),
+                    'ctt_liq': (['time'], np.float32(ctt_liq_new)),
+                    'cth_liq': (['time'], np.float32(cth_liq_new)),
+                    'ctp_liq': (['time'], np.float32(ctp_liq_new)),
                     },
                      coords={'time': ('time', time_new)})
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
     ds['time'].attrs["standard_name"] = "time"
-    ds['ctt'].attrs["long_name"] = 'cloud top temperature for all clouds'
+    ds['ctt'].attrs["long_name"] = 'cloud top temperature'
     ds['ctt'].attrs["units"] = 'K'
-    ds['ctp'].attrs["long_name"] = 'cloud top pressure for all clouds'
+    ds['ctp'].attrs["long_name"] = 'cloud top pressure'
     ds['ctp'].attrs["units"] = 'hPa'
-    ds['cth'].attrs["long_name"] = 'cloud top height for all clouds'
+    ds['cth'].attrs["long_name"] = 'cloud top height'
     ds['cth'].attrs["units"] = 'km'
+    ds['ctt_liq'].attrs["long_name"] = 'cloud top temperature for liquid clouds'
+    ds['ctt_liq'].attrs["units"] = 'K'
+    ds['ctp_liq'].attrs["long_name"] = 'cloud top pressure for liquid clouds'
+    ds['ctp_liq'].attrs["units"] = 'hPa'
+    ds['cth_liq'].attrs["long_name"] = 'cloud top height for liquid clouds'
+    ds['cth_liq'].attrs["units"] = 'km'
     
     ds.attrs["title"] = 'cloud top temperature, pressure and height from VISST 0.5x0.5 data'
-    ds.attrs["description"] = 'for liquid clouds only'
+    ds.attrs["description"] = 'for all or liquid clouds within grids'
     ds.attrs["date"] = ttt.ctime(ttt.time())
-    ds.to_netcdf(outfile, mode='w')
     
-    #
-    outfile = predatapath + 'cloudtopliq_VISSTgrid_ACEENA.nc'
-    print('output file '+outfile)
-    ds = xr.Dataset({
-                    'ctt': (['time'], np.float32(ctt_liq_new)),
-                    'cth': (['time'], np.float32(cth_liq_new)),
-                    'ctp': (['time'], np.float32(ctp_liq_new)),
-                    },
-                     coords={'time': ('time', time_new)})
-    #assign attributes
-    ds['time'].attrs["long_name"] = "Time"
-    ds['time'].attrs["standard_name"] = "time"
-    ds['ctt'].attrs["long_name"] = 'cloud top temperature for liquid clouds'
-    ds['ctt'].attrs["units"] = 'K'
-    ds['ctp'].attrs["long_name"] = 'cloud top pressure for liquid clouds'
-    ds['ctp'].attrs["units"] = 'hPa'
-    ds['cth'].attrs["long_name"] = 'cloud top height for liquid clouds'
-    ds['cth'].attrs["units"] = 'km'
-    
-    ds.attrs["title"] = 'cloud top temperature, pressure and height from VISST 0.5x0.5 data'
-    ds.attrs["description"] = 'for liquid clouds only'
-    ds.attrs["date"] = ttt.ctime(ttt.time())
     ds.to_netcdf(outfile, mode='w')
     
     #
