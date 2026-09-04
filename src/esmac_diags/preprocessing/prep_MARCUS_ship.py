@@ -943,7 +943,7 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     ds = xr.Dataset({
                     'lat': (['time'], lat1.data),
                     'lon': (['time'], lon1.data),
-                    'lwp': (['time'], lwp1),
+                    'lwp': (['time'], lwp1.data),
                     },
                      coords={'time': ('time', time_new)})
     
