@@ -9,7 +9,7 @@ import os
 import sys
 import yaml
 import esmac_diags.preprocessing.prep_MARCUS_ship as ship
-import esmac_diags.preprocessing.prep_MARCUS_satellite as sat
+# import esmac_diags.preprocessing.prep_MARCUS_satellite as sat
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% set input data path
 # Load configuration file
