@@ -510,7 +510,7 @@ def prep_CN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=3600):
     #%% read in data
     filename_exhaustfree = exhaustfreepath + 'CPC_UHSAS_exhaustfree_1hr.nc'
     obsdata = xr.open_dataset(filename_exhaustfree)
-    time2 = obsdata['time'].load()
+    time1 = obsdata['time'].load()
     cpc = obsdata['CPC'].load()
     uhsas = obsdata['UHSAS100'].load()
     obsdata.close()
@@ -521,13 +521,13 @@ def prep_CN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21 3:00:00', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
-    tmpcpc = xr.DataArray(data=np.array(cpc), dims=["time"], coords=dict(time=time2))
-    tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time2))
+    tmpcpc = xr.DataArray(data=np.array(cpc), dims=["time"], coords=dict(time=time1))
+    tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time1))
 
     lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
     lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
     cpc1 = median_time_1d(time1, tmpcpc, time_new, arraytype='xarray')
-    uhsas1 = median_time_1d(time2, tmpuhsas, time_new, arraytype='xarray')
+    uhsas1 = median_time_1d(time1, tmpuhsas, time_new, arraytype='xarray')
     
     #%% output file
     outfile = prep_data_path + 'CN_MARCUS_exhaustfree.nc'
@@ -601,7 +601,7 @@ def prep_CNsize_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=360
     #%% read in UHSAS data
     filename_exhaustfree = exhaustfreepath + 'CPC_UHSAS_exhaustfree_1hr.nc'
     obsdata = xr.open_dataset(filename_exhaustfree)
-    time2 = obsdata['time'].load()
+    time1 = obsdata['time'].load()
     size = obsdata['size'].load()
     dmin = obsdata['size_low'].load()
     dmax = obsdata['size_high'].load()
@@ -613,11 +613,11 @@ def prep_CNsize_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=360
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21 3:00:00', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
-    tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time2))
+    tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time1))
     
     lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
     lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
-    uhsas1 = median_time_2d(time2, tmpuhsas, time_new, arraytype='xarray')
+    uhsas1 = median_time_2d(time1, tmpuhsas, time_new, arraytype='xarray')
     
     #%% output file
     outfile = prep_data_path + 'CNsize_UHSAS_MARCUS_exhaustfree.nc'
