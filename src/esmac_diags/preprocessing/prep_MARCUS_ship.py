@@ -124,7 +124,7 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
     ccn10_fit = qc_mask_qcflag(ccn10_fit, qc_ccns[:,4])
     
     #%% re-shape the data into coarser resolution
-    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
+    time_new = pd.date_range(start='2017-10-21 3:00:00', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
 
     if dt >= 3600:
         lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
@@ -304,7 +304,7 @@ exhaustfreepath : str
     ccn5s = qc_remove_neg(ccn5s)
     
     #%% re-shape the data into coarser resolution
-    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
+    time_new = pd.date_range(start='2017-10-21 3:00:00', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
 
     if dt >= 3600:
         lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
@@ -323,8 +323,8 @@ exhaustfreepath : str
     outfile = prep_data_path + 'CCN_MARCUS_exhaustfree.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
+                    'lat': (['time'], lat1.data),
+                    'lon': (['time'], lon1.data),
                     'CCN1': (['time'], ccn1.data),
                     'CCN2': (['time'], ccn2.data),
                     'CCN5': (['time'], ccn5.data),
@@ -428,7 +428,7 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     uhsas100 = qc_remove_neg(uhsas100, remove_zero='True')
     
     #%% re-shape the data into coarser resolution (ship position starts at 3Z on 10-21)
-    time_new = pd.date_range(start='2017-10-21 03:00:00', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
+    time_new = pd.date_range(start='2017-10-21 3:00:00', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
 
     tmpcpc = xr.DataArray(data=np.array(cpc), dims=["time"], coords=dict(time=time1))
     tmpuhsas100 = xr.DataArray(data=np.array(uhsas100), dims=["time"], coords=dict(time=time2))
@@ -519,7 +519,7 @@ def prep_CN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=3600):
     uhsas = qc_remove_neg(uhsas.data)
     
     #%% re-shape the data into coarser resolution
-    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
+    time_new = pd.date_range(start='2017-10-21 3:00:00', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
     tmpcpc = xr.DataArray(data=np.array(cpc), dims=["time"], coords=dict(time=time2))
     tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time2))
@@ -535,8 +535,8 @@ def prep_CN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=3600):
     ds = xr.Dataset({
                     'lat': (['time'], lat1.data),
                     'lon': (['time'], lon1.data),
-                    'CPC10': (['time'], cpc1),
-                    'UHSAS100': (['time'], uhsas1),
+                    'CPC10': (['time'], cpc1.data),
+                    'UHSAS100': (['time'], uhsas1.data),
                     },
                      coords={'time': ('time', time_new)})
     
@@ -611,7 +611,7 @@ def prep_CNsize_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=360
     uhsas = qc_remove_neg(uhsas.data)
     
     #%% re-shape the data into coarser resolution
-    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
+    time_new = pd.date_range(start='2017-10-21 3:00:00', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
     tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time2))
     
@@ -801,7 +801,7 @@ def prep_MET(shipmetpath, prep_data_path, dt=3600):
     ps = qc_mask_qcflag(ps, qc_ps)
     
     #%% re-shape the data into coarser resolution
-    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
+    time_new = pd.date_range(start='2017-10-21 3:00:00', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
     lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
     lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
@@ -918,7 +918,7 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     lwp = qc_mask_qcflag(lwp, qc_lwp)
     
     #%% re-shape the data into coarser resolution
-    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
+    time_new = pd.date_range(start='2017-10-21 3:00:00', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
     lon1 = avg_time_1d(time, lon, time_new, arraytype='xarray')
     lat1 = avg_time_1d(time, lat, time_new, arraytype='xarray')
