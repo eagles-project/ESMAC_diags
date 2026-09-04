@@ -407,6 +407,11 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     cpc = obsdata['concentration'].load()
     qc_cpc = obsdata['qc_concentration'].load()
     obsdata.close()
+
+    cpc = cpc.drop_duplicates(dim="time")
+    time1 = time1.drop_duplicates(dim="time")
+    qc_cpc = qc_cpc.drop_duplicates(dim="time")
+
     cpc = qc_remove_neg(cpc.data)
     cpc = qc_mask_qcflag(cpc, qc_cpc)
     
@@ -417,6 +422,7 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     dmin = obsdata['lower_size_limit'][0,:].load()
     dmax = obsdata['upper_size_limit'][0,:].load()
     obsdata.close()
+    
     uhsas = qc_remove_neg(uhsas.data)
     uhsas100 = np.nansum(uhsas[:, dmin>100], axis=1)
     uhsas100 = qc_remove_neg(uhsas100, remove_zero='True')
@@ -426,7 +432,7 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
 
     tmpcpc = xr.DataArray(data=np.array(cpc), dims=["time"], coords=dict(time=time1))
     tmpuhsas100 = xr.DataArray(data=np.array(uhsas100), dims=["time"], coords=dict(time=time2))
-    
+
     lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
     lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
     cpc1 = median_time_1d(time1, tmpcpc, time_new, arraytype='xarray')
@@ -517,9 +523,6 @@ def prep_CN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=3600):
     
     tmpcpc = xr.DataArray(data=np.array(cpc), dims=["time"], coords=dict(time=time2))
     tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time2))
-
-    tmpcpc = tmpcpc.drop_duplicates(dim="time")
-    tmpuhsas = tmpuhsas.drop_duplicates(dim="time")
 
     lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
     lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
