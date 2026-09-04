@@ -96,7 +96,7 @@ def prep_VISST_grid(shipmetpath, visstgridpath, predatapath, dx=0.5, dt=3600):
     x_idx = abs(lon-lon_ship[0]).argmin()
     y_idx = abs(lat-lat_ship[0]).argmin()    
 
-    solar_zenith_xyt = visstdata['solar_zenith_angle']t[0, y_idx, x_idx]
+    solar_zenith_xyt = visstdata['solar_zenith_angle'][0, y_idx, x_idx]
     clearsky_vis_reflectance_xyt = visstdata['clearsky_vis_reflectance']t[0, y_idx, x_idx]
     vis_reflectance_all_xyt = visstdata['visible_reflectance'][0,y_idx,x_idx,0]
     vis_reflectance_clr_xyt = visstdata['visible_reflectance'][0,y_idx,x_idx,1]
