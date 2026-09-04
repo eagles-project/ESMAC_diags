@@ -707,7 +707,7 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
     size = (dmin+dmax)/2
     
     #%% re-shape the data into coarser resolution
-    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
+    time_new = pd.date_range(start='2017-10-21 3:00:00', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
     tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time", "bin_num"], coords=dict(time=time2, bin_num=size))
     
