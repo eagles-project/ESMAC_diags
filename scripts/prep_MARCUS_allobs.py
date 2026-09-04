@@ -40,13 +40,13 @@ satellite_dt = config['obs_satellite_dt']
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 # prepare ship data. output time in 1hr (dt=3600s) resolution
 print('prepare ship data:')
-# ship.prep_CCN(shipmetpath, ccnpath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)              # CCN number concentration
-# ship.prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)    # aerosol number concentration
-# ship.prep_CNsize(shipmetpath, uhsaspath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)   # aerosol size distribution from UHSAS
-# ship.prep_CCN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)              # CCN number concentration
-# ship.prep_CN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)    # aerosol number concentration
-# ship.prep_CNsize_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)   # aerosol size distribution from UHSAS
-# ship.prep_MWR(shipmetpath, mwrpath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt) # cloud liquid water path
+ship.prep_CCN(shipmetpath, ccnpath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)              # CCN number concentration
+ship.prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)    # aerosol number concentration
+ship.prep_CNsize(shipmetpath, uhsaspath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)   # aerosol size distribution from UHSAS
+ship.prep_CCN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)              # CCN number concentration
+ship.prep_CN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)    # aerosol number concentration
+ship.prep_CNsize_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)   # aerosol size distribution from UHSAS
+ship.prep_MWR(shipmetpath, mwrpath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt) # cloud liquid water path
 
-print('prepare satellite data:')
-sat.prep_VISST_grid(shipmetpath, visstgridpath, prep_data_path+'satellite/'+str(satellite_dt)+'s/', dx=0.5, dt=satellite_dt)
+# print('prepare satellite data:')
+# sat.prep_VISST_grid(shipmetpath, visstgridpath, prep_data_path+'satellite/'+str(satellite_dt)+'s/', dx=0.5, dt=satellite_dt)
