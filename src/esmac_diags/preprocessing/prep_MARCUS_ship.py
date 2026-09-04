@@ -515,6 +515,9 @@ def prep_CN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
 
+    cpc = cpc.drop_duplicates(dim="time")
+    uhsas = uhsas.drop_duplicates(dim="time")
+    
     tmpcpc = xr.DataArray(data=np.array(cpc), dims=["time"], coords=dict(time=time2))
     tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time2))
     
