@@ -305,12 +305,19 @@ exhaustfreepath : str
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
-    
-    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
-    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
-    ccn1 = median_time_1d(time2, ccn1s, time_new, arraytype='numpy')
-    ccn2 = median_time_1d(time2, ccn2s, time_new, arraytype='numpy')
-    ccn5 = median_time_1d(time2, ccn5s, time_new, arraytype='numpy')
+
+    if dt >= 3600:
+        lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
+        lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
+        ccn1 = median_time_1d(time2, ccn1s, time_new, arraytype='xarray')
+        ccn2 = median_time_1d(time2, ccn2s, time_new, arraytype='xarray')
+        ccn5 = median_time_1d(time2, ccn5s, time_new, arraytype='xarray')
+    if dt < 3600:
+        lon1 = interp_time_1d(time, lon, time_new, arraytype='xarray')
+        lat1 = interp_time_1d(time, lat, time_new, arraytype='xarray')
+        ccn1 = interp_time_1d(time2, ccn1s, time_new, arraytype='xarray')
+        ccn2 = interp_time_1d(time2, ccn2s, time_new, arraytype='xarray')
+        ccn5 = interp_time_1d(time2, ccn5s, time_new, arraytype='xarray')
 
     #%% output file
     outfile = prep_data_path + 'CCN_MARCUS_exhaustfree.nc'
@@ -340,9 +347,13 @@ exhaustfreepath : str
     ds['CCN5'].attrs["long_name"] = ccn5s.long_name
     ds['CCN5'].attrs["description"] = ccn5s.description
     ds['CCN5'].attrs["units"] = "1/cm3"
-    
+
+    ds.attrs["title"] = 'Surface CCN number concentration'
     ds.attrs["input data_example"] = filename_exhaustfree.split('/')[-1]
-    ds.attrs["description"] = 'median value of '+str(int(dt))+'sec resolution'
+    if dt >= 3600:
+        ds.attrs["description"] = 'median value of each time window'
+    if dt < 3600:
+        ds.attrs["description"] = 'interpolated value from ~hourly resolution data'
     ds.attrs["creation_date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
@@ -416,8 +427,8 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     tmpcpc = xr.DataArray(data=np.array(cpc), dims=["time"], coords=dict(time=time1))
     tmpuhsas100 = xr.DataArray(data=np.array(uhsas100), dims=["time"], coords=dict(time=time2))
     
-    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
-    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
     cpc1 = median_time_1d(time1, tmpcpc, time_new, arraytype='xarray')
     uhsas1 = median_time_1d(time2, tmpuhsas100, time_new, arraytype='xarray')
     
@@ -507,8 +518,8 @@ def prep_CN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=3600):
     tmpcpc = xr.DataArray(data=np.array(cpc), dims=["time"], coords=dict(time=time2))
     tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time2))
     
-    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
-    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
     cpc1 = median_time_1d(time1, tmpcpc, time_new, arraytype='xarray')
     uhsas1 = median_time_1d(time2, tmpuhsas, time_new, arraytype='xarray')
     
@@ -598,8 +609,8 @@ def prep_CNsize_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=360
     
     tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time2))
     
-    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
-    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
     uhsas1 = median_time_2d(time2, tmpuhsas, time_new, arraytype='xarray')
     
     #%% output file
@@ -694,8 +705,8 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
     
     tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time2))
     
-    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
-    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
     uhsas1 = median_time_2d(time2, tmpuhsas, time_new, arraytype='xarray')
     
     #%% output file
@@ -786,11 +797,11 @@ def prep_MET(shipmetpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
-    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
-    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
-    T1 = median_time_1d(time, T, time_new, arraytype='numpy')
-    RH1 = median_time_1d(time, RH, time_new, arraytype='numpy')
-    ps1 = median_time_1d(time, ps, time_new, arraytype='numpy')
+    lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
+    T1 = median_time_1d(time, T, time_new, arraytype='xarray')
+    RH1 = median_time_1d(time, RH, time_new, arraytype='xarray')
+    ps1 = median_time_1d(time, ps, time_new, arraytype='xarray')
     
     #%% output file
     outfile = prep_data_path + 'T_RH_Ps_MARCUS.nc'
@@ -903,9 +914,9 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
-    lon1 = avg_time_1d(time, lon, time_new, arraytype='numpy')
-    lat1 = avg_time_1d(time, lat, time_new, arraytype='numpy')
-    lwp1 = avg_time_1d(time2, lwp, time_new, arraytype='numpy')
+    lon1 = avg_time_1d(time, lon, time_new, arraytype='xarray')
+    lat1 = avg_time_1d(time, lat, time_new, arraytype='xarray')
+    lwp1 = avg_time_1d(time2, lwp, time_new, arraytype='xarray')
     lwp1 = qc_remove_neg(lwp1)
     
     #%% calculate cloud fraction from LWP
@@ -917,6 +928,7 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     cf_10 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=10)
     cf_20 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=20)
     cf_30 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=30)
+    
     #%% output file
     outfile = prep_data_path + 'LWP_MARCUS.nc'
     print('output file '+outfile)
