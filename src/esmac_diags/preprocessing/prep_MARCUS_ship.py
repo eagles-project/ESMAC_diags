@@ -66,36 +66,102 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
     lon = qc_mask_qcflag(lon, qc_lon)
     
     #%% read in data
-    lst2 = glob.glob(ccnpath+'maraosccn1colavgM1.b1.*')
+    # lst2 = glob.glob(ccnpath+'maraosccn1colavgM1.b1.*')
+    lst2 = glob.glob(ccnpath+'maraosccn1colspectraM1.b1.*')
     obsdata = xr.open_mfdataset(lst2, combine='by_coords')
     time2 = obsdata['time'].load()
     ccn = obsdata['N_CCN'].load()
-    qc_ccn = obsdata['qc_N_CCN'].load()
-    SS = obsdata['supersaturation_calculated'].load()
+    qc_ccns = obsdata['qc_N_CCN'].load()
+    ss = obsdata['supersaturation_calculated'].load()
+    coefs = obsdata['N_CCN_fit_coefs'].load()
     obsdata.close()
-    ccn = qc_mask_qcflag(ccn, qc_ccn)
     
-    ccn_1s = np.array(ccn)
-    ccn_2s = np.array(ccn)
-    ccn_3s = np.array(ccn)
-    ccn_5s = np.array(ccn)
-    ccn_6s = np.array(ccn)
-    ccn_1s[np.logical_or(SS<0.05, SS>0.15)] = np.nan
-    ccn_2s[np.logical_or(SS<0.15, SS>0.25)] = np.nan
-    ccn_3s[np.logical_or(SS<0.25, SS>0.35)] = np.nan
-    ccn_5s[np.logical_or(SS<0.45, SS>0.55)] = np.nan
-    ccn_6s[np.logical_or(SS<0.55, SS>0.65)] = np.nan
+    # ccn = qc_mask_qcflag(ccn, qc_ccn)
+    
+    # ccn_1s = np.array(ccn)
+    # ccn_2s = np.array(ccn)
+    # ccn_3s = np.array(ccn)
+    # ccn_5s = np.array(ccn)
+    # ccn_6s = np.array(ccn)
+    # ccn_1s[np.logical_or(SS<0.05, SS>0.15)] = np.nan
+    # ccn_2s[np.logical_or(SS<0.15, SS>0.25)] = np.nan
+    # ccn_3s[np.logical_or(SS<0.25, SS>0.35)] = np.nan
+    # ccn_5s[np.logical_or(SS<0.45, SS>0.55)] = np.nan
+    # ccn_6s[np.logical_or(SS<0.55, SS>0.65)] = np.nan
+
+    ss1 = ss[:,1]
+    ss2 = ss[:,2]
+    ss5 = ss[:,3]
+    ss8 = ss[:,4]
+    ss10 = ss[:,5]
+    ccn1 = ccn[:,1]
+    ccn2 = ccn[:,2]
+    ccn5 = ccn[:,3]
+    ccn8 = ccn[:,4]
+    ccn10 = ccn[:,5]
+
+    #%% these are computed from CCN spectra polynomial fits
+    #this accounts for fluctuations in supersaturation that are different than the target supersaturation
+    #but the fits do not always work, so the the sample size is less than the measured CCN
+    ccn1_fit = coefs[:,0] + coefs[:,1]*0.1 + coefs[:,2]*(0.1**2)
+    ccn2_fit = coefs[:,0] + coefs[:,1]*0.2 + coefs[:,2]*(0.2**2)
+    ccn5_fit = coefs[:,0] + coefs[:,1]*0.5 + coefs[:,2]*(0.5**2)
+    ccn8_fit = coefs[:,0] + coefs[:,1]*0.8 + coefs[:,2]*(0.8**2)
+    ccn10_fit = coefs[:,0] + coefs[:,1]*1.0 + coefs[:,2]*(1.0**2)
+  
+    #apply basic QC flags
+    ccn1 = qc_mask_qcflag(ccn1, qc_ccns[:,0])
+    ccn2 = qc_mask_qcflag(ccn2, qc_ccns[:,1])
+    ccn5 = qc_mask_qcflag(ccn5, qc_ccns[:,2])
+    ccn8 = qc_mask_qcflag(ccn5, qc_ccns[:,3])
+    ccn10 = qc_mask_qcflag(ccn5, qc_ccns[:,4])
+
+    #apply to ccn fits
+    ccn1_fit = qc_mask_qcflag(ccn1_fit, qc_ccns[:,0])
+    ccn2_fit = qc_mask_qcflag(ccn2_fit, qc_ccns[:,1])
+    ccn5_fit = qc_mask_qcflag(ccn5_fit, qc_ccns[:,2])
+    ccn8_fit = qc_mask_qcflag(ccn8_fit, qc_ccns[:,3])
+    ccn10_fit = qc_mask_qcflag(ccn10_fit, qc_ccns[:,4])
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
-    
-    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
-    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
-    ccn1 = median_time_1d(time2, ccn_1s, time_new, arraytype='numpy')
-    ccn2 = median_time_1d(time2, ccn_2s, time_new, arraytype='numpy')
-    ccn3 = median_time_1d(time2, ccn_3s, time_new, arraytype='numpy')
-    ccn5 = median_time_1d(time2, ccn_5s, time_new, arraytype='numpy')
-    ccn6 = median_time_1d(time2, ccn_6s, time_new, arraytype='numpy')
+
+    if dt >= 3600:
+        lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
+        lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
+        ccn1_measure = median_time_1d(time2, ccn1, time_new, arraytype='xarray')
+        ss1_i = median_time_1d(time2, ss1, time_new, arraytype='xarray')
+        ccn2_measure = median_time_1d(time2, ccn2, time_new, arraytype='xarray')
+        ss2_i = median_time_1d(time2, ss2, time_new, arraytype='xarray')
+        ccn5_measure = median_time_1d(time2, ccn5, time_new, arraytype='xarray')
+        ss5_i = median_time_1d(time2, ss5, time_new, arraytype='xarray')
+        ccn8_measure = median_time_1d(time2, ccn8, time_new, arraytype='xarray')
+        ss8_i = median_time_1d(time2, ss8, time_new, arraytype='xarray')
+        ccn10_measure = median_time_1d(time2, ccn10, time_new, arraytype='xarray')
+        ss10_i = median_time_1d(time2, ss10, time_new, arraytype='xarray')
+        ccn1_fit_i = median_time_1d(time2, ccn1_fit, time_new, arraytype='xarray')
+        ccn2_fit_i = median_time_1d(time2, ccn2_fit, time_new, arraytype='xarray')
+        ccn5_fit_i = median_time_1d(time2, ccn5_fit, time_new, arraytype='xarray')   
+        ccn8_fit_i = median_time_1d(time2, ccn8_fit, time_new, arraytype='xarray')  
+        ccn10_fit_i = median_time_1d(time2, ccn10_fit, time_new, arraytype='xarray')  
+    if dt < 3660:
+        lon1 = interp_time_1d(time, lon, time_new, arraytype='xarray')
+        lat1 = interp_time_1d(time, lat, time_new, arraytype='xarray')
+        ccn1_measure = interp_time_1d(time2, ccn1, time_new, arraytype='xarray')
+        ss1_i = interp_time_1d(time2, ss1, time_new, arraytype='xarray')
+        ccn2_measure = interp_time_1d(time2, ccn2, time_new, arraytype='xarray')
+        ss2_i = interp_time_1d(time2, ss2, time_new, arraytype='xarray')
+        ccn5_measure = interp_time_1d(time2, ccn5, time_new, arraytype='xarray')
+        ss5_i = interp_time_1d(time2, ss5, time_new, arraytype='xarray')
+        ccn8_measure = interp_time_1d(time2, ccn8, time_new, arraytype='xarray')
+        ss8_i = interp_time_1d(time2, ss8, time_new, arraytype='xarray')
+        ccn10_measure = interp_time_1d(time2, ccn10, time_new, arraytype='xarray')
+        ss10_i = interp_time_1d(time2, ss10, time_new, arraytype='xarray')
+        ccn1_fit_i = interp_time_1d(time2, ccn1_fit, time_new, arraytype='xarray')
+        ccn2_fit_i = interp_time_1d(time2, ccn2_fit, time_new, arraytype='xarray')
+        ccn5_fit_i = interp_time_1d(time2, ccn5_fit, time_new, arraytype='xarray')   
+        ccn8_fit_i = interp_time_1d(time2, ccn8_fit, time_new, arraytype='xarray')  
+        ccn10_fit_i = interp_time_1d(time2, ccn10_fit, time_new, arraytype='xarray')  
     
     #%% output file
     outfile = prep_data_path + 'CCN_MARCUS.nc'
@@ -103,11 +169,21 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
     ds = xr.Dataset({
                     'lat': (['time'], lat1),
                     'lon': (['time'], lon1),
-                    'CCN1': (['time'], ccn1),
-                    'CCN2': (['time'], ccn2),
-                    'CCN3': (['time'], ccn3),
-                    'CCN5': (['time'], ccn5),
-                    'CCN6': (['time'], ccn6),
+                     'CCN1_fit': ('time', np.float32(ccn1_fit_i)),
+                     'CCN2_fit': ('time', np.float32(ccn2_fit_i)),
+                     'CCN5_fit': ('time', np.float32(ccn5_fit_i)),
+                     'CCN8_fit': ('time', np.float32(ccn8_fit_i)),
+                     'CCN10_fit': ('time', np.float32(ccn10_fit_i)),
+                     'CCN1': ('time', np.float32(ccn1_measure)),
+                     'CCN2': ('time', np.float32(ccn2_measure)),
+                     'CCN5': ('time', np.float32(ccn5_measure)),
+                     'CCN8': ('time', np.float32(ccn8_measure)),
+                     'CCN10': ('time', np.float32(ccn10_measure)),
+                     'ss1': ('time', np.float32(ss1_i)),
+                     'ss2': ('time', np.float32(ss2_i)),
+                     'ss5': ('time', np.float32(ss5_i)),
+                     'ss8': ('time', np.float32(ss8_i)),
+                     'ss10': ('time', np.float32(ss10_i)),
                     },
                      coords={'time': ('time', time_new)})
     
@@ -118,19 +194,57 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
     ds['lat'].attrs["units"] = "degree_north"
     ds['lon'].attrs["long_name"] = "longitude"
     ds['lon'].attrs["units"] = "degree_east"
-    ds['CCN1'].attrs["long_name"] = 'CCN concentration for SS between 0.05% and 0.15%'
-    ds['CCN1'].attrs["units"] = "1/cm3"
-    ds['CCN2'].attrs["long_name"] = 'CCN concentration for SS between 0.15% and 0.25%'
-    ds['CCN2'].attrs["units"] = "1/cm3"
-    ds['CCN3'].attrs["long_name"] = 'CCN concentration for SS between 0.25% and 0.35%'
-    ds['CCN3'].attrs["units"] = "1/cm3"
-    ds['CCN5'].attrs["long_name"] = 'CCN concentration for SS between 0.45% and 0.55%'
-    ds['CCN5'].attrs["units"] = "1/cm3"
-    ds['CCN6'].attrs["long_name"] = 'CCN concentration for SS between 0.55% and 0.65%'
-    ds['CCN6'].attrs["units"] = "1/cm3"
+    ds['CCN1_fit'].attrs["long_name"] = "0.1% Cloud Condensation Nuclei"
+    ds['CCN1_fit'].attrs["units"] = "cm-3"
+    ds['CCN1_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
+    ds['CCN2_fit'].attrs["long_name"] = "0.2% Cloud Condensation Nuclei"
+    ds['CCN2_fit'].attrs["units"] = "cm-3"
+    ds['CCN2_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
+    ds['CCN5_fit'].attrs["long_name"] = "0.5% Cloud Condensation Nuclei"
+    ds['CCN5_fit'].attrs["units"] = "cm-3"
+    ds['CCN5_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
+    ds['CCN8_fit'].attrs["long_name"] = "0.8% Cloud Condensation Nuclei"
+    ds['CCN8_fit'].attrs["units"] = "cm-3"
+    ds['CCN8_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
+    ds['CCN10_fit'].attrs["long_name"] = "1.0% Cloud Condensation Nuclei"
+    ds['CCN10_fit'].attrs["units"] = "cm-3"
+    ds['CCN10_fit'].attrs["description"] = "Calculated using a polynomial fit to ARM-measured CCN spectra"
+    ds['CCN1'].attrs["long_name"] = "0.1% Cloud Condensation Nuclei - measured"
+    ds['CCN1'].attrs["units"] = "cm-3"
+    ds['CCN1'].attrs["description"] = "ARM-measured CCN targeted to 0.1% SS. see SS1 for actual measured SS"
+    ds['ss1'].attrs["long_name"] = "Actual Supersaturation targeted to 0.1%"
+    ds['ss1'].attrs["units"] = "%"
+    ds['ss1'].attrs["description"] = "measured SS that is closest to 0.1%. ccn1_m is measured at this SS"
+    ds['CCN2'].attrs["long_name"] = "0.2% Cloud Condensation Nuclei"
+    ds['CCN2'].attrs["units"] = "cm-3"
+    ds['CCN2'].attrs["description"] = "ARM-measured CCN targeted to 0.2% SS. see SS2 for actual measured SS"
+    ds['ss2'].attrs["long_name"] = "Actual Supersaturation targeted to 0.2%"
+    ds['ss2'].attrs["units"] = "%"
+    ds['ss2'].attrs["description"] = "measured SS that is closest to 0.2%. ccn2_m is measured at this SS"
+    ds['CCN5'].attrs["long_name"] = "0.5% Cloud Condensation Nuclei"
+    ds['CCN5'].attrs["units"] = "cm-3"
+    ds['CCN5'].attrs["description"] = "ARM-measured CCN targeted to 0.5% SS. see SS5 for actual measured SS"
+    ds['ss5'].attrs["long_name"] = "Actual Supersaturation targeted to 0.5%"
+    ds['ss5'].attrs["units"] = "%"
+    ds['ss5'].attrs["description"] = "measured SS that is closest to 0.5%. ccn5_m is measured at this SS"
+    ds['CCN8'].attrs["long_name"] = "0.8% Cloud Condensation Nuclei"
+    ds['CCN8'].attrs["units"] = "cm-3"
+    ds['CCN8'].attrs["description"] = "ARM-measured CCN targeted to 0.8% SS. see SS8 for actual measured SS"
+    ds['ss8'].attrs["long_name"] = "Actual Supersaturation targeted to 0.8%"
+    ds['ss8'].attrs["units"] = "%"
+    ds['ss8'].attrs["description"] = "measured SS that is closest to 0.8%. ccn5_m is measured at this SS"
+    ds['CCN10'].attrs["long_name"] = "1.0% Cloud Condensation Nuclei"
+    ds['CCN10'].attrs["units"] = "cm-3"
+    ds['CCN10'].attrs["description"] = "ARM-measured CCN targeted to 1.0% SS. see SS10 for actual measured SS"
+    ds['ss10'].attrs["long_name"] = "Actual Supersaturation targeted to 1.0%"
+    ds['ss10'].attrs["units"] = "%"
+    ds['ss10'].attrs["description"] = "measured SS that is closest to 1.0%. ccn5_m is measured at this SS"
     
-    ds.attrs["input data_example"] = lst2[0].split('/')[-1]
-    ds.attrs["description"] = 'median value of '+str(int(dt))+'sec resolution'
+    ds.attrs["title"] = 'Surface CCN number concentration'    ds.attrs["input data_example"] = lst2[0].split('/')[-1]
+    if dt >= 3600:
+        ds.attrs["description"] = 'median value of each time window'
+    if dt < 3600:
+        ds.attrs["description"] = 'interpolated value from ~hourly resolution data'
     ds.attrs["creation_date"] = ttt.ctime(ttt.time())
     
     ds.to_netcdf(outfile, mode='w')
