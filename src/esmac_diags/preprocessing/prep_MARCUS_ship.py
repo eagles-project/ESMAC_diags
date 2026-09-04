@@ -723,7 +723,7 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
                     'lon': (['time'], lon1.data),
                     'size_low': (['size'], dmin.data),
                     'size_high': (['size'], dmax.data),
-                    'size_distribution_uhsas': (['time', 'size'], uhsas1),
+                    'size_distribution_uhsas': (['time', 'size'], uhsas1.data),
                     },
                      coords={'time': ('time', time_new), 'size': ('size', size.data)})
     
