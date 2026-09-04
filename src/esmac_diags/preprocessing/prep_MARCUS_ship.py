@@ -167,8 +167,8 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
     outfile = prep_data_path + 'CCN_MARCUS.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
+                    'lat': (['time'], lat1.data),
+                    'lon': (['time'], lon1.data),
                      'CCN1_fit': ('time', np.float32(ccn1_fit_i)),
                      'CCN2_fit': ('time', np.float32(ccn2_fit_i)),
                      'CCN5_fit': ('time', np.float32(ccn5_fit_i)),
