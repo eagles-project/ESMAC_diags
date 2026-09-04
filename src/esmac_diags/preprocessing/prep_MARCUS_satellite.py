@@ -83,116 +83,117 @@ def prep_VISST_grid(shipmetpath, visstgridpath, predatapath, dx=0.5, dt=3600):
     vissttime = visstdata['time']
     lat = visstdata['latitude']
     lon = visstdata['longitude']
-            
-    solar_zenith_xyt = visstdata['solar_zenith_angle']
-    clearsky_vis_reflectance_xyt = visstdata['clearsky_vis_reflectance']
-    vis_reflectance_all_xyt = visstdata['visible_reflectance'][:,:,:,0]
-    vis_reflectance_clr_xyt = visstdata['visible_reflectance'][:,:,:,1]
-    lwp_xyt = visstdata['water_path'][:,:,:,1]
-    iwp_xyt = visstdata['water_path'][:,:,:,0]
-    sfc_net_sw_xyt = visstdata['surface_net_shortwave_flux']
-    sfc_net_lw_xyt = visstdata['surface_net_longwave_flux']
-    sfc_down_sw_xyt = visstdata['surface_down_shortwave_flux']
-    sfc_down_lw_xyt = visstdata['surface_down_longwave_flux']
-    reff_liq_xyt = visstdata['particle_size'][:,:,:,1]
-    cod_liq_linavg_xyt = visstdata['optical_depth_linear'][:,:,:,2]
-    cod_liq_logavg_xyt = visstdata['optical_depth_log'][:,:,:,2]
-    cod_linavg_xyt = visstdata['optical_depth_linear'][:,:,:,0]
-    cod_logavg_xyt = visstdata['optical_depth_log'][:,:,:,0]
-    ctt_liq_xyt = visstdata['cloud_temperature'][:,:,:,2]
-    ctp_liq_xyt = visstdata['cloud_pressure_top'][:,:,:,2]
-    cth_liq_xyt = visstdata['cloud_height_top'][:,:,:,2]
-    ctt_all_xyt = visstdata['cloud_temperature'][:,:,:,0]
-    ctp_all_xyt = visstdata['cloud_pressure_top'][:,:,:,0]
-    cth_all_xyt = visstdata['cloud_height_top'][:,:,:,0]
-    cf_all_xyt = visstdata['cloud_percentage'][:,:,:,0]
-    cf_liq_xyt = visstdata['cloud_percentage'][:,:,:,2]
-    cf_allz_xyt = visstdata['cloud_percentage_level'][:,:,:,0]
-    cf_low_xyt = visstdata['cloud_percentage_level'][:,:,:,1]
-    cf_mid_xyt = visstdata['cloud_percentage_level'][:,:,:,2]
-    cf_high_xyt = visstdata['cloud_percentage_level'][:,:,:,3]
-    bb_lw_all_xyt = visstdata['broadband_longwave_flux'][:,:,:,0]
-    bb_sw_albedo_all_xyt = visstdata['broadband_shortwave_albedo'][:,:,:,0]
-    bb_lw_clr_xyt = visstdata['broadband_longwave_flux'][:,:,:,1]
-    bb_sw_albedo_clr_xyt = visstdata['broadband_shortwave_albedo'][:,:,:,1]
-    visstdata.close()
-    
+
     # get location of ship for VISST time
     lon_ship = np.interp(vissttime, shiptime, lon0)
     lat_ship = np.interp(vissttime, shiptime, lat0)
     lon_ship_all = np.array(lon_ship)
     lat_ship_all = np.array(lat_ship)
-    
+
     # choose the data at the ship location
     lon.load()
     lat.load()
     x_idx = abs(lon-lon_ship[0]).argmin()
-    y_idx = abs(lat-lat_ship[0]).argmin()
-    solar_zenith = solar_zenith_xyt[0, y_idx, x_idx]
-    clearsky_vis_reflectance = clearsky_vis_reflectance_xyt[0, y_idx, x_idx]
-    vis_reflectance_all = vis_reflectance_all_xyt[0, y_idx, x_idx]
-    vis_reflectance_clr = vis_reflectance_clr_xyt[0, y_idx, x_idx]
-    lwp = lwp_xyt[0, y_idx, x_idx]
-    iwp = iwp_xyt[0, y_idx, x_idx]
-    sfc_net_sw = sfc_net_sw_xyt[0, y_idx, x_idx]
-    sfc_net_lw = sfc_net_lw_xyt[0, y_idx, x_idx]
-    sfc_down_sw = sfc_down_sw_xyt[0, y_idx, x_idx]
-    sfc_down_lw = sfc_down_lw_xyt[0, y_idx, x_idx]
-    reff_liq = reff_liq_xyt[0, y_idx, x_idx]
-    cod_liq_linavg = cod_liq_linavg_xyt[0, y_idx, x_idx]
-    cod_liq_logavg = cod_liq_logavg_xyt[0, y_idx, x_idx]
-    cod_linavg = cod_linavg_xyt[0, y_idx, x_idx]
-    cod_logavg = cod_logavg_xyt[0, y_idx, x_idx]
-    ctt_liq = ctt_liq_xyt[0, y_idx, x_idx]
-    ctp_liq = ctp_liq_xyt[0, y_idx, x_idx]
-    cth_liq = cth_liq_xyt[0, y_idx, x_idx]
-    ctt_all = ctt_all_xyt[0, y_idx, x_idx]
-    ctp_all = ctp_all_xyt[0, y_idx, x_idx]
-    cth_all = cth_all_xyt[0, y_idx, x_idx]
-    cf_all = cf_all_xyt[0, y_idx, x_idx]
-    cf_liq = cf_liq_xyt[0, y_idx, x_idx]
-    cf_allz = cf_allz_xyt[0, y_idx, x_idx]
-    cf_low = cf_low_xyt[0, y_idx, x_idx]
-    cf_mid = cf_mid_xyt[0, y_idx, x_idx]
-    cf_high = cf_high_xyt[0, y_idx, x_idx]
-    bb_lw_all = bb_lw_all_xyt[0, y_idx, x_idx]
-    bb_lw_clr = bb_lw_clr_xyt[0, y_idx, x_idx]
-    bb_sw_albedo_all = bb_sw_albedo_all_xyt[0, y_idx, x_idx]
-    bb_sw_albedo_clr = bb_sw_albedo_clr_xyt[0, y_idx, x_idx]
+    y_idx = abs(lat-lat_ship[0]).argmin()    
+
+    solar_zenith_xyt = visstdata['solar_zenith_angle']
+    clearsky_vis_reflectance_xyt = visstdata['clearsky_vis_reflectance']
+    vis_reflectance_all_xyt = visstdata['visible_reflectance'][0,y_idx,x_idx,0]
+    vis_reflectance_clr_xyt = visstdata['visible_reflectance'][0,y_idx,x_idx,1]
+    lwp_xyt = visstdata['water_path'][0,y_idx,x_idx,1]
+    iwp_xyt = visstdata['water_path'][0,y_idx,x_idx,0]
+    sfc_net_sw_xyt = visstdata['surface_net_shortwave_flux'][0, y_idx, x_idx]
+    sfc_net_lw_xyt = visstdata['surface_net_longwave_flux'][0, y_idx, x_idx]
+    sfc_down_sw_xyt = visstdata['surface_down_shortwave_flux'][0, y_idx, x_idx]
+    sfc_down_lw_xyt = visstdata['surface_down_longwave_flux'][0, y_idx, x_idx]
+    reff_liq_xyt = visstdata['particle_size'][0,y_idx,x_idx,1]
+    cod_liq_linavg_xyt = visstdata['optical_depth_linear'][0,y_idx,x_idx,2]
+    cod_liq_logavg_xyt = visstdata['optical_depth_log'][0,y_idx,x_idx,2]
+    cod_linavg_xyt = visstdata['optical_depth_linear'][0,y_idx,x_idx,0]
+    cod_logavg_xyt = visstdata['optical_depth_log'][0,y_idx,x_idx,0]
+    ctt_liq_xyt = visstdata['cloud_temperature'][0,y_idx,x_idx,2]
+    ctp_liq_xyt = visstdata['cloud_pressure_top'][0,y_idx,x_idx,2]
+    cth_liq_xyt = visstdata['cloud_height_top'][0,y_idx,x_idx,2]
+    ctt_all_xyt = visstdata['cloud_temperature'][0,y_idx,x_idx,0]
+    ctp_all_xyt = visstdata['cloud_pressure_top'][0,y_idx,x_idx,0]
+    cth_all_xyt = visstdata['cloud_height_top'][0,y_idx,x_idx,0]
+    cf_all_xyt = visstdata['cloud_percentage'][0,y_idx,x_idx,0]
+    cf_liq_xyt = visstdata['cloud_percentage'][0,y_idx,x_idx,2]
+    cf_allz_xyt = visstdata['cloud_percentage_level'][0,y_idx,x_idx,0]
+    cf_low_xyt = visstdata['cloud_percentage_level'][0,y_idx,x_idx,1]
+    cf_mid_xyt = visstdata['cloud_percentage_level'][0,y_idx,x_idx,2]
+    cf_high_xyt = visstdata['cloud_percentage_level'][0,y_idx,x_idx,3]
+    bb_lw_all_xyt = visstdata['broadband_longwave_flux'][0,y_idx,x_idx,0]
+    bb_sw_albedo_all_xyt = visstdata['broadband_shortwave_albedo'][0,y_idx,x_idx,0]
+    bb_lw_clr_xyt = visstdata['broadband_longwave_flux'][0,y_idx,x_idx,1]
+    bb_sw_albedo_clr_xyt = visstdata['broadband_shortwave_albedo'][0,y_idx,x_idx,1]
+    visstdata.close()
+    
+    # solar_zenith = solar_zenith_xyt[0, y_idx, x_idx]
+    # clearsky_vis_reflectance = clearsky_vis_reflectance_xyt[0, y_idx, x_idx]
+    # vis_reflectance_all = vis_reflectance_all_xyt[0, y_idx, x_idx]
+    # vis_reflectance_clr = vis_reflectance_clr_xyt[0, y_idx, x_idx]
+    # lwp = lwp_xyt[0, y_idx, x_idx]
+    # iwp = iwp_xyt[0, y_idx, x_idx]
+    # sfc_net_sw = sfc_net_sw_xyt[0, y_idx, x_idx]
+    # sfc_net_lw = sfc_net_lw_xyt[0, y_idx, x_idx]
+    # sfc_down_sw = sfc_down_sw_xyt[0, y_idx, x_idx]
+    # sfc_down_lw = sfc_down_lw_xyt[0, y_idx, x_idx]
+    # reff_liq = reff_liq_xyt[0, y_idx, x_idx]
+    # cod_liq_linavg = cod_liq_linavg_xyt[0, y_idx, x_idx]
+    # cod_liq_logavg = cod_liq_logavg_xyt[0, y_idx, x_idx]
+    # cod_linavg = cod_linavg_xyt[0, y_idx, x_idx]
+    # cod_logavg = cod_logavg_xyt[0, y_idx, x_idx]
+    # ctt_liq = ctt_liq_xyt[0, y_idx, x_idx]
+    # ctp_liq = ctp_liq_xyt[0, y_idx, x_idx]
+    # cth_liq = cth_liq_xyt[0, y_idx, x_idx]
+    # ctt_all = ctt_all_xyt[0, y_idx, x_idx]
+    # ctp_all = ctp_all_xyt[0, y_idx, x_idx]
+    # cth_all = cth_all_xyt[0, y_idx, x_idx]
+    # cf_all = cf_all_xyt[0, y_idx, x_idx]
+    # cf_liq = cf_liq_xyt[0, y_idx, x_idx]
+    # cf_allz = cf_allz_xyt[0, y_idx, x_idx]
+    # cf_low = cf_low_xyt[0, y_idx, x_idx]
+    # cf_mid = cf_mid_xyt[0, y_idx, x_idx]
+    # cf_high = cf_high_xyt[0, y_idx, x_idx]
+    # bb_lw_all = bb_lw_all_xyt[0, y_idx, x_idx]
+    # bb_lw_clr = bb_lw_clr_xyt[0, y_idx, x_idx]
+    # bb_sw_albedo_all = bb_sw_albedo_all_xyt[0, y_idx, x_idx]
+    # bb_sw_albedo_clr = bb_sw_albedo_clr_xyt[0, y_idx, x_idx]
     for tt in range(1,len(vissttime)):
         x_idx = abs(lon-lon_ship[tt]).argmin()
         y_idx = abs(lat-lat_ship[tt]).argmin()
         solar_zenith = xr.concat([solar_zenith, solar_zenith_xyt[tt, y_idx, x_idx]], dim="time")
-        clearsky_vis_reflectance = xr.concat([clearsky_vis_reflectance, clearsky_vis_reflectance_xyt[0, y_idx, x_idx]], dim="time")
-        vis_reflectance_all = xr.concat([vis_reflectance_all, vis_reflectance_all_xyt[0, y_idx, x_idx]], dim="time")
-        vis_reflectance_clr = xr.concat([vis_reflectance_clr, vis_reflectance_clr_xyt[0, y_idx, x_idx]], dim="time")
-        lwp = xr.concat([lwp, lwp_xyt[0, y_idx, x_idx]], dim="time")
-        iwp = xr.concat([iwp, iwp_xyt[0, y_idx, x_idx]], dim="time")
-        sfc_net_sw = xr.concat([sfc_net_sw, sfc_net_sw_xyt[0, y_idx, x_idx]], dim="time")
-        sfc_net_lw = xr.concat([sfc_net_lw, sfc_net_lw_xyt[0, y_idx, x_idx]], dim="time")
-        sfc_down_sw = xr.concat([sfc_down_sw, sfc_down_sw_xyt[0, y_idx, x_idx]], dim="time")
-        sfc_down_lw = xr.concat([sfc_down_lw, sfc_down_lw_xyt[0, y_idx, x_idx]], dim="time")
-        reff_liq = xr.concat([reff_liq, reff_liq_xyt[0, y_idx, x_idx]], dim="time")
-        cod_liq_linavg = xr.concat([cod_liq_linavg, cod_liq_linavg_xyt[0, y_idx, x_idx]], dim="time")
-        cod_liq_logavg = xr.concat([cod_liq_logavg, cod_liq_logavg_xyt[0, y_idx, x_idx]], dim="time")
-        cod_linavg = xr.concat([cod_linavg,cod_linavg_xyt[0, y_idx, x_idx]], dim="time")
-        cod_logavg = xr.concat([cod_logavg, cod_logavg_xyt[0, y_idx, x_idx]], dim="time")
-        ctt_liq = xr.concat([ctt_liq, ctt_liq_xyt[0, y_idx, x_idx]], dim="time")
-        ctp_liq = xr.concat([ctp_liq, ctp_liq_xyt[0, y_idx, x_idx]], dim="time")
-        cth_liq = xr.concat([cth_liq, cth_liq_xyt[0, y_idx, x_idx]], dim="time")
-        ctt_all = xr.concat([ctt_all, ctt_all_xyt[0, y_idx, x_idx]], dim="time")
-        ctp_all = xr.concat([ctp_all, ctp_all_xyt[0, y_idx, x_idx]], dim="time")
-        cth_all = xr.concat([cth_all, cth_all_xyt[0, y_idx, x_idx]], dim="time")
-        cf_all = xr.concat([cf_all, cf_all_xyt[0, y_idx, x_idx]], dim="time")
-        cf_liq = xr.concat([cf_liq, cf_liq_xyt[0, y_idx, x_idx]], dim="time")
-        cf_allz = xr.concat([cf_allz, cf_allz_xyt[0, y_idx, x_idx]], dim="time")
-        cf_low = xr.concat([cf_low, cf_low_xyt[0, y_idx, x_idx]], dim="time")
-        cf_mid = xr.concat([cf_mid, cf_mid_xyt[0, y_idx, x_idx]], dim="time")
-        cf_high = xr.concat([cf_high, cf_high_xyt[0, y_idx, x_idx]], dim="time")
-        bb_lw_all = xr.concat([bb_lw_all, bb_lw_all_xyt[0, y_idx, x_idx]], dim="time")
-        bb_lw_clr = xr.concat([bb_lw_clr, bb_lw_clr_xyt[0, y_idx, x_idx]], dim="time")
-        bb_sw_albedo_all = xr.concat([bb_sw_albedo_all, bb_sw_albedo_all_xyt[0, y_idx, x_idx]], dim="time")
-        bb_sw_albedo_clr = xr.concat([bb_sw_albedo_clr, bb_sw_albedo_clr_xyt[0, y_idx, x_idx]], dim="time")
+        clearsky_vis_reflectance = xr.concat([clearsky_vis_reflectance, clearsky_vis_reflectance_xyt[tt, y_idx, x_idx]], dim="time")
+        vis_reflectance_all = xr.concat([vis_reflectance_all, vis_reflectance_all_xyt[tt, y_idx, x_idx]], dim="time")
+        vis_reflectance_clr = xr.concat([vis_reflectance_clr, vis_reflectance_clr_xyt[tt, y_idx, x_idx]], dim="time")
+        lwp = xr.concat([lwp, lwp_xyt[tt, y_idx, x_idx]], dim="time")
+        iwp = xr.concat([iwp, iwp_xyt[tt, y_idx, x_idx]], dim="time")
+        sfc_net_sw = xr.concat([sfc_net_sw, sfc_net_sw_xyt[tt, y_idx, x_idx]], dim="time")
+        sfc_net_lw = xr.concat([sfc_net_lw, sfc_net_lw_xyt[tt, y_idx, x_idx]], dim="time")
+        sfc_down_sw = xr.concat([sfc_down_sw, sfc_down_sw_xyt[tt, y_idx, x_idx]], dim="time")
+        sfc_down_lw = xr.concat([sfc_down_lw, sfc_down_lw_xyt[tt, y_idx, x_idx]], dim="time")
+        reff_liq = xr.concat([reff_liq, reff_liq_xyt[tt, y_idx, x_idx]], dim="time")
+        cod_liq_linavg = xr.concat([cod_liq_linavg, cod_liq_linavg_xyt[tt, y_idx, x_idx]], dim="time")
+        cod_liq_logavg = xr.concat([cod_liq_logavg, cod_liq_logavg_xyt[tt, y_idx, x_idx]], dim="time")
+        cod_linavg = xr.concat([cod_linavg,cod_linavg_xyt[tt, y_idx, x_idx]], dim="time")
+        cod_logavg = xr.concat([cod_logavg, cod_logavg_xyt[tt, y_idx, x_idx]], dim="time")
+        ctt_liq = xr.concat([ctt_liq, ctt_liq_xyt[tt, y_idx, x_idx]], dim="time")
+        ctp_liq = xr.concat([ctp_liq, ctp_liq_xyt[tt, y_idx, x_idx]], dim="time")
+        cth_liq = xr.concat([cth_liq, cth_liq_xyt[tt, y_idx, x_idx]], dim="time")
+        ctt_all = xr.concat([ctt_all, ctt_all_xyt[tt, y_idx, x_idx]], dim="time")
+        ctp_all = xr.concat([ctp_all, ctp_all_xyt[tt, y_idx, x_idx]], dim="time")
+        cth_all = xr.concat([cth_all, cth_all_xyt[tt, y_idx, x_idx]], dim="time")
+        cf_all = xr.concat([cf_all, cf_all_xyt[tt, y_idx, x_idx]], dim="time")
+        cf_liq = xr.concat([cf_liq, cf_liq_xyt[tt, y_idx, x_idx]], dim="time")
+        cf_allz = xr.concat([cf_allz, cf_allz_xyt[tt, y_idx, x_idx]], dim="time")
+        cf_low = xr.concat([cf_low, cf_low_xyt[tt, y_idx, x_idx]], dim="time")
+        cf_mid = xr.concat([cf_mid, cf_mid_xyt[tt, y_idx, x_idx]], dim="time")
+        cf_high = xr.concat([cf_high, cf_high_xyt[tt, y_idx, x_idx]], dim="time")
+        bb_lw_all = xr.concat([bb_lw_all, bb_lw_all_xyt[tt, y_idx, x_idx]], dim="time")
+        bb_lw_clr = xr.concat([bb_lw_clr, bb_lw_clr_xyt[tt, y_idx, x_idx]], dim="time")
+        bb_sw_albedo_all = xr.concat([bb_sw_albedo_all, bb_sw_albedo_all_xyt[tt, y_idx, x_idx]], dim="time")
+        bb_sw_albedo_clr = xr.concat([bb_sw_albedo_clr, bb_sw_albedo_clr_xyt[tt, y_idx, x_idx]], dim="time")
     
     for filename in lst[1:]:
         print(filename)
@@ -200,84 +201,85 @@ def prep_VISST_grid(shipmetpath, visstgridpath, predatapath, dx=0.5, dt=3600):
         vissttime2 = visstdata['time']
         lat = visstdata['latitude']
         lon = visstdata['longitude']
-                
-        solar_zenith_xyt = visstdata['solar_zenith_angle']
-        clearsky_vis_reflectance_xyt = visstdata['clearsky_vis_reflectance']
-        vis_reflectance_all_xyt = visstdata['visible_reflectance'][:,:,:,0]
-        vis_reflectance_clr_xyt = visstdata['visible_reflectance'][:,:,:,1]
-        lwp_xyt = visstdata['water_path'][:,:,:,1]
-        iwp_xyt = visstdata['water_path'][:,:,:,0]
-        sfc_net_sw_xyt = visstdata['surface_net_shortwave_flux']
-        sfc_net_lw_xyt = visstdata['surface_net_longwave_flux']
-        sfc_down_sw_xyt = visstdata['surface_down_shortwave_flux']
-        sfc_down_lw_xyt = visstdata['surface_down_longwave_flux']
-        reff_liq_xyt = visstdata['particle_size'][:,:,:,1]
-        cod_liq_linavg_xyt = visstdata['optical_depth_linear'][:,:,:,2]
-        cod_liq_logavg_xyt = visstdata['optical_depth_log'][:,:,:,2]
-        cod_linavg_xyt = visstdata['optical_depth_linear'][:,:,:,0]
-        cod_logavg_xyt = visstdata['optical_depth_log'][:,:,:,0]
-        ctt_liq_xyt = visstdata['cloud_temperature'][:,:,:,2]
-        ctp_liq_xyt = visstdata['cloud_pressure_top'][:,:,:,2]
-        cth_liq_xyt = visstdata['cloud_height_top'][:,:,:,2]
-        ctt_all_xyt = visstdata['cloud_temperature'][:,:,:,0]
-        ctp_all_xyt = visstdata['cloud_pressure_top'][:,:,:,0]
-        cth_all_xyt = visstdata['cloud_height_top'][:,:,:,0]
-        cf_all_xyt = visstdata['cloud_percentage'][:,:,:,0]
-        cf_liq_xyt = visstdata['cloud_percentage'][:,:,:,2]
-        cf_allz_xyt = visstdata['cloud_percentage_level'][:,:,:,0]
-        cf_low_xyt = visstdata['cloud_percentage_level'][:,:,:,1]
-        cf_mid_xyt = visstdata['cloud_percentage_level'][:,:,:,2]
-        cf_high_xyt = visstdata['cloud_percentage_level'][:,:,:,3]
-        bb_lw_all_xyt = visstdata['broadband_longwave_flux'][:,:,:,0]
-        bb_sw_albedo_all_xyt = visstdata['broadband_shortwave_albedo'][:,:,:,0]
-        bb_lw_clr_xyt = visstdata['broadband_longwave_flux'][:,:,:,1]
-        bb_sw_albedo_clr_xyt = visstdata['broadband_shortwave_albedo'][:,:,:,1]
-        visstdata.close()
-        
+
         # get location of ship for VISST time
         lon_ship = np.interp(vissttime2, shiptime, lon0)
         lat_ship = np.interp(vissttime2, shiptime, lat0)
         lon_ship_all = np.hstack((lon_ship_all, lon_ship))
         lat_ship_all = np.hstack((lat_ship_all, lat_ship))
-        
-        # choose the data at the ship location
+
         lon.load()
         lat.load()
+    
+        # solar_zenith_xyt = visstdata['solar_zenith_angle']
+        # clearsky_vis_reflectance_xyt = visstdata['clearsky_vis_reflectance']
+        # vis_reflectance_all_xyt = visstdata['visible_reflectance'][:,:,:,0]
+        # vis_reflectance_clr_xyt = visstdata['visible_reflectance'][:,:,:,1]
+        # lwp_xyt = visstdata['water_path'][:,:,:,1]
+        # iwp_xyt = visstdata['water_path'][:,:,:,0]
+        # sfc_net_sw_xyt = visstdata['surface_net_shortwave_flux']
+        # sfc_net_lw_xyt = visstdata['surface_net_longwave_flux']
+        # sfc_down_sw_xyt = visstdata['surface_down_shortwave_flux']
+        # sfc_down_lw_xyt = visstdata['surface_down_longwave_flux']
+        # reff_liq_xyt = visstdata['particle_size'][:,:,:,1]
+        # cod_liq_linavg_xyt = visstdata['optical_depth_linear'][:,:,:,2]
+        # cod_liq_logavg_xyt = visstdata['optical_depth_log'][:,:,:,2]
+        # cod_linavg_xyt = visstdata['optical_depth_linear'][:,:,:,0]
+        # cod_logavg_xyt = visstdata['optical_depth_log'][:,:,:,0]
+        # ctt_liq_xyt = visstdata['cloud_temperature'][:,:,:,2]
+        # ctp_liq_xyt = visstdata['cloud_pressure_top'][:,:,:,2]
+        # cth_liq_xyt = visstdata['cloud_height_top'][:,:,:,2]
+        # ctt_all_xyt = visstdata['cloud_temperature'][:,:,:,0]
+        # ctp_all_xyt = visstdata['cloud_pressure_top'][:,:,:,0]
+        # cth_all_xyt = visstdata['cloud_height_top'][:,:,:,0]
+        # cf_all_xyt = visstdata['cloud_percentage'][:,:,:,0]
+        # cf_liq_xyt = visstdata['cloud_percentage'][:,:,:,2]
+        # cf_allz_xyt = visstdata['cloud_percentage_level'][:,:,:,0]
+        # cf_low_xyt = visstdata['cloud_percentage_level'][:,:,:,1]
+        # cf_mid_xyt = visstdata['cloud_percentage_level'][:,:,:,2]
+        # cf_high_xyt = visstdata['cloud_percentage_level'][:,:,:,3]
+        # bb_lw_all_xyt = visstdata['broadband_longwave_flux'][:,:,:,0]
+        # bb_sw_albedo_all_xyt = visstdata['broadband_shortwave_albedo'][:,:,:,0]
+        # bb_lw_clr_xyt = visstdata['broadband_longwave_flux'][:,:,:,1]
+        # bb_sw_albedo_clr_xyt = visstdata['broadband_shortwave_albedo'][:,:,:,1]
+        # visstdata.close()
+        
+        # choose the data at the ship location
         for tt in range(len(vissttime2)):
             x_idx = abs(lon-lon_ship[tt]).argmin()
             y_idx = abs(lat-lat_ship[tt]).argmin()
             vissttime = xr.concat([vissttime, vissttime2[tt]], dim="time")
-            solar_zenith = xr.concat([solar_zenith, solar_zenith_xyt[tt, y_idx, x_idx]], dim="time")
-            clearsky_vis_reflectance = xr.concat([clearsky_vis_reflectance, clearsky_vis_reflectance_xyt[0, y_idx, x_idx]], dim="time")
-            vis_reflectance_all = xr.concat([vis_reflectance_all, vis_reflectance_all_xyt[0, y_idx, x_idx]], dim="time")
-            vis_reflectance_clr = xr.concat([vis_reflectance_clr, vis_reflectance_clr_xyt[0, y_idx, x_idx]], dim="time")
-            lwp = xr.concat([lwp, lwp_xyt[0, y_idx, x_idx]], dim="time")
-            iwp = xr.concat([iwp, iwp_xyt[0, y_idx, x_idx]], dim="time")
-            sfc_net_sw = xr.concat([sfc_net_sw, sfc_net_sw_xyt[0, y_idx, x_idx]], dim="time")
-            sfc_net_lw = xr.concat([sfc_net_lw, sfc_net_lw_xyt[0, y_idx, x_idx]], dim="time")
-            sfc_down_sw = xr.concat([sfc_down_sw, sfc_down_sw_xyt[0, y_idx, x_idx]], dim="time")
-            sfc_down_lw = xr.concat([sfc_down_lw, sfc_down_lw_xyt[0, y_idx, x_idx]], dim="time")
-            reff_liq = xr.concat([reff_liq, reff_liq_xyt[0, y_idx, x_idx]], dim="time")
-            cod_liq_linavg = xr.concat([cod_liq_linavg, cod_liq_linavg_xyt[0, y_idx, x_idx]], dim="time")
-            cod_liq_logavg = xr.concat([cod_liq_logavg, cod_liq_logavg_xyt[0, y_idx, x_idx]], dim="time")
-            cod_linavg = xr.concat([cod_linavg,cod_linavg_xyt[0, y_idx, x_idx]], dim="time")
-            cod_logavg = xr.concat([cod_logavg, cod_logavg_xyt[0, y_idx, x_idx]], dim="time")
-            ctt_liq = xr.concat([ctt_liq, ctt_liq_xyt[0, y_idx, x_idx]], dim="time")
-            ctp_liq = xr.concat([ctp_liq, ctp_liq_xyt[0, y_idx, x_idx]], dim="time")
-            cth_liq = xr.concat([cth_liq, cth_liq_xyt[0, y_idx, x_idx]], dim="time")
-            ctt_all = xr.concat([ctt_all, ctt_all_xyt[0, y_idx, x_idx]], dim="time")
-            ctp_all = xr.concat([ctp_all, ctp_all_xyt[0, y_idx, x_idx]], dim="time")
-            cth_all = xr.concat([cth_all, cth_all_xyt[0, y_idx, x_idx]], dim="time")
-            cf_all = xr.concat([cf_all, cf_all_xyt[0, y_idx, x_idx]], dim="time")
-            cf_liq = xr.concat([cf_liq, cf_liq_xyt[0, y_idx, x_idx]], dim="time")
-            cf_allz = xr.concat([cf_allz, cf_allz_xyt[0, y_idx, x_idx]], dim="time")
-            cf_low = xr.concat([cf_low, cf_low_xyt[0, y_idx, x_idx]], dim="time")
-            cf_mid = xr.concat([cf_mid, cf_mid_xyt[0, y_idx, x_idx]], dim="time")
-            cf_high = xr.concat([cf_high, cf_high_xyt[0, y_idx, x_idx]], dim="time")
-            bb_lw_all = xr.concat([bb_lw_all, bb_lw_all_xyt[0, y_idx, x_idx]], dim="time")
-            bb_lw_clr = xr.concat([bb_lw_clr, bb_lw_clr_xyt[0, y_idx, x_idx]], dim="time")
-            bb_sw_albedo_all = xr.concat([bb_sw_albedo_all, bb_sw_albedo_all_xyt[0, y_idx, x_idx]], dim="time")
-            bb_sw_albedo_clr = xr.concat([bb_sw_albedo_clr, bb_sw_albedo_clr_xyt[0, y_idx, x_idx]], dim="time")
+            solar_zenith = xr.concat([solar_zenith, visstdata['solar_zenith_angle'][tt, y_idx, x_idx]], dim="time")
+            clearsky_vis_reflectance = xr.concat([clearsky_vis_reflectance, visstdata['clearsky_vis_reflectance'][tt, y_idx, x_idx]], dim="time")
+            vis_reflectance_all = xr.concat([vis_reflectance_all, visstdata['visible_reflectance'][tt, y_idx, x_idx, 0]], dim="time")
+            vis_reflectance_clr = xr.concat([vis_reflectance_clr, visstdata['visible_reflectance'][tt, y_idx, x_idx, 1]], dim="time")
+            lwp = xr.concat([lwp, visstdata['water_path'][tt, y_idx, x_idx, 1]], dim="time")
+            iwp = xr.concat([iwp, visstdata['water_path'][tt, y_idx, x_idx, 0]], dim="time")
+            sfc_net_sw = xr.concat([sfc_net_sw, visstdata['surface_net_shortwave_flux'][tt, y_idx, x_idx]], dim="time")
+            sfc_net_lw = xr.concat([sfc_net_lw, visstdata['surface_net_longwave_flux'][tt, y_idx, x_idx]], dim="time")
+            sfc_down_sw = xr.concat([sfc_down_sw, visstdata['surface_down_shortwave_flux'][tt, y_idx, x_idx]], dim="time")
+            sfc_down_lw = xr.concat([sfc_down_lw, visstdata['surface_down_longwave_flux'][tt, y_idx, x_idx]], dim="time")
+            reff_liq = xr.concat([reff_liq, visstdata['particle_size'][tt, y_idx, x_idx, 1]], dim="time")
+            cod_liq_linavg = xr.concat([cod_liq_linavg, visstdata['optical_depth_linear'][tt, y_idx, x_idx, 2]], dim="time")
+            cod_liq_logavg = xr.concat([cod_liq_logavg, visstdata['optical_depth_log'][tt, y_idx, x_idx, 2]], dim="time")
+            cod_linavg = xr.concat([cod_linavg,visstdata['optical_depth_linear'][tt, y_idx, x_idx, 0]], dim="time")
+            cod_logavg = xr.concat([cod_logavg, visstdata['optical_depth_log'][tt, y_idx, x_idx, 0]], dim="time")
+            ctt_liq = xr.concat([ctt_liq, visstdata['cloud_temperature'][tt, y_idx, x_idx, 2]], dim="time")
+            ctp_liq = xr.concat([ctp_liq, visstdata['cloud_pressure_top'][tt, y_idx, x_idx, 2]], dim="time")
+            cth_liq = xr.concat([cth_liq, visstdata['cloud_height_top'][tt, y_idx, x_idx, 2]], dim="time")
+            ctt_all = xr.concat([ctt_all, visstdata['cloud_temperature'][tt, y_idx, x_idx, 0]], dim="time")
+            ctp_all = xr.concat([ctp_all, visstdata['cloud_pressure_top'][tt, y_idx, x_idx, 0]], dim="time")
+            cth_all = xr.concat([cth_all, visstdata['cloud_height_top'][tt, y_idx, x_idx, 0]], dim="time")
+            cf_all = xr.concat([cf_all, visstdata['cloud_percentage'][tt, y_idx, x_idx, 0]], dim="time")
+            cf_liq = xr.concat([cf_liq, visstdata['cloud_percentage'][tt, y_idx, x_idx, 2]], dim="time")
+            cf_allz = xr.concat([cf_allz, visstdata['cloud_percentage_level'][tt, y_idx, x_idx, 0]], dim="time")
+            cf_low = xr.concat([cf_low, visstdata['cloud_percentage_level'][tt, y_idx, x_idx, 1]], dim="time")
+            cf_mid = xr.concat([cf_mid, visstdata['cloud_percentage_level'][tt, y_idx, x_idx, 2]], dim="time")
+            cf_high = xr.concat([cf_high, visstdata['cloud_percentage_level'][tt, y_idx, x_idx, 3]], dim="time")
+            bb_lw_all = xr.concat([bb_lw_all, visstdata['broadband_longwave_flux'][tt, y_idx, x_idx, 0]], dim="time")
+            bb_lw_clr = xr.concat([bb_lw_clr, visstdata['broadband_longwave_flux'][tt, y_idx, x_idx, 0]], dim="time")
+            bb_sw_albedo_all = xr.concat([bb_sw_albedo_all, visstdata['broadband_shortwave_albedo'][tt, y_idx, x_idx, 1]], dim="time")
+            bb_sw_albedo_clr = xr.concat([bb_sw_albedo_clr, visstdata['broadband_shortwave_albedo'][tt, y_idx, x_idx, 1]], dim="time")
     
     # print('load all data')
     # solar_zenith.load()
