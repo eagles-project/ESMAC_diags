@@ -444,8 +444,8 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     ds = xr.Dataset({
                     'lat': (['time'], lat1.data),
                     'lon': (['time'], lon1.data),
-                    'CPC10': (['time'], cpc1),
-                    'UHSAS100': (['time'], uhsas1),
+                    'CPC10': (['time'], cpc1.data),
+                    'UHSAS100': (['time'], uhsas1.data),
                     },
                      coords={'time': ('time', time_new)})
     
