@@ -9,7 +9,7 @@ import os
 import sys
 import yaml
 import esmac_diags.preprocessing.prep_MARCUS_ship as ship
-# import esmac_diags.preprocessing.prep_MARCUS_satellite as sat
+import esmac_diags.preprocessing.prep_MARCUS_satellite as sat
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% set input data path
 # Load configuration file
@@ -46,7 +46,7 @@ print('prepare ship data:')
 # ship.prep_CCN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)              # CCN number concentration
 # ship.prep_CN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)    # aerosol number concentration
 # ship.prep_CNsize_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)   # aerosol size distribution from UHSAS
-ship.prep_MWR(shipmetpath, mwrpath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt) # cloud liquid water path
+# ship.prep_MWR(shipmetpath, mwrpath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt) # cloud liquid water path
 
-# print('prepare satellite data:')
-# sat.prep_VISST_grid(shipmetpath, visstgridpath, prep_data_path+'satellite/'+str(satellite_dt)+'s/', dx=0.5, dt=satellite_dt)
+print('prepare satellite data:')
+sat.prep_VISST_grid(shipmetpath, visstgridpath, prep_data_path+'satellite/'+str(satellite_dt)+'s/', dx=0.5, dt=satellite_dt)
