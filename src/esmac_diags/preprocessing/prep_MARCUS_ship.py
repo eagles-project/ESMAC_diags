@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 import time as ttt
 import esmac_diags
-from esmac_diags.subroutines.time_resolution_change import avg_time_1d, median_time_1d, median_time_2d
+from esmac_diags.subroutines.time_resolution_change import avg_time_1d, median_time_1d, median_time_2d, interp_time_1d
 from esmac_diags.subroutines.quality_control import  qc_remove_neg, qc_mask_qcflag
 from esmac_diags.subroutines.specific_data_treatment import calc_cldfrac_from_highres
 
