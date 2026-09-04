@@ -48,5 +48,5 @@ ship.prep_CN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path+'ship/'+st
 ship.prep_CNsize_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)   # aerosol size distribution from UHSAS
 ship.prep_MWR(shipmetpath, mwrpath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt) # cloud liquid water path
 
-print('prepare satellite data:')
-sat.prep_VISST_grid(shipmetpath, visstgridpath, prep_data_path+'satellite/'+str(satellite_dt)+'s/', dx=0.5, dt=satellite_dt)
+# print('prepare satellite data:')
+# sat.prep_VISST_grid(shipmetpath, visstgridpath, prep_data_path+'satellite/'+str(satellite_dt)+'s/', dx=0.5, dt=satellite_dt)
