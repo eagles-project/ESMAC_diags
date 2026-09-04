@@ -401,8 +401,8 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     lon = qc_mask_qcflag(lon, qc_lon)
     
     #%% read in data
-    lst1 = glob.glob(cpcpath+'maraoscpcf1mM1.b1.*')
-    obsdata = xr.open_mfdataset(lst1, combine='by_coords')
+    lst1 = sorted(glob.glob(cpcpath+'maraoscpcf1mM1.b1.*'))
+    obsdata = xr.open_mfdataset(lst1, combine="nested", concat_dim="time")
     time1 = obsdata['time'].load()
     cpc = obsdata['concentration'].load()
     qc_cpc = obsdata['qc_concentration'].load()
@@ -410,7 +410,7 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     cpc = qc_remove_neg(cpc.data)
     cpc = qc_mask_qcflag(cpc, qc_cpc)
     
-    lst2 = glob.glob(uhsaspath+'maraosuhsasM1.a1.*')
+    lst2 = sorted(glob.glob(uhsaspath+'maraosuhsasM1.a1.*'))
     obsdata = xr.open_mfdataset(lst2, combine='by_coords')
     time2 = obsdata['time'].load()
     uhsas = obsdata['concentration'].load()
