@@ -24,6 +24,8 @@ from esmac_diags.subroutines.specific_data_treatment import calc_cldfrac_from_hi
 
 # dt=3600
 
+#No code yet for cloud fraction but there is TSI and lidar data that could be used
+#Better than MWR LWP being used for cloud fraction (current code commented out)
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
@@ -925,15 +927,15 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     lwp1 = avg_time_1d(time2, lwp, time_new, arraytype='xarray')
     lwp1 = qc_remove_neg(lwp1)
     
-    #%% calculate cloud fraction from LWP
-    # from MWR handbook: a value of LWP that is +/- 0.03 mm of zero could be clear sky
-    lwp_thres = 30
-    cf_out = calc_cldfrac_from_highres(lwp, time2, time_new, thres=lwp_thres)
+    # #%% calculate cloud fraction from LWP
+    # # from MWR handbook: a value of LWP that is +/- 0.03 mm of zero could be clear sky
+    # lwp_thres = 30
+    # cf_out = calc_cldfrac_from_highres(lwp, time2, time_new, thres=lwp_thres)
     
-    cf_5 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=5)
-    cf_10 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=10)
-    cf_20 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=20)
-    cf_30 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=30)
+    # cf_5 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=5)
+    # cf_10 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=10)
+    # cf_20 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=20)
+    # cf_30 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=30)
     
     #%% output file
     outfile = prep_data_path + 'LWP_MARCUS.nc'
@@ -961,57 +963,57 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     
     ds.to_netcdf(outfile, mode='w')
     
-    outfile = prep_data_path + 'totcld_MARCUS.nc'
-    print('output file '+outfile)
-    ds = xr.Dataset({
-                    'lat': (['time'], lat1.data),
-                    'lon': (['time'], lon1.data),
-                    'cldfrac': (['time'], cf_out),
-                    },
-                     coords={'time': ('time', time_new)})
-    #assign attributes
-    ds['time'].attrs["long_name"] = "Time"
-    ds['time'].attrs["standard_name"] = "time"
-    ds['lat'].attrs["long_name"] = "latitude"
-    ds['lat'].attrs["units"] = "degree_north"
-    ds['lon'].attrs["long_name"] = "longitude"
-    ds['lon'].attrs["units"] = "degree_east"
-    ds['cldfrac'].attrs["long_name"] = 'total cloud fraction'
-    ds['cldfrac'].attrs["units"] = '%'
-    ds.attrs["input data_example"] = lst2[0].split('/')[-1]
-    ds.attrs["description"] = 'calculated from LWP with threshold of '+str(lwp_thres)+' g/m2'
-    ds.attrs["creation_date"] = ttt.ctime(ttt.time())
-    ds.to_netcdf(outfile, mode='w')
+    # outfile = prep_data_path + 'totcld_MARCUS.nc'
+    # print('output file '+outfile)
+    # ds = xr.Dataset({
+    #                 'lat': (['time'], lat1.data),
+    #                 'lon': (['time'], lon1.data),
+    #                 'cldfrac': (['time'], cf_out),
+    #                 },
+    #                  coords={'time': ('time', time_new)})
+    # #assign attributes
+    # ds['time'].attrs["long_name"] = "Time"
+    # ds['time'].attrs["standard_name"] = "time"
+    # ds['lat'].attrs["long_name"] = "latitude"
+    # ds['lat'].attrs["units"] = "degree_north"
+    # ds['lon'].attrs["long_name"] = "longitude"
+    # ds['lon'].attrs["units"] = "degree_east"
+    # ds['cldfrac'].attrs["long_name"] = 'total cloud fraction'
+    # ds['cldfrac'].attrs["units"] = '%'
+    # ds.attrs["input data_example"] = lst2[0].split('/')[-1]
+    # ds.attrs["description"] = 'calculated from LWP with threshold of '+str(lwp_thres)+' g/m2'
+    # ds.attrs["creation_date"] = ttt.ctime(ttt.time())
+    # ds.to_netcdf(outfile, mode='w')
 
-    outfile = prep_data_path + 'totcld_sensitivity_MARCUS.nc'
-    print('output file '+outfile)
-    ds = xr.Dataset({
-                    'lat': (['time'], lat1.data),
-                    'lon': (['time'], lon1.data),
-                    'cldfrac_5': (['time'], cf_5),
-                    'cldfrac_10': (['time'], cf_10),
-                    'cldfrac_20': (['time'], cf_20),
-                    'cldfrac_30': (['time'], cf_30),
-                    },
-                     coords={'time': ('time', time_new)})
-    #assign attributes
-    ds['time'].attrs["long_name"] = "Time"
-    ds['time'].attrs["standard_name"] = "time"
-    ds['lat'].attrs["long_name"] = "latitude"
-    ds['lat'].attrs["units"] = "degree_north"
-    ds['lon'].attrs["long_name"] = "longitude"
-    ds['lon'].attrs["units"] = "degree_east"
-    ds['cldfrac_5'].attrs["long_name"] = 'total cloud fraction'
-    ds['cldfrac_5'].attrs["units"] = '%'
-    ds['cldfrac_10'].attrs["long_name"] = 'total cloud fraction'
-    ds['cldfrac_10'].attrs["units"] = '%'
-    ds['cldfrac_20'].attrs["long_name"] = 'total cloud fraction'
-    ds['cldfrac_20'].attrs["units"] = '%'
-    ds['cldfrac_30'].attrs["long_name"] = 'total cloud fraction'
-    ds['cldfrac_30'].attrs["units"] = '%'
-    ds.attrs["input data_example"] = lst2[0].split('/')[-1]
-    ds.attrs["description"] = 'calculated from LWP with different LWP threshold (5/10/20/30 g/m2)'
-    ds.attrs["creation_date"] = ttt.ctime(ttt.time())
-    ds.to_netcdf(outfile, mode='w')
+    # outfile = prep_data_path + 'totcld_sensitivity_MARCUS.nc'
+    # print('output file '+outfile)
+    # ds = xr.Dataset({
+    #                 'lat': (['time'], lat1.data),
+    #                 'lon': (['time'], lon1.data),
+    #                 'cldfrac_5': (['time'], cf_5),
+    #                 'cldfrac_10': (['time'], cf_10),
+    #                 'cldfrac_20': (['time'], cf_20),
+    #                 'cldfrac_30': (['time'], cf_30),
+    #                 },
+    #                  coords={'time': ('time', time_new)})
+    # #assign attributes
+    # ds['time'].attrs["long_name"] = "Time"
+    # ds['time'].attrs["standard_name"] = "time"
+    # ds['lat'].attrs["long_name"] = "latitude"
+    # ds['lat'].attrs["units"] = "degree_north"
+    # ds['lon'].attrs["long_name"] = "longitude"
+    # ds['lon'].attrs["units"] = "degree_east"
+    # ds['cldfrac_5'].attrs["long_name"] = 'total cloud fraction'
+    # ds['cldfrac_5'].attrs["units"] = '%'
+    # ds['cldfrac_10'].attrs["long_name"] = 'total cloud fraction'
+    # ds['cldfrac_10'].attrs["units"] = '%'
+    # ds['cldfrac_20'].attrs["long_name"] = 'total cloud fraction'
+    # ds['cldfrac_20'].attrs["units"] = '%'
+    # ds['cldfrac_30'].attrs["long_name"] = 'total cloud fraction'
+    # ds['cldfrac_30'].attrs["units"] = '%'
+    # ds.attrs["input data_example"] = lst2[0].split('/')[-1]
+    # ds.attrs["description"] = 'calculated from LWP with different LWP threshold (5/10/20/30 g/m2)'
+    # ds.attrs["creation_date"] = ttt.ctime(ttt.time())
+    # ds.to_netcdf(outfile, mode='w')
 
         
