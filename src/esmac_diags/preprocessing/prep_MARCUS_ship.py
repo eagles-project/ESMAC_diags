@@ -436,8 +436,8 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     outfile = prep_data_path + 'CN_MARCUS.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
+                    'lat': (['time'], lat1.data),
+                    'lon': (['time'], lon1.data),
                     'CPC10': (['time'], cpc1),
                     'UHSAS100': (['time'], uhsas1),
                     },
@@ -527,8 +527,8 @@ def prep_CN_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=3600):
     outfile = prep_data_path + 'CN_MARCUS_exhaustfree.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
+                    'lat': (['time'], lat1.data),
+                    'lon': (['time'], lon1.data),
                     'CPC10': (['time'], cpc1),
                     'UHSAS100': (['time'], uhsas1),
                     },
@@ -617,8 +617,8 @@ def prep_CNsize_exhaustfree(shipmetpath, exhaustfreepath, prep_data_path, dt=360
     outfile = prep_data_path + 'CNsize_UHSAS_MARCUS_exhaustfree.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
+                    'lat': (['time'], lat1.data),
+                    'lon': (['time'], lon1.data),
                     'size_low': (['size'], dmin.data),
                     'size_high': (['size'], dmax.data),
                     'size_distribution_uhsas': (['time', 'size'], uhsas1),
@@ -713,8 +713,8 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
     outfile = prep_data_path + 'CNsize_UHSAS_MARCUS.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
+                    'lat': (['time'], lat1.data),
+                    'lon': (['time'], lon1.data),
                     'size_low': (['size'], dmin.data),
                     'size_high': (['size'], dmax.data),
                     'size_distribution_uhsas': (['time', 'size'], uhsas1),
@@ -807,8 +807,8 @@ def prep_MET(shipmetpath, prep_data_path, dt=3600):
     outfile = prep_data_path + 'T_RH_Ps_MARCUS.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
+                    'lat': (['time'], lat1.data),
+                    'lon': (['time'], lon1.data),
                     'T': (['time'], T1),
                     'RH': (['time'], RH1),
                     'Ps': (['time'], ps1),
@@ -933,8 +933,8 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     outfile = prep_data_path + 'LWP_MARCUS.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
+                    'lat': (['time'], lat1.data),
+                    'lon': (['time'], lon1.data),
                     'lwp': (['time'], lwp1),
                     },
                      coords={'time': ('time', time_new)})
@@ -958,8 +958,8 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     outfile = prep_data_path + 'totcld_MARCUS.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
+                    'lat': (['time'], lat1.data),
+                    'lon': (['time'], lon1.data),
                     'cldfrac': (['time'], cf_out),
                     },
                      coords={'time': ('time', time_new)})
@@ -980,8 +980,8 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     outfile = prep_data_path + 'totcld_sensitivity_MARCUS.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
+                    'lat': (['time'], lat1.data),
+                    'lon': (['time'], lon1.data),
                     'cldfrac_5': (['time'], cf_5),
                     'cldfrac_10': (['time'], cf_10),
                     'cldfrac_20': (['time'], cf_20),
