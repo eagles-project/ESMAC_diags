@@ -240,7 +240,8 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
     ds['ss10'].attrs["units"] = "%"
     ds['ss10'].attrs["description"] = "measured SS that is closest to 1.0%. ccn5_m is measured at this SS"
     
-    ds.attrs["title"] = 'Surface CCN number concentration'    ds.attrs["input data_example"] = lst2[0].split('/')[-1]
+    ds.attrs["title"] = 'Surface CCN number concentration'
+    ds.attrs["input data_example"] = lst2[0].split('/')[-1]
     if dt >= 3600:
         ds.attrs["description"] = 'median value of each time window'
     if dt < 3600:
