@@ -427,8 +427,8 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     uhsas100 = np.nansum(uhsas[:, dmin>100], axis=1)
     uhsas100 = qc_remove_neg(uhsas100, remove_zero='True')
     
-    #%% re-shape the data into coarser resolution
-    time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
+    #%% re-shape the data into coarser resolution (ship position starts at 3Z on 10-21)
+    time_new = pd.date_range(start='2017-10-21 03:00:00', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
 
     tmpcpc = xr.DataArray(data=np.array(cpc), dims=["time"], coords=dict(time=time1))
     tmpuhsas100 = xr.DataArray(data=np.array(uhsas100), dims=["time"], coords=dict(time=time2))
