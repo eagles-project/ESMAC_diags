@@ -709,7 +709,7 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2017-10-21', end='2018-03-23 23:59:00', freq=str(int(dt))+"s")  # MARCUS time period
     
-    tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time", "size"], coords=dict(time=time2, size=size))
+    tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time", "bin_num"], coords=dict(time=time2, bin_num=size))
     
     lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
     lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
