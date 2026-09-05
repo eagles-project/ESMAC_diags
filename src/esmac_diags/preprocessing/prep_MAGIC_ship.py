@@ -12,7 +12,7 @@ import time as ttt
 from netCDF4 import Dataset
 import esmac_diags
 # from esmac_diags.subroutines.read_ship import read_marmet
-from esmac_diags.subroutines.time_resolution_change import avg_time_1d, median_time_1d, median_time_2d
+from esmac_diags.subroutines.time_resolution_change import avg_time_1d, median_time_1d, median_time_2d, interp_time_1d
 from esmac_diags.subroutines.quality_control import  qc_remove_neg, qc_mask_qcflag, qc_cn_max, qc_ccn_max
 from esmac_diags.subroutines.specific_data_treatment import calc_cldfrac_from_highres
 
@@ -92,14 +92,23 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
     
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
-    
-    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
-    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
-    ccn1 = median_time_1d(time2, ccn_1s, time_new, arraytype='numpy')
-    ccn2 = median_time_1d(time2, ccn_2s, time_new, arraytype='numpy')
-    ccn3 = median_time_1d(time2, ccn_3s, time_new, arraytype='numpy')
-    ccn5 = median_time_1d(time2, ccn_5s, time_new, arraytype='numpy')
-    ccn6 = median_time_1d(time2, ccn_6s, time_new, arraytype='numpy')
+
+    if dt >= 3600:
+        lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
+        lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+        ccn1 = median_time_1d(time2, ccn_1s, time_new, arraytype='numpy')
+        ccn2 = median_time_1d(time2, ccn_2s, time_new, arraytype='numpy')
+        ccn3 = median_time_1d(time2, ccn_3s, time_new, arraytype='numpy')
+        ccn5 = median_time_1d(time2, ccn_5s, time_new, arraytype='numpy')
+        ccn6 = median_time_1d(time2, ccn_6s, time_new, arraytype='numpy')
+    else:
+        lon1 = interp_time_1d(time, lon, time_new, arraytype='numpy')
+        lat1 = interp_time_1d(time, lat, time_new, arraytype='numpy')
+        ccn1 = interp_time_1d(time2, ccn_1s, time_new, arraytype='numpy')
+        ccn2 = interp_time_1d(time2, ccn_2s, time_new, arraytype='numpy')
+        ccn3 = interp_time_1d(time2, ccn_3s, time_new, arraytype='numpy')
+        ccn5 = interp_time_1d(time2, ccn_5s, time_new, arraytype='numpy')
+        ccn6 = interp_time_1d(time2, ccn_6s, time_new, arraytype='numpy')
     
     #%% output file
     outfile = prep_data_path + 'CCN_MAGIC.nc'
