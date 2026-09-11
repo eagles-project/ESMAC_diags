@@ -120,13 +120,13 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
     outfile = prep_data_path + 'CCN_MAGIC.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
-                    'CCN1': (['time'], ccn1),
-                    'CCN2': (['time'], ccn2),
-                    'CCN3': (['time'], ccn3),
-                    'CCN5': (['time'], ccn5),
-                    'CCN6': (['time'], ccn6),
+                    'lat': (['time'], lat1.data),
+                    'lon': (['time'], lon1.data),
+                    'CCN1': (['time'], ccn1.data),
+                    'CCN2': (['time'], ccn2.data),
+                    'CCN3': (['time'], ccn3.data),
+                    'CCN5': (['time'], ccn5.data),
+                    'CCN6': (['time'], ccn6.data),
                     },
                      coords={'time': ('time', time_new)})
     
