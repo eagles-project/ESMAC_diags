@@ -93,22 +93,28 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
 
+    tmpccn_1s = xr.DataArray(data=np.array(ccn_1s), dims=["time"], coords=dict(time=time2))
+    tmpccn_2s = xr.DataArray(data=np.array(ccn_2s), dims=["time"], coords=dict(time=time2))
+    tmpccn_3s = xr.DataArray(data=np.array(ccn_3s), dims=["time"], coords=dict(time=time2))
+    tmpccn_5s = xr.DataArray(data=np.array(ccn_5s), dims=["time"], coords=dict(time=time2))
+    tmpccn_6s = xr.DataArray(data=np.array(ccn_6s), dims=["time"], coords=dict(time=time2))
+
     if dt >= 3600:
-        lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
-        lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
-        ccn1 = median_time_1d(time2, ccn_1s, time_new, arraytype='numpy')
-        ccn2 = median_time_1d(time2, ccn_2s, time_new, arraytype='numpy')
-        ccn3 = median_time_1d(time2, ccn_3s, time_new, arraytype='numpy')
-        ccn5 = median_time_1d(time2, ccn_5s, time_new, arraytype='numpy')
-        ccn6 = median_time_1d(time2, ccn_6s, time_new, arraytype='numpy')
+        lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
+        lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
+        ccn1 = median_time_1d(time2, tmpccn_1s, time_new, arraytype='xarray')
+        ccn2 = median_time_1d(time2, tmpccn_2s, time_new, arraytype='xarray')
+        ccn3 = median_time_1d(time2, tmpccn_3s, time_new, arraytype='xarray')
+        ccn5 = median_time_1d(time2, tmpccn_5s, time_new, arraytype='xarray')
+        ccn6 = median_time_1d(time2, tmpccn_6s, time_new, arraytype='xarray')
     else:
-        lon1 = interp_time_1d(time, lon, time_new, arraytype='numpy')
-        lat1 = interp_time_1d(time, lat, time_new, arraytype='numpy')
-        ccn1 = interp_time_1d(time2, ccn_1s, time_new, arraytype='numpy')
-        ccn2 = interp_time_1d(time2, ccn_2s, time_new, arraytype='numpy')
-        ccn3 = interp_time_1d(time2, ccn_3s, time_new, arraytype='numpy')
-        ccn5 = interp_time_1d(time2, ccn_5s, time_new, arraytype='numpy')
-        ccn6 = interp_time_1d(time2, ccn_6s, time_new, arraytype='numpy')
+        lon1 = interp_time_1d(time, lon, time_new, arraytype='xarray')
+        lat1 = interp_time_1d(time, lat, time_new, arraytype='xarray')
+        ccn1 = interp_time_1d(time2, tmpccn_1s, time_new, arraytype='xarray')
+        ccn2 = interp_time_1d(time2, tmpccn_2s, time_new, arraytype='xarray')
+        ccn3 = interp_time_1d(time2, tmpccn_3s, time_new, arraytype='xarray')
+        ccn5 = interp_time_1d(time2, tmpccn_5s, time_new, arraytype='xarray')
+        ccn6 = interp_time_1d(time2, tmpccn_6s, time_new, arraytype='xarray')
     
     #%% output file
     outfile = prep_data_path + 'CCN_MAGIC.nc'
