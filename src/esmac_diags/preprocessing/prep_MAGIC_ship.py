@@ -239,10 +239,10 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     outfile = prep_data_path + 'CN_MAGIC.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
-                    'CPC10': (['time'], cpc1),
-                    'UHSAS100': (['time'], uhsas1),
+                    'lat': (['time'], lat1.data),
+                    'lon': (['time'], lon1.data),
+                    'CPC10': (['time'], cpc1.data),
+                    'UHSAS100': (['time'], uhsas1.data),
                     },
                      coords={'time': ('time', time_new)})
     
@@ -338,8 +338,8 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
     outfile = prep_data_path + 'CNsize_UHSAS_MAGIC.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
+                    'lat': (['time'], lat1.data),
+                    'lon': (['time'], lon1.data),
                     'size_low': (['size'], dmin.data),
                     'size_high': (['size'], dmax.data),
                     'size_distribution_uhsas': (['time', 'size'], uhsas1),
@@ -433,8 +433,8 @@ def prep_MET(shipmetpath, prep_data_path, dt=3600):
     outfile = prep_data_path + 'T_RH_Ps_MAGIC.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
+                    'lat': (['time'], lat1.data),
+                    'lon': (['time'], lon1.data),
                     'T': (['time'], T1),
                     'RH': (['time'], RH1),
                     'Ps': (['time'], ps1),
@@ -533,9 +533,9 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     outfile = prep_data_path + 'LWP_MAGIC.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
-                    'lwp': (['time'], lwp1),
+                    'lat': (['time'], lat1.data),
+                    'lon': (['time'], lon1.data),
+                    'lwp': (['time'], lwp1.data),
                     },
                      coords={'time': ('time', time_new)})
     #assign attributes
