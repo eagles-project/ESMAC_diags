@@ -56,11 +56,11 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
         raise ValueError('cannot find any data')
     
     shipdata = xr.open_mfdataset(lst, combine='by_coords')
-    time = shipdata['time'].load().data
-    lon = shipdata['lon_mean_gps'].load().data
-    qc_lon = shipdata['qc_lon_mean_gps'].load().data
-    lat = shipdata['lat_mean_gps'].load().data
-    qc_lat = shipdata['qc_lat_mean_gps'].load().data
+    time = shipdata['time'].load()
+    lon = shipdata['lon_mean_gps'].load()
+    qc_lon = shipdata['qc_lon_mean_gps'].load()
+    lat = shipdata['lat_mean_gps'].load()
+    qc_lat = shipdata['qc_lat_mean_gps'].load()
     shipdata.close()
     
     lat = qc_mask_qcflag(lat, qc_lat)
@@ -72,8 +72,8 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
     
     obsdata = xr.open_mfdataset(lst2, combine='by_coords')
     time2 = obsdata['time'].load()
-    ccn = obsdata['N_CCN'].load().data
-    SS = obsdata['CCN_ss_set'].load().data
+    ccn = obsdata['N_CCN'].load()
+    SS = obsdata['CCN_ss_set'].load()
     obsdata.close()
     
     ccn=qc_ccn_max(ccn,SS)
