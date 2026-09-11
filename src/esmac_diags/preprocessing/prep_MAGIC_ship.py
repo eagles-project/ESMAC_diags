@@ -224,8 +224,8 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     tmpcpc = xr.DataArray(data=np.array(cpc), dims=["time"], coords=dict(time=time1))
     tmpuhsas100 = xr.DataArray(data=np.array(uhsas100), dims=["time"], coords=dict(time=time2))
 
-    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
-    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
     cpc1 = median_time_1d(time1, tmpcpc, time_new, arraytype='xarray')
     uhsas1 = median_time_1d(time2, tmpuhsas100, time_new, arraytype='xarray')
     
@@ -324,8 +324,8 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
 
     tmpuhsas = xr.DataArray(data=np.array(uhsas), dims=["time"], coords=dict(time=time2))
     
-    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
-    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
+    lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
     uhsas1 = median_time_2d(time2, tmpuhsas, time_new, arraytype='xarray')
     
     #%% output file
@@ -416,11 +416,11 @@ def prep_MET(shipmetpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
     
-    lon1 = median_time_1d(time, lon, time_new, arraytype='numpy')
-    lat1 = median_time_1d(time, lat, time_new, arraytype='numpy')
-    T1 = median_time_1d(time, T, time_new, arraytype='numpy')
-    RH1 = median_time_1d(time, RH, time_new, arraytype='numpy')
-    ps1 = median_time_1d(time, ps, time_new, arraytype='numpy')
+    lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
+    lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
+    T1 = median_time_1d(time, T, time_new, arraytype='xarray')
+    RH1 = median_time_1d(time, RH, time_new, arraytype='xarray')
+    ps1 = median_time_1d(time, ps, time_new, arraytype='xarray')
 
 
     #%% output file
@@ -508,20 +508,20 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     #%% re-shape the data into coarser resolution
     time_new = pd.date_range(start='2012-10-05', end='2013-10-09 23:59:00', freq=str(int(dt))+"s")  # MAGIC time period
     
-    lon1 = avg_time_1d(time, lon, time_new, arraytype='numpy')
-    lat1 = avg_time_1d(time, lat, time_new, arraytype='numpy')
-    lwp1 = avg_time_1d(time2, lwp, time_new, arraytype='numpy')
+    lon1 = avg_time_1d(time, lon, time_new, arraytype='xarray')
+    lat1 = avg_time_1d(time, lat, time_new, arraytype='xarray')
+    lwp1 = avg_time_1d(time2, lwp, time_new, arraytype='xarray')
     lwp1 = qc_remove_neg(lwp1)
     
-    #%% calculate cloud fraction from LWP
-    # from MWR handbook: a value of LWP that is +/- 0.03 mm of zero could be clear sky
-    lwp_thres = 30
-    cf_out = calc_cldfrac_from_highres(lwp, time2, time_new, thres=lwp_thres)
+    # #%% calculate cloud fraction from LWP
+    # # from MWR handbook: a value of LWP that is +/- 0.03 mm of zero could be clear sky
+    # lwp_thres = 30
+    # cf_out = calc_cldfrac_from_highres(lwp, time2, time_new, thres=lwp_thres)
     
-    cf_5 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=5)
-    cf_10 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=10)
-    cf_20 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=20)
-    cf_30 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=30)
+    # cf_5 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=5)
+    # cf_10 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=10)
+    # cf_20 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=20)
+    # cf_30 = calc_cldfrac_from_highres(lwp, time2, time_new, thres=30)
     
     #%% output file
     outfile = prep_data_path + 'LWP_MAGIC.nc'
@@ -546,58 +546,58 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     ds.attrs["creation_date"] = ttt.ctime(ttt.time())
     ds.to_netcdf(outfile, mode='w')
         
-    outfile = prep_data_path + 'totcld_MAGIC.nc'
-    print('output file '+outfile)
-    ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
-                    'cldfrac': (['time'], cf_out),
-                    },
-                     coords={'time': ('time', time_new)})
-    #assign attributes
-    ds['time'].attrs["long_name"] = "Time"
-    ds['time'].attrs["standard_name"] = "time"
-    ds['lat'].attrs["long_name"] = "latitude"
-    ds['lat'].attrs["units"] = "degree_north"
-    ds['lon'].attrs["long_name"] = "longitude"
-    ds['lon'].attrs["units"] = "degree_east"
-    ds['cldfrac'].attrs["long_name"] = 'total cloud fraction'
-    ds['cldfrac'].attrs["units"] = '%'
-    ds.attrs["input data_example"] = lst2[0].split('/')[-1]
-    ds.attrs["description"] = 'calculated from LWP with threshold of '+str(lwp_thres)+' g/m2'
-    ds.attrs["creation_date"] = ttt.ctime(ttt.time())
-    ds.to_netcdf(outfile, mode='w')
+    # outfile = prep_data_path + 'totcld_MAGIC.nc'
+    # print('output file '+outfile)
+    # ds = xr.Dataset({
+    #                 'lat': (['time'], lat1),
+    #                 'lon': (['time'], lon1),
+    #                 'cldfrac': (['time'], cf_out),
+    #                 },
+    #                  coords={'time': ('time', time_new)})
+    # #assign attributes
+    # ds['time'].attrs["long_name"] = "Time"
+    # ds['time'].attrs["standard_name"] = "time"
+    # ds['lat'].attrs["long_name"] = "latitude"
+    # ds['lat'].attrs["units"] = "degree_north"
+    # ds['lon'].attrs["long_name"] = "longitude"
+    # ds['lon'].attrs["units"] = "degree_east"
+    # ds['cldfrac'].attrs["long_name"] = 'total cloud fraction'
+    # ds['cldfrac'].attrs["units"] = '%'
+    # ds.attrs["input data_example"] = lst2[0].split('/')[-1]
+    # ds.attrs["description"] = 'calculated from LWP with threshold of '+str(lwp_thres)+' g/m2'
+    # ds.attrs["creation_date"] = ttt.ctime(ttt.time())
+    # ds.to_netcdf(outfile, mode='w')
 
-    outfile = prep_data_path + 'totcld_sensitivity_MAGIC.nc'
-    print('output file '+outfile)
-    ds = xr.Dataset({
-                    'lat': (['time'], lat1),
-                    'lon': (['time'], lon1),
-                    'cldfrac_5': (['time'], cf_5),
-                    'cldfrac_10': (['time'], cf_10),
-                    'cldfrac_20': (['time'], cf_20),
-                    'cldfrac_30': (['time'], cf_30),
-                    },
-                     coords={'time': ('time', time_new)})
-    #assign attributes
-    ds['time'].attrs["long_name"] = "Time"
-    ds['time'].attrs["standard_name"] = "time"
-    ds['lat'].attrs["long_name"] = "latitude"
-    ds['lat'].attrs["units"] = "degree_north"
-    ds['lon'].attrs["long_name"] = "longitude"
-    ds['lon'].attrs["units"] = "degree_east"
-    ds['cldfrac_5'].attrs["long_name"] = 'total cloud fraction'
-    ds['cldfrac_5'].attrs["units"] = '%'
-    ds['cldfrac_10'].attrs["long_name"] = 'total cloud fraction'
-    ds['cldfrac_10'].attrs["units"] = '%'
-    ds['cldfrac_20'].attrs["long_name"] = 'total cloud fraction'
-    ds['cldfrac_20'].attrs["units"] = '%'
-    ds['cldfrac_30'].attrs["long_name"] = 'total cloud fraction'
-    ds['cldfrac_30'].attrs["units"] = '%'
-    ds.attrs["input data_example"] = lst2[0].split('/')[-1]
-    ds.attrs["description"] = 'calculated from LWP with different LWP threshold (5/10/20/30 g/m2)'
-    ds.attrs["creation_date"] = ttt.ctime(ttt.time())
-    ds.to_netcdf(outfile, mode='w')
+    # outfile = prep_data_path + 'totcld_sensitivity_MAGIC.nc'
+    # print('output file '+outfile)
+    # ds = xr.Dataset({
+    #                 'lat': (['time'], lat1),
+    #                 'lon': (['time'], lon1),
+    #                 'cldfrac_5': (['time'], cf_5),
+    #                 'cldfrac_10': (['time'], cf_10),
+    #                 'cldfrac_20': (['time'], cf_20),
+    #                 'cldfrac_30': (['time'], cf_30),
+    #                 },
+    #                  coords={'time': ('time', time_new)})
+    # #assign attributes
+    # ds['time'].attrs["long_name"] = "Time"
+    # ds['time'].attrs["standard_name"] = "time"
+    # ds['lat'].attrs["long_name"] = "latitude"
+    # ds['lat'].attrs["units"] = "degree_north"
+    # ds['lon'].attrs["long_name"] = "longitude"
+    # ds['lon'].attrs["units"] = "degree_east"
+    # ds['cldfrac_5'].attrs["long_name"] = 'total cloud fraction'
+    # ds['cldfrac_5'].attrs["units"] = '%'
+    # ds['cldfrac_10'].attrs["long_name"] = 'total cloud fraction'
+    # ds['cldfrac_10'].attrs["units"] = '%'
+    # ds['cldfrac_20'].attrs["long_name"] = 'total cloud fraction'
+    # ds['cldfrac_20'].attrs["units"] = '%'
+    # ds['cldfrac_30'].attrs["long_name"] = 'total cloud fraction'
+    # ds['cldfrac_30'].attrs["units"] = '%'
+    # ds.attrs["input data_example"] = lst2[0].split('/')[-1]
+    # ds.attrs["description"] = 'calculated from LWP with different LWP threshold (5/10/20/30 g/m2)'
+    # ds.attrs["creation_date"] = ttt.ctime(ttt.time())
+    # ds.to_netcdf(outfile, mode='w')
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def prep_Nd_Wu_etal(Ndpath, prep_data_path, dt=3600):
