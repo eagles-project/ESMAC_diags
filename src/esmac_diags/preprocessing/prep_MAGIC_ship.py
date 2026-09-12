@@ -131,7 +131,7 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
                     'CCN5': (['time'], ccn5_aligned.data),
                     'CCN6': (['time'], ccn6_aligned.data),
                     },
-                     coords={'time': ('time', time_aligned)})
+                     coords={'time': ('time', time_aligned.data)})
     
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
@@ -250,7 +250,7 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
                     'CPC10': (['time'], cpc1_aligned.data),
                     'UHSAS100': (['time'], uhsas1_aligned.data),
                     },
-                     coords={'time': ('time', time_aligned)})
+                     coords={'time': ('time', time_aligned.data)})
     
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
@@ -351,9 +351,9 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
                     'lon': (['time'], lon1_aligned.data),
                     'size_low': (['size'], dmin.data),
                     'size_high': (['size'], dmax.data),
-                    'size_distribution_uhsas': (['time', 'size'], uhsas1_aligned),
+                    'size_distribution_uhsas': (['time', 'size'], uhsas1_aligned.data),
                     },
-                     coords={'time': ('time', time_aligned), 'size': ('size', size.data)})
+                     coords={'time': ('time', time_aligned.data), 'size': ('size', size.data)})
     
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
@@ -549,7 +549,7 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
                     'lon': (['time'], lon1_aligned.data),
                     'lwp': (['time'], lwp1_aligned.data),
                     },
-                     coords={'time': ('time', time_aligned)})
+                     coords={'time': ('time', time_aligned.data)})
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
     ds['time'].attrs["standard_name"] = "time"
