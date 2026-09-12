@@ -115,18 +115,20 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
         ccn3 = interp_time_1d(time2, tmpccn_3s, time_new, arraytype='xarray')
         ccn5 = interp_time_1d(time2, tmpccn_5s, time_new, arraytype='xarray')
         ccn6 = interp_time_1d(time2, tmpccn_6s, time_new, arraytype='xarray')
-    
+
+    lon1_aligned, lat1_aligned, ccn1_aligned, ccn2_aligned, ccn3_aligned, ccn5_aligned, ccn6_aligned = xr.align(lon1, lat1, ccn1, ccn2, ccn3, ccn5, ccn6, join="inner")
+
     #%% output file
     outfile = prep_data_path + 'CCN_MAGIC.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1.data),
-                    'lon': (['time'], lon1.data),
-                    'CCN1': (['time'], ccn1.data),
-                    'CCN2': (['time'], ccn2.data),
-                    'CCN3': (['time'], ccn3.data),
-                    'CCN5': (['time'], ccn5.data),
-                    'CCN6': (['time'], ccn6.data),
+                    'lat': (['time'], lat1_aligned.data),
+                    'lon': (['time'], lon1_aligned.data),
+                    'CCN1': (['time'], ccn1_aligned.data),
+                    'CCN2': (['time'], ccn2_aligned.data),
+                    'CCN3': (['time'], ccn3_aligned.data),
+                    'CCN5': (['time'], ccn5_aligned.data),
+                    'CCN6': (['time'], ccn6_aligned.data),
                     },
                      coords={'time': ('time', time_new)})
     
@@ -234,15 +236,17 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
     cpc1 = median_time_1d(time1, tmpcpc, time_new, arraytype='xarray')
     uhsas1 = median_time_1d(time2, tmpuhsas100, time_new, arraytype='xarray')
-    
+
+    lon1_aligned, lat1_aligned, cpc1_aligned, uhsas1_aligned = xr.align(lon1, lat1, cpc1, uhsas1, join="inner")
+
     #%% output file
     outfile = prep_data_path + 'CN_MAGIC.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1.data),
-                    'lon': (['time'], lon1.data),
-                    'CPC10': (['time'], cpc1.data),
-                    'UHSAS100': (['time'], uhsas1.data),
+                    'lat': (['time'], lat1_aligned.data),
+                    'lon': (['time'], lon1_aligned.data),
+                    'CPC10': (['time'], cpc1_aligned.data),
+                    'UHSAS100': (['time'], uhsas1_aligned.data),
                     },
                      coords={'time': ('time', time_new)})
     
@@ -333,16 +337,18 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
     lon1 = median_time_1d(time, lon, time_new, arraytype='xarray')
     lat1 = median_time_1d(time, lat, time_new, arraytype='xarray')
     uhsas1 = median_time_2d(time2, tmpuhsas, time_new, arraytype='xarray')
-    
+
+    lon1_aligned, lat1_aligned, uhsas1_aligned = xr.align(lon1, lat1, uhsas1, join="inner", exclude="size")
+
     #%% output file
     outfile = prep_data_path + 'CNsize_UHSAS_MAGIC.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1.data),
-                    'lon': (['time'], lon1.data),
+                    'lat': (['time'], lat1_aligned.data),
+                    'lon': (['time'], lon1_aligned.data),
                     'size_low': (['size'], dmin.data),
                     'size_high': (['size'], dmax.data),
-                    'size_distribution_uhsas': (['time', 'size'], uhsas1),
+                    'size_distribution_uhsas': (['time', 'size'], uhsas1_aligned),
                     },
                      coords={'time': ('time', time_new), 'size': ('size', size.data)})
     
@@ -518,7 +524,9 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     lat1 = avg_time_1d(time, lat, time_new, arraytype='xarray')
     lwp1 = avg_time_1d(time2, lwp, time_new, arraytype='xarray')
     lwp1 = qc_remove_neg(lwp1)
-    
+
+    lon1_aligned, lat1_aligned, uhsas1_aligned = xr.align(lon1, lat1, lwp1, join="inner")
+
     # #%% calculate cloud fraction from LWP
     # # from MWR handbook: a value of LWP that is +/- 0.03 mm of zero could be clear sky
     # lwp_thres = 30
@@ -533,9 +541,9 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     outfile = prep_data_path + 'LWP_MAGIC.nc'
     print('output file '+outfile)
     ds = xr.Dataset({
-                    'lat': (['time'], lat1.data),
-                    'lon': (['time'], lon1.data),
-                    'lwp': (['time'], lwp1.data),
+                    'lat': (['time'], lat1_aligned.data),
+                    'lon': (['time'], lon1_aligned.data),
+                    'lwp': (['time'], lwp1_aligned.data),
                     },
                      coords={'time': ('time', time_new)})
     #assign attributes
