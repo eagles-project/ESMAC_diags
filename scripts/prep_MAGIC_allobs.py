@@ -43,7 +43,7 @@ satellite_dt = config['obs_satellite_dt']
 print('prepare ship data:')
 # ship.prep_CCN(shipmetpath, ccnpath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)              # CCN number concentration
 # ship.prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)    # aerosol number concentration (>3 or 10nm)
-ship.prep_CNsize(shipmetpath, uhsaspath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)   # aerosol size distribution from UHSAS
+# ship.prep_CNsize(shipmetpath, uhsaspath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)   # aerosol size distribution from UHSAS
 ship.prep_MWR(shipmetpath, mwrpath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt) # cloud liquid water path
 ship.prep_Nd_Wu_etal(Ndpath, prep_data_path+'ship/'+str(surface_dt)+'s/', dt=surface_dt)          # cloud droplet number retrieval from Wu et al.
 
