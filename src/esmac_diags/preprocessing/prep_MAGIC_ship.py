@@ -117,6 +117,7 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
         ccn6 = interp_time_1d(time2, tmpccn_6s, time_new, arraytype='xarray')
 
     lon1_aligned, lat1_aligned, ccn1_aligned, ccn2_aligned, ccn3_aligned, ccn5_aligned, ccn6_aligned = xr.align(lon1, lat1, ccn1, ccn2, ccn3, ccn5, ccn6, join="inner")
+    time_aligned = lon1_aligned["time"]
 
     #%% output file
     outfile = prep_data_path + 'CCN_MAGIC.nc'
@@ -130,7 +131,7 @@ def prep_CCN(shipmetpath, ccnpath, prep_data_path, dt=3600):
                     'CCN5': (['time'], ccn5_aligned.data),
                     'CCN6': (['time'], ccn6_aligned.data),
                     },
-                     coords={'time': ('time', time_new)})
+                     coords={'time': ('time', time_aligned)})
     
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
@@ -238,6 +239,7 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
     uhsas1 = median_time_1d(time2, tmpuhsas100, time_new, arraytype='xarray')
 
     lon1_aligned, lat1_aligned, cpc1_aligned, uhsas1_aligned = xr.align(lon1, lat1, cpc1, uhsas1, join="inner")
+    time_aligned = lon1_aligned["time"]
 
     #%% output file
     outfile = prep_data_path + 'CN_MAGIC.nc'
@@ -248,7 +250,7 @@ def prep_CN(shipmetpath, cpcpath, uhsaspath, prep_data_path, dt=3600):
                     'CPC10': (['time'], cpc1_aligned.data),
                     'UHSAS100': (['time'], uhsas1_aligned.data),
                     },
-                     coords={'time': ('time', time_new)})
+                     coords={'time': ('time', time_aligned)})
     
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
@@ -339,6 +341,7 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
     uhsas1 = median_time_2d(time2, tmpuhsas, time_new, arraytype='xarray')
 
     lon1_aligned, lat1_aligned, uhsas1_aligned = xr.align(lon1, lat1, uhsas1, join="inner", exclude="size")
+    time_aligned = lon1_aligned["time"]
 
     #%% output file
     outfile = prep_data_path + 'CNsize_UHSAS_MAGIC.nc'
@@ -350,7 +353,7 @@ def prep_CNsize(shipmetpath, uhsaspath, prep_data_path, dt=3600):
                     'size_high': (['size'], dmax.data),
                     'size_distribution_uhsas': (['time', 'size'], uhsas1_aligned),
                     },
-                     coords={'time': ('time', time_new), 'size': ('size', size.data)})
+                     coords={'time': ('time', time_aligned), 'size': ('size', size.data)})
     
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
@@ -526,6 +529,7 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     lwp1 = qc_remove_neg(lwp1)
 
     lon1_aligned, lat1_aligned, uhsas1_aligned = xr.align(lon1, lat1, lwp1, join="inner")
+    time_aligned = lon1_aligned["time"]
 
     # #%% calculate cloud fraction from LWP
     # # from MWR handbook: a value of LWP that is +/- 0.03 mm of zero could be clear sky
@@ -545,7 +549,7 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
                     'lon': (['time'], lon1_aligned.data),
                     'lwp': (['time'], lwp1_aligned.data),
                     },
-                     coords={'time': ('time', time_new)})
+                     coords={'time': ('time', time_aligned)})
     #assign attributes
     ds['time'].attrs["long_name"] = "Time"
     ds['time'].attrs["standard_name"] = "time"
