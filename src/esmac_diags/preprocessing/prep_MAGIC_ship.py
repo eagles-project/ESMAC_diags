@@ -528,7 +528,7 @@ def prep_MWR(shipmetpath, mwrpath, prep_data_path, dt=3600):
     lwp1 = avg_time_1d(time2, lwp, time_new, arraytype='xarray')
     lwp1 = qc_remove_neg(lwp1)
 
-    lon1_aligned, lat1_aligned, uhsas1_aligned = xr.align(lon1, lat1, lwp1, join="inner")
+    lon1_aligned, lat1_aligned, lwp1_aligned = xr.align(lon1, lat1, lwp1, join="inner")
     time_aligned = lon1_aligned["time"]
 
     # #%% calculate cloud fraction from LWP
